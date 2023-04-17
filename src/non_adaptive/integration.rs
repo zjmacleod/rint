@@ -39,8 +39,7 @@ impl GaussKronrod {
 ///
 /// The user defines an [`Integrand`] to be integrated using a Gauss-Kronrod
 /// integration [`Rule`] between the two integration limits `lower` and `upper`.
-/// By convention `upper > lower`, however this is not mandatory. Also provided
-/// are relative and abolute error bounds, `abs_error_bound` and `rel_error_bound`.
+/// By convention `upper > lower`, however this is not mandatory.
 pub struct GaussKronrodIntegral<I, R>
 where
     I: Integrand,
@@ -48,10 +47,6 @@ where
 {
     lower: f64,
     upper: f64,
-    // TODO when calculating the error we us ABSERR <= max(abs_error_bound, rel_error_bound)
-    // This means that only _one_ should be selected by the user. This should be an enum.
-    abs_error_bound: f64,
-    rel_error_bound: f64,
     rule: R,
     function: I,
 }
@@ -67,21 +62,10 @@ where
     /// [`Integrand`] trait and selects a Gauss-Kronrod quadrature [`Rule`],
     /// `rule`, to integrate the function with between the integration limis,
     /// `upper` and `lower`.
-    /// Also provided are the absolute and relative error bounds to use in the
-    /// numerical estimation of the integral, `abs_error_bound` and `rel_error_bound`.
-    pub fn new(
-        lower: f64,
-        upper: f64,
-        abs_error_bound: f64,
-        rel_error_bound: f64,
-        rule: R,
-        function: I,
-    ) -> Self {
+    pub fn new(lower: f64, upper: f64, rule: R, function: I) -> Self {
         Self {
             lower,
             upper,
-            abs_error_bound,
-            rel_error_bound,
             rule,
             function,
         }
@@ -160,16 +144,6 @@ where
     /// Return the value of the `lower` integration limit.
     pub fn lower(&self) -> f64 {
         self.lower
-    }
-
-    /// Return the value of the `abs_error_bound` error constraint.
-    pub fn abs_error_bound(&self) -> f64 {
-        self.abs_error_bound
-    }
-
-    /// Return the value of the `rel_error_bound` error constraint.
-    pub fn rel_error_bound(&self) -> f64 {
-        self.rel_error_bound
     }
 }
 

@@ -25,14 +25,7 @@ fn gauss_kronrod_15() -> Result<(), String> {
     let function = util::Function1 { alpha };
     let rule = GaussKronrod15;
 
-    let integral = GaussKronrodIntegral::new(
-        lower,
-        upper,
-        abs_error_bound,
-        rel_error_bound,
-        rule,
-        function,
-    );
+    let integral = GaussKronrodIntegral::new(lower, upper, rule, function);
 
     let integral_result = integral.integrate();
     let result = integral_result.result();
@@ -71,14 +64,7 @@ fn gauss_kronrod_15() -> Result<(), String> {
     let function = util::Function1 { alpha };
     let rule = GaussKronrod15;
 
-    let integral = GaussKronrodIntegral::new(
-        lower,
-        upper,
-        abs_error_bound,
-        rel_error_bound,
-        rule,
-        function,
-    );
+    let integral = GaussKronrodIntegral::new(lower, upper, rule, function);
 
     let integral_result = integral.integrate();
     let result = integral_result.result();
@@ -131,14 +117,7 @@ fn gauss_kronrod_21() -> Result<(), String> {
     let function = util::Function1 { alpha };
     let rule = GaussKronrod21;
 
-    let integral = GaussKronrodIntegral::new(
-        lower,
-        upper,
-        abs_error_bound,
-        rel_error_bound,
-        rule,
-        function,
-    );
+    let integral = GaussKronrodIntegral::new(lower, upper, rule, function);
 
     let integral_result = integral.integrate();
     let result = integral_result.result();
@@ -177,14 +156,7 @@ fn gauss_kronrod_21() -> Result<(), String> {
     let function = util::Function1 { alpha };
     let rule = GaussKronrod21;
 
-    let integral = GaussKronrodIntegral::new(
-        lower,
-        upper,
-        abs_error_bound,
-        rel_error_bound,
-        rule,
-        function,
-    );
+    let integral = GaussKronrodIntegral::new(lower, upper, rule, function);
 
     let integral_result = integral.integrate();
     let result = integral_result.result();
@@ -237,14 +209,7 @@ fn gauss_kronrod_31() -> Result<(), String> {
     let function = util::Function1 { alpha };
     let rule = GaussKronrod31;
 
-    let integral = GaussKronrodIntegral::new(
-        lower,
-        upper,
-        abs_error_bound,
-        rel_error_bound,
-        rule,
-        function,
-    );
+    let integral = GaussKronrodIntegral::new(lower, upper, rule, function);
 
     let integral_result = integral.integrate();
     let result = integral_result.result();
@@ -283,14 +248,7 @@ fn gauss_kronrod_31() -> Result<(), String> {
     let function = util::Function1 { alpha };
     let rule = GaussKronrod31;
 
-    let integral = GaussKronrodIntegral::new(
-        lower,
-        upper,
-        abs_error_bound,
-        rel_error_bound,
-        rule,
-        function,
-    );
+    let integral = GaussKronrodIntegral::new(lower, upper, rule, function);
 
     let integral_result = integral.integrate();
     let result = integral_result.result();
@@ -343,14 +301,7 @@ fn gauss_kronrod_41() -> Result<(), String> {
     let function = util::Function1 { alpha };
     let rule = GaussKronrod41;
 
-    let integral = GaussKronrodIntegral::new(
-        lower,
-        upper,
-        abs_error_bound,
-        rel_error_bound,
-        rule,
-        function,
-    );
+    let integral = GaussKronrodIntegral::new(lower, upper, rule, function);
 
     let integral_result = integral.integrate();
     let result = integral_result.result();
@@ -389,14 +340,7 @@ fn gauss_kronrod_41() -> Result<(), String> {
     let function = util::Function1 { alpha };
     let rule = GaussKronrod41;
 
-    let integral = GaussKronrodIntegral::new(
-        lower,
-        upper,
-        abs_error_bound,
-        rel_error_bound,
-        rule,
-        function,
-    );
+    let integral = GaussKronrodIntegral::new(lower, upper, rule, function);
 
     let integral_result = integral.integrate();
     let result = integral_result.result();
@@ -450,14 +394,7 @@ fn gauss_kronrod_51() -> Result<(), String> {
     let function = util::Function1 { alpha };
     let rule = GaussKronrod51;
 
-    let integral = GaussKronrodIntegral::new(
-        lower,
-        upper,
-        abs_error_bound,
-        rel_error_bound,
-        rule,
-        function,
-    );
+    let integral = GaussKronrodIntegral::new(lower, upper, rule, function);
 
     let integral_result = integral.integrate();
     let result = integral_result.result();
@@ -496,14 +433,7 @@ fn gauss_kronrod_51() -> Result<(), String> {
     let function = util::Function1 { alpha };
     let rule = GaussKronrod51;
 
-    let integral = GaussKronrodIntegral::new(
-        lower,
-        upper,
-        abs_error_bound,
-        rel_error_bound,
-        rule,
-        function,
-    );
+    let integral = GaussKronrodIntegral::new(lower, upper, rule, function);
 
     let integral_result = integral.integrate();
     let result = integral_result.result();
@@ -556,14 +486,7 @@ fn gauss_kronrod_61() -> Result<(), String> {
     let function = util::Function1 { alpha };
     let rule = GaussKronrod61;
 
-    let integral = GaussKronrodIntegral::new(
-        lower,
-        upper,
-        abs_error_bound,
-        rel_error_bound,
-        rule,
-        function,
-    );
+    let integral = GaussKronrodIntegral::new(lower, upper, rule, function);
 
     let integral_result = integral.integrate();
     let result = integral_result.result();
@@ -602,14 +525,7 @@ fn gauss_kronrod_61() -> Result<(), String> {
     let function = util::Function1 { alpha };
     let rule = GaussKronrod61;
 
-    let integral = GaussKronrodIntegral::new(
-        lower,
-        upper,
-        abs_error_bound,
-        rel_error_bound,
-        rule,
-        function,
-    );
+    let integral = GaussKronrodIntegral::new(lower, upper, rule, function);
 
     let integral_result = integral.integrate();
     let result = integral_result.result();
