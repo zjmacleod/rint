@@ -1,3 +1,4 @@
+use crate::integration::rescale_error;
 use crate::rule::Rule;
 use crate::Integrand;
 
