@@ -4,7 +4,7 @@
 //! The algorithms are heavily inspired by the GNU Scientific Library numerical integration routines.
 //!
 #![warn(clippy::pedantic)]
-#![allow(clippy::excessive_precision)]
+#![allow(clippy::module_name_repetitions, clippy::excessive_precision)]
 pub mod integration;
 pub mod rule;
 
