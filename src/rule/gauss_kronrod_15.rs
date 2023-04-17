@@ -1,4 +1,4 @@
-use crate::non_adaptive::Rule;
+use crate::rule::Rule;
 
 /// The unit struct of the 15-point Gauss-Kronrod quadrature rule.
 ///

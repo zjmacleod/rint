@@ -5,7 +5,8 @@
 //!
 #![warn(clippy::pedantic)]
 #![allow(clippy::excessive_precision)]
-pub mod non_adaptive;
+pub mod integration;
+pub mod rule;
 
 /// The integrand of a one-dimensional integral.
 ///

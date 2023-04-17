@@ -1,4 +1,4 @@
-use crate::non_adaptive::Rule;
+use crate::rule::Rule;
 use crate::Integrand;
 
 /// The value of a function evaluated with Gauss-Kronrod integration and associated error
@@ -40,7 +40,7 @@ impl GaussKronrod {
 /// The user defines an [`Integrand`] to be integrated using a Gauss-Kronrod
 /// integration [`Rule`] between the two integration limits `lower` and `upper`.
 /// By convention `upper > lower`, however this is not mandatory.
-pub struct GaussKronrodIntegral<I, R>
+pub struct GaussKronrodBasic<I, R>
 where
     I: Integrand,
     R: Rule,
@@ -51,12 +51,12 @@ where
     function: I,
 }
 
-impl<I, R> GaussKronrodIntegral<I, R>
+impl<I, R> GaussKronrodBasic<I, R>
 where
     I: Integrand,
     R: Rule,
 {
-    /// Create a new [`GaussKronrodIntegral`].
+    /// Create a new [`GaussKronrodBasic`].
     ///
     /// The user first defines a `function` which is a `struct` implementing the
     /// [`Integrand`] trait and selects a Gauss-Kronrod quadrature [`Rule`],

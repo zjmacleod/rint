@@ -5,7 +5,6 @@ pub(crate) mod gauss_kronrod_31;
 pub(crate) mod gauss_kronrod_41;
 pub(crate) mod gauss_kronrod_51;
 pub(crate) mod gauss_kronrod_61;
-pub(crate) mod integration;
 
 pub use gauss_kronrod_15::GaussKronrod15;
 pub use gauss_kronrod_21::GaussKronrod21;
@@ -13,8 +12,6 @@ pub use gauss_kronrod_31::GaussKronrod31;
 pub use gauss_kronrod_41::GaussKronrod41;
 pub use gauss_kronrod_51::GaussKronrod51;
 pub use gauss_kronrod_61::GaussKronrod61;
-pub use integration::GaussKronrod;
-pub use integration::GaussKronrodIntegral;
 
 mod private {
     pub trait Sealed {}
