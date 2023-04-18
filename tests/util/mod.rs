@@ -1,6 +1,6 @@
 use std::f64::consts::PI;
 
-use gauss_kronrod_adaptive_integration::Integrand;
+use gauss_kronrod_integration::Integrand;
 
 /* These are the test functions from table 4.1 of the QUADPACK book */
 

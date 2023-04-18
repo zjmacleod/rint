@@ -1,8 +1,8 @@
 // Test the basic Gauss-Kronrod integration rules with a smooth positive function.
 // Ported from gsl-2.6/integration/test.c
 
-use gauss_kronrod_adaptive_integration::integration::GaussKronrodBasic;
-use gauss_kronrod_adaptive_integration::rule::{
+use gauss_kronrod_integration::integration::GaussKronrodBasic;
+use gauss_kronrod_integration::rule::{
     GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod41,
     GaussKronrod51, GaussKronrod61,
 };
