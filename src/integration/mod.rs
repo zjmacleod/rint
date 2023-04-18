@@ -1,7 +1,7 @@
 pub mod basic;
 pub mod non_adaptive;
 
-pub use basic::GaussKronrod;
+pub use basic::Basic;
 pub use basic::GaussKronrodBasic;
 
 fn rescale_error(error: f64, result_abs: f64, result_asc: f64) -> f64 {

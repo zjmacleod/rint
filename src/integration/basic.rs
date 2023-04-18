@@ -4,14 +4,14 @@ use crate::Integrand;
 
 /// The value of a function evaluated with Gauss-Kronrod integration and associated error
 /// estimation.
-pub struct GaussKronrod {
+pub struct Basic {
     result: f64,
     result_abs: f64,
     result_asc: f64,
     error: f64,
 }
 
-impl GaussKronrod {
+impl Basic {
     /// Return the numerically approximated value of the integral.
     #[must_use]
     pub fn result(&self) -> f64 {
@@ -36,9 +36,9 @@ impl GaussKronrod {
     }
 }
 
-/// An integral to be evaluated with Gauss-Kronrod quadrature.
+/// A basic Gauss-Kronrod integration routine.
 ///
-/// The user defines an [`Integrand`] to be integrated using a Gauss-Kronrod
+/// The user defines an [`Integrand`] to be integrated using a fixed Gauss-Kronrod
 /// integration [`Rule`] between the two integration limits `lower` and `upper`.
 /// By convention `upper > lower`, however this is not mandatory.
 pub struct GaussKronrodBasic<I, R>
@@ -72,8 +72,8 @@ where
         }
     }
 
-    /// Integrate the function and return a [`GaussKronrod`] integration result.
-    pub fn integrate(&self) -> GaussKronrod {
+    /// Integrate `function`, returning a [`GaussKronrod`] integration result.
+    pub fn integrate(&self) -> Basic {
         let center = 0.5 * (self.upper + self.lower);
         let half_length = 0.5 * (self.upper - self.lower);
         let abs_half_length = half_length.abs();
@@ -129,7 +129,7 @@ where
         let result_asc = asc_result * abs_half_length;
         let error = rescale_error(error, result_abs, result_asc);
 
-        GaussKronrod {
+        Basic {
             result,
             result_abs,
             result_asc,
