@@ -1,3 +1,73 @@
+//! A basic Gauss-Kronrod integration routine.
+//!
+//! This is the most basic integration routine provided by this library. It applies an n-point
+//! Gauss-Kronrod integration [`Rule`] to a user supplied function, which is a struct implementing
+//! the [`Integrand`] trait.
+//! The integration routine tries to be as efficient as possible by reusing function
+//! evaluations of the lower n-point Gauss integration in the calculation of the higher-order
+//! Kronrod extension. The available Gauss-Kronrod integration rules are:
+//! * [`GaussKronrod15`] - 7-point Gauss, 15-point Kronrod, 8 total function evaluations
+//! * [`GaussKronrod21`] - 10-point Gauss, 21-point Kronrod, 11 total function evaluations
+//! * [`GaussKronrod31`] - 15-point Gauss, 31-point Kronrod, 16 total function evaluations
+//! * [`GaussKronrod41`] - 20-point Gauss, 41-point Kronrod, 21 total function evaluations
+//! * [`GaussKronrod51`] -  25-point Gauss, 51-point Kronrod, 26 total function evaluations
+//! * [`GaussKronrod61`] -  30-point Gauss, 61-point Kronrod, 31 total function evaluations
+//!
+//! [`GaussKronrod15`]: ../../rule/struct.GaussKronrod15.html
+//! [`GaussKronrod21`]: ../../rule/struct.GaussKronrod21.html
+//! [`GaussKronrod31`]: ../../rule/struct.GaussKronrod31.html
+//! [`GaussKronrod41`]: ../../rule/struct.GaussKronrod41.html
+//! [`GaussKronrod51`]: ../../rule/struct.GaussKronrod51.html
+//! [`GaussKronrod61`]: ../../rule/struct.GaussKronrod61.html
+//!
+//! The user defines an [`Integrand`] to be integrated using a fixed Gauss-Kronrod
+//! integration [`Rule`] between the two integration limits `lower` and `upper`.
+//! By convention `upper > lower`, however this is not mandatory.
+//!
+//!```rust
+//! use gauss_kronrod_adaptive_integration::Integrand;
+//! use gauss_kronrod_adaptive_integration::integration::GaussKronrodBasic;
+//! use gauss_kronrod_adaptive_integration::rule::GaussKronrod15;
+//!
+//! /* f1(x) = x^alpha * log(1/x) */
+//! /* integ(f1,x,0,1) = 1/(alpha + 1)^2 */
+//! pub struct Function1 {
+//!     pub alpha: f64,
+//! }
+//!
+//! impl Integrand for Function1 {
+//!     fn evaluate(&self, x: &f64) -> f64 {
+//!         let alpha = self.alpha;
+//!         x.powf(alpha) * (1.0 / x).ln()
+//!     }
+//! }
+//!
+//! let exp_result: f64 = 7.716049357767090777E-02;
+//! let exp_abserr: f64 = 2.990224871000550874E-06;
+//! let exp_resabs: f64 = 7.716049357767090777E-02;
+//! let exp_resasc: f64 = 4.434273814139995384E-02;
+//!
+//! let rel_error_bound = 1.0e-15;
+//! let alpha = 2.6;
+//!
+//! let lower = 0.0;
+//! let upper = 1.0;
+//!
+//! let function = Function1 { alpha };
+//! let rule = GaussKronrod15;
+//! let integral = GaussKronrodBasic::new(lower, upper, rule, function);
+//!
+//! let integral_result = integral.integrate();
+//! let result = integral_result.result();
+//! let abserr = integral_result.error();
+//! let resabs = integral_result.result_abs();
+//! let resasc = integral_result.result_asc();
+//!
+//! assert!((exp_result - result).abs() / exp_result.abs() < rel_error_bound);
+//! assert!((exp_abserr - abserr).abs() / exp_abserr.abs() < rel_error_bound);
+//! assert!((exp_resabs - resabs).abs() / exp_resabs.abs() < rel_error_bound);
+//! assert!((exp_resasc - resasc).abs() / exp_resasc.abs() < rel_error_bound);
+//!```
 use crate::integration::rescale_error;
 use crate::rule::Rule;
 use crate::Integrand;
@@ -37,10 +107,6 @@ impl Basic {
 }
 
 /// A basic Gauss-Kronrod integration routine.
-///
-/// The user defines an [`Integrand`] to be integrated using a fixed Gauss-Kronrod
-/// integration [`Rule`] between the two integration limits `lower` and `upper`.
-/// By convention `upper > lower`, however this is not mandatory.
 pub struct GaussKronrodBasic<I, R>
 where
     I: Integrand,
@@ -72,7 +138,7 @@ where
         }
     }
 
-    /// Integrate `function`, returning a [`GaussKronrod`] integration result.
+    /// Integrate `function`, returning a [`Basic`] integration result.
     pub fn integrate(&self) -> Basic {
         let centre = 0.5 * (self.upper + self.lower);
         let half_length = 0.5 * (self.upper - self.lower);
