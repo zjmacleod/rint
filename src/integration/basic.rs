@@ -74,52 +74,67 @@ where
 
     /// Integrate `function`, returning a [`GaussKronrod`] integration result.
     pub fn integrate(&self) -> Basic {
-        let center = 0.5 * (self.upper + self.lower);
+        let centre = 0.5 * (self.upper + self.lower);
         let half_length = 0.5 * (self.upper - self.lower);
         let abs_half_length = half_length.abs();
+        let f_centre = self.function.evaluate(&centre);
 
-        let initial_kronrod = 0.0;
-        let initial_gauss = 0.0;
-        let initial_abs = 0.0;
-        let initial_asc = 0.0;
+        let initial_kronrod = self.rule.kronrod_centre() * f_centre;
+        let initial_gauss = if let Some(v) = self.rule.gauss_centre() {
+            v * f_centre
+        } else {
+            0.0
+        };
+        let initial_abs = initial_kronrod.abs();
 
-        let gauss_result = self
+        let mut function_values: Vec<(f64, (f64, f64))> = Vec::with_capacity(61);
+
+        let (gauss_result, kronrod_shared, abs_shared) = self
             .rule
-            .gauss_nodes()
+            .shared_nodes()
             .into_iter()
-            .zip(self.rule.gauss_weights().into_iter())
-            .map(|(t, w)| {
-                let point = (half_length * t) + center;
-                let rate = self.function.evaluate(&point);
-                w * rate
+            .zip(
+                self.rule
+                    .gauss_weights()
+                    .into_iter()
+                    .zip(self.rule.kronrod_weights().into_iter()),
+            )
+            .map(|(t, (g, k))| {
+                let abscissa = half_length * t;
+                let rate_plus = self.function.evaluate(&(centre + abscissa));
+                let rate_minus = self.function.evaluate(&(centre - abscissa));
+                let rate = rate_plus + rate_minus;
+                let rate_abs = rate_plus.abs() + rate_minus.abs();
+                function_values.push((k, (rate_plus, rate_minus)));
+                (g * rate, k * rate, k * rate_abs)
             })
-            .fold(initial_gauss, |a, v| a + v);
-
-        let mut function_values: Vec<f64> = Vec::with_capacity(61);
+            .fold((initial_gauss, initial_kronrod, initial_abs), |a, v| {
+                (a.0 + v.0, a.1 + v.1, a.2 + v.2)
+            });
 
         let (kronrod_result, abs_result) = self
             .rule
-            .kronrod_nodes()
+            .extended_nodes()
             .into_iter()
-            .zip(self.rule.kronrod_weights().into_iter())
-            .map(|(t, w)| {
-                let point = (half_length * t) + center;
-                let rate = self.function.evaluate(&point);
-                let rate_abs = rate.abs();
-
-                function_values.push(rate);
-                (w * rate, w * rate_abs)
+            .zip(self.rule.extended_weights().into_iter())
+            .map(|(t, k)| {
+                let abscissa = half_length * t;
+                let rate_plus = self.function.evaluate(&(centre + abscissa));
+                let rate_minus = self.function.evaluate(&(centre - abscissa));
+                let rate = rate_plus + rate_minus;
+                let rate_abs = rate_plus.abs() + rate_minus.abs();
+                function_values.push((k, (rate_plus, rate_minus)));
+                (k * rate, k * rate_abs)
             })
-            .fold((initial_kronrod, initial_abs), |a, v| {
-                (a.0 + v.0, a.1 + v.1)
-            });
+            .fold((kronrod_shared, abs_shared), |a, v| (a.0 + v.0, a.1 + v.1));
 
         let mean = kronrod_result * 0.5;
 
+        let initial_asc = self.rule.kronrod_centre() * (f_centre - mean).abs();
+
         let asc_result = function_values
             .iter()
-            .zip(self.rule.kronrod_weights().into_iter())
-            .map(|(f, w)| w * (f - mean).abs())
+            .map(|(k, (rp, rm))| k * ((rp - mean).abs() + (rm - mean).abs()))
             .fold(initial_asc, |a, v| a + v);
 
         let error = (kronrod_result - gauss_result) * half_length;

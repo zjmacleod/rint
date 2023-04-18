@@ -9,6 +9,8 @@ impl Rule for GaussKronrod51 {
     type Gauss = [f64; 25];
     type Kronrod = [f64; 51];
 
+    const KRONROD_CENTRE: f64 = 0.061_580_818_067_832_935_078_759_824_240_066;
+
     fn gauss_nodes(&self) -> Self::Gauss {
         GAUSS_NODES_25
     }
@@ -23,6 +25,10 @@ impl Rule for GaussKronrod51 {
 
     fn kronrod_weights(&self) -> Self::Kronrod {
         KRONROD_WEIGHTS_51
+    }
+
+    fn gauss_centre(&self) -> Option<f64> {
+        Some(0.123_176_053_726_715_451_203_902_873_079_050)
     }
 }
 
