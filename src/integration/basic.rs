@@ -55,7 +55,7 @@
 //!
 //! let function = Function1 { alpha };
 //! let rule = GaussKronrod15;
-//! let integral = GaussKronrodBasic::new(lower, upper, rule, function);
+//! let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
 //!
 //! let integral_result = integral.integrate();
 //! let result = integral_result.result();
@@ -115,7 +115,7 @@ impl Basic {
 /// The integration routine tries to be as efficient as possible by reusing function
 /// evaluations of the lower n-point Gauss integration in the calculation of the higher-order
 /// Kronrod extension.
-pub struct GaussKronrodBasic<I, R>
+pub struct GaussKronrodBasic<'a, I, R>
 where
     I: Integrand,
     R: Rule,
@@ -123,10 +123,10 @@ where
     lower: f64,
     upper: f64,
     rule: R,
-    function: I,
+    function: &'a I,
 }
 
-impl<I, R> GaussKronrodBasic<I, R>
+impl<'a, I, R> GaussKronrodBasic<'a, I, R>
 where
     I: Integrand,
     R: Rule,
@@ -137,7 +137,7 @@ where
     /// [`Integrand`] trait and selects a Gauss-Kronrod quadrature [`Rule`],
     /// `rule`, to integrate the function with between the integration limis,
     /// `upper` and `lower`.
-    pub fn new(lower: f64, upper: f64, rule: R, function: I) -> Self {
+    pub fn new(lower: f64, upper: f64, rule: R, function: &'a I) -> Self {
         Self {
             lower,
             upper,

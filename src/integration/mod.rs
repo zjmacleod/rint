@@ -1,5 +1,4 @@
 pub mod basic;
-pub mod non_adaptive;
 
 pub use basic::Basic;
 pub use basic::GaussKronrodBasic;

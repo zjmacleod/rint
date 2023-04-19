@@ -37,7 +37,7 @@ mod private {
 /// The [`Rule`] trait defines a Gauss-Kronrod quadrature rule, returning the sets of points `x_i`
 /// and weights `w_i` for the `n`-point Gauss rule and the corresponding `(2n - 1)`-point Kronrod
 /// extension.
-pub trait Rule: private::Sealed {
+pub trait Rule: private::Sealed + Clone + Copy {
     type Shared: IntoIterator<Item = f64>;
     type Extended: IntoIterator<Item = f64>;
 

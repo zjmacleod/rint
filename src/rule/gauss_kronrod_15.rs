@@ -3,6 +3,7 @@ use crate::rule::Rule;
 /// The unit struct of the 15-point Gauss-Kronrod quadrature rule.
 ///
 /// The 15-point rule combines a 7-point Gaussian rule with a 15-point Kronrod extension.
+#[derive(Clone, Copy)]
 pub struct GaussKronrod15;
 
 impl Rule for GaussKronrod15 {

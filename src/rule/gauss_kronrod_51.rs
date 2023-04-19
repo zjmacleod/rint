@@ -3,6 +3,7 @@ use crate::rule::Rule;
 /// The unit struct of the 51-point Gauss-Kronrod quadrature rule.
 ///
 /// The 51-point rule combines a 25-point Gaussian rule with a 51-point Kronrod extension.
+#[derive(Clone, Copy)]
 pub struct GaussKronrod51;
 
 impl Rule for GaussKronrod51 {
