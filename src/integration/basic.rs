@@ -6,12 +6,12 @@
 //! The integration routine tries to be as efficient as possible by reusing function
 //! evaluations of the lower n-point Gauss integration in the calculation of the higher-order
 //! Kronrod extension. The available Gauss-Kronrod integration rules are:
-//! * [`GaussKronrod15`] - 7-point Gauss, 15-point Kronrod, 8 total function evaluations
-//! * [`GaussKronrod21`] - 10-point Gauss, 21-point Kronrod, 11 total function evaluations
-//! * [`GaussKronrod31`] - 15-point Gauss, 31-point Kronrod, 16 total function evaluations
-//! * [`GaussKronrod41`] - 20-point Gauss, 41-point Kronrod, 21 total function evaluations
-//! * [`GaussKronrod51`] -  25-point Gauss, 51-point Kronrod, 26 total function evaluations
-//! * [`GaussKronrod61`] -  30-point Gauss, 61-point Kronrod, 31 total function evaluations
+//! * [`GaussKronrod15`] - 7-point Gauss, 15-point Kronrod, 15 total function evaluations
+//! * [`GaussKronrod21`] - 10-point Gauss, 21-point Kronrod, 21 total function evaluations
+//! * [`GaussKronrod31`] - 15-point Gauss, 31-point Kronrod, 31 total function evaluations
+//! * [`GaussKronrod41`] - 20-point Gauss, 41-point Kronrod, 41 total function evaluations
+//! * [`GaussKronrod51`] -  25-point Gauss, 51-point Kronrod, 51 total function evaluations
+//! * [`GaussKronrod61`] -  30-point Gauss, 61-point Kronrod, 61 total function evaluations
 //!
 //! [`GaussKronrod15`]: ../../rule/struct.GaussKronrod15.html
 //! [`GaussKronrod21`]: ../../rule/struct.GaussKronrod21.html
@@ -82,24 +82,25 @@ pub struct Basic {
 }
 
 impl Basic {
-    /// Return the numerically approximated value of the integral.
+    /// Return the numerically evaluated approximation of the integral `I = int_a^b f(x) dx`.
     #[must_use]
     pub fn result(&self) -> f64 {
         self.result
     }
 
-    /// Return the numerically approximated value of the absolute value of the integral.
+    /// Return the numerically evaluated approximation of the integral `I_{abs} = int_a^b |f(x)| dx`.
     #[must_use]
     pub fn result_abs(&self) -> f64 {
         self.result_abs
     }
 
+    /// Return the numerically evaluated approximation of the integral `I_{asc} = int_a^b |f(x) - I/(b - a)| dx`, where `I` is the integral value returned by [`Basic::result`].
     #[must_use]
     pub fn result_asc(&self) -> f64 {
         self.result_asc
     }
 
-    /// Return the numerically approximated error.
+    /// Return the numerically evaluated approximation of the absolute error in the numerical routine.
     #[must_use]
     pub fn error(&self) -> f64 {
         self.error
@@ -107,6 +108,13 @@ impl Basic {
 }
 
 /// A basic Gauss-Kronrod integration routine.
+///
+/// This is the most basic integration routine provided by this library. It applies an n-point
+/// Gauss-Kronrod integration [`Rule`] to a user supplied function, which is a struct implementing
+/// the [`Integrand`] trait.
+/// The integration routine tries to be as efficient as possible by reusing function
+/// evaluations of the lower n-point Gauss integration in the calculation of the higher-order
+/// Kronrod extension.
 pub struct GaussKronrodBasic<I, R>
 where
     I: Integrand,
