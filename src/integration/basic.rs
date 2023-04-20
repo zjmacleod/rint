@@ -68,6 +68,8 @@
 //! assert!((exp_resabs - resabs).abs() / exp_resabs.abs() < rel_error_bound);
 //! assert!((exp_resasc - resasc).abs() / exp_resasc.abs() < rel_error_bound);
 //!```
+use std::cmp::Ordering;
+
 use crate::integration::rescale_error;
 use crate::rule::Rule;
 use crate::Integrand;
@@ -147,7 +149,7 @@ where
     }
 
     /// Integrate `function`, returning a [`Basic`] integration result.
-    pub fn integrate(&self) -> Basic {
+    pub(crate) fn integrate_internal(&self) -> BasicInternal {
         let centre = 0.5 * (self.upper + self.lower);
         let half_length = 0.5 * (self.upper - self.lower);
         let abs_half_length = half_length.abs();
@@ -219,12 +221,18 @@ where
         let result_asc = asc_result * abs_half_length;
         let error = rescale_error(error, result_abs, result_asc);
 
-        Basic {
+        BasicInternal {
+            error,
             result,
             result_abs,
             result_asc,
-            error,
+            lower: self.lower,
+            upper: self.upper,
         }
+    }
+
+    pub fn integrate(&self) -> Basic {
+        self.integrate_internal().into()
     }
 
     /// Return the value of the `upper` integration limit.
@@ -235,5 +243,174 @@ where
     /// Return the value of the `lower` integration limit.
     pub fn lower(&self) -> f64 {
         self.lower
+    }
+}
+
+#[derive(PartialEq)]
+pub(crate) struct BasicInternal {
+    error: f64,
+    result: f64,
+    result_abs: f64,
+    result_asc: f64,
+    lower: f64,
+    upper: f64,
+}
+
+impl Eq for BasicInternal {}
+
+impl PartialOrd for BasicInternal {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for BasicInternal {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let mut ordering = self.total_cmp_error(other);
+        if let Ordering::Equal = ordering {
+            ordering = self.total_cmp_interval_length(other);
+        }
+        ordering
+    }
+}
+
+impl From<BasicInternal> for Basic {
+    fn from(other: BasicInternal) -> Basic {
+        Basic {
+            error: other.error,
+            result: other.result,
+            result_abs: other.result_abs,
+            result_asc: other.result_asc,
+        }
+    }
+}
+
+impl BasicInternal {
+    #[must_use]
+    pub(crate) fn result(&self) -> f64 {
+        self.result
+    }
+
+    #[must_use]
+    pub(crate) fn result_abs(&self) -> f64 {
+        self.result_abs
+    }
+
+    #[must_use]
+    pub(crate) fn result_asc(&self) -> f64 {
+        self.result_asc
+    }
+
+    #[must_use]
+    pub(crate) fn error(&self) -> f64 {
+        self.error
+    }
+
+    #[must_use]
+    pub(crate) fn lower(&self) -> f64 {
+        self.lower
+    }
+
+    #[must_use]
+    pub(crate) fn upper(&self) -> f64 {
+        self.upper
+    }
+
+    pub(crate) fn roundoff(&self) -> f64 {
+        50.0 * f64::EPSILON * self.result_abs
+    }
+
+    pub(crate) fn total_cmp_error(&self, other: &Self) -> Ordering {
+        self.error.total_cmp(&other.error)
+    }
+
+    pub(crate) fn total_cmp_interval_length(&self, other: &Self) -> Ordering {
+        let length = (self.upper - self.lower).abs();
+        let other_length = (other.upper - other.lower).abs();
+        length.total_cmp(&other_length)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ordering_of_basic_internal() {
+        use std::collections::BinaryHeap;
+
+        let a = BasicInternal {
+            error: 1.533,
+            result: 1.0,
+            result_abs: 1.0,
+            result_asc: 1.0,
+            lower: 0.0,
+            upper: 1.0,
+        };
+        let b = BasicInternal {
+            error: 2.0,
+            result: 1.0,
+            result_abs: 1.0,
+            result_asc: 1.0,
+            lower: 0.0,
+            upper: 1.0,
+        };
+        let c = BasicInternal {
+            error: 1.533,
+            result: 1.0,
+            result_abs: 1.0,
+            result_asc: 1.0,
+            lower: 0.5,
+            upper: 1.0,
+        };
+        let d = BasicInternal {
+            error: 1.60,
+            result: 1.0,
+            result_abs: 1.0,
+            result_asc: 1.0,
+            lower: 0.0,
+            upper: 1.0,
+        };
+
+        let mut bh = BinaryHeap::new();
+        bh.push(a);
+        bh.push(b);
+        bh.push(c);
+        bh.push(d);
+        let vec = bh.into_sorted_vec();
+        let check = vec![
+            BasicInternal {
+                error: 2.0,
+                result: 1.0,
+                result_abs: 1.0,
+                result_asc: 1.0,
+                lower: 0.0,
+                upper: 1.0,
+            },
+            BasicInternal {
+                error: 1.60,
+                result: 1.0,
+                result_abs: 1.0,
+                result_asc: 1.0,
+                lower: 0.0,
+                upper: 1.0,
+            },
+            BasicInternal {
+                error: 1.533,
+                result: 1.0,
+                result_abs: 1.0,
+                result_asc: 1.0,
+                lower: 0.0,
+                upper: 1.0,
+            },
+            BasicInternal {
+                error: 1.533,
+                result: 1.0,
+                result_abs: 1.0,
+                result_asc: 1.0,
+                lower: 0.5,
+                upper: 1.0,
+            },
+        ];
     }
 }

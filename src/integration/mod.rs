@@ -14,6 +14,7 @@ pub enum ErrorBound {
 }
 
 impl ErrorBound {
+    #[must_use]
     pub fn tolerance(&self, integral_value: &f64) -> f64 {
         match *self {
             ErrorBound::Absolute(v) => v,
@@ -29,9 +30,14 @@ pub enum IntegrationError<T> {
     FailedToReachTolerance(T),
     FailedToReachToleranceRoundoff(T),
     MaximumSubintervalsReached(T),
-    BadTolerance,
-    NegativeRelativeErrorBound,
-    AbsoluteErrorBoundTooSmall,
+    RelativeBoundNegativeOrZero(f64),
+    AbsoluteBoundTooSmall(f64),
+    InvalidArgument,
+    InvalidTolerance,
+    Roundoff,
+    ExceededMaxIterations,
+    PossibleSingularity,
+    Unknown,
 }
 
 fn rescale_error(error: f64, result_abs: f64, result_asc: f64) -> f64 {
