@@ -75,10 +75,10 @@ use crate::Integrand;
 /// The value of a function evaluated with Gauss-Kronrod integration and associated error
 /// estimation.
 pub struct Basic {
+    error: f64,
     result: f64,
     result_abs: f64,
     result_asc: f64,
-    error: f64,
 }
 
 impl Basic {

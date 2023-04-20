@@ -1,7 +1,38 @@
+pub mod adaptive;
 pub mod basic;
 
 pub use basic::Basic;
 pub use basic::GaussKronrodBasic;
+
+/// User selected error bound type.
+///
+///
+pub enum ErrorBound {
+    Absolute(f64),
+    Relative(f64),
+    Either { absolute: f64, relative: f64 },
+}
+
+impl ErrorBound {
+    pub fn tolerance(&self, integral_value: &f64) -> f64 {
+        match *self {
+            ErrorBound::Absolute(v) => v,
+            ErrorBound::Relative(v) => v * integral_value.abs(),
+            ErrorBound::Either { absolute, relative } => {
+                f64::max(absolute, relative * integral_value.abs())
+            }
+        }
+    }
+}
+
+pub enum IntegrationError<T> {
+    FailedToReachTolerance(T),
+    FailedToReachToleranceRoundoff(T),
+    MaximumSubintervalsReached(T),
+    BadTolerance,
+    NegativeRelativeErrorBound,
+    AbsoluteErrorBoundTooSmall,
+}
 
 fn rescale_error(error: f64, result_abs: f64, result_asc: f64) -> f64 {
     let mut error = error.abs();
