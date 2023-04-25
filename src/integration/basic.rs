@@ -96,7 +96,8 @@ impl Basic {
         self.result_abs
     }
 
-    /// Return the numerically evaluated approximation of the integral `I_{asc} = int_a^b |f(x) - I/(b - a)| dx`, where `I` is the integral value returned by [`Basic::result`].
+    /// Return the numerically evaluated approximation of the integral `I_{asc} = int_a^b |f(x) - I/(b - a)| dx`,
+    /// where `I` is the integral value returned by [`Basic::result`].
     #[must_use]
     pub fn result_asc(&self) -> f64 {
         self.result_asc
