@@ -20,32 +20,23 @@ impl Adaptive {
         self.result
     }
 
-    /// Return the numerically approximated value of the absolute value of the integral.
-    #[must_use]
-    pub fn result_abs(&self) -> f64 {
-        self.result_abs
-    }
-
-    #[must_use]
-    pub fn result_asc(&self) -> f64 {
-        self.result_asc
-    }
-
     /// Return the numerically approximated error.
     #[must_use]
     pub fn error(&self) -> f64 {
         self.error
     }
 
+    /// Return the number of iterations used in the adaptive integration routine.
+    #[must_use]
+    pub fn iterations(&self) -> usize {
+        self.iterations
+    }
+
     pub(crate) fn from_basic(basic: &BasicInternal, iterations: usize) -> Self {
         let result = basic.result();
-        let result_abs = basic.result_abs();
-        let result_asc = basic.result_asc();
         let error = basic.error();
         Self {
             result,
-            result_abs,
-            result_asc,
             error,
             iterations,
         }
