@@ -292,11 +292,6 @@ impl BasicInternal {
     }
 
     #[must_use]
-    pub(crate) fn result_abs(&self) -> f64 {
-        self.result_abs
-    }
-
-    #[must_use]
     pub(crate) fn result_asc(&self) -> f64 {
         self.result_asc
     }
