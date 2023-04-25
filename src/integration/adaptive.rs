@@ -230,10 +230,8 @@ where
                     return Err(IntegrationError::Roundoff);
                 }
 
-                // TODO singularity check need subinterval_too_small
-                if false {
-                    return Err(IntegrationError::PossibleSingularity);
-                }
+                // Check if the next subinterval would be too small. Possible singularity.
+                subinterval_too_small(self.lower, midpoint, self.upper)?;
             }
 
             results.push(lower_integration);
@@ -263,5 +261,22 @@ where
     /// Return the value of the `lower` integration limit.
     pub fn lower(&self) -> f64 {
         self.lower
+    }
+}
+
+fn subinterval_too_small(
+    lower: f64,
+    midpoint: f64,
+    upper: f64,
+) -> Result<(), IntegrationError<Adaptive>> {
+    let eps = f64::EPSILON;
+    let min = f64::MIN_POSITIVE;
+
+    let tmp = (1.0 + 100.0 * eps) * (midpoint.abs() + 1000.0 * min);
+
+    if lower.abs() <= tmp && upper.abs() <= tmp {
+        Err(IntegrationError::PossibleSingularity)
+    } else {
+        Ok(())
     }
 }
