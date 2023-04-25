@@ -324,6 +324,9 @@ impl BasicInternal {
         self.error.total_cmp(&other.error)
     }
 
+    // TODO this sorts the largest interval to be larger, and is only used if the errors are
+    // equal. However, it maybe makes more sense to have the integral with the smallest interval be
+    // sorted larger than the one with the longer interval.
     pub(crate) fn total_cmp_interval_length(&self, other: &Self) -> Ordering {
         let length = (self.upper - self.lower).abs();
         let other_length = (other.upper - other.lower).abs();

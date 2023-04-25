@@ -120,7 +120,13 @@ where
     }
 
     /// Integrate the function and return a [`GaussKronrod`] integration result.
+    ///
+    /// # Errors
+    /// Integration can fail if user suplied tolerance cannot be achieved within the maximum number
+    /// of iterations.
+    /// TODO
     pub fn integrate(&self) -> Result<Adaptive, IntegrationError<Adaptive>> {
+        // Initial integration over (lower, upper) interval.
         let initial_integration = GaussKronrodBasic::new(
             self.lower,
             self.upper,
@@ -129,6 +135,7 @@ where
         )
         .integrate_internal();
 
+        // Test on accuracy and roundoff.
         let tolerance = self.error_bound.tolerance(&initial_integration.result());
         let roundoff = initial_integration.roundoff();
 
@@ -149,17 +156,24 @@ where
             return Err(IntegrationError::MaximumSubintervalsReached(output));
         }
 
-        let mut iterations: usize = 1;
-
         let mut area = initial_integration.result();
         let mut error = initial_integration.error();
 
+        let mut iterations: usize = 1;
+
+        // GSL uses a workspace struct for storing and sorting the results of each successive
+        // integration. We use an internal representation of the value of the integral which
+        // implements [`Ord`] on the numerically approximated error, and so we use a [`BinaryHeap`]
+        // to store the intermediate results. This allows us to simply `push` the results from the
+        // current iteration, and `pop` the interval with the largest error.
         let mut results = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
         results.push(initial_integration);
+
+        // Keep track of how many iterations have a roundoff error.
         let mut roundoff_type1 = 0usize;
         let mut roundoff_type2 = 0usize;
 
-        while iterations <= self.max_iterations {
+        while iterations < self.max_iterations {
             let Some(previous) = results.pop() else {
                 break;
             };
