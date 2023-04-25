@@ -246,7 +246,7 @@ where
     }
 }
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 pub(crate) struct BasicInternal {
     error: f64,
     result: f64,
@@ -383,7 +383,15 @@ mod tests {
         let vec = bh.into_sorted_vec();
         let check = vec![
             BasicInternal {
-                error: 2.0,
+                error: 1.533,
+                result: 1.0,
+                result_abs: 1.0,
+                result_asc: 1.0,
+                lower: 0.5,
+                upper: 1.0,
+            },
+            BasicInternal {
+                error: 1.533,
                 result: 1.0,
                 result_abs: 1.0,
                 result_asc: 1.0,
@@ -399,21 +407,15 @@ mod tests {
                 upper: 1.0,
             },
             BasicInternal {
-                error: 1.533,
+                error: 2.0,
                 result: 1.0,
                 result_abs: 1.0,
                 result_asc: 1.0,
                 lower: 0.0,
                 upper: 1.0,
             },
-            BasicInternal {
-                error: 1.533,
-                result: 1.0,
-                result_abs: 1.0,
-                result_asc: 1.0,
-                lower: 0.5,
-                upper: 1.0,
-            },
         ];
+
+        assert_eq!(vec, check);
     }
 }
