@@ -1,6 +1,8 @@
 pub mod adaptive;
 pub mod basic;
 
+pub use adaptive::Adaptive;
+pub use adaptive::GaussKronrodAdaptive;
 pub use basic::Basic;
 pub use basic::GaussKronrodBasic;
 
