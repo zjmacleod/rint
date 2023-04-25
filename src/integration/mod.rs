@@ -26,6 +26,7 @@ impl ErrorBound {
     }
 }
 
+#[derive(Debug)]
 pub enum IntegrationError<T> {
     FailedToReachTolerance(T),
     FailedToReachToleranceRoundoff(T),

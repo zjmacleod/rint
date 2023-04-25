@@ -7,6 +7,7 @@ use crate::Integrand;
 
 /// The value of a function evaluated with Gauss-Kronrod integration and associated error
 /// estimation.
+#[derive(Debug)]
 pub struct Adaptive {
     result: f64,
     error: f64,
