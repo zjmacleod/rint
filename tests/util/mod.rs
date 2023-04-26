@@ -109,3 +109,17 @@ pub fn test_absolute_error(
     }
     Ok(())
 }
+
+pub fn test_int(
+    calculated: usize,
+    target: usize,
+    description: &str,
+) -> Result<(), String> {
+    if calculated == target {
+        Ok(())
+    } else {
+        Err(format!(
+            "Failed test {description}: calculated value: {calculated} target value: {target}"
+        ))
+    }
+}
