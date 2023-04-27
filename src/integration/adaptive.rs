@@ -1,7 +1,7 @@
 use std::collections::BinaryHeap;
 
 use crate::integration::basic::BasicInternal;
-use crate::integration::{ErrorBound, GaussKronrodBasic, IntegrationError};
+use crate::integration::{ErrorBound, GaussKronrodBasic};
 use crate::rule::Rule;
 use crate::Integrand;
 
@@ -15,6 +15,13 @@ pub struct Adaptive {
 }
 
 impl Adaptive {
+    pub(crate) fn new(result: f64, error: f64, iterations: usize) -> Self {
+        Self {
+            result,
+            error,
+            iterations,
+        }
+    }
     /// Return the numerically approximated value of the integral.
     #[must_use]
     pub fn result(&self) -> f64 {
@@ -36,11 +43,7 @@ impl Adaptive {
     pub(crate) fn from_basic(basic: &BasicInternal, iterations: usize) -> Self {
         let result = basic.result();
         let error = basic.error();
-        Self {
-            result,
-            error,
-            iterations,
-        }
+        Self::new(result, error, iterations)
     }
 }
 
@@ -92,21 +95,27 @@ where
         rule: R,
         function: &'a I,
         max_iterations: usize,
-    ) -> Result<Self, IntegrationError<Adaptive>> {
+    ) -> Result<Self, Error> {
         match error_bound {
             ErrorBound::Absolute(v) => {
                 if v <= 0.0 {
-                    return Err(IntegrationError::RelativeBoundNegativeOrZero(v));
+                    let partial_result = Adaptive::new(0.0, 0.0, 0);
+                    let kind = Kind::RelativeBoundNegativeOrZero;
+                    return Err(Error::new(kind, partial_result));
                 }
             }
             ErrorBound::Relative(v) => {
                 if v < 50.0 * f64::EPSILON {
-                    return Err(IntegrationError::AbsoluteBoundTooSmall(v));
+                    let partial_result = Adaptive::new(0.0, 0.0, 0);
+                    let kind = Kind::AbsoluteBoundTooSmall;
+                    return Err(Error::new(kind, partial_result));
                 }
             }
             ErrorBound::Either { absolute, relative } => {
                 if absolute <= 0.0 && relative < 50.0 * f64::EPSILON {
-                    return Err(IntegrationError::InvalidTolerance);
+                    let partial_result = Adaptive::new(0.0, 0.0, 0);
+                    let kind = Kind::InvalidTolerance;
+                    return Err(Error::new(kind, partial_result));
                 }
             }
         }
@@ -125,10 +134,10 @@ where
     /// # Errors
     /// Integration can fail if user suplied tolerance cannot be achieved within the maximum number
     /// of iterations.
-    /// TODO
-    pub fn integrate(&self) -> Result<Adaptive, IntegrationError<Adaptive>> {
+    #[allow(clippy::too_many_lines)]
+    pub fn integrate(&self) -> Result<Adaptive, Error> {
         // Initial integration over (lower, upper) interval.
-        let initial_integration = GaussKronrodBasic::new(
+        let integral = GaussKronrodBasic::new(
             self.lower,
             self.upper,
             self.rule,
@@ -136,31 +145,30 @@ where
         )
         .integrate_internal();
 
-        // Test on accuracy and roundoff.
-        let tolerance = self.error_bound.tolerance(&initial_integration.result());
-        let roundoff = initial_integration.roundoff();
+        let mut iterations: usize = 1;
 
-        if initial_integration.error() <= roundoff
-            && initial_integration.error() > tolerance
+        // Test on accuracy and roundoff.
+        let tolerance = self.error_bound.tolerance(&integral.result());
+        let roundoff = integral.roundoff();
+
+        if integral.error() <= roundoff && integral.error() > tolerance {
+            let partial_result = Adaptive::from_basic(&integral, iterations);
+            let kind = Kind::FailedToReachToleranceRoundoff;
+            return Err(Error::new(kind, partial_result));
+        } else if (integral.error() <= tolerance
+            && integral.error().to_bits() != integral.result_asc().to_bits())
+            || integral.error() == 0.0
         {
-            let output = Adaptive::from_basic(&initial_integration, 1);
-            return Err(IntegrationError::FailedToReachToleranceRoundoff(output));
-        } else if (initial_integration.error() <= tolerance
-            && initial_integration.error().to_bits()
-                != initial_integration.result_asc().to_bits())
-            || initial_integration.error() == 0.0
-        {
-            let output = Adaptive::from_basic(&initial_integration, 1);
+            let output = Adaptive::from_basic(&integral, iterations);
             return Ok(output);
         } else if self.max_iterations == 1 {
-            let output = Adaptive::from_basic(&initial_integration, 1);
-            return Err(IntegrationError::MaximumSubintervalsReached(output));
+            let partial_result = Adaptive::from_basic(&integral, iterations);
+            let kind = Kind::MaximumIterationsReached;
+            return Err(Error::new(kind, partial_result));
         }
 
-        let mut area = initial_integration.result();
-        let mut error = initial_integration.error();
-
-        let mut iterations: usize = 1;
+        let mut area = integral.result();
+        let mut error = integral.error();
 
         // GSL uses a workspace struct for storing and sorting the results of each successive
         // integration. We use an internal representation of the value of the integral which
@@ -168,7 +176,7 @@ where
         // to store the intermediate results. This allows us to simply `push` the results from the
         // current iteration, and `pop` the interval with the largest error.
         let mut results = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
-        results.push(initial_integration);
+        results.push(integral);
 
         // Keep track of how many iterations have a roundoff error.
         let mut roundoff_type1 = 0usize;
@@ -176,50 +184,44 @@ where
 
         while iterations < self.max_iterations {
             let Some(previous) = results.pop() else {
+                // TODO this should be an error? we should _always_ have something to pop
                 break;
             };
 
-            let midpoint = (previous.upper() + previous.lower()) * 0.5;
+            iterations += 1;
 
-            let lower_integration = GaussKronrodBasic::new(
-                previous.lower(),
-                midpoint,
-                self.rule,
-                self.function,
-            )
-            .integrate_internal();
+            let lower = previous.lower();
+            let upper = previous.upper();
+            let mid = (upper + lower) * 0.5;
 
-            let upper_integration = GaussKronrodBasic::new(
-                midpoint,
-                previous.upper(),
-                self.rule,
-                self.function,
-            )
-            .integrate_internal();
+            let lower_integral =
+                GaussKronrodBasic::new(lower, mid, self.rule, self.function)
+                    .integrate_internal();
+
+            let upper_integral =
+                GaussKronrodBasic::new(mid, upper, self.rule, self.function)
+                    .integrate_internal();
 
             let iteration_area =
-                lower_integration.result() + upper_integration.result();
-            let iteration_error =
-                lower_integration.error() + upper_integration.error();
+                lower_integral.result() + upper_integral.result();
+            let iteration_error = lower_integral.error() + upper_integral.error();
 
             area += iteration_area - previous.result();
             error += iteration_error - previous.error();
 
-            if lower_integration.result_asc().to_bits()
-                != lower_integration.error().to_bits()
-                && upper_integration.result_asc().to_bits()
-                    != upper_integration.error().to_bits()
+            if lower_integral.result_asc().to_bits()
+                != lower_integral.error().to_bits()
+                && upper_integral.result_asc().to_bits()
+                    != upper_integral.error().to_bits()
             {
                 let delta = previous.result() - iteration_area;
 
                 if delta.abs() <= 1.0e-5 * iteration_area.abs()
                     && iteration_error >= 0.99 * previous.error()
                 {
-                    // TODO
                     roundoff_type1 += 1;
                 }
                 if iterations >= 10 && iteration_error >= previous.error() {
-                    // TODO
                     roundoff_type2 += 1;
                 }
             }
@@ -228,17 +230,21 @@ where
 
             if error > iteration_tolerance {
                 if roundoff_type1 >= 6 || roundoff_type2 >= 20 {
-                    return Err(IntegrationError::Roundoff);
+                    let partial_result = Adaptive::new(area, error, iterations);
+                    let kind = Kind::FailedToReachToleranceRoundoff;
+                    return Err(Error::new(kind, partial_result));
                 }
 
                 // Check if the next subinterval would be too small. Possible singularity.
-                subinterval_too_small(self.lower, midpoint, self.upper)?;
+                if subinterval_too_small(lower, mid, upper) {
+                    let partial_result = Adaptive::new(area, error, iterations);
+                    let kind = Kind::PossibleSingularity { lower, upper };
+                    return Err(Error::new(kind, partial_result));
+                }
             }
 
-            results.push(lower_integration);
-            results.push(upper_integration);
-
-            iterations += 1;
+            results.push(lower_integral);
+            results.push(upper_integral);
 
             if error < iteration_tolerance {
                 break;
@@ -246,12 +252,14 @@ where
         }
 
         let result = results.into_iter().fold(0.0f64, |a, v| a + v.result());
+        let output = Adaptive::new(result, error, iterations);
 
-        Ok(Adaptive {
-            result,
-            error,
-            iterations,
-        })
+        if iterations == self.max_iterations {
+            let kind = Kind::MaximumIterationsReached;
+            Err(Error::new(kind, output))
+        } else {
+            Ok(output)
+        }
     }
 
     /// Return the value of the `upper` integration limit.
@@ -265,19 +273,58 @@ where
     }
 }
 
-fn subinterval_too_small(
-    lower: f64,
-    midpoint: f64,
-    upper: f64,
-) -> Result<(), IntegrationError<Adaptive>> {
+#[derive(Debug)]
+pub enum Kind {
+    RelativeBoundNegativeOrZero,
+    AbsoluteBoundTooSmall,
+    InvalidTolerance,
+    FailedToReachToleranceRoundoff,
+    MaximumIterationsReached,
+    PossibleSingularity { lower: f64, upper: f64 },
+}
+
+#[derive(Debug)]
+pub struct Error {
+    kind: Kind,
+    integral: Adaptive,
+}
+
+impl Error {
+    fn new(kind: Kind, integral: Adaptive) -> Self {
+        Self { kind, integral }
+    }
+
+    #[must_use]
+    pub fn kind(&self) -> &Kind {
+        &self.kind
+    }
+
+    #[must_use]
+    pub fn integral(&self) -> &Adaptive {
+        &self.integral
+    }
+
+    #[must_use]
+    pub fn result(&self) -> f64 {
+        self.integral.result()
+    }
+
+    #[must_use]
+    pub fn error(&self) -> f64 {
+        self.integral.error()
+    }
+
+    #[must_use]
+    pub fn iterations(&self) -> usize {
+        self.integral.iterations()
+    }
+}
+
+fn subinterval_too_small(lower: f64, midpoint: f64, upper: f64) -> bool {
     let eps = f64::EPSILON;
     let min = f64::MIN_POSITIVE;
 
     let tmp = (1.0 + 100.0 * eps) * (midpoint.abs() + 1000.0 * min);
 
-    if lower.abs() <= tmp && upper.abs() <= tmp {
-        Err(IntegrationError::PossibleSingularity)
-    } else {
-        Ok(())
-    }
+    lower.abs() <= tmp && upper.abs() <= tmp
 }

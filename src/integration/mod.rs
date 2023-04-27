@@ -28,21 +28,6 @@ impl ErrorBound {
     }
 }
 
-#[derive(Debug)]
-pub enum IntegrationError<T> {
-    FailedToReachTolerance(T),
-    FailedToReachToleranceRoundoff(T),
-    MaximumSubintervalsReached(T),
-    RelativeBoundNegativeOrZero(f64),
-    AbsoluteBoundTooSmall(f64),
-    InvalidArgument,
-    InvalidTolerance,
-    Roundoff,
-    ExceededMaxIterations,
-    PossibleSingularity,
-    Unknown,
-}
-
 fn rescale_error(error: f64, result_abs: f64, result_asc: f64) -> f64 {
     let mut error = error.abs();
 
