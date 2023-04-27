@@ -134,9 +134,7 @@ where
     /// # Errors
     /// Integration can fail if user suplied tolerance cannot be achieved within the maximum number
     /// of iterations.
-    #[allow(clippy::too_many_lines)]
     pub fn integrate(&self) -> Result<Adaptive, Error> {
-        // Initial integration over (lower, upper) interval.
         let integral = GaussKronrodBasic::new(
             self.lower,
             self.upper,
@@ -147,7 +145,6 @@ where
 
         let mut iterations: usize = 1;
 
-        // Test on accuracy and roundoff.
         let tolerance = self.error_bound.tolerance(&integral.result());
         let roundoff = integral.roundoff();
 
@@ -170,15 +167,9 @@ where
         let mut area = integral.result();
         let mut error = integral.error();
 
-        // GSL uses a workspace struct for storing and sorting the results of each successive
-        // integration. We use an internal representation of the value of the integral which
-        // implements [`Ord`] on the numerically approximated error, and so we use a [`BinaryHeap`]
-        // to store the intermediate results. This allows us to simply `push` the results from the
-        // current iteration, and `pop` the interval with the largest error.
         let mut results = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
         results.push(integral);
 
-        // Keep track of how many iterations have a roundoff error.
         let mut roundoff_type1 = 0usize;
         let mut roundoff_type2 = 0usize;
 
@@ -235,7 +226,6 @@ where
                     return Err(Error::new(kind, partial_result));
                 }
 
-                // Check if the next subinterval would be too small. Possible singularity.
                 if subinterval_too_small(lower, mid, upper) {
                     let partial_result = Adaptive::new(area, error, iterations);
                     let kind = Kind::PossibleSingularity { lower, upper };
