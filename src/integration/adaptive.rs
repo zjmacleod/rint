@@ -170,7 +170,7 @@ where
 
         while iterations < self.max_iterations {
             let Some(previous) = results.pop() else {
-                // TODO this should be an error? we should _always_ have something to pop
+                // XXX this should be an error? we should _always_ have something to pop
                 break;
             };
 
@@ -211,13 +211,15 @@ where
 
             if error > iteration_tolerance {
                 if roundoff_type1 >= 6 || roundoff_type2 >= 20 {
-                    let partial_result = Adaptive::new(area, error, iterations);
+                    let result = results.into_iter().fold(0.0f64, |a, v| a + v.result());
+                    let partial_result = Adaptive::new(result, error, iterations);
                     let kind = Kind::FailedToReachToleranceRoundoff;
                     return Err(Error::new(kind, partial_result));
                 }
 
                 if subinterval_too_small(lower, mid, upper) {
-                    let partial_result = Adaptive::new(area, error, iterations);
+                    let result = results.into_iter().fold(0.0f64, |a, v| a + v.result());
+                    let partial_result = Adaptive::new(result, error, iterations);
                     let kind = Kind::PossibleSingularity { lower, upper };
                     return Err(Error::new(kind, partial_result));
                 }
