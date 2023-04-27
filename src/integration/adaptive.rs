@@ -135,13 +135,8 @@ where
     /// Integration can fail if user suplied tolerance cannot be achieved within the maximum number
     /// of iterations.
     pub fn integrate(&self) -> Result<Adaptive, Error> {
-        let integral = GaussKronrodBasic::new(
-            self.lower,
-            self.upper,
-            self.rule,
-            self.function,
-        )
-        .integrate_internal();
+        let integral = GaussKronrodBasic::new(self.lower, self.upper, self.rule, self.function)
+            .integrate_internal();
 
         let mut iterations: usize = 1;
 
@@ -186,24 +181,19 @@ where
             let mid = (upper + lower) * 0.5;
 
             let lower_integral =
-                GaussKronrodBasic::new(lower, mid, self.rule, self.function)
-                    .integrate_internal();
+                GaussKronrodBasic::new(lower, mid, self.rule, self.function).integrate_internal();
 
             let upper_integral =
-                GaussKronrodBasic::new(mid, upper, self.rule, self.function)
-                    .integrate_internal();
+                GaussKronrodBasic::new(mid, upper, self.rule, self.function).integrate_internal();
 
-            let iteration_area =
-                lower_integral.result() + upper_integral.result();
+            let iteration_area = lower_integral.result() + upper_integral.result();
             let iteration_error = lower_integral.error() + upper_integral.error();
 
             area += iteration_area - previous.result();
             error += iteration_error - previous.error();
 
-            if lower_integral.result_asc().to_bits()
-                != lower_integral.error().to_bits()
-                && upper_integral.result_asc().to_bits()
-                    != upper_integral.error().to_bits()
+            if lower_integral.result_asc().to_bits() != lower_integral.error().to_bits()
+                && upper_integral.result_asc().to_bits() != upper_integral.error().to_bits()
             {
                 let delta = previous.result() - iteration_area;
 
