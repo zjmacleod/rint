@@ -302,6 +302,48 @@ impl Error {
     }
 }
 
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self.kind() {
+            Kind::RelativeBoundNegativeOrZero => {
+                write!(
+                    f,
+                    "Invalid error bound: relative bound must be non-zero and positive."
+                )
+            }
+            Kind::AbsoluteBoundTooSmall => {
+                write!(
+                    f,
+                    "Invalid error bound: absolute bound must be larger than 50.0 * f64::EPSILON."
+                )
+            }
+            Kind::InvalidTolerance => {
+                write!(f, "Invalid tolerance: relative bound must be non-zero and positive and absolute bound must be larger than 50.0 * f64::EPSILON.")
+            }
+            Kind::FailedToReachToleranceRoundoff => {
+                let result = self.result();
+                let error = self.error();
+                write!(f, "Failed to reach tolerance due to roundoff error. Result: {result}, error: {error}.")
+            }
+            Kind::MaximumIterationsReached => {
+                let result = self.result();
+                let error = self.error();
+                write!(
+                    f,
+                    "Maximum number of iterations reached. Result: {result}, error: {error}."
+                )
+            }
+            Kind::PossibleSingularity { lower, upper } => {
+                let result = self.result();
+                let error = self.error();
+                write!(f, "Possible singularity detected between ({lower},{upper}). Result: {result}, error: {error}.")
+            }
+        }
+    }
+}
+
+impl std::error::Error for Error {}
+
 fn subinterval_too_small(lower: f64, midpoint: f64, upper: f64) -> bool {
     let eps = f64::EPSILON;
     let min = f64::MIN_POSITIVE;
