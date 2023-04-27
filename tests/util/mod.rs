@@ -69,25 +69,32 @@ pub(crate) fn test_relative_error(
 ) -> Result<(), String> {
     if calculated.is_nan() || target.is_nan() {
         if calculated.is_nan() != calculated.is_nan() {
-            return Err(format!("Failed test {description}: calculated.is_nan() != target.is_nan()"));
+            return Err(format!(
+                "Failed test {description}: calculated.is_nan() != target.is_nan()"
+            ));
         }
     }
 
     if calculated.is_infinite() || target.is_infinite() {
         if calculated.is_infinite() != calculated.is_infinite() {
-            return Err(format!("Failed test {description}: calculated.is_infinite() != target.is_infinite()"));
+            return Err(format!(
+                "Failed test {description}: calculated.is_infinite() != target.is_infinite()"
+            ));
         }
     }
 
-    if (target > 0.0 && target < f64::MIN_POSITIVE)
-        || (target < 0.0 && target > -f64::MIN_POSITIVE)
+    if (target > 0.0 && target < f64::MIN_POSITIVE) || (target < 0.0 && target > -f64::MIN_POSITIVE)
     {
-        return Err(format!("Failed test {description}: target value smaller than f64::MIN_POSITIVE"));
+        return Err(format!(
+            "Failed test {description}: target value smaller than f64::MIN_POSITIVE"
+        ));
     }
 
     if target != 0.0 {
         if (calculated - target).abs() / target.abs() > relative_error {
-            return Err(format!("Failed test {description}: calculated relative error is larger than target"));
+            return Err(format!(
+                "Failed test {description}: calculated relative error is larger than target"
+            ));
         }
     } else {
         if calculated.abs() > relative_error {
@@ -106,20 +113,25 @@ pub(crate) fn test_absolute_error(
 ) -> Result<(), String> {
     if calculated.is_nan() || target.is_nan() {
         if calculated.is_nan() != calculated.is_nan() {
-            return Err(format!("Failed test {description}: calculated.is_nan() != target.is_nan()"));
+            return Err(format!(
+                "Failed test {description}: calculated.is_nan() != target.is_nan()"
+            ));
         }
     }
 
     if calculated.is_infinite() || target.is_infinite() {
         if calculated.is_infinite() != calculated.is_infinite() {
-            return Err(format!("Failed test {description}: calculated.is_infinite() != target.is_infinite()"));
+            return Err(format!(
+                "Failed test {description}: calculated.is_infinite() != target.is_infinite()"
+            ));
         }
     }
 
-    if (target > 0.0 && target < f64::MIN_POSITIVE)
-        || (target < 0.0 && target > -f64::MIN_POSITIVE)
+    if (target > 0.0 && target < f64::MIN_POSITIVE) || (target < 0.0 && target > -f64::MIN_POSITIVE)
     {
-        return Err(format!("Failed test {description}: target value smaller than f64::MIN_POSITIVE"));
+        return Err(format!(
+            "Failed test {description}: target value smaller than f64::MIN_POSITIVE"
+        ));
     } else {
         if (calculated - target).abs() > absolute_error {
             return Err(format!("Failed test {description}: calculated absolute error is smaller than target relative error"));
@@ -128,11 +140,7 @@ pub(crate) fn test_absolute_error(
     Ok(())
 }
 
-pub(crate) fn test_int(
-    calculated: usize,
-    target: usize,
-    description: &str,
-) -> Result<(), String> {
+pub(crate) fn test_int(calculated: usize, target: usize, description: &str) -> Result<(), String> {
     if calculated == target {
         Ok(())
     } else {

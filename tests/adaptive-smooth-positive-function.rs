@@ -1,8 +1,7 @@
 use gauss_kronrod_integration::integration::adaptive::Kind;
 use gauss_kronrod_integration::integration::{ErrorBound, GaussKronrodAdaptive};
 use gauss_kronrod_integration::rule::{
-    GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod51,
-    GaussKronrod61,
+    GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod51, GaussKronrod61,
 };
 
 mod util;
@@ -26,15 +25,8 @@ fn test_adaptive_smooth_relative_error_15() -> Result<(), String> {
 
     let function = util::Function1 { alpha };
 
-    let integral = GaussKronrodAdaptive::new(
-        lower,
-        upper,
-        error_bound,
-        rule,
-        &function,
-        1000,
-    )
-    .unwrap();
+    let integral =
+        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
 
     let integral_result = integral.integrate().unwrap();
     let result = integral_result.result();
@@ -47,12 +39,7 @@ fn test_adaptive_smooth_relative_error_15() -> Result<(), String> {
         abs_error_bound,
         "qk15(f1) smooth result",
     )?;
-    util::test_relative_error(
-        error,
-        exp_abserr,
-        rel_error_bound,
-        "qk15(f1) smooth abserr",
-    )?;
+    util::test_relative_error(error, exp_abserr, rel_error_bound, "qk15(f1) smooth abserr")?;
     util::test_int(
         iterations,
         exp_iterations,
@@ -65,15 +52,8 @@ fn test_adaptive_smooth_relative_error_15() -> Result<(), String> {
 
     let function = util::Function1 { alpha };
 
-    let integral = GaussKronrodAdaptive::new(
-        lower,
-        upper,
-        error_bound,
-        rule,
-        &function,
-        1000,
-    )
-    .unwrap();
+    let integral =
+        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
 
     let integral_result = integral.integrate().unwrap();
     let result = integral_result.result();
@@ -86,12 +66,7 @@ fn test_adaptive_smooth_relative_error_15() -> Result<(), String> {
         abs_error_bound,
         "qk15(f1) smooth result",
     )?;
-    util::test_relative_error(
-        error,
-        exp_abserr,
-        rel_error_bound,
-        "qk15(f1) smooth abserr",
-    )?;
+    util::test_relative_error(error, exp_abserr, rel_error_bound, "qk15(f1) smooth abserr")?;
     util::test_int(
         iterations,
         exp_iterations,
@@ -121,15 +96,8 @@ fn test_adaptive_smooth_absolute_error_21() -> Result<(), String> {
 
     let function = util::Function1 { alpha };
 
-    let integral = GaussKronrodAdaptive::new(
-        lower,
-        upper,
-        error_bound,
-        rule,
-        &function,
-        1000,
-    )
-    .unwrap();
+    let integral =
+        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
 
     let integral_result = integral.integrate().unwrap();
     let result = integral_result.result();
@@ -142,12 +110,7 @@ fn test_adaptive_smooth_absolute_error_21() -> Result<(), String> {
         abs_error_bound,
         "qk15(f1) smooth result",
     )?;
-    util::test_relative_error(
-        error,
-        exp_abserr,
-        rel_error_bound,
-        "qk15(f1) smooth abserr",
-    )?;
+    util::test_relative_error(error, exp_abserr, rel_error_bound, "qk15(f1) smooth abserr")?;
     util::test_int(
         iterations,
         exp_iterations,
@@ -160,15 +123,8 @@ fn test_adaptive_smooth_absolute_error_21() -> Result<(), String> {
 
     let function = util::Function1 { alpha };
 
-    let integral = GaussKronrodAdaptive::new(
-        lower,
-        upper,
-        error_bound,
-        rule,
-        &function,
-        1000,
-    )
-    .unwrap();
+    let integral =
+        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
 
     let integral_result = integral.integrate().unwrap();
     let result = integral_result.result();
@@ -181,12 +137,7 @@ fn test_adaptive_smooth_absolute_error_21() -> Result<(), String> {
         abs_error_bound,
         "qk15(f1) smooth result",
     )?;
-    util::test_relative_error(
-        error,
-        exp_abserr,
-        rel_error_bound,
-        "qk15(f1) smooth abserr",
-    )?;
+    util::test_relative_error(error, exp_abserr, rel_error_bound, "qk15(f1) smooth abserr")?;
     util::test_int(
         iterations,
         exp_iterations,
@@ -216,15 +167,8 @@ fn test_adaptive_oscillating_should_error_roundoff_31() -> Result<(), String> {
 
     let function = util::Function3 { alpha };
 
-    let integral = GaussKronrodAdaptive::new(
-        lower,
-        upper,
-        error_bound,
-        rule,
-        &function,
-        1000,
-    )
-    .unwrap();
+    let integral =
+        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
 
     let integral_result = integral.integrate();
 
@@ -264,15 +208,8 @@ fn test_adaptive_oscillating_should_error_roundoff_31() -> Result<(), String> {
 
     let function = util::Function3 { alpha };
 
-    let integral = GaussKronrodAdaptive::new(
-        lower,
-        upper,
-        error_bound,
-        rule,
-        &function,
-        1000,
-    )
-    .unwrap();
+    let integral =
+        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
 
     let integral_result = integral.integrate();
 
@@ -325,15 +262,8 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
 
     let function = util::Function16 { alpha };
 
-    let integral = GaussKronrodAdaptive::new(
-        lower,
-        upper,
-        error_bound,
-        rule,
-        &function,
-        1000,
-    )
-    .unwrap();
+    let integral =
+        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
 
     let integral_result = integral.integrate();
 
@@ -362,15 +292,8 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
 
     let function = util::Function16 { alpha };
 
-    let integral = GaussKronrodAdaptive::new(
-        lower,
-        upper,
-        error_bound,
-        rule,
-        &function,
-        1000,
-    )
-    .unwrap();
+    let integral =
+        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
 
     let integral_result = integral.integrate();
 
@@ -417,8 +340,7 @@ fn test_adaptive_max_iterations_61() -> Result<(), String> {
     let function = util::Function16 { alpha };
 
     let integral =
-        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 3)
-            .unwrap();
+        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 3).unwrap();
 
     let integral_result = integral.integrate();
 
@@ -459,8 +381,7 @@ fn test_adaptive_max_iterations_61() -> Result<(), String> {
     let function = util::Function16 { alpha };
 
     let integral =
-        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 3)
-            .unwrap();
+        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 3).unwrap();
 
     let integral_result = integral.integrate();
 

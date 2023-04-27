@@ -3,8 +3,7 @@
 
 use gauss_kronrod_integration::integration::GaussKronrodBasic;
 use gauss_kronrod_integration::rule::{
-    GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod41,
-    GaussKronrod51, GaussKronrod61,
+    GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod41, GaussKronrod51, GaussKronrod61,
 };
 
 mod util;
