@@ -37,13 +37,18 @@ fn test_adaptive_smooth_relative_error_15() -> Result<(), String> {
         result,
         exp_result,
         abs_error_bound,
-        "qk15(f1) smooth result",
+        "adaptive(f1,15) smooth result",
     )?;
-    util::test_relative_error(error, exp_abserr, rel_error_bound, "qk15(f1) smooth abserr")?;
+    util::test_relative_error(
+        error,
+        exp_abserr,
+        rel_error_bound,
+        "adaptive(f1,15) smooth abserr",
+    )?;
     util::test_int(
         iterations,
         exp_iterations,
-        "adaptive qk15(f1) smooth iterations",
+        "adaptive(f1,15) smooth iterations",
     )?;
 
     let error_bound = ErrorBound::Relative(1e-10);
@@ -64,13 +69,18 @@ fn test_adaptive_smooth_relative_error_15() -> Result<(), String> {
         result,
         -exp_result,
         abs_error_bound,
-        "qk15(f1) smooth result",
+        "adaptive(f1,15) smooth result reverse",
     )?;
-    util::test_relative_error(error, exp_abserr, rel_error_bound, "qk15(f1) smooth abserr")?;
+    util::test_relative_error(
+        error,
+        exp_abserr,
+        rel_error_bound,
+        "adaptive(f1,15) smooth abserr reverse",
+    )?;
     util::test_int(
         iterations,
         exp_iterations,
-        "adaptive qk15(f1) smooth iterations",
+        "adaptive(f1,15) smooth iterations reverse",
     )?;
 
     Ok(())
@@ -108,13 +118,18 @@ fn test_adaptive_smooth_absolute_error_21() -> Result<(), String> {
         result,
         exp_result,
         abs_error_bound,
-        "qk15(f1) smooth result",
+        "adaptive(f1,21) smooth result",
     )?;
-    util::test_relative_error(error, exp_abserr, rel_error_bound, "qk15(f1) smooth abserr")?;
+    util::test_relative_error(
+        error,
+        exp_abserr,
+        rel_error_bound,
+        "adaptive(f1,21) smooth abserr",
+    )?;
     util::test_int(
         iterations,
         exp_iterations,
-        "adaptive qk15(f1) smooth iterations",
+        "adaptive(f1,21) smooth iterations",
     )?;
 
     let error_bound = ErrorBound::Absolute(1e-14);
@@ -135,13 +150,18 @@ fn test_adaptive_smooth_absolute_error_21() -> Result<(), String> {
         result,
         -exp_result,
         abs_error_bound,
-        "qk15(f1) smooth result",
+        "adaptive(f1,21) smooth result reverse",
     )?;
-    util::test_relative_error(error, exp_abserr, rel_error_bound, "qk15(f1) smooth abserr")?;
+    util::test_relative_error(
+        error,
+        exp_abserr,
+        rel_error_bound,
+        "adaptive(f1,21) smooth abserr reverse",
+    )?;
     util::test_int(
         iterations,
         exp_iterations,
-        "adaptive qk15(f1) smooth iterations",
+        "adaptive(f1,21) smooth iterations reverse",
     )?;
 
     Ok(())
@@ -182,18 +202,18 @@ fn test_adaptive_oscillating_should_error_roundoff_31() -> Result<(), String> {
                 result,
                 exp_result,
                 abs_error_bound,
-                "qk15(f1) smooth result",
+                "adaptive(f3,31) smooth result",
             )?;
             util::test_relative_error(
                 error,
                 exp_abserr,
                 rel_error_bound,
-                "qk15(f1) smooth abserr",
+                "adaptive(f3,31) smooth abserr",
             )?;
             util::test_int(
                 iterations,
                 exp_iterations,
-                "adaptive qk15(f1) smooth iterations",
+                "adaptive(f3,31) smooth iterations",
             )?;
         } else {
             return Err(String::from("wrong error kind"));
@@ -223,18 +243,18 @@ fn test_adaptive_oscillating_should_error_roundoff_31() -> Result<(), String> {
                 result,
                 -exp_result,
                 abs_error_bound,
-                "qk15(f1) smooth result",
+                "adaptive(f3,31) smooth result reverse",
             )?;
             util::test_relative_error(
                 error,
                 exp_abserr,
                 rel_error_bound,
-                "qk15(f1) smooth abserr",
+                "adaptive(f3,31) smooth abserr reverse",
             )?;
             util::test_int(
                 iterations,
                 exp_iterations,
-                "adaptive qk15(f1) smooth iterations",
+                "adaptive(f3,31) smooth iterations reverse",
             )?;
         } else {
             return Err(String::from("wrong error kind"));
@@ -277,7 +297,7 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
             util::test_int(
                 iterations,
                 exp_iterations,
-                "adaptive qk15(f1) smooth iterations",
+                "adaptive(f16,51) smooth iterations",
             )?;
         } else {
             return Err(String::from("wrong error kind"));
@@ -307,7 +327,7 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
             util::test_int(
                 iterations,
                 exp_iterations,
-                "adaptive qk15(f1) smooth iterations",
+                "adaptive(f16,51) smooth iterations reverse",
             )?;
         } else {
             return Err(String::from("wrong error kind"));
@@ -354,18 +374,18 @@ fn test_adaptive_max_iterations_61() -> Result<(), String> {
                 result,
                 exp_result,
                 abs_error_bound,
-                "adaptive(f16, 61) smooth result",
+                "adaptive(f16,61) smooth result",
             )?;
             util::test_relative_error(
                 error,
                 exp_abserr,
                 rel_error_bound,
-                "adaptive(f16, 61) smooth abserr",
+                "adaptive(f16,61) smooth abserr",
             )?;
             util::test_int(
                 iterations,
                 exp_iterations,
-                "adaptive(f16, 61) smooth iterations",
+                "adaptive(f16,61) smooth iterations",
             )?;
         } else {
             return Err(String::from("wrong error kind"));
@@ -395,18 +415,18 @@ fn test_adaptive_max_iterations_61() -> Result<(), String> {
                 result,
                 -exp_result,
                 abs_error_bound,
-                "adaptive(f16, 61) smooth result negative",
+                "adaptive(f16,61) smooth result negative reverse",
             )?;
             util::test_relative_error(
                 error,
                 exp_abserr,
                 rel_error_bound,
-                "adaptive(f16, 61) smooth abserr negative",
+                "adaptive(f16,61) smooth abserr negative reverse",
             )?;
             util::test_int(
                 iterations,
                 exp_iterations,
-                "adaptive(f16, 61) smooth iterations negative",
+                "adaptive(f16,61) smooth iterations negative reverse",
             )?;
         } else {
             return Err(String::from("wrong error kind"));

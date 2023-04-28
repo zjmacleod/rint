@@ -37,25 +37,25 @@ fn gauss_kronrod_15() -> Result<(), String> {
         result,
         exp_result,
         abs_error_bound,
-        "qk15(f1) smooth result",
+        "basic(f1,15) smooth result",
     )?;
     util::test_relative_error(
         abserr,
         exp_abserr,
         rel_error_bound,
-        "qk15(f1) smooth abserr",
+        "basic(f1,15) smooth abserr",
     )?;
     util::test_relative_error(
         resabs,
         exp_resabs,
         abs_error_bound,
-        "qk15(f1) smooth resabs",
+        "basic(f1,15) smooth resabs",
     )?;
     util::test_relative_error(
         resasc,
         exp_resasc,
         abs_error_bound,
-        "qk15(f1) smooth resasc",
+        "basic(f1,15) smooth resasc",
     )?;
 
     let lower = 1.0;
@@ -73,25 +73,25 @@ fn gauss_kronrod_15() -> Result<(), String> {
         result,
         -exp_result,
         abs_error_bound,
-        "qk15(f1) reverse result",
+        "basic(f1,15) reverse result",
     )?;
     util::test_relative_error(
         abserr,
         exp_abserr,
         rel_error_bound,
-        "qk15(f1) reverse abserr",
+        "basic(f1,15) reverse abserr",
     )?;
     util::test_relative_error(
         resabs,
         exp_resabs,
         abs_error_bound,
-        "qk15(f1) reverse resabs",
+        "basic(f1,15) reverse resabs",
     )?;
     util::test_relative_error(
         resasc,
         exp_resasc,
         abs_error_bound,
-        "qk15(f1) reverse resasc",
+        "basic(f1,15) reverse resasc",
     )?;
 
     Ok(())
@@ -126,25 +126,25 @@ fn gauss_kronrod_21() -> Result<(), String> {
         result,
         exp_result,
         abs_error_bound,
-        "qk21(f1) smooth result",
+        "basic(f1,21) smooth result",
     )?;
     util::test_relative_error(
         abserr,
         exp_abserr,
         rel_error_bound,
-        "qk21(f1) smooth abserr",
+        "basic(f1,21) smooth abserr",
     )?;
     util::test_relative_error(
         resabs,
         exp_resabs,
         abs_error_bound,
-        "qk21(f1) smooth resabs",
+        "basic(f1,21) smooth resabs",
     )?;
     util::test_relative_error(
         resasc,
         exp_resasc,
         abs_error_bound,
-        "qk21(f1) smooth resasc",
+        "basic(f1,21) smooth resasc",
     )?;
 
     let lower = 1.0;
@@ -162,25 +162,25 @@ fn gauss_kronrod_21() -> Result<(), String> {
         result,
         -exp_result,
         abs_error_bound,
-        "qk21(f1) reverse result",
+        "basic(f1,21) reverse result",
     )?;
     util::test_relative_error(
         abserr,
         exp_abserr,
         rel_error_bound,
-        "qk21(f1) reverse abserr",
+        "basic(f1,21) reverse abserr",
     )?;
     util::test_relative_error(
         resabs,
         exp_resabs,
         abs_error_bound,
-        "qk21(f1) reverse resabs",
+        "basic(f1,21) reverse resabs",
     )?;
     util::test_relative_error(
         resasc,
         exp_resasc,
         abs_error_bound,
-        "qk21(f1) reverse resasc",
+        "basic(f1,21) reverse resasc",
     )?;
 
     Ok(())
@@ -215,25 +215,25 @@ fn gauss_kronrod_31() -> Result<(), String> {
         result,
         exp_result,
         abs_error_bound,
-        "qk31(f1) smooth result",
+        "basic(f1,31) smooth result",
     )?;
     util::test_relative_error(
         abserr,
         exp_abserr,
         rel_error_bound,
-        "qk31(f1) smooth abserr",
+        "basic(f1,31) smooth abserr",
     )?;
     util::test_relative_error(
         resabs,
         exp_resabs,
         abs_error_bound,
-        "qk31(f1) smooth resabs",
+        "basic(f1,31) smooth resabs",
     )?;
     util::test_relative_error(
         resasc,
         exp_resasc,
         abs_error_bound,
-        "qk31(f1) smooth resasc",
+        "basic(f1,31) smooth resasc",
     )?;
 
     let lower = 1.0;
@@ -251,25 +251,25 @@ fn gauss_kronrod_31() -> Result<(), String> {
         result,
         -exp_result,
         abs_error_bound,
-        "qk31(f1) reverse result",
+        "basic(f1,31) reverse result",
     )?;
     util::test_relative_error(
         abserr,
         exp_abserr,
         rel_error_bound,
-        "qk31(f1) reverse abserr",
+        "basic(f1,31) reverse abserr",
     )?;
     util::test_relative_error(
         resabs,
         exp_resabs,
         abs_error_bound,
-        "qk31(f1) reverse resabs",
+        "basic(f1,31) reverse resabs",
     )?;
     util::test_relative_error(
         resasc,
         exp_resasc,
         abs_error_bound,
-        "qk31(f1) reverse resasc",
+        "basic(f1,31) reverse resasc",
     )?;
 
     Ok(())
@@ -304,25 +304,25 @@ fn gauss_kronrod_41() -> Result<(), String> {
         result,
         exp_result,
         abs_error_bound,
-        "qk41(f1) smooth result",
+        "basic(f1,41) smooth result",
     )?;
     util::test_relative_error(
         abserr,
         exp_abserr,
         rel_error_bound,
-        "qk41(f1) smooth abserr",
+        "basic(f1,41) smooth abserr",
     )?;
     util::test_relative_error(
         resabs,
         exp_resabs,
         abs_error_bound,
-        "qk41(f1) smooth resabs",
+        "basic(f1,41) smooth resabs",
     )?;
     util::test_relative_error(
         resasc,
         exp_resasc,
         abs_error_bound,
-        "qk41(f1) smooth resasc",
+        "basic(f1,41) smooth resasc",
     )?;
 
     let lower = 1.0;
@@ -340,25 +340,25 @@ fn gauss_kronrod_41() -> Result<(), String> {
         result,
         -exp_result,
         abs_error_bound,
-        "qk41(f1) reverse result",
+        "basic(f1,41) reverse result",
     )?;
     util::test_relative_error(
         abserr,
         exp_abserr,
         rel_error_bound,
-        "qk41(f1) reverse abserr",
+        "basic(f1,41) reverse abserr",
     )?;
     util::test_relative_error(
         resabs,
         exp_resabs,
         abs_error_bound,
-        "qk41(f1) reverse resabs",
+        "basic(f1,41) reverse resabs",
     )?;
     util::test_relative_error(
         resasc,
         exp_resasc,
         abs_error_bound,
-        "qk41(f1) reverse resasc",
+        "basic(f1,41) reverse resasc",
     )?;
 
     Ok(())
@@ -393,25 +393,25 @@ fn gauss_kronrod_51() -> Result<(), String> {
         result,
         exp_result,
         abs_error_bound,
-        "qk51(f1) smooth result",
+        "basic(f1,51) smooth result",
     )?;
     util::test_relative_error(
         abserr,
         exp_abserr,
         rel_error_bound,
-        "qk51(f1) smooth abserr",
+        "basic(f1,51) smooth abserr",
     )?;
     util::test_relative_error(
         resabs,
         exp_resabs,
         abs_error_bound,
-        "qk51(f1) smooth resabs",
+        "basic(f1,51) smooth resabs",
     )?;
     util::test_relative_error(
         resasc,
         exp_resasc,
         abs_error_bound,
-        "qk51(f1) smooth resasc",
+        "basic(f1,51) smooth resasc",
     )?;
 
     let lower = 1.0;
@@ -429,25 +429,25 @@ fn gauss_kronrod_51() -> Result<(), String> {
         result,
         -exp_result,
         abs_error_bound,
-        "qk51(f1) reverse result",
+        "basic(f1,51) reverse result",
     )?;
     util::test_relative_error(
         abserr,
         exp_abserr,
         rel_error_bound,
-        "qk51(f1) reverse abserr",
+        "basic(f1,51) reverse abserr",
     )?;
     util::test_relative_error(
         resabs,
         exp_resabs,
         abs_error_bound,
-        "qk51(f1) reverse resabs",
+        "basic(f1,51) reverse resabs",
     )?;
     util::test_relative_error(
         resasc,
         exp_resasc,
         abs_error_bound,
-        "qk51(f1) reverse resasc",
+        "basic(f1,51) reverse resasc",
     )?;
 
     Ok(())
@@ -482,25 +482,25 @@ fn gauss_kronrod_61() -> Result<(), String> {
         result,
         exp_result,
         abs_error_bound,
-        "qk61(f1) smooth result",
+        "basic(f1,61) smooth result",
     )?;
     util::test_relative_error(
         abserr,
         exp_abserr,
         rel_error_bound,
-        "qk61(f1) smooth abserr",
+        "basic(f1,61) smooth abserr",
     )?;
     util::test_relative_error(
         resabs,
         exp_resabs,
         abs_error_bound,
-        "qk61(f1) smooth resabs",
+        "basic(f1,61) smooth resabs",
     )?;
     util::test_relative_error(
         resasc,
         exp_resasc,
         abs_error_bound,
-        "qk61(f1) smooth resasc",
+        "basic(f1,61) smooth resasc",
     )?;
 
     let lower = 1.0;
@@ -518,25 +518,25 @@ fn gauss_kronrod_61() -> Result<(), String> {
         result,
         -exp_result,
         abs_error_bound,
-        "qk61(f1) reverse result",
+        "basic(f1,61) reverse result",
     )?;
     util::test_relative_error(
         abserr,
         exp_abserr,
         rel_error_bound,
-        "qk61(f1) reverse abserr",
+        "basic(f1,61) reverse abserr",
     )?;
     util::test_relative_error(
         resabs,
         exp_resabs,
         abs_error_bound,
-        "qk61(f1) reverse resabs",
+        "basic(f1,61) reverse resabs",
     )?;
     util::test_relative_error(
         resasc,
         exp_resasc,
         abs_error_bound,
-        "qk61(f1) reverse resasc",
+        "basic(f1,61) reverse resasc",
     )?;
 
     Ok(())
