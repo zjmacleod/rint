@@ -329,9 +329,9 @@ impl BasicInternal {
     // equal. However, it maybe makes more sense to have the integral with the smallest interval be
     // sorted larger than the one with the longer interval.
     pub(crate) fn total_cmp_interval_length(&self, other: &Self) -> Ordering {
-        let length = (self.upper - self.lower).abs();
-        let other_length = (other.upper - other.lower).abs();
-        length.total_cmp(&other_length)
+        let inverse_length = 1.0 / (self.upper - self.lower).abs();
+        let other_inverse_length = 1.0 / (other.upper - other.lower).abs();
+        inverse_length.total_cmp(&other_inverse_length)
     }
 }
 
@@ -344,7 +344,7 @@ mod tests {
         use std::collections::BinaryHeap;
 
         let a = BasicInternal {
-            error: 1.533,
+            error: 2.0,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
@@ -352,7 +352,7 @@ mod tests {
             upper: 1.0,
         };
         let b = BasicInternal {
-            error: 2.0,
+            error: 1.533,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
@@ -388,7 +388,7 @@ mod tests {
                 result: 1.0,
                 result_abs: 1.0,
                 result_asc: 1.0,
-                lower: 0.5,
+                lower: 0.0,
                 upper: 1.0,
             },
             BasicInternal {
@@ -396,7 +396,7 @@ mod tests {
                 result: 1.0,
                 result_abs: 1.0,
                 result_asc: 1.0,
-                lower: 0.0,
+                lower: 0.5,
                 upper: 1.0,
             },
             BasicInternal {
