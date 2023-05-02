@@ -268,7 +268,7 @@ pub struct Error {
 }
 
 impl Error {
-    fn new(kind: Kind, integral: Adaptive) -> Self {
+    pub(crate) fn new(kind: Kind, integral: Adaptive) -> Self {
         Self { kind, integral }
     }
 
@@ -340,7 +340,7 @@ impl std::fmt::Display for Error {
 
 impl std::error::Error for Error {}
 
-fn subinterval_too_small(lower: f64, midpoint: f64, upper: f64) -> bool {
+pub(crate) fn subinterval_too_small(lower: f64, midpoint: f64, upper: f64) -> bool {
     let eps = f64::EPSILON;
     let min = f64::MIN_POSITIVE;
 
