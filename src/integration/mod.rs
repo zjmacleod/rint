@@ -7,8 +7,6 @@ pub use basic::Basic;
 pub use basic::GaussKronrodBasic;
 
 /// User selected error bound type.
-///
-///
 pub enum ErrorBound {
     Absolute(f64),
     Relative(f64),

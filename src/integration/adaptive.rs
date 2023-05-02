@@ -55,10 +55,6 @@ impl Adaptive {
 /// [`ErrorBound::Relative`] to work to a specified relative error,
 /// or [`ErrorBound::Either`] to return a result as soon as _either_ the relative
 /// or absolute error bound has been satisfied.
-///
-/// This routine successively applies the Gauss-Kronrod 10-point, 21-point, 43-point and 87-point
-/// rules to a numerical integral of the `function` between `(lower, upper)` until an estimate has
-/// been achieved within the desired error bound.
 pub struct GaussKronrodAdaptive<'a, I, R>
 where
     I: Integrand,
@@ -129,7 +125,7 @@ where
         })
     }
 
-    /// Integrate the function and return a [`GaussKronrod`] integration result.
+    /// Integrate the function and return a [`Adaptive`] integration result.
     ///
     /// # Errors
     /// Integration can fail if user suplied tolerance cannot be achieved within the maximum number
