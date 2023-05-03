@@ -139,109 +139,84 @@ where
     /// Integration can fail if user suplied tolerance cannot be achieved within the maximum number
     /// of iterations.
     pub fn integrate(&self) -> Result<Adaptive, Error> {
-        let integral = GaussKronrodBasic::new(self.lower, self.upper, self.rule, self.function)
+        let initial = GaussKronrodBasic::new(self.lower, self.upper, self.rule, self.function)
             .integrate_internal();
 
-        let mut iteration: usize = 1;
-        let max_iterations = self.max_iterations;
-
-        let tolerance = self.error_bound.tolerance(&integral.result());
-        let roundoff = integral.roundoff();
-
-        if integral.error() <= roundoff && integral.error() > tolerance {
-            let partial_result = Adaptive::from_basic(&integral, iteration);
-            let kind = Kind::FailedToReachToleranceRoundoff;
-            return Err(Error::new(kind, partial_result));
-        } else if (integral.error() <= tolerance
-            && integral.error().to_bits() != integral.result_asc().to_bits())
-            || integral.error() == 0.0
-        {
-            let output = Adaptive::from_basic(&integral, iteration);
+        if let Some(output) = self.check_initial_integration(&initial)? {
             return Ok(output);
-        } else if max_iterations == 1 {
-            let partial_result = Adaptive::from_basic(&integral, iteration);
-            let kind = Kind::MaximumIterationsReached;
-            return Err(Error::new(kind, partial_result));
         }
 
-        let mut area = integral.result();
-        let mut error = integral.error();
+        let mut area = initial.result();
+        let mut error = initial.error();
 
-        let mut results = Workspace::new(max_iterations, integral);
+        let mut workspace = Workspace::new(self.max_iterations, initial);
 
-        while results.iteration < max_iterations {
-            let Some(previous) = results.pop() else {
-                let output = Adaptive::empty();
-                let kind = Kind::UninitialisedWorkspace;
-                return Err(Error::new(kind, output));
-            };
+        while workspace.iteration < self.max_iterations {
+            let [previous, lower, upper] =
+                workspace.bisect_largest_error(self.function, self.rule)?;
 
-            results.iteration += 1;
+            let prev_area = previous.result();
+            let prev_error = previous.error();
 
-            let lower = previous.lower();
-            let upper = previous.upper();
-            let mid = (upper + lower) * 0.5;
+            let new_area = lower.result() + upper.result();
+            let new_error = lower.error() + upper.error();
 
-            let lower_integral =
-                GaussKronrodBasic::new(lower, mid, self.rule, self.function).integrate_internal();
+            area += new_area - prev_area;
+            error += new_error - prev_error;
 
-            let upper_integral =
-                GaussKronrodBasic::new(mid, upper, self.rule, self.function).integrate_internal();
-
-            let iteration_area = lower_integral.result() + upper_integral.result();
-            let iteration_error = lower_integral.error() + upper_integral.error();
-
-            area += iteration_area - previous.result();
-            error += iteration_error - previous.error();
-
-            if lower_integral.result_asc().to_bits() != lower_integral.error().to_bits()
-                && upper_integral.result_asc().to_bits() != upper_integral.error().to_bits()
+            if lower.result_asc().to_bits() != lower.error().to_bits()
+                && upper.result_asc().to_bits() != upper.error().to_bits()
             {
-                let delta = previous.result() - iteration_area;
+                let delta = (prev_area - new_area).abs();
 
-                if delta.abs() <= 1.0e-5 * iteration_area.abs()
-                    && iteration_error >= 0.99 * previous.error()
-                {
-                    results.roundoff_type1 += 1;
+                if delta <= 1e-5 * new_area.abs() && new_error >= 0.99 * prev_error {
+                    workspace.roundoff_type1 += 1;
                 }
-                if results.iteration >= 10 && iteration_error >= previous.error() {
-                    results.roundoff_type2 += 1;
+                if workspace.iteration >= 10 && new_error >= prev_error {
+                    workspace.roundoff_type2 += 1;
                 }
             }
 
             let iteration_tolerance = self.error_bound.tolerance(&area);
 
             if error > iteration_tolerance {
-                if results.roundoff_type1 >= 6 || results.roundoff_type2 >= 20 {
-                    let final_iteration = results.iteration;
-                    let result = results.into_iter().fold(0.0f64, |a, v| a + v.result());
+                if workspace.roundoff_type1 >= 6 || workspace.roundoff_type2 >= 20 {
+                    let final_iteration = workspace.iteration;
+                    let result = workspace.sum_results();
                     let partial_result = Adaptive::new(result, error, final_iteration);
                     let kind = Kind::FailedToReachToleranceRoundoff;
                     return Err(Error::new(kind, partial_result));
                 }
 
-                if subinterval_too_small(lower, mid, upper) {
-                    let final_iteration = results.iteration;
-                    let result = results.into_iter().fold(0.0f64, |a, v| a + v.result());
+                let lower_limit = previous.lower();
+                let upper_limit = previous.upper();
+                let midpoint = (upper_limit + lower_limit) * 0.5;
+
+                if subinterval_too_small(lower_limit, midpoint, upper_limit) {
+                    let final_iteration = workspace.iteration;
+                    let result = workspace.sum_results();
                     let partial_result = Adaptive::new(result, error, final_iteration);
-                    let kind = Kind::PossibleSingularity { lower, upper };
+                    let kind = Kind::PossibleSingularity {
+                        lower: lower_limit,
+                        upper: upper_limit,
+                    };
                     return Err(Error::new(kind, partial_result));
                 }
             }
 
-            results.push(lower_integral);
-            results.push(upper_integral);
+            workspace.push(lower);
+            workspace.push(upper);
 
             if error < iteration_tolerance {
                 break;
             }
         }
 
-        let final_iteration = results.iteration;
-        let result = results.into_iter().fold(0.0f64, |a, v| a + v.result());
+        let final_iteration = workspace.iteration;
+        let result = workspace.sum_results();
         let output = Adaptive::new(result, error, final_iteration);
 
-        if final_iteration == max_iterations {
+        if final_iteration == self.max_iterations {
             let kind = Kind::MaximumIterationsReached;
             Err(Error::new(kind, output))
         } else {
@@ -257,6 +232,35 @@ where
     /// Return the value of the `lower` integration limit.
     pub fn lower(&self) -> f64 {
         self.lower
+    }
+
+    fn check_initial_integration(
+        &self,
+        initial: &BasicInternal,
+    ) -> Result<Option<Adaptive>, Error> {
+        let tolerance = self.error_bound.tolerance(&initial.result());
+        let roundoff = initial.roundoff();
+
+        if initial.error() <= roundoff && initial.error() > tolerance {
+            let partial_result = Adaptive::from_basic(initial, 1);
+            let kind = Kind::FailedToReachToleranceRoundoff;
+
+            Err(Error::new(kind, partial_result))
+        } else if (initial.error() <= tolerance
+            && initial.error().to_bits() != initial.result_asc().to_bits())
+            || initial.error() == 0.0
+        {
+            let output = Adaptive::from_basic(initial, 1);
+
+            Ok(Some(output))
+        } else if self.max_iterations == 1 {
+            let partial_result = Adaptive::from_basic(initial, 1);
+            let kind = Kind::MaximumIterationsReached;
+
+            Err(Error::new(kind, partial_result))
+        } else {
+            Ok(None)
+        }
     }
 }
 
@@ -277,6 +281,36 @@ impl Workspace {
             roundoff_type1: 0,
             roundoff_type2: 0,
         }
+    }
+
+    fn bisect_largest_error<F: Integrand, R: Rule>(
+        &mut self,
+        function: &F,
+        rule: R,
+    ) -> Result<[BasicInternal; 3], Error> {
+        let Some(previous) = self.pop() else {
+                let output = Adaptive::empty();
+                let kind = Kind::UninitialisedWorkspace;
+                return Err(Error::new(kind, output));
+            };
+
+        self.iteration += 1;
+
+        let lower = previous.lower();
+        let upper = previous.upper();
+        let mid = (upper + lower) * 0.5;
+
+        let lower_integral =
+            GaussKronrodBasic::new(lower, mid, rule, function).integrate_internal();
+
+        let upper_integral =
+            GaussKronrodBasic::new(mid, upper, rule, function).integrate_internal();
+
+        Ok([previous, lower_integral, upper_integral])
+    }
+
+    fn sum_results(self) -> f64 {
+        self.into_iter().fold(0.0f64, |a, v| a + v.result())
     }
 }
 
