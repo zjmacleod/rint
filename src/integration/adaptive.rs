@@ -1,4 +1,4 @@
-use std::collections::BinaryHeap;
+use std::collections::binary_heap::{BinaryHeap, IntoIter};
 
 use crate::integration::basic::BasicInternal;
 use crate::integration::{ErrorBound, GaussKronrodBasic};
@@ -134,23 +134,24 @@ where
         let integral = GaussKronrodBasic::new(self.lower, self.upper, self.rule, self.function)
             .integrate_internal();
 
-        let mut iterations: usize = 1;
+        let mut iteration: usize = 1;
+        let max_iterations = self.max_iterations;
 
         let tolerance = self.error_bound.tolerance(&integral.result());
         let roundoff = integral.roundoff();
 
         if integral.error() <= roundoff && integral.error() > tolerance {
-            let partial_result = Adaptive::from_basic(&integral, iterations);
+            let partial_result = Adaptive::from_basic(&integral, iteration);
             let kind = Kind::FailedToReachToleranceRoundoff;
             return Err(Error::new(kind, partial_result));
         } else if (integral.error() <= tolerance
             && integral.error().to_bits() != integral.result_asc().to_bits())
             || integral.error() == 0.0
         {
-            let output = Adaptive::from_basic(&integral, iterations);
+            let output = Adaptive::from_basic(&integral, iteration);
             return Ok(output);
-        } else if self.max_iterations == 1 {
-            let partial_result = Adaptive::from_basic(&integral, iterations);
+        } else if max_iterations == 1 {
+            let partial_result = Adaptive::from_basic(&integral, iteration);
             let kind = Kind::MaximumIterationsReached;
             return Err(Error::new(kind, partial_result));
         }
@@ -158,19 +159,19 @@ where
         let mut area = integral.result();
         let mut error = integral.error();
 
-        let mut results = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
+        let mut results = Workspace::new(iteration, max_iterations);
         results.push(integral);
 
         let mut roundoff_type1 = 0usize;
         let mut roundoff_type2 = 0usize;
 
-        while iterations < self.max_iterations {
+        while iteration < max_iterations {
             let Some(previous) = results.pop() else {
                 // XXX this should be an error? we should _always_ have something to pop
                 break;
             };
 
-            iterations += 1;
+            iteration += 1;
 
             let lower = previous.lower();
             let upper = previous.upper();
@@ -198,7 +199,7 @@ where
                 {
                     roundoff_type1 += 1;
                 }
-                if iterations >= 10 && iteration_error >= previous.error() {
+                if iteration >= 10 && iteration_error >= previous.error() {
                     roundoff_type2 += 1;
                 }
             }
@@ -208,14 +209,14 @@ where
             if error > iteration_tolerance {
                 if roundoff_type1 >= 6 || roundoff_type2 >= 20 {
                     let result = results.into_iter().fold(0.0f64, |a, v| a + v.result());
-                    let partial_result = Adaptive::new(result, error, iterations);
+                    let partial_result = Adaptive::new(result, error, iteration);
                     let kind = Kind::FailedToReachToleranceRoundoff;
                     return Err(Error::new(kind, partial_result));
                 }
 
                 if subinterval_too_small(lower, mid, upper) {
                     let result = results.into_iter().fold(0.0f64, |a, v| a + v.result());
-                    let partial_result = Adaptive::new(result, error, iterations);
+                    let partial_result = Adaptive::new(result, error, iteration);
                     let kind = Kind::PossibleSingularity { lower, upper };
                     return Err(Error::new(kind, partial_result));
                 }
@@ -230,9 +231,9 @@ where
         }
 
         let result = results.into_iter().fold(0.0f64, |a, v| a + v.result());
-        let output = Adaptive::new(result, error, iterations);
+        let output = Adaptive::new(result, error, iteration);
 
-        if iterations == self.max_iterations {
+        if iteration == max_iterations {
             let kind = Kind::MaximumIterationsReached;
             Err(Error::new(kind, output))
         } else {
@@ -248,6 +249,43 @@ where
     /// Return the value of the `lower` integration limit.
     pub fn lower(&self) -> f64 {
         self.lower
+    }
+}
+
+struct Workspace {
+    heap: BinaryHeap<BasicInternal>,
+    iteration: usize,
+}
+
+impl Workspace {
+    fn new(current_iteration: usize, max_iterations: usize) -> Self {
+        let heap = BinaryHeap::with_capacity(2 * max_iterations + 1);
+        Self {
+            heap,
+            iteration: current_iteration,
+        }
+    }
+}
+
+impl std::ops::Deref for Workspace {
+    type Target = BinaryHeap<BasicInternal>;
+    fn deref(&self) -> &Self::Target {
+        &self.heap
+    }
+}
+
+impl std::ops::DerefMut for Workspace {
+    fn deref_mut(&mut self) -> &mut BinaryHeap<BasicInternal> {
+        &mut self.heap
+    }
+}
+
+impl IntoIterator for Workspace {
+    type Item = BasicInternal;
+    type IntoIter = IntoIter<BasicInternal>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.heap.into_iter()
     }
 }
 
