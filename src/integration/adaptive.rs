@@ -45,6 +45,14 @@ impl Adaptive {
         let error = basic.error();
         Self::new(result, error, iterations)
     }
+
+    pub(crate) fn empty() -> Self {
+        Self {
+            result: f64::NAN,
+            error: f64::NAN,
+            iterations: 0,
+        }
+    }
 }
 
 /// An integral to be evaluated with an adaptive Gauss-Kronrod quadrature.
@@ -163,8 +171,9 @@ where
 
         while results.iteration < max_iterations {
             let Some(previous) = results.pop() else {
-                // XXX this should be an error? we should _always_ have something to pop
-                break;
+                let output = Adaptive::empty();
+                let kind = Kind::UninitialisedWorkspace;
+                return Err(Error::new(kind, output));
             };
 
             results.iteration += 1;
@@ -301,6 +310,7 @@ pub enum Kind {
     FailedToReachToleranceRoundoff,
     MaximumIterationsReached,
     PossibleSingularity { lower: f64, upper: f64 },
+    UninitialisedWorkspace,
 }
 
 #[derive(Debug)]
@@ -375,6 +385,9 @@ impl std::fmt::Display for Error {
                 let result = self.result();
                 let error = self.error();
                 write!(f, "Possible singularity detected between ({lower},{upper}). Result: {result}, error: {error}.")
+            }
+            Kind::UninitialisedWorkspace => {
+                write!(f, "The integration Workspace was not properly initialised.")
             }
         }
     }
