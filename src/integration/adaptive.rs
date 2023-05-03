@@ -159,19 +159,15 @@ where
         let mut area = integral.result();
         let mut error = integral.error();
 
-        let mut results = Workspace::new(iteration, max_iterations);
-        results.push(integral);
+        let mut results = Workspace::new(max_iterations, integral);
 
-        let mut roundoff_type1 = 0usize;
-        let mut roundoff_type2 = 0usize;
-
-        while iteration < max_iterations {
+        while results.iteration < max_iterations {
             let Some(previous) = results.pop() else {
                 // XXX this should be an error? we should _always_ have something to pop
                 break;
             };
 
-            iteration += 1;
+            results.iteration += 1;
 
             let lower = previous.lower();
             let upper = previous.upper();
@@ -197,26 +193,28 @@ where
                 if delta.abs() <= 1.0e-5 * iteration_area.abs()
                     && iteration_error >= 0.99 * previous.error()
                 {
-                    roundoff_type1 += 1;
+                    results.roundoff_type1 += 1;
                 }
-                if iteration >= 10 && iteration_error >= previous.error() {
-                    roundoff_type2 += 1;
+                if results.iteration >= 10 && iteration_error >= previous.error() {
+                    results.roundoff_type2 += 1;
                 }
             }
 
             let iteration_tolerance = self.error_bound.tolerance(&area);
 
             if error > iteration_tolerance {
-                if roundoff_type1 >= 6 || roundoff_type2 >= 20 {
+                if results.roundoff_type1 >= 6 || results.roundoff_type2 >= 20 {
+                    let final_iteration = results.iteration;
                     let result = results.into_iter().fold(0.0f64, |a, v| a + v.result());
-                    let partial_result = Adaptive::new(result, error, iteration);
+                    let partial_result = Adaptive::new(result, error, final_iteration);
                     let kind = Kind::FailedToReachToleranceRoundoff;
                     return Err(Error::new(kind, partial_result));
                 }
 
                 if subinterval_too_small(lower, mid, upper) {
+                    let final_iteration = results.iteration;
                     let result = results.into_iter().fold(0.0f64, |a, v| a + v.result());
-                    let partial_result = Adaptive::new(result, error, iteration);
+                    let partial_result = Adaptive::new(result, error, final_iteration);
                     let kind = Kind::PossibleSingularity { lower, upper };
                     return Err(Error::new(kind, partial_result));
                 }
@@ -230,10 +228,11 @@ where
             }
         }
 
+        let final_iteration = results.iteration;
         let result = results.into_iter().fold(0.0f64, |a, v| a + v.result());
-        let output = Adaptive::new(result, error, iteration);
+        let output = Adaptive::new(result, error, final_iteration);
 
-        if iteration == max_iterations {
+        if final_iteration == max_iterations {
             let kind = Kind::MaximumIterationsReached;
             Err(Error::new(kind, output))
         } else {
@@ -255,14 +254,19 @@ where
 struct Workspace {
     heap: BinaryHeap<BasicInternal>,
     iteration: usize,
+    roundoff_type1: usize,
+    roundoff_type2: usize,
 }
 
 impl Workspace {
-    fn new(current_iteration: usize, max_iterations: usize) -> Self {
-        let heap = BinaryHeap::with_capacity(2 * max_iterations + 1);
+    fn new(max_iterations: usize, initial: BasicInternal) -> Self {
+        let mut heap = BinaryHeap::with_capacity(2 * max_iterations + 1);
+        heap.push(initial);
         Self {
             heap,
-            iteration: current_iteration,
+            iteration: 1,
+            roundoff_type1: 0,
+            roundoff_type2: 0,
         }
     }
 }
