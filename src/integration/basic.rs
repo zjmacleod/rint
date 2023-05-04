@@ -336,13 +336,28 @@ impl BasicInternal {
         self.error.total_cmp(&other.error)
     }
 
-    // TODO this sorts the largest interval to be larger, and is only used if the errors are
-    // equal. However, it maybe makes more sense to have the integral with the smallest interval be
-    // sorted larger than the one with the longer interval.
     pub(crate) fn total_cmp_interval_length(&self, other: &Self) -> Ordering {
         let inverse_length = 1.0 / (self.upper - self.lower).abs();
         let other_inverse_length = 1.0 / (other.upper - other.lower).abs();
         inverse_length.total_cmp(&other_inverse_length)
+    }
+
+    pub(crate) fn bisect<F: Integrand, R: Rule>(
+        &self,
+        function: &F,
+        rule: R,
+    ) -> [BasicInternal; 2] {
+        let lower = self.lower();
+        let upper = self.upper();
+        let mid = (upper + lower) * 0.5;
+
+        let lower_integral =
+            GaussKronrodBasic::new(lower, mid, rule, function).integrate_internal();
+
+        let upper_integral =
+            GaussKronrodBasic::new(mid, upper, rule, function).integrate_internal();
+
+        [lower_integral, upper_integral]
     }
 }
 

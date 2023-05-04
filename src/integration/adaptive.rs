@@ -151,30 +151,10 @@ where
         while workspace.iteration < self.max_iterations {
             let previous = workspace.retrieve_largest_error()?;
 
-            let prev_result = previous.result();
-            let prev_error = previous.error();
+            let [lower, upper] = previous.bisect(self.function, self.rule);
+            workspace.update_limits(lower.lower(), upper.upper());
 
-            let [lower, upper] =
-                workspace.bisect_largest_error(&previous, self.function, self.rule);
-
-            let new_result = lower.result() + upper.result();
-            let new_error = lower.error() + upper.error();
-
-            if lower.result_asc().to_bits() != lower.error().to_bits()
-                && upper.result_asc().to_bits() != upper.error().to_bits()
-            {
-                let delta = (prev_result - new_result).abs();
-
-                if delta <= 1e-5 * new_result.abs() && new_error >= 0.99 * prev_error {
-                    workspace.roundoff_type1 += 1;
-                }
-                if workspace.iteration >= 10 && new_error >= prev_error {
-                    workspace.roundoff_type2 += 1;
-                }
-            }
-
-            let result = workspace.update_result(new_result - prev_result);
-            let error = workspace.update_error(new_error - prev_error);
+            let (result, error) = workspace.iteration_result_error(&previous, &lower, &upper);
 
             let iteration_tolerance = self.error_bound.tolerance(&result);
 
@@ -186,7 +166,7 @@ where
             workspace.push(lower);
             workspace.push(upper);
 
-            if error < iteration_tolerance {
+            if error <= iteration_tolerance {
                 break;
             }
         }
@@ -251,18 +231,19 @@ struct Workspace {
     error: f64,
     lower_limit: f64,
     upper_limit: f64,
-    midpoint: f64,
 }
 
 impl Workspace {
     fn new(max_iterations: usize, initial: BasicInternal) -> Self {
         let mut heap = BinaryHeap::with_capacity(2 * max_iterations + 1);
+
         let result = initial.result();
         let error = initial.error();
         let lower_limit = initial.lower();
         let upper_limit = initial.upper();
-        let midpoint = (lower_limit + upper_limit) * 0.5;
+
         heap.push(initial);
+
         Self {
             heap,
             iteration: 1,
@@ -272,11 +253,11 @@ impl Workspace {
             error,
             lower_limit,
             upper_limit,
-            midpoint,
         }
     }
 
     fn retrieve_largest_error(&mut self) -> Result<BasicInternal, Error> {
+        self.iteration += 1;
         if let Some(previous) = self.pop() {
             Ok(previous)
         } else {
@@ -286,32 +267,9 @@ impl Workspace {
         }
     }
 
-    fn bisect_largest_error<F: Integrand, R: Rule>(
-        &mut self,
-        previous: &BasicInternal,
-        function: &F,
-        rule: R,
-    ) -> [BasicInternal; 2] {
-        let lower = previous.lower();
-        let upper = previous.upper();
-        let mid = (upper + lower) * 0.5;
-
-        let lower_integral =
-            GaussKronrodBasic::new(lower, mid, rule, function).integrate_internal();
-
-        let upper_integral =
-            GaussKronrodBasic::new(mid, upper, rule, function).integrate_internal();
-
-        self.iteration += 1;
+    fn update_limits(&mut self, lower: f64, upper: f64) {
         self.lower_limit = lower;
         self.upper_limit = upper;
-        self.midpoint = mid;
-
-        [lower_integral, upper_integral]
-    }
-
-    fn sum_results(&self) -> f64 {
-        self.iter().fold(0.0f64, |a, v| a + v.result())
     }
 
     fn update_result(&mut self, diff: f64) -> f64 {
@@ -324,11 +282,34 @@ impl Workspace {
         self.error
     }
 
-    fn integral_estimate(&self) -> Adaptive {
-        let error = self.error;
-        let iterations = self.iteration;
-        let result = self.sum_results();
-        Adaptive::new(result, error, iterations)
+    fn iteration_result_error(
+        &mut self,
+        previous: &BasicInternal,
+        lower: &BasicInternal,
+        upper: &BasicInternal,
+    ) -> (f64, f64) {
+        let prev_result = previous.result();
+        let prev_error = previous.error();
+        let new_result = lower.result() + upper.result();
+        let new_error = lower.error() + upper.error();
+
+        if lower.result_asc().to_bits() != lower.error().to_bits()
+            && upper.result_asc().to_bits() != upper.error().to_bits()
+        {
+            let delta = (prev_result - new_result).abs();
+
+            if delta <= 1e-5 * new_result.abs() && new_error >= 0.99 * prev_error {
+                self.roundoff_type1 += 1;
+            }
+            if self.iteration >= 10 && new_error >= prev_error {
+                self.roundoff_type2 += 1;
+            }
+        }
+
+        let result = self.update_result(new_result - prev_result);
+        let error = self.update_error(new_error - prev_error);
+
+        (result, error)
     }
 
     fn check_roundoff(&self) -> Result<(), Error> {
@@ -344,7 +325,7 @@ impl Workspace {
     fn check_singularity(&self) -> Result<(), Error> {
         let lower_limit = self.lower_limit;
         let upper_limit = self.upper_limit;
-        let midpoint = self.midpoint;
+        let midpoint = (lower_limit + upper_limit) * 0.5;
         if subinterval_too_small(lower_limit, midpoint, upper_limit) {
             let output = self.integral_estimate();
             let kind = Kind::PossibleSingularity {
@@ -355,6 +336,17 @@ impl Workspace {
         } else {
             Ok(())
         }
+    }
+
+    fn sum_results(&self) -> f64 {
+        self.iter().fold(0.0f64, |a, v| a + v.result())
+    }
+
+    fn integral_estimate(&self) -> Adaptive {
+        let error = self.error;
+        let iterations = self.iteration;
+        let result = self.sum_results();
+        Adaptive::new(result, error, iterations)
     }
 }
 
