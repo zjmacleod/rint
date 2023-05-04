@@ -149,24 +149,23 @@ where
         let mut workspace = Workspace::new(self.max_iterations, initial);
 
         while workspace.iteration < self.max_iterations {
-            let [previous, lower, upper] =
-                workspace.bisect_largest_error(self.function, self.rule)?;
+            let previous = workspace.retrieve_largest_error()?;
 
-            let prev_area = previous.result();
+            let prev_result = previous.result();
             let prev_error = previous.error();
 
-            let new_area = lower.result() + upper.result();
-            let new_error = lower.error() + upper.error();
+            let [lower, upper] =
+                workspace.bisect_largest_error(&previous, self.function, self.rule);
 
-            let area = workspace.update_current_area(new_area - prev_area);
-            let error = workspace.update_error(new_error - prev_error);
+            let new_result = lower.result() + upper.result();
+            let new_error = lower.error() + upper.error();
 
             if lower.result_asc().to_bits() != lower.error().to_bits()
                 && upper.result_asc().to_bits() != upper.error().to_bits()
             {
-                let delta = (prev_area - new_area).abs();
+                let delta = (prev_result - new_result).abs();
 
-                if delta <= 1e-5 * new_area.abs() && new_error >= 0.99 * prev_error {
+                if delta <= 1e-5 * new_result.abs() && new_error >= 0.99 * prev_error {
                     workspace.roundoff_type1 += 1;
                 }
                 if workspace.iteration >= 10 && new_error >= prev_error {
@@ -174,27 +173,14 @@ where
                 }
             }
 
-            let iteration_tolerance = self.error_bound.tolerance(&area);
+            let result = workspace.update_result(new_result - prev_result);
+            let error = workspace.update_error(new_error - prev_error);
+
+            let iteration_tolerance = self.error_bound.tolerance(&result);
 
             if error > iteration_tolerance {
-                if workspace.roundoff_type1 >= 6 || workspace.roundoff_type2 >= 20 {
-                    let output = workspace.integral_estimate();
-                    let kind = Kind::FailedToReachToleranceRoundoff;
-                    return Err(Error::new(kind, output));
-                }
-
-                let lower_limit = previous.lower();
-                let upper_limit = previous.upper();
-                let midpoint = (upper_limit + lower_limit) * 0.5;
-
-                if subinterval_too_small(lower_limit, midpoint, upper_limit) {
-                    let output = workspace.integral_estimate();
-                    let kind = Kind::PossibleSingularity {
-                        lower: lower_limit,
-                        upper: upper_limit,
-                    };
-                    return Err(Error::new(kind, output));
-                }
+                workspace.check_roundoff()?;
+                workspace.check_singularity()?;
             }
 
             workspace.push(lower);
@@ -261,39 +247,51 @@ struct Workspace {
     iteration: usize,
     roundoff_type1: usize,
     roundoff_type2: usize,
-    current_area: f64,
+    result: f64,
     error: f64,
+    lower_limit: f64,
+    upper_limit: f64,
+    midpoint: f64,
 }
 
 impl Workspace {
     fn new(max_iterations: usize, initial: BasicInternal) -> Self {
         let mut heap = BinaryHeap::with_capacity(2 * max_iterations + 1);
-        let current_area = initial.result();
+        let result = initial.result();
         let error = initial.error();
+        let lower_limit = initial.lower();
+        let upper_limit = initial.upper();
+        let midpoint = (lower_limit + upper_limit) * 0.5;
         heap.push(initial);
         Self {
             heap,
             iteration: 1,
             roundoff_type1: 0,
             roundoff_type2: 0,
-            current_area,
+            result,
             error,
+            lower_limit,
+            upper_limit,
+            midpoint,
+        }
+    }
+
+    fn retrieve_largest_error(&mut self) -> Result<BasicInternal, Error> {
+        if let Some(previous) = self.pop() {
+            Ok(previous)
+        } else {
+            let output = Adaptive::empty();
+            let kind = Kind::UninitialisedWorkspace;
+            Err(Error::new(kind, output))
         }
     }
 
     fn bisect_largest_error<F: Integrand, R: Rule>(
         &mut self,
+        previous: &BasicInternal,
         function: &F,
         rule: R,
-    ) -> Result<[BasicInternal; 3], Error> {
-        let Some(previous) = self.pop() else {
-                let output = Adaptive::empty();
-                let kind = Kind::UninitialisedWorkspace;
-                return Err(Error::new(kind, output));
-            };
-
-        self.iteration += 1;
-
+    ) -> [BasicInternal; 2] {
         let lower = previous.lower();
         let upper = previous.upper();
         let mid = (upper + lower) * 0.5;
@@ -304,16 +302,21 @@ impl Workspace {
         let upper_integral =
             GaussKronrodBasic::new(mid, upper, rule, function).integrate_internal();
 
-        Ok([previous, lower_integral, upper_integral])
+        self.iteration += 1;
+        self.lower_limit = lower;
+        self.upper_limit = upper;
+        self.midpoint = mid;
+
+        [lower_integral, upper_integral]
     }
 
-    fn sum_results(self) -> f64 {
-        self.into_iter().fold(0.0f64, |a, v| a + v.result())
+    fn sum_results(&self) -> f64 {
+        self.iter().fold(0.0f64, |a, v| a + v.result())
     }
 
-    fn update_current_area(&mut self, diff: f64) -> f64 {
-        self.current_area += diff;
-        self.current_area
+    fn update_result(&mut self, diff: f64) -> f64 {
+        self.result += diff;
+        self.result
     }
 
     fn update_error(&mut self, diff: f64) -> f64 {
@@ -321,11 +324,37 @@ impl Workspace {
         self.error
     }
 
-    fn integral_estimate(self) -> Adaptive {
+    fn integral_estimate(&self) -> Adaptive {
         let error = self.error;
         let iterations = self.iteration;
         let result = self.sum_results();
         Adaptive::new(result, error, iterations)
+    }
+
+    fn check_roundoff(&self) -> Result<(), Error> {
+        if self.roundoff_type1 >= 6 || self.roundoff_type2 >= 20 {
+            let output = self.integral_estimate();
+            let kind = Kind::FailedToReachToleranceRoundoff;
+            Err(Error::new(kind, output))
+        } else {
+            Ok(())
+        }
+    }
+
+    fn check_singularity(&self) -> Result<(), Error> {
+        let lower_limit = self.lower_limit;
+        let upper_limit = self.upper_limit;
+        let midpoint = self.midpoint;
+        if subinterval_too_small(lower_limit, midpoint, upper_limit) {
+            let output = self.integral_estimate();
+            let kind = Kind::PossibleSingularity {
+                lower: lower_limit,
+                upper: upper_limit,
+            };
+            Err(Error::new(kind, output))
+        } else {
+            Ok(())
+        }
     }
 }
 
