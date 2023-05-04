@@ -86,12 +86,14 @@ pub struct Basic {
 impl Basic {
     /// Return the numerically evaluated approximation of the integral `I = int_a^b f(x) dx`.
     #[must_use]
+    #[inline]
     pub fn result(&self) -> f64 {
         self.result
     }
 
     /// Return the numerically evaluated approximation of the integral `I_{abs} = int_a^b |f(x)| dx`.
     #[must_use]
+    #[inline]
     pub fn result_abs(&self) -> f64 {
         self.result_abs
     }
@@ -99,12 +101,14 @@ impl Basic {
     /// Return the numerically evaluated approximation of the integral `I_{asc} = int_a^b |f(x) - I/(b - a)| dx`,
     /// where `I` is the integral value returned by [`Basic::result`].
     #[must_use]
+    #[inline]
     pub fn result_asc(&self) -> f64 {
         self.result_asc
     }
 
     /// Return the numerically evaluated approximation of the absolute error in the numerical routine.
     #[must_use]
+    #[inline]
     pub fn error(&self) -> f64 {
         self.error
     }
@@ -288,35 +292,42 @@ impl From<BasicInternal> for Basic {
 
 impl BasicInternal {
     #[must_use]
+    #[inline]
     pub(crate) fn result(&self) -> f64 {
         self.result
     }
 
     #[must_use]
+    #[inline]
     pub(crate) fn result_asc(&self) -> f64 {
         self.result_asc
     }
 
     #[must_use]
+    #[inline]
     pub(crate) fn result_abs(&self) -> f64 {
         self.result_abs
     }
 
     #[must_use]
+    #[inline]
     pub(crate) fn error(&self) -> f64 {
         self.error
     }
 
     #[must_use]
+    #[inline]
     pub(crate) fn lower(&self) -> f64 {
         self.lower
     }
 
     #[must_use]
+    #[inline]
     pub(crate) fn upper(&self) -> f64 {
         self.upper
     }
 
+    #[inline]
     pub(crate) fn roundoff(&self) -> f64 {
         50.0 * f64::EPSILON * self.result_abs
     }
