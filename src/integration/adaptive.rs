@@ -103,23 +103,23 @@ where
         match error_bound {
             ErrorBound::Absolute(v) => {
                 if v <= 0.0 {
-                    let partial_result = Adaptive::new(0.0, 0.0, 0);
+                    let output = Adaptive::new(0.0, 0.0, 0);
                     let kind = Kind::RelativeBoundNegativeOrZero;
-                    return Err(Error::new(kind, partial_result));
+                    return Err(Error::new(kind, output));
                 }
             }
             ErrorBound::Relative(v) => {
                 if v < 50.0 * f64::EPSILON {
-                    let partial_result = Adaptive::new(0.0, 0.0, 0);
+                    let output = Adaptive::new(0.0, 0.0, 0);
                     let kind = Kind::AbsoluteBoundTooSmall;
-                    return Err(Error::new(kind, partial_result));
+                    return Err(Error::new(kind, output));
                 }
             }
             ErrorBound::Either { absolute, relative } => {
                 if absolute <= 0.0 && relative < 50.0 * f64::EPSILON {
-                    let partial_result = Adaptive::new(0.0, 0.0, 0);
+                    let output = Adaptive::new(0.0, 0.0, 0);
                     let kind = Kind::InvalidTolerance;
-                    return Err(Error::new(kind, partial_result));
+                    return Err(Error::new(kind, output));
                 }
             }
         }
@@ -146,9 +146,6 @@ where
             return Ok(output);
         }
 
-        let mut area = initial.result();
-        let mut error = initial.error();
-
         let mut workspace = Workspace::new(self.max_iterations, initial);
 
         while workspace.iteration < self.max_iterations {
@@ -161,8 +158,8 @@ where
             let new_area = lower.result() + upper.result();
             let new_error = lower.error() + upper.error();
 
-            area += new_area - prev_area;
-            error += new_error - prev_error;
+            let area = workspace.update_current_area(new_area - prev_area);
+            let error = workspace.update_error(new_error - prev_error);
 
             if lower.result_asc().to_bits() != lower.error().to_bits()
                 && upper.result_asc().to_bits() != upper.error().to_bits()
@@ -181,11 +178,9 @@ where
 
             if error > iteration_tolerance {
                 if workspace.roundoff_type1 >= 6 || workspace.roundoff_type2 >= 20 {
-                    let final_iteration = workspace.iteration;
-                    let result = workspace.sum_results();
-                    let partial_result = Adaptive::new(result, error, final_iteration);
+                    let output = workspace.integral_estimate();
                     let kind = Kind::FailedToReachToleranceRoundoff;
-                    return Err(Error::new(kind, partial_result));
+                    return Err(Error::new(kind, output));
                 }
 
                 let lower_limit = previous.lower();
@@ -193,14 +188,12 @@ where
                 let midpoint = (upper_limit + lower_limit) * 0.5;
 
                 if subinterval_too_small(lower_limit, midpoint, upper_limit) {
-                    let final_iteration = workspace.iteration;
-                    let result = workspace.sum_results();
-                    let partial_result = Adaptive::new(result, error, final_iteration);
+                    let output = workspace.integral_estimate();
                     let kind = Kind::PossibleSingularity {
                         lower: lower_limit,
                         upper: upper_limit,
                     };
-                    return Err(Error::new(kind, partial_result));
+                    return Err(Error::new(kind, output));
                 }
             }
 
@@ -213,8 +206,7 @@ where
         }
 
         let final_iteration = workspace.iteration;
-        let result = workspace.sum_results();
-        let output = Adaptive::new(result, error, final_iteration);
+        let output = workspace.integral_estimate();
 
         if final_iteration == self.max_iterations {
             let kind = Kind::MaximumIterationsReached;
@@ -242,10 +234,10 @@ where
         let roundoff = initial.roundoff();
 
         if initial.error() <= roundoff && initial.error() > tolerance {
-            let partial_result = Adaptive::from_basic(initial, 1);
+            let output = Adaptive::from_basic(initial, 1);
             let kind = Kind::FailedToReachToleranceRoundoff;
 
-            Err(Error::new(kind, partial_result))
+            Err(Error::new(kind, output))
         } else if (initial.error() <= tolerance
             && initial.error().to_bits() != initial.result_asc().to_bits())
             || initial.error() == 0.0
@@ -254,10 +246,10 @@ where
 
             Ok(Some(output))
         } else if self.max_iterations == 1 {
-            let partial_result = Adaptive::from_basic(initial, 1);
+            let output = Adaptive::from_basic(initial, 1);
             let kind = Kind::MaximumIterationsReached;
 
-            Err(Error::new(kind, partial_result))
+            Err(Error::new(kind, output))
         } else {
             Ok(None)
         }
@@ -269,17 +261,23 @@ struct Workspace {
     iteration: usize,
     roundoff_type1: usize,
     roundoff_type2: usize,
+    current_area: f64,
+    error: f64,
 }
 
 impl Workspace {
     fn new(max_iterations: usize, initial: BasicInternal) -> Self {
         let mut heap = BinaryHeap::with_capacity(2 * max_iterations + 1);
+        let current_area = initial.result();
+        let error = initial.error();
         heap.push(initial);
         Self {
             heap,
             iteration: 1,
             roundoff_type1: 0,
             roundoff_type2: 0,
+            current_area,
+            error,
         }
     }
 
@@ -311,6 +309,23 @@ impl Workspace {
 
     fn sum_results(self) -> f64 {
         self.into_iter().fold(0.0f64, |a, v| a + v.result())
+    }
+
+    fn update_current_area(&mut self, diff: f64) -> f64 {
+        self.current_area += diff;
+        self.current_area
+    }
+
+    fn update_error(&mut self, diff: f64) -> f64 {
+        self.error += diff;
+        self.error
+    }
+
+    fn integral_estimate(self) -> Adaptive {
+        let error = self.error;
+        let iterations = self.iteration;
+        let result = self.sum_results();
+        Adaptive::new(result, error, iterations)
     }
 }
 
