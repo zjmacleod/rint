@@ -103,21 +103,21 @@ where
         match error_bound {
             ErrorBound::Absolute(v) => {
                 if v <= 0.0 {
-                    let output = Adaptive::new(0.0, 0.0, 0);
+                    let output = Adaptive::empty();
                     let kind = Kind::RelativeBoundNegativeOrZero;
                     return Err(Error::new(kind, output));
                 }
             }
             ErrorBound::Relative(v) => {
                 if v < 50.0 * f64::EPSILON {
-                    let output = Adaptive::new(0.0, 0.0, 0);
+                    let output = Adaptive::empty();
                     let kind = Kind::AbsoluteBoundTooSmall;
                     return Err(Error::new(kind, output));
                 }
             }
             ErrorBound::Either { absolute, relative } => {
                 if absolute <= 0.0 && relative < 50.0 * f64::EPSILON {
-                    let output = Adaptive::new(0.0, 0.0, 0);
+                    let output = Adaptive::empty();
                     let kind = Kind::InvalidTolerance;
                     return Err(Error::new(kind, output));
                 }
