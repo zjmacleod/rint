@@ -53,6 +53,35 @@ impl Adaptive {
             iterations: 0,
         }
     }
+
+    fn check_initial_integration(
+        initial: &BasicInternal,
+        tolerance: f64,
+        max_iterations: usize,
+    ) -> Result<Option<Adaptive>, Error> {
+        let roundoff = initial.roundoff();
+
+        if initial.error() <= roundoff && initial.error() > tolerance {
+            let output = Adaptive::from_basic(initial, 1);
+            let kind = Kind::FailedToReachToleranceRoundoff;
+
+            Err(Error::new(kind, output))
+        } else if (initial.error() <= tolerance
+            && initial.error().to_bits() != initial.result_asc().to_bits())
+            || initial.error() == 0.0
+        {
+            let output = Adaptive::from_basic(initial, 1);
+
+            Ok(Some(output))
+        } else if max_iterations == 1 {
+            let output = Adaptive::from_basic(initial, 1);
+            let kind = Kind::MaximumIterationsReached;
+
+            Err(Error::new(kind, output))
+        } else {
+            Ok(None)
+        }
+    }
 }
 
 /// An integral to be evaluated with an adaptive Gauss-Kronrod quadrature.
@@ -141,8 +170,11 @@ where
     pub fn integrate(&self) -> Result<Adaptive, Error> {
         let initial = GaussKronrodBasic::new(self.lower, self.upper, self.rule, self.function)
             .integrate_internal();
+        let tolerance = self.error_bound.tolerance(&initial.result());
 
-        if let Some(output) = self.check_initial_integration(&initial)? {
+        if let Some(output) =
+            Adaptive::check_initial_integration(&initial, tolerance, self.max_iterations)?
+        {
             return Ok(output);
         }
 
@@ -191,38 +223,9 @@ where
     pub fn lower(&self) -> f64 {
         self.lower
     }
-
-    fn check_initial_integration(
-        &self,
-        initial: &BasicInternal,
-    ) -> Result<Option<Adaptive>, Error> {
-        let tolerance = self.error_bound.tolerance(&initial.result());
-        let roundoff = initial.roundoff();
-
-        if initial.error() <= roundoff && initial.error() > tolerance {
-            let output = Adaptive::from_basic(initial, 1);
-            let kind = Kind::FailedToReachToleranceRoundoff;
-
-            Err(Error::new(kind, output))
-        } else if (initial.error() <= tolerance
-            && initial.error().to_bits() != initial.result_asc().to_bits())
-            || initial.error() == 0.0
-        {
-            let output = Adaptive::from_basic(initial, 1);
-
-            Ok(Some(output))
-        } else if self.max_iterations == 1 {
-            let output = Adaptive::from_basic(initial, 1);
-            let kind = Kind::MaximumIterationsReached;
-
-            Err(Error::new(kind, output))
-        } else {
-            Ok(None)
-        }
-    }
 }
 
-struct Workspace {
+pub(crate) struct Workspace {
     heap: BinaryHeap<BasicInternal>,
     iteration: usize,
     roundoff_type1: usize,
@@ -234,7 +237,7 @@ struct Workspace {
 }
 
 impl Workspace {
-    fn new(max_iterations: usize, initial: BasicInternal) -> Self {
+    pub(crate) fn new(max_iterations: usize, initial: BasicInternal) -> Self {
         let mut heap = BinaryHeap::with_capacity(2 * max_iterations + 1);
 
         let result = initial.result();
@@ -256,7 +259,12 @@ impl Workspace {
         }
     }
 
-    fn retrieve_largest_error(&mut self) -> Result<BasicInternal, Error> {
+    #[inline]
+    pub(crate) fn iteration(&self) -> usize {
+        self.iteration
+    }
+
+    pub(crate) fn retrieve_largest_error(&mut self) -> Result<BasicInternal, Error> {
         self.iteration += 1;
         if let Some(previous) = self.pop() {
             Ok(previous)
@@ -267,22 +275,22 @@ impl Workspace {
         }
     }
 
-    fn update_limits(&mut self, lower: f64, upper: f64) {
+    pub(crate) fn update_limits(&mut self, lower: f64, upper: f64) {
         self.lower_limit = lower;
         self.upper_limit = upper;
     }
 
-    fn update_result(&mut self, diff: f64) -> f64 {
+    pub(crate) fn update_result(&mut self, diff: f64) -> f64 {
         self.result += diff;
         self.result
     }
 
-    fn update_error(&mut self, diff: f64) -> f64 {
+    pub(crate) fn update_error(&mut self, diff: f64) -> f64 {
         self.error += diff;
         self.error
     }
 
-    fn iteration_result_error(
+    pub(crate) fn iteration_result_error(
         &mut self,
         previous: &BasicInternal,
         lower: &BasicInternal,
@@ -312,7 +320,7 @@ impl Workspace {
         (result, error)
     }
 
-    fn check_roundoff(&self) -> Result<(), Error> {
+    pub(crate) fn check_roundoff(&self) -> Result<(), Error> {
         if self.roundoff_type1 >= 6 || self.roundoff_type2 >= 20 {
             let output = self.integral_estimate();
             let kind = Kind::FailedToReachToleranceRoundoff;
@@ -322,7 +330,7 @@ impl Workspace {
         }
     }
 
-    fn check_singularity(&self) -> Result<(), Error> {
+    pub(crate) fn check_singularity(&self) -> Result<(), Error> {
         let lower_limit = self.lower_limit;
         let upper_limit = self.upper_limit;
         let midpoint = (lower_limit + upper_limit) * 0.5;
@@ -338,11 +346,11 @@ impl Workspace {
         }
     }
 
-    fn sum_results(&self) -> f64 {
+    pub(crate) fn sum_results(&self) -> f64 {
         self.iter().fold(0.0f64, |a, v| a + v.result())
     }
 
-    fn integral_estimate(&self) -> Adaptive {
+    pub(crate) fn integral_estimate(&self) -> Adaptive {
         let error = self.error;
         let iterations = self.iteration;
         let result = self.sum_results();
