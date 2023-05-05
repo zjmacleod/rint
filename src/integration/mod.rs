@@ -2,6 +2,8 @@ pub mod adaptive;
 pub mod basic;
 pub mod singularity;
 
+pub(crate) mod workspace;
+
 pub use adaptive::Adaptive;
 pub use adaptive::GaussKronrodAdaptive;
 pub use basic::Basic;
@@ -49,4 +51,13 @@ fn rescale_error(error: f64, result_abs: f64, result_asc: f64) -> f64 {
     }
 
     error
+}
+
+pub(crate) fn subinterval_too_small(lower: f64, midpoint: f64, upper: f64) -> bool {
+    let eps = f64::EPSILON;
+    let min = f64::MIN_POSITIVE;
+
+    let tmp = (1.0 + 100.0 * eps) * (midpoint.abs() + 1000.0 * min);
+
+    lower.abs() <= tmp && upper.abs() <= tmp
 }

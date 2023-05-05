@@ -1,7 +1,6 @@
-use std::collections::BinaryHeap;
-
-use crate::integration::adaptive::{self, Error, Kind, Workspace};
+use crate::integration::adaptive::{Error, Kind};
 use crate::integration::basic::BasicInternal;
+use crate::integration::workspace::Workspace;
 use crate::integration::{Adaptive, ErrorBound, GaussKronrodBasic};
 use crate::rule::Rule;
 use crate::Integrand;
