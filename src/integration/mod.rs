@@ -16,7 +16,7 @@ pub enum ErrorBound {
 
 impl ErrorBound {
     #[must_use]
-    pub fn tolerance(&self, integral_value: &f64) -> f64 {
+    pub fn tolerance(&self, integral_value: f64) -> f64 {
         match *self {
             ErrorBound::Absolute(v) => v,
             ErrorBound::Relative(v) => v * integral_value.abs(),

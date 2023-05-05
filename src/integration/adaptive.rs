@@ -53,34 +53,6 @@ impl Adaptive {
             iterations: 0,
         }
     }
-
-    pub(crate) fn check_initial_integration(
-        initial: &BasicInternal,
-        tolerance: f64,
-        roundoff: f64,
-        max_iterations: usize,
-    ) -> Result<Option<Adaptive>, Error> {
-        if initial.error() <= roundoff && initial.error() > tolerance {
-            let output = Adaptive::from_basic(initial, 1);
-            let kind = Kind::FailedToReachToleranceRoundoff;
-
-            Err(Error::new(kind, output))
-        } else if (initial.error() <= tolerance
-            && initial.error().to_bits() != initial.result_asc().to_bits())
-            || initial.error() == 0.0
-        {
-            let output = Adaptive::from_basic(initial, 1);
-
-            Ok(Some(output))
-        } else if max_iterations == 1 {
-            let output = Adaptive::from_basic(initial, 1);
-            let kind = Kind::MaximumIterationsReached;
-
-            Err(Error::new(kind, output))
-        } else {
-            Ok(None)
-        }
-    }
 }
 
 /// An integral to be evaluated with an adaptive Gauss-Kronrod quadrature.
@@ -161,8 +133,37 @@ where
         })
     }
 
-    fn roundoff(integral: &BasicInternal) -> f64 {
-        50.0 * f64::EPSILON * integral.result_abs()
+    fn roundoff(result_abs: f64) -> f64 {
+        50.0 * f64::EPSILON * result_abs
+    }
+
+    pub(crate) fn check_initial_integration(
+        &self,
+        initial: &BasicInternal,
+    ) -> Result<Option<Adaptive>, Error> {
+        let tolerance = self.error_bound.tolerance(initial.result());
+        let roundoff = Self::roundoff(initial.result_abs());
+
+        if initial.error() <= roundoff && initial.error() > tolerance {
+            let output = Adaptive::from_basic(initial, 1);
+            let kind = Kind::FailedToReachToleranceRoundoff;
+
+            Err(Error::new(kind, output))
+        } else if (initial.error() <= tolerance
+            && initial.error().to_bits() != initial.result_asc().to_bits())
+            || initial.error() == 0.0
+        {
+            let output = Adaptive::from_basic(initial, 1);
+
+            Ok(Some(output))
+        } else if self.max_iterations == 1 {
+            let output = Adaptive::from_basic(initial, 1);
+            let kind = Kind::MaximumIterationsReached;
+
+            Err(Error::new(kind, output))
+        } else {
+            Ok(None)
+        }
     }
 
     /// Integrate the function and return a [`Adaptive`] integration result.
@@ -173,12 +174,8 @@ where
     pub fn integrate(&self) -> Result<Adaptive, Error> {
         let initial = GaussKronrodBasic::new(self.lower, self.upper, self.rule, self.function)
             .integrate_internal();
-        let tolerance = self.error_bound.tolerance(&initial.result());
-        let roundoff = Self::roundoff(&initial);
 
-        if let Some(output) =
-            Adaptive::check_initial_integration(&initial, tolerance, roundoff, self.max_iterations)?
-        {
+        if let Some(output) = self.check_initial_integration(&initial)? {
             return Ok(output);
         }
 
@@ -192,7 +189,7 @@ where
 
             let (result, error) = workspace.iteration_result_error(&previous, &lower, &upper);
 
-            let iteration_tolerance = self.error_bound.tolerance(&result);
+            let iteration_tolerance = self.error_bound.tolerance(result);
 
             if error > iteration_tolerance {
                 workspace.check_roundoff()?;
