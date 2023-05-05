@@ -57,10 +57,9 @@ impl Adaptive {
     pub(crate) fn check_initial_integration(
         initial: &BasicInternal,
         tolerance: f64,
+        roundoff: f64,
         max_iterations: usize,
     ) -> Result<Option<Adaptive>, Error> {
-        let roundoff = initial.roundoff();
-
         if initial.error() <= roundoff && initial.error() > tolerance {
             let output = Adaptive::from_basic(initial, 1);
             let kind = Kind::FailedToReachToleranceRoundoff;
@@ -162,6 +161,10 @@ where
         })
     }
 
+    fn roundoff(integral: &BasicInternal) -> f64 {
+        50.0 * f64::EPSILON * integral.result_abs()
+    }
+
     /// Integrate the function and return a [`Adaptive`] integration result.
     ///
     /// # Errors
@@ -171,9 +174,10 @@ where
         let initial = GaussKronrodBasic::new(self.lower, self.upper, self.rule, self.function)
             .integrate_internal();
         let tolerance = self.error_bound.tolerance(&initial.result());
+        let roundoff = Self::roundoff(&initial);
 
         if let Some(output) =
-            Adaptive::check_initial_integration(&initial, tolerance, self.max_iterations)?
+            Adaptive::check_initial_integration(&initial, tolerance, roundoff, self.max_iterations)?
         {
             return Ok(output);
         }
