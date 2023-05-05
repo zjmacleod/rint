@@ -107,6 +107,8 @@ struct ExtrapolationTable {
     cached_value_2: f64,
     cached: Cached,
     state: ExtrapolationState,
+    result: f64,
+    error: f64,
 }
 
 enum ExtrapolationState {
@@ -131,6 +133,8 @@ impl ExtrapolationTable {
         let cached_value_2 = 0.0;
         let cached = Cached::Zero;
         let state = ExtrapolationState::Off;
+        let result = 0.0;
+        let error = f64::MAX;
 
         Self {
             number,
@@ -140,12 +144,15 @@ impl ExtrapolationTable {
             cached_value_2,
             cached,
             state,
+            result,
+            error,
         }
     }
 
-    fn initialise(result: f64) -> Self {
+    fn initialise(initial: &BasicInternal) -> Self {
         let mut table = Self::new();
-        table.append_table(result);
+        table.result = initial.result();
+        table.append_table(initial.result());
         table
     }
 
@@ -371,15 +378,24 @@ mod tests {
 
     #[test]
     fn test_intitialising() {
-        let value = 999.0;
+        let error = 0.0;
+        let result = 0.0;
+        let result_abs = 0.0;
+        let result_asc = 0.0;
+        let lower = 0.0;
+        let upper = 0.0;
+        let value = BasicInternal {
+            error,
+            result,
+            result_abs,
+            result_asc,
+            lower,
+            upper,
+        };
 
-        let table = ExtrapolationTable::initialise(value);
+        let table = ExtrapolationTable::initialise(&value);
 
         assert!(table.number == 1);
-        assert!((table.results[0] - value) < 1e-10);
+        assert!((table.results[0] - value.result()) < 1e-10);
     }
-}
-
-pub(crate) fn test_positivity(result: f64, result_abs: f64) -> bool {
-    result.abs() >= (1.0 - 50.0 * f64::EPSILON) * result_abs
 }

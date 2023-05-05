@@ -253,12 +253,12 @@ where
 
 #[derive(Debug, PartialEq)]
 pub(crate) struct BasicInternal {
-    error: f64,
-    result: f64,
-    result_abs: f64,
-    result_asc: f64,
-    lower: f64,
-    upper: f64,
+    pub(crate) error: f64,
+    pub(crate) result: f64,
+    pub(crate) result_abs: f64,
+    pub(crate) result_asc: f64,
+    pub(crate) lower: f64,
+    pub(crate) upper: f64,
 }
 
 impl Eq for BasicInternal {}
