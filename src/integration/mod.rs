@@ -1,5 +1,6 @@
 pub mod adaptive;
 pub mod basic;
+pub mod singularity;
 
 pub use adaptive::Adaptive;
 pub use adaptive::GaussKronrodAdaptive;

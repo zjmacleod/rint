@@ -54,7 +54,7 @@ impl Adaptive {
         }
     }
 
-    fn check_initial_integration(
+    pub(crate) fn check_initial_integration(
         initial: &BasicInternal,
         tolerance: f64,
         max_iterations: usize,

@@ -332,6 +332,11 @@ impl BasicInternal {
         50.0 * f64::EPSILON * self.result_abs
     }
 
+    #[inline]
+    pub(crate) fn roundoff_singularity(&self) -> f64 {
+        100.0 * f64::EPSILON * self.result_abs
+    }
+
     pub(crate) fn total_cmp_error(&self, other: &Self) -> Ordering {
         self.error.total_cmp(&other.error)
     }
