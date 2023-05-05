@@ -354,6 +354,10 @@ impl BasicInternal {
 
         [lower_integral, upper_integral]
     }
+
+    pub(crate) fn positivity(&self) -> bool {
+        self.result.abs() >= (1.0 - 50.0 * f64::EPSILON) * self.result_abs
+    }
 }
 
 #[cfg(test)]
