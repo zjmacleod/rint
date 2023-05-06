@@ -204,7 +204,7 @@ impl ExtrapolationTable {
         if n_current < 2 {
             result = current;
             abserr = f64::max(absolute, relative);
-            return Data::new(result, abserr);
+            return (result, abserr);
         }
 
         self.results[n_current + 2] = self.results[n_current];
@@ -231,7 +231,7 @@ impl ExtrapolationTable {
                 absolute = err2 + err3;
                 relative = 5.0 * f64::EPSILON * f64::abs(res);
                 abserr = f64::max(absolute, relative);
-                return Data::new(result, abserr);
+                return (result, abserr);
             }
 
             let e3 = self.results[n_current - 2 * i];
@@ -287,7 +287,7 @@ impl ExtrapolationTable {
         self.cache(result);
         abserr = f64::max(abserr, 5.0 * f64::EPSILON * f64::abs(result));
 
-        Data::new(result, abserr)
+        (result, abserr)
     }
 
     fn shift_table(&mut self, n_original: usize, n_final: usize, new_element: usize) -> &mut Self {
@@ -308,24 +308,20 @@ impl ExtrapolationTable {
         }
         self
     }
-}
 
-struct Data {
-    result: f64,
-    error: f64,
-}
-
-impl Data {
-    fn new(result: f64, error: f64) -> Self {
-        Self { result, error }
-    }
-
-    fn result(&self) -> f64 {
-        self.result
-    }
-
-    fn error(&self) -> f64 {
-        self.error
+    fn check_extrapolation_roundoff(
+        &self,
+        result: f64,
+        error: f64,
+        iterations: usize,
+    ) -> Result<(), Error> {
+        if self.extrapolation_count > 5 && self.err_ext < 0.001 * error {
+            let output = Adaptive::new(result, error, iterations);
+            let kind = Kind::FailedToReachToleranceRoundoffExtrapolation;
+            Err(Error::new(kind, output))
+        } else {
+            Ok(())
+        }
     }
 }
 
