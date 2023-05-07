@@ -43,10 +43,10 @@ impl SingularityData {
 
 pub(crate) struct Workspace {
     heap: BinaryHeap<BasicInternal>,
-    iteration: usize,
+    pub(crate) iteration: usize,
     routine: Routine,
-    result: f64,
-    error: f64,
+    pub(crate) result: f64,
+    pub(crate) error: f64,
     lower_limit: f64,
     upper_limit: f64,
 }

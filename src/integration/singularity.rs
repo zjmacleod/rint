@@ -83,8 +83,82 @@ where
         })
     }
 
+    fn roundoff(result_abs: f64) -> f64 {
+        100.0 * f64::EPSILON * result_abs
+    }
+
+    pub(crate) fn check_initial_integration(
+        &self,
+        initial: &BasicInternal,
+    ) -> Result<Option<Adaptive>, Error> {
+        let tolerance = self.error_bound.tolerance(initial.result());
+        let roundoff = Self::roundoff(initial.result_abs());
+
+        if initial.error() <= roundoff && initial.error() > tolerance {
+            let output = Adaptive::from_basic(initial, 1);
+            let kind = Kind::FailedToReachToleranceRoundoff;
+
+            Err(Error::new(kind, output))
+        } else if (initial.error() <= tolerance
+            && initial.error().to_bits() != initial.result_asc().to_bits())
+            || initial.error() == 0.0
+        {
+            let output = Adaptive::from_basic(initial, 1);
+
+            Ok(Some(output))
+        } else if self.max_iterations == 1 {
+            let output = Adaptive::from_basic(initial, 1);
+            let kind = Kind::MaximumIterationsReached;
+
+            Err(Error::new(kind, output))
+        } else {
+            Ok(None)
+        }
+    }
+
+    // TODO add extrapolation
     pub fn integrate(&self) -> Result<Adaptive, Error> {
-        todo!()
+        let initial = GaussKronrodBasic::new(self.lower, self.upper, self.rule, self.function)
+            .integrate_internal();
+
+        if let Some(output) = self.check_initial_integration(&initial)? {
+            return Ok(output);
+        }
+
+        let mut workspace = Workspace::adaptive(self.max_iterations, initial);
+
+        while workspace.iteration() < self.max_iterations {
+            let previous = workspace.retrieve_largest_error()?;
+
+            let [lower, upper] = previous.bisect(self.function, self.rule);
+            workspace.update_limits(lower.lower(), upper.upper());
+
+            let (result, error) = workspace.iteration_result_error(&previous, &lower, &upper);
+
+            let iteration_tolerance = self.error_bound.tolerance(result);
+
+            if error > iteration_tolerance {
+                workspace.check_roundoff()?;
+                workspace.check_singularity()?;
+            }
+
+            workspace.push(lower);
+            workspace.push(upper);
+
+            if error <= iteration_tolerance {
+                break;
+            }
+        }
+
+        let final_iteration = workspace.iteration();
+        let output = workspace.integral_estimate();
+
+        if final_iteration == self.max_iterations {
+            let kind = Kind::MaximumIterationsReached;
+            Err(Error::new(kind, output))
+        } else {
+            Ok(output)
+        }
     }
 
     /// Return the value of the `upper` integration limit.
