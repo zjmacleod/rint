@@ -1,7 +1,8 @@
+use std::collections::binary_heap::{BinaryHeap, IntoIter};
+
 use crate::integration::adaptive::{Error, Kind};
 use crate::integration::basic::BasicInternal;
-use crate::integration::workspace::Workspace;
-use crate::integration::{Adaptive, ErrorBound, GaussKronrodBasic};
+use crate::integration::{subinterval_too_small, Adaptive, ErrorBound, GaussKronrodBasic};
 use crate::rule::Rule;
 use crate::Integrand;
 
@@ -87,7 +88,7 @@ where
         100.0 * f64::EPSILON * result_abs
     }
 
-    pub(crate) fn check_initial_integration(
+    fn check_initial_integration(
         &self,
         initial: &BasicInternal,
     ) -> Result<Option<Adaptive>, Error> {
@@ -116,7 +117,10 @@ where
         }
     }
 
+    /// # Errors
     // TODO add extrapolation
+    // XXX goto compute_result = use workspace.integral_estimate()
+    // XXX goto return_error = use table.integral_estimate()
     pub fn integrate(&self) -> Result<Adaptive, Error> {
         let initial = GaussKronrodBasic::new(self.lower, self.upper, self.rule, self.function)
             .integrate_internal();
@@ -125,32 +129,93 @@ where
             return Ok(output);
         }
 
-        let mut workspace = Workspace::adaptive(self.max_iterations, initial);
+        let mut workspace = Workspace::new(self.max_iterations, initial);
 
-        while workspace.iteration() < self.max_iterations {
+        while workspace.iteration < self.max_iterations {
             let previous = workspace.retrieve_largest_error()?;
 
-            let [lower, upper] = previous.bisect(self.function, self.rule);
-            workspace.update_limits(lower.lower(), upper.upper());
+            let half_current_interval = previous.abs_interval_length() / 2.0;
+            workspace.update_smallest_interval(half_current_interval);
 
-            let (result, error) = workspace.iteration_result_error(&previous, &lower, &upper);
+            let [lower, upper] = previous.bisect(self.function, self.rule);
+
+            let previous_error = previous.error();
+            let iteration_error = lower.error() + upper.error();
+
+            let [result, error] = workspace.improved_result_error(&previous, &lower, &upper);
 
             let iteration_tolerance = self.error_bound.tolerance(result);
-
-            if error > iteration_tolerance {
-                workspace.check_roundoff()?;
-                workspace.check_singularity()?;
-            }
 
             workspace.push(lower);
             workspace.push(upper);
 
             if error <= iteration_tolerance {
-                break;
+                return workspace.go_to_115();
             }
+
+            workspace.check_roundoff()?;
+            workspace.check_singularity()?;
+
+            if workspace.iteration >= self.max_iterations - 1 {
+                // error type 1
+                break;
+            } else if workspace.iteration == 2 {
+                // XXX quadpack multiplies this by 0.375
+                workspace.smallest_interval = half_current_interval;
+                workspace.error_over_large_intervals = workspace.error;
+                workspace.ertest = iteration_tolerance;
+                workspace.table.append_table(workspace.result);
+                continue;
+            }
+
+            // probably don't need this. disallow_extrapolation _only_ set to true
+            // if table.number == 1, which is only satisfied _before_ bisecting the
+            // initial result outside the loop. By the time we reach this point,
+            // table.number >= 2.
+            //if disallow_extrapolation {
+            //    continue;
+            //}
+
+            workspace.update_error_over_large_intervals(
+                half_current_interval,
+                previous_error,
+                iteration_error,
+            );
+
+            // peek the next interval with the largest error and check if it
+            // is the smallest interval.
+            if !workspace.extrapolate {
+                if let Some(next) = workspace.heap.peek() {
+                    if next.abs_interval_length() > workspace.smallest_interval {
+                        continue;
+                    }
+                };
+
+                // the next interval to be bisected has the largest error and
+                // smallest interval. Store it to reduce error in large intervals
+                if let Some(smallest) = workspace.pop() {
+                    workspace.store(smallest);
+                };
+                workspace.extrapolate = true;
+            }
+
+            if !workspace.error_type2 && workspace.error_over_large_intervals > workspace.ertest {
+                // XXX not quite right. This should loop through to find the next
+                // iteration with a larger interval. Store all the other?
+                while let Some(next) = workspace.heap.peek() {
+                    if next.abs_interval_length() > workspace.smallest_interval {
+                        continue;
+                    }
+                    if let Some(next) = workspace.pop() {
+                        workspace.store(next);
+                    };
+                }
+            }
+
+            let (ext_result, ext_error) = workspace.table.extrapolate(result);
         }
 
-        let final_iteration = workspace.iteration();
+        let final_iteration = workspace.iteration;
         let output = workspace.integral_estimate();
 
         if final_iteration == self.max_iterations {
@@ -172,6 +237,286 @@ where
     }
 }
 
+enum State {
+    Initialised,
+    Extrapolate,
+    Bisect,
+    ComputeResult,
+    CheckError,
+}
+
+struct Workspace {
+    heap: BinaryHeap<BasicInternal>,
+    iteration: usize,
+    roundoff_type1: usize,
+    roundoff_type2: usize,
+    roundoff_type3: usize,
+    error_type2: bool,
+    result: f64,
+    error: f64,
+    lower_limit: f64,
+    upper_limit: f64,
+    table: ExtrapolationTable,
+    smallest_interval: f64,
+    error_over_large_intervals: f64,
+    ertest: f64,
+    state: State,
+    positive_integrand: bool,
+    initial_abs: f64,
+    correction: f64,
+    extrapolate: bool,
+    store: BinaryHeap<BasicInternal>,
+    num_stored: usize,
+}
+
+impl Workspace {
+    fn new(max_iterations: usize, initial: BasicInternal) -> Self {
+        let mut heap = BinaryHeap::with_capacity(2 * max_iterations + 1);
+
+        let result = initial.result();
+        let error = initial.error();
+        let lower_limit = initial.lower();
+        let upper_limit = initial.upper();
+        let table = ExtrapolationTable::initialise(&initial);
+        let smallest_interval = initial.abs_interval_length();
+        let error_over_large_intervals = error;
+        let ertest = f64::MAX;
+        let state = State::Initialised;
+        let positive_integrand = initial.positivity();
+        let initial_abs = initial.result_abs();
+        let correction = 0.0;
+        let store = BinaryHeap::with_capacity(2 * max_iterations + 1);
+
+        heap.push(initial);
+
+        Self {
+            heap,
+            iteration: 1,
+            roundoff_type1: 0,
+            roundoff_type2: 0,
+            roundoff_type3: 0,
+            error_type2: false,
+            result,
+            error,
+            lower_limit,
+            upper_limit,
+            table,
+            smallest_interval,
+            error_over_large_intervals,
+            ertest,
+            state,
+            positive_integrand,
+            initial_abs,
+            correction,
+            extrapolate: false,
+            store,
+            num_stored: 0,
+        }
+    }
+
+    fn retrieve_largest_error(&mut self) -> Result<BasicInternal, Error> {
+        self.state = State::Bisect;
+        self.iteration += 1;
+        if let Some(previous) = self.pop() {
+            self.lower_limit = previous.lower;
+            self.upper_limit = previous.upper;
+
+            Ok(previous)
+        } else {
+            let output = Adaptive::empty();
+            let kind = Kind::UninitialisedWorkspace;
+            Err(Error::new(kind, output))
+        }
+    }
+
+    fn next_interval_length(&self) -> f64 {
+        if let Some(next) = self.heap.peek() {
+            next.abs_interval_length()
+        } else {
+            f64::MAX
+        }
+    }
+
+    fn update_smallest_interval(&mut self, half_current_interval: f64) {
+        if half_current_interval < self.smallest_interval {
+            self.smallest_interval = half_current_interval;
+        }
+    }
+
+    fn improved_result_error(
+        &mut self,
+        previous: &BasicInternal,
+        lower: &BasicInternal,
+        upper: &BasicInternal,
+    ) -> [f64; 2] {
+        let prev_result = previous.result();
+        let prev_error = previous.error();
+        let new_result = lower.result() + upper.result();
+        let new_error = lower.error() + upper.error();
+
+        if lower.result_asc().to_bits() != lower.error().to_bits()
+            && upper.result_asc().to_bits() != upper.error().to_bits()
+        {
+            let delta = (prev_result - new_result).abs();
+
+            if delta <= 1e-5 * new_result.abs() && new_error >= 0.99 * prev_error {
+                if let State::Bisect = self.state {
+                    self.roundoff_type1 += 1;
+                } else if let State::Extrapolate = self.state {
+                    self.roundoff_type2 += 1;
+                }
+                // in GSL this next conditional is _always_ run, in QUADPACK it is not
+            } else if self.iteration > 10 && new_error > prev_error {
+                self.roundoff_type3 += 1;
+            }
+        }
+
+        self.result += new_result - prev_result;
+        self.error += new_error - prev_error;
+
+        [self.result(), self.error()]
+    }
+
+    // TODO Change these to go_to_100
+    fn check_roundoff(&mut self) -> Result<(), Error> {
+        if self.roundoff_type1 + self.roundoff_type2 >= 10 || self.roundoff_type3 >= 20 {
+            let output = self.integral_estimate();
+            let kind = Kind::FailedToReachToleranceRoundoff;
+            return Err(Error::new(kind, output));
+        } // goto 100
+
+        if self.roundoff_type2 >= 5 {
+            self.error_type2 = true;
+        }
+        Ok(())
+    }
+
+    // TODO Change these to go_to_100
+    fn check_singularity(&self) -> Result<(), Error> {
+        let lower_limit = self.lower_limit;
+        let upper_limit = self.upper_limit;
+        let midpoint = (lower_limit + upper_limit) * 0.5;
+        if subinterval_too_small(lower_limit, midpoint, upper_limit) {
+            let output = self.integral_estimate();
+            let kind = Kind::PossibleSingularity {
+                lower: lower_limit,
+                upper: upper_limit,
+            };
+            Err(Error::new(kind, output))
+        } else {
+            Ok(())
+        }
+    }
+
+    fn sum_results(&self) -> f64 {
+        let store = self.store.iter().fold(0.0f64, |a, v| a + v.result());
+        let heap = self.heap.iter().fold(0.0f64, |a, v| a + v.result());
+        store + heap
+    }
+
+    fn store(&mut self, integral: BasicInternal) {
+        self.store.push(integral);
+        self.num_stored += 1;
+    }
+
+    fn pop(&mut self) -> Option<BasicInternal> {
+        self.heap.pop()
+    }
+
+    fn push(&mut self, integral: BasicInternal) {
+        self.heap.push(integral);
+    }
+
+    fn integral_estimate(&self) -> Adaptive {
+        let error = self.error;
+        let iterations = self.iteration;
+        let result = self.sum_results();
+        Adaptive::new(result, error, iterations)
+    }
+
+    fn update_error_over_large_intervals(
+        &mut self,
+        iteration_interval: f64,
+        previous_error: f64,
+        iteration_error: f64,
+    ) {
+        self.error_over_large_intervals += -previous_error;
+
+        if iteration_interval > self.smallest_interval {
+            self.error_over_large_intervals += iteration_error;
+        }
+    }
+
+    // XXX This function is entered if:
+    //  - There is an error ANYWHERE in the bisection
+    //      + If _no_ extrapolation has occurred, this goes to 115
+    //  - The error output from extrapolation < extrapolation tolerance
+    //  - If there is an error in the extrapolation
+    fn go_to_100(&self) -> Result<Adaptive, Error> {
+        if self.table.extrapolation_error() == f64::MAX {
+            self.go_to_115()
+        } else {
+            // TODO
+            Ok(Adaptive::empty())
+        }
+    }
+
+    fn go_to_105(&self) -> Result<Adaptive, Error> {
+        if self.table.extrapolation_error() / self.table.extrapolation_result().abs()
+            > self.error / self.result.abs()
+        {
+            self.go_to_115()
+        } else {
+            self.go_to_110()
+        }
+    }
+
+    // test on divergence
+    fn go_to_110(&self) -> Result<Adaptive, Error> {
+        let output = self.table.integral_estimate(self.iteration);
+        let max_area = f64::max(self.table.extrapolation_result().abs(), self.result.abs());
+        if !self.positive_integrand && max_area < 0.01 * self.initial_abs {
+            return Ok(output);
+        }
+
+        let ratio = self.table.extrapolation_result() / self.result;
+
+        if ratio < 0.01 || ratio > 100.0 || self.error > self.result.abs() {
+            let kind = Kind::Divergence;
+            return Err(Error::new(kind, output));
+        }
+
+        Ok(output)
+    }
+
+    fn go_to_115(&self) -> Result<Adaptive, Error> {
+        let output = self.integral_estimate();
+        Ok(output)
+    }
+
+    fn go_to_130(&self) -> Result<Adaptive, Error> {
+        let output = self.table.integral_estimate(self.iteration);
+        Ok(output)
+    }
+
+    fn error(&self) -> f64 {
+        self.error
+    }
+
+    fn result(&self) -> f64 {
+        self.result
+    }
+}
+
+impl IntoIterator for Workspace {
+    type Item = BasicInternal;
+    type IntoIter = IntoIter<BasicInternal>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.heap.into_iter()
+    }
+}
+
 struct ExtrapolationTable {
     number: usize,
     results: [f64; 52],
@@ -179,14 +524,10 @@ struct ExtrapolationTable {
     cached_value_1: f64,
     cached_value_2: f64,
     cached: Cached,
-    state: ExtrapolationState,
-    result: f64,
-    error: f64,
-}
-
-enum ExtrapolationState {
-    On,
-    Off,
+    res_ext: f64,
+    err_ext: f64,
+    ertest: f64,
+    ktmin: usize,
 }
 
 #[derive(Debug, PartialEq)]
@@ -205,9 +546,10 @@ impl ExtrapolationTable {
         let cached_value_1 = 0.0;
         let cached_value_2 = 0.0;
         let cached = Cached::Zero;
-        let state = ExtrapolationState::Off;
-        let result = 0.0;
-        let error = f64::MAX;
+        let res_ext = 0.0;
+        let err_ext = f64::MAX;
+        let ertest = f64::MAX;
+        let ktmin = 0;
 
         Self {
             number,
@@ -216,15 +558,16 @@ impl ExtrapolationTable {
             cached_value_1,
             cached_value_2,
             cached,
-            state,
-            result,
-            error,
+            res_ext,
+            err_ext,
+            ertest,
+            ktmin,
         }
     }
 
     fn initialise(initial: &BasicInternal) -> Self {
         let mut table = Self::new();
-        table.result = initial.result();
+        table.res_ext = initial.result();
         table.append_table(initial.result());
         table
     }
@@ -259,7 +602,8 @@ impl ExtrapolationTable {
     }
 
     // Adapted directly from GSL
-    fn extrapolate(&mut self, value: f64) -> Data {
+    #[must_use]
+    fn extrapolate(&mut self, value: f64) -> (f64, f64) {
         self.append_table(value);
         let n_current = self.number - 1;
 
@@ -361,6 +705,8 @@ impl ExtrapolationTable {
         self.cache(result);
         abserr = f64::max(abserr, 5.0 * f64::EPSILON * f64::abs(result));
 
+        self.ktmin += 1;
+
         (result, abserr)
     }
 
@@ -389,13 +735,85 @@ impl ExtrapolationTable {
         error: f64,
         iterations: usize,
     ) -> Result<(), Error> {
-        if self.extrapolation_count > 5 && self.err_ext < 0.001 * error {
+        if self.ktmin > 5 && self.err_ext < 0.001 * error {
             let output = Adaptive::new(result, error, iterations);
             let kind = Kind::FailedToReachToleranceRoundoffExtrapolation;
             Err(Error::new(kind, output))
         } else {
             Ok(())
         }
+    }
+
+    fn integral_estimate(&self, iterations: usize) -> Adaptive {
+        let result = self.res_ext;
+        let error = self.err_ext;
+        Adaptive::new(result, error, iterations)
+    }
+
+    #[inline]
+    fn extrapolation_error(&self) -> f64 {
+        self.err_ext
+    }
+
+    #[inline]
+    fn extrapolation_result(&self) -> f64 {
+        self.res_ext
+    }
+}
+
+struct InfiniteInterval<I: Integrand> {
+    function: I,
+}
+
+impl<I: Integrand> InfiniteInterval<I> {
+    fn transform_evaluate(&self, t: &f64) -> f64 {
+        let x = (1.0 - t) / t;
+        let y = self.function.evaluate(&x) + self.function.evaluate(&(-x));
+        y / (t.powi(2))
+    }
+}
+
+impl<I: Integrand> Integrand for InfiniteInterval<I> {
+    fn evaluate(&self, x: &f64) -> f64 {
+        self.transform_evaluate(x)
+    }
+}
+
+struct SemiInfiniteIntervalPositive<I: Integrand> {
+    lower: f64,
+    function: I,
+}
+
+impl<I: Integrand> SemiInfiniteIntervalPositive<I> {
+    fn transform_evaluate(&self, t: &f64) -> f64 {
+        let x = self.lower + (1.0 - t) / t;
+        let y = self.function.evaluate(&x);
+        y / (t.powi(2))
+    }
+}
+
+impl<I: Integrand> Integrand for SemiInfiniteIntervalPositive<I> {
+    fn evaluate(&self, x: &f64) -> f64 {
+        self.transform_evaluate(x)
+    }
+}
+
+struct SemiInfiniteIntervalNegative<I: Integrand> {
+    upper: f64,
+    function: I,
+}
+
+impl<I: Integrand> SemiInfiniteIntervalNegative<I> {
+    fn transform_evaluate(&self, t: &f64) -> f64 {
+        let x = self.upper - (1.0 - t) / t;
+        let y = self.function.evaluate(&x);
+        y / (t.powi(2))
+    }
+}
+
+impl<I: Integrand> Integrand for SemiInfiniteIntervalNegative<I> {
+    fn evaluate(&self, x: &f64) -> f64 {
+        self.transform_evaluate(x)
     }
 }
 

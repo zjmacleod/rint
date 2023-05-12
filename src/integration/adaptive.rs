@@ -1,5 +1,7 @@
+use std::collections::binary_heap::{BinaryHeap, IntoIter};
+
 use crate::integration::basic::BasicInternal;
-use crate::integration::workspace::Workspace;
+use crate::integration::subinterval_too_small;
 use crate::integration::{ErrorBound, GaussKronrodBasic};
 use crate::rule::Rule;
 use crate::Integrand;
@@ -178,22 +180,16 @@ where
             return Ok(output);
         }
 
-        let mut workspace = Workspace::adaptive(self.max_iterations, initial);
+        let mut workspace = Workspace::new(self.max_iterations, initial);
 
-        while workspace.iteration() < self.max_iterations {
+        while workspace.iteration < self.max_iterations {
             let previous = workspace.retrieve_largest_error()?;
 
             let [lower, upper] = previous.bisect(self.function, self.rule);
-            workspace.update_limits(lower.lower(), upper.upper());
 
             let (result, error) = workspace.iteration_result_error(&previous, &lower, &upper);
 
             let iteration_tolerance = self.error_bound.tolerance(result);
-
-            if error > iteration_tolerance {
-                workspace.check_roundoff()?;
-                workspace.check_singularity()?;
-            }
 
             workspace.push(lower);
             workspace.push(upper);
@@ -201,9 +197,12 @@ where
             if error <= iteration_tolerance {
                 break;
             }
+
+            workspace.check_roundoff()?;
+            workspace.check_singularity()?;
         }
 
-        let final_iteration = workspace.iteration();
+        let final_iteration = workspace.iteration;
         let output = workspace.integral_estimate();
 
         if final_iteration == self.max_iterations {
@@ -225,15 +224,150 @@ where
     }
 }
 
+struct Workspace {
+    heap: BinaryHeap<BasicInternal>,
+    iteration: usize,
+    roundoff_type1: usize,
+    roundoff_type2: usize,
+    result: f64,
+    error: f64,
+    lower_limit: f64,
+    upper_limit: f64,
+}
+
+impl Workspace {
+    fn new(max_iterations: usize, initial: BasicInternal) -> Self {
+        let mut heap = BinaryHeap::with_capacity(2 * max_iterations + 1);
+
+        let result = initial.result();
+        let error = initial.error();
+        let lower_limit = initial.lower();
+        let upper_limit = initial.upper();
+
+        heap.push(initial);
+
+        Self {
+            heap,
+            iteration: 1,
+            roundoff_type1: 0,
+            roundoff_type2: 0,
+            result,
+            error,
+            lower_limit,
+            upper_limit,
+        }
+    }
+
+    fn retrieve_largest_error(&mut self) -> Result<BasicInternal, Error> {
+        self.iteration += 1;
+        if let Some(previous) = self.pop() {
+            self.lower_limit = previous.lower;
+            self.upper_limit = previous.upper;
+            Ok(previous)
+        } else {
+            let output = Adaptive::empty();
+            let kind = Kind::UninitialisedWorkspace;
+            Err(Error::new(kind, output))
+        }
+    }
+
+    fn iteration_result_error(
+        &mut self,
+        previous: &BasicInternal,
+        lower: &BasicInternal,
+        upper: &BasicInternal,
+    ) -> (f64, f64) {
+        let prev_result = previous.result();
+        let prev_error = previous.error();
+        let new_result = lower.result() + upper.result();
+        let new_error = lower.error() + upper.error();
+
+        if lower.result_asc().to_bits() != lower.error().to_bits()
+            && upper.result_asc().to_bits() != upper.error().to_bits()
+        {
+            let delta = (prev_result - new_result).abs();
+
+            if delta <= 1e-5 * new_result.abs() && new_error >= 0.99 * prev_error {
+                self.roundoff_type1 += 1;
+            }
+            if self.iteration >= 10 && new_error >= prev_error {
+                self.roundoff_type2 += 1;
+            }
+        }
+
+        self.result += new_result - prev_result;
+        self.error += new_error - prev_error;
+        let result = self.result;
+        let error = self.error;
+
+        (result, error)
+    }
+
+    fn check_roundoff(&self) -> Result<(), Error> {
+        if self.roundoff_type1 >= 6 || self.roundoff_type2 >= 20 {
+            let output = self.integral_estimate();
+            let kind = Kind::FailedToReachToleranceRoundoff;
+            return Err(Error::new(kind, output));
+        }
+        Ok(())
+    }
+
+    fn check_singularity(&self) -> Result<(), Error> {
+        let lower_limit = self.lower_limit;
+        let upper_limit = self.upper_limit;
+        let midpoint = (lower_limit + upper_limit) * 0.5;
+        if subinterval_too_small(lower_limit, midpoint, upper_limit) {
+            let output = self.integral_estimate();
+            let kind = Kind::PossibleSingularity {
+                lower: lower_limit,
+                upper: upper_limit,
+            };
+            Err(Error::new(kind, output))
+        } else {
+            Ok(())
+        }
+    }
+
+    fn sum_results(&self) -> f64 {
+        self.heap.iter().fold(0.0f64, |a, v| a + v.result())
+    }
+
+    fn pop(&mut self) -> Option<BasicInternal> {
+        self.heap.pop()
+    }
+
+    fn push(&mut self, integral: BasicInternal) {
+        self.heap.push(integral);
+    }
+
+    fn integral_estimate(&self) -> Adaptive {
+        let error = self.error;
+        let iterations = self.iteration;
+        let result = self.sum_results();
+        Adaptive::new(result, error, iterations)
+    }
+}
+
+impl IntoIterator for Workspace {
+    type Item = BasicInternal;
+    type IntoIter = IntoIter<BasicInternal>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.heap.into_iter()
+    }
+}
+
 #[derive(Debug)]
 pub enum Kind {
     RelativeBoundNegativeOrZero,
     AbsoluteBoundTooSmall,
     InvalidTolerance,
     FailedToReachToleranceRoundoff,
+    FailedToReachToleranceRoundoffExtrapolation,
     MaximumIterationsReached,
     PossibleSingularity { lower: f64, upper: f64 },
     UninitialisedWorkspace,
+    Divergence,
 }
 
 #[derive(Debug)]
@@ -296,6 +430,11 @@ impl std::fmt::Display for Error {
                 let error = self.error();
                 write!(f, "Failed to reach tolerance due to roundoff error. Result: {result}, error: {error}.")
             }
+            Kind::FailedToReachToleranceRoundoffExtrapolation => {
+                let result = self.result();
+                let error = self.error();
+                write!(f, "Failed to reach tolerance due to roundoff error in extrapolation table. Result: {result}, error: {error}.")
+            }
             Kind::MaximumIterationsReached => {
                 let result = self.result();
                 let error = self.error();
@@ -308,6 +447,9 @@ impl std::fmt::Display for Error {
                 let result = self.result();
                 let error = self.error();
                 write!(f, "Possible singularity detected between ({lower},{upper}). Result: {result}, error: {error}.")
+            }
+            Kind::Divergence => {
+                write!(f, "Possible divergence detected in the integrand.")
             }
             Kind::UninitialisedWorkspace => {
                 write!(f, "The integration Workspace was not properly initialised.")

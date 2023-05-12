@@ -358,6 +358,10 @@ impl BasicInternal {
     pub(crate) fn positivity(&self) -> bool {
         self.result.abs() >= (1.0 - 50.0 * f64::EPSILON) * self.result_abs
     }
+
+    pub(crate) fn abs_interval_length(&self) -> f64 {
+        (self.upper() - self.lower()).abs()
+    }
 }
 
 #[cfg(test)]

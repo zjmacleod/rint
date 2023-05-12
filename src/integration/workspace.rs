@@ -10,8 +10,8 @@ pub(crate) enum Routine {
 }
 
 pub(crate) struct AdaptiveData {
-    roundoff_type1: usize,
-    roundoff_type2: usize,
+    pub(crate) roundoff_type1: usize,
+    pub(crate) roundoff_type2: usize,
 }
 
 impl AdaptiveData {
@@ -24,10 +24,10 @@ impl AdaptiveData {
 }
 
 pub(crate) struct SingularityData {
-    roundoff_type1: usize,
-    roundoff_type2: usize,
-    roundoff_type3: usize,
-    extrapolate: bool,
+    pub(crate) roundoff_type1: usize,
+    pub(crate) roundoff_type2: usize,
+    pub(crate) roundoff_type3: usize,
+    pub(crate) extrapolate: bool,
 }
 
 impl SingularityData {
@@ -43,10 +43,10 @@ impl SingularityData {
 
 pub(crate) struct Workspace {
     heap: BinaryHeap<BasicInternal>,
-    pub(crate) iteration: usize,
+    iteration: usize,
     routine: Routine,
-    pub(crate) result: f64,
-    pub(crate) error: f64,
+    result: f64,
+    error: f64,
     lower_limit: f64,
     upper_limit: f64,
 }
@@ -88,9 +88,15 @@ impl Workspace {
         self.iteration
     }
 
+    #[inline]
+    pub(crate) fn routine(&self) -> &Routine {
+        &self.routine
+    }
+
     pub(crate) fn retrieve_largest_error(&mut self) -> Result<BasicInternal, Error> {
         self.iteration += 1;
         if let Some(previous) = self.pop() {
+            self.set_limits(previous.lower, previous.upper);
             Ok(previous)
         } else {
             let output = Adaptive::empty();
@@ -99,19 +105,52 @@ impl Workspace {
         }
     }
 
-    pub(crate) fn update_limits(&mut self, lower: f64, upper: f64) {
+    #[inline]
+    pub(crate) fn set_limits(&mut self, lower: f64, upper: f64) {
         self.lower_limit = lower;
         self.upper_limit = upper;
     }
 
-    pub(crate) fn update_result(&mut self, diff: f64) -> f64 {
-        self.result += diff;
+    #[inline]
+    pub(crate) fn result(&self) -> f64 {
         self.result
     }
 
-    pub(crate) fn update_error(&mut self, diff: f64) -> f64 {
-        self.error += diff;
+    #[inline]
+    pub(crate) fn error(&self) -> f64 {
         self.error
+    }
+
+    #[inline]
+    pub(crate) fn result_mut(&mut self) -> &mut f64 {
+        &mut self.result
+    }
+
+    #[inline]
+    pub(crate) fn error_mut(&mut self) -> &mut f64 {
+        &mut self.error
+    }
+
+    #[inline]
+    pub(crate) fn should_extrapolate(&self) -> bool {
+        match self.routine {
+            Routine::Adaptive(_) => false,
+            Routine::Singularity(ref state) => state.extrapolate,
+        }
+    }
+
+    #[inline]
+    pub(crate) fn extrapolate_true(&mut self) {
+        if let Routine::Singularity(ref mut state) = self.routine {
+            state.extrapolate = true;
+        }
+    }
+
+    #[inline]
+    pub(crate) fn extrapolate_false(&mut self) {
+        if let Routine::Singularity(ref mut state) = self.routine {
+            state.extrapolate = false;
+        }
     }
 
     pub(crate) fn iteration_result_error(
@@ -160,8 +199,10 @@ impl Workspace {
             }
         }
 
-        let result = self.update_result(new_result - prev_result);
-        let error = self.update_error(new_error - prev_error);
+        *self.result_mut() += new_result - prev_result;
+        *self.error_mut() += new_error - prev_error;
+        let result = self.result();
+        let error = self.error();
 
         (result, error)
     }
@@ -208,7 +249,15 @@ impl Workspace {
     }
 
     pub(crate) fn sum_results(&self) -> f64 {
-        self.iter().fold(0.0f64, |a, v| a + v.result())
+        self.heap.iter().fold(0.0f64, |a, v| a + v.result())
+    }
+
+    pub(crate) fn pop(&mut self) -> Option<BasicInternal> {
+        self.heap.pop()
+    }
+
+    pub(crate) fn push(&mut self, integral: BasicInternal) {
+        self.heap.push(integral);
     }
 
     pub(crate) fn integral_estimate(&self) -> Adaptive {
@@ -217,18 +266,19 @@ impl Workspace {
         let result = self.sum_results();
         Adaptive::new(result, error, iterations)
     }
-}
 
-impl std::ops::Deref for Workspace {
-    type Target = BinaryHeap<BasicInternal>;
-    fn deref(&self) -> &Self::Target {
-        &self.heap
+    #[inline]
+    pub(crate) fn lower(&self) -> f64 {
+        self.lower_limit
     }
-}
 
-impl std::ops::DerefMut for Workspace {
-    fn deref_mut(&mut self) -> &mut BinaryHeap<BasicInternal> {
-        &mut self.heap
+    #[inline]
+    pub(crate) fn upper(&self) -> f64 {
+        self.upper_limit
+    }
+
+    pub(crate) fn peek(&self) -> Option<&BasicInternal> {
+        self.heap.peek()
     }
 }
 
