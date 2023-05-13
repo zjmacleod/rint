@@ -11,7 +11,7 @@ pub(crate) struct Function1 {
 }
 
 impl Integrand for Function1 {
-    fn evaluate(&self, x: &f64) -> f64 {
+    fn evaluate(&self, x: f64) -> f64 {
         let alpha = self.alpha;
         x.powf(alpha) * (1.0 / x).ln()
     }
@@ -24,7 +24,7 @@ pub(crate) struct Function2 {
 }
 
 impl Integrand for Function2 {
-    fn evaluate(&self, x: &f64) -> f64 {
+    fn evaluate(&self, x: f64) -> f64 {
         let alpha = self.alpha;
         4.0_f64.powf(-alpha) / ((x - PI / 4.0).powi(2) + 16.0_f64.powf(-alpha))
     }
@@ -37,7 +37,7 @@ pub(crate) struct Function3 {
 }
 
 impl Integrand for Function3 {
-    fn evaluate(&self, x: &f64) -> f64 {
+    fn evaluate(&self, x: f64) -> f64 {
         let alpha = self.alpha;
         (2.0_f64.powf(alpha) * x.sin()).cos()
     }
@@ -49,7 +49,7 @@ pub(crate) struct Function16 {
 }
 
 impl Integrand for Function16 {
-    fn evaluate(&self, x: &f64) -> f64 {
+    fn evaluate(&self, x: f64) -> f64 {
         let alpha = self.alpha;
         if x.to_bits() == 0f64.to_bits() && alpha == 1 {
             1.0

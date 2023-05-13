@@ -36,7 +36,7 @@
 //! }
 //!
 //! impl Integrand for Function1 {
-//!     fn evaluate(&self, x: &f64) -> f64 {
+//!     fn evaluate(&self, x: f64) -> f64 {
 //!         let alpha = self.alpha;
 //!         x.powf(alpha) * (1.0 / x).ln()
 //!     }
@@ -158,7 +158,7 @@ where
         let centre = 0.5 * (self.upper + self.lower);
         let half_length = 0.5 * (self.upper - self.lower);
         let abs_half_length = half_length.abs();
-        let f_centre = self.function.evaluate(&centre);
+        let f_centre = self.function.evaluate(centre);
 
         let initial_kronrod = self.rule.kronrod_centre() * f_centre;
         let initial_gauss = if let Some(v) = self.rule.gauss_centre() {
@@ -183,8 +183,8 @@ where
             )
             .map(|(t, (g, k))| {
                 let abscissa = half_length * t;
-                let rate_plus = self.function.evaluate(&(centre + abscissa));
-                let rate_minus = self.function.evaluate(&(centre - abscissa));
+                let rate_plus = self.function.evaluate(centre + abscissa);
+                let rate_minus = self.function.evaluate(centre - abscissa);
                 let rate = rate_plus + rate_minus;
                 let rate_abs = rate_plus.abs() + rate_minus.abs();
                 function_values.push((k, (rate_plus, rate_minus)));
@@ -201,8 +201,8 @@ where
             .zip(self.rule.extended_weights().into_iter())
             .map(|(t, k)| {
                 let abscissa = half_length * t;
-                let rate_plus = self.function.evaluate(&(centre + abscissa));
-                let rate_minus = self.function.evaluate(&(centre - abscissa));
+                let rate_plus = self.function.evaluate(centre + abscissa);
+                let rate_minus = self.function.evaluate(centre - abscissa);
                 let rate = rate_plus + rate_minus;
                 let rate_abs = rate_plus.abs() + rate_minus.abs();
                 function_values.push((k, (rate_plus, rate_minus)));

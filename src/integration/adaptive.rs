@@ -368,6 +368,7 @@ pub enum Kind {
     PossibleSingularity { lower: f64, upper: f64 },
     UninitialisedWorkspace,
     Divergence,
+    ExtrapolationRoundoffDetected,
 }
 
 #[derive(Debug)]
@@ -453,6 +454,9 @@ impl std::fmt::Display for Error {
             }
             Kind::UninitialisedWorkspace => {
                 write!(f, "The integration Workspace was not properly initialised.")
+            }
+            Kind::ExtrapolationRoundoffDetected => {
+                write!(f, "Error in extrapolation table detected.")
             }
         }
     }

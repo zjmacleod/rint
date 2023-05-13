@@ -146,20 +146,27 @@ where
 
             let iteration_tolerance = self.error_bound.tolerance(result);
 
+            workspace.check_roundoff();
+            workspace.check_singularity();
+
             workspace.push(lower);
             workspace.push(upper);
 
             if error <= iteration_tolerance {
-                return workspace.go_to_115();
+                // XXX check this is calculating from both heap and store
+                return workspace.on_compute_result();
             }
 
-            workspace.check_roundoff()?;
-            workspace.check_singularity()?;
+            if workspace.is_err() {
+                break;
+            }
 
             if workspace.iteration >= self.max_iterations - 1 {
-                // error type 1
+                workspace.set_error_kind(Kind::MaximumIterationsReached);
                 break;
-            } else if workspace.iteration == 2 {
+            }
+
+            if workspace.iteration == 2 {
                 // XXX quadpack multiplies this by 0.375
                 workspace.smallest_interval = half_current_interval;
                 workspace.error_over_large_intervals = workspace.error;
@@ -167,14 +174,6 @@ where
                 workspace.table.append_table(workspace.result);
                 continue;
             }
-
-            // probably don't need this. disallow_extrapolation _only_ set to true
-            // if table.number == 1, which is only satisfied _before_ bisecting the
-            // initial result outside the loop. By the time we reach this point,
-            // table.number >= 2.
-            //if disallow_extrapolation {
-            //    continue;
-            //}
 
             workspace.update_error_over_large_intervals(
                 half_current_interval,
@@ -185,7 +184,7 @@ where
             // peek the next interval with the largest error and check if it
             // is the smallest interval.
             if !workspace.extrapolate {
-                if let Some(next) = workspace.heap.peek() {
+                if let Some(next) = workspace.peek() {
                     if next.abs_interval_length() > workspace.smallest_interval {
                         continue;
                     }
@@ -199,10 +198,10 @@ where
                 workspace.extrapolate = true;
             }
 
-            if !workspace.error_type2 && workspace.error_over_large_intervals > workspace.ertest {
-                // XXX not quite right. This should loop through to find the next
-                // iteration with a larger interval. Store all the other?
-                while let Some(next) = workspace.heap.peek() {
+            if !workspace.extrapolation_error
+                && workspace.error_over_large_intervals > workspace.ertest
+            {
+                while let Some(next) = workspace.peek() {
                     if next.abs_interval_length() > workspace.smallest_interval {
                         continue;
                     }
@@ -210,20 +209,43 @@ where
                         workspace.store(next);
                     };
                 }
+
+                // If we reach here then _all_ the results are now in the store
+                // so we mem::swap the store and the heap and continue on to the
+                // extrapolation.
+                std::mem::swap(&mut workspace.heap, &mut workspace.store);
             }
 
             let (ext_result, ext_error) = workspace.table.extrapolate(result);
+
+            if workspace.table.ktmin > 5
+                && workspace.table.extrapolation_error() < 0.001 * workspace.error
+            {
+                // ier = 5 -> 4
+                workspace.set_error_kind(Kind::ExtrapolationRoundoffDetected);
+            }
+
+            if ext_error < workspace.table.extrapolation_error() {
+                workspace.table.ktmin = 0;
+                workspace.table.err_ext = ext_error;
+                workspace.table.res_ext = ext_result;
+                workspace.correction = workspace.error_over_large_intervals;
+                workspace.table.ertest = self.error_bound.tolerance(ext_result);
+                if workspace.table.err_ext <= workspace.table.ertest {
+                    break;
+                }
+            }
+
+            if let Some(Kind::ExtrapolationRoundoffDetected) = workspace.error_kind {
+                break;
+            }
+
+            workspace.extrapolate = false;
+            workspace.error_over_large_intervals = workspace.error;
+            workspace.heap.append(&mut workspace.store);
         }
 
-        let final_iteration = workspace.iteration;
-        let output = workspace.integral_estimate();
-
-        if final_iteration == self.max_iterations {
-            let kind = Kind::MaximumIterationsReached;
-            Err(Error::new(kind, output))
-        } else {
-            Ok(output)
-        }
+        workspace.on_break()
     }
 
     /// Return the value of the `upper` integration limit.
@@ -237,21 +259,13 @@ where
     }
 }
 
-enum State {
-    Initialised,
-    Extrapolate,
-    Bisect,
-    ComputeResult,
-    CheckError,
-}
-
 struct Workspace {
     heap: BinaryHeap<BasicInternal>,
     iteration: usize,
     roundoff_type1: usize,
     roundoff_type2: usize,
     roundoff_type3: usize,
-    error_type2: bool,
+    extrapolation_error: bool,
     result: f64,
     error: f64,
     lower_limit: f64,
@@ -260,13 +274,12 @@ struct Workspace {
     smallest_interval: f64,
     error_over_large_intervals: f64,
     ertest: f64,
-    state: State,
     positive_integrand: bool,
     initial_abs: f64,
     correction: f64,
     extrapolate: bool,
     store: BinaryHeap<BasicInternal>,
-    num_stored: usize,
+    error_kind: Option<Kind>,
 }
 
 impl Workspace {
@@ -281,11 +294,11 @@ impl Workspace {
         let smallest_interval = initial.abs_interval_length();
         let error_over_large_intervals = error;
         let ertest = f64::MAX;
-        let state = State::Initialised;
         let positive_integrand = initial.positivity();
         let initial_abs = initial.result_abs();
         let correction = 0.0;
         let store = BinaryHeap::with_capacity(2 * max_iterations + 1);
+        let error_kind = None;
 
         heap.push(initial);
 
@@ -295,7 +308,7 @@ impl Workspace {
             roundoff_type1: 0,
             roundoff_type2: 0,
             roundoff_type3: 0,
-            error_type2: false,
+            extrapolation_error: false,
             result,
             error,
             lower_limit,
@@ -304,18 +317,16 @@ impl Workspace {
             smallest_interval,
             error_over_large_intervals,
             ertest,
-            state,
             positive_integrand,
             initial_abs,
             correction,
             extrapolate: false,
             store,
-            num_stored: 0,
+            error_kind,
         }
     }
 
     fn retrieve_largest_error(&mut self) -> Result<BasicInternal, Error> {
-        self.state = State::Bisect;
         self.iteration += 1;
         if let Some(previous) = self.pop() {
             self.lower_limit = previous.lower;
@@ -326,14 +337,6 @@ impl Workspace {
             let output = Adaptive::empty();
             let kind = Kind::UninitialisedWorkspace;
             Err(Error::new(kind, output))
-        }
-    }
-
-    fn next_interval_length(&self) -> f64 {
-        if let Some(next) = self.heap.peek() {
-            next.abs_interval_length()
-        } else {
-            f64::MAX
         }
     }
 
@@ -360,12 +363,11 @@ impl Workspace {
             let delta = (prev_result - new_result).abs();
 
             if delta <= 1e-5 * new_result.abs() && new_error >= 0.99 * prev_error {
-                if let State::Bisect = self.state {
-                    self.roundoff_type1 += 1;
-                } else if let State::Extrapolate = self.state {
+                if self.extrapolate {
                     self.roundoff_type2 += 1;
+                } else {
+                    self.roundoff_type1 += 1;
                 }
-                // in GSL this next conditional is _always_ run, in QUADPACK it is not
             } else if self.iteration > 10 && new_error > prev_error {
                 self.roundoff_type3 += 1;
             }
@@ -374,37 +376,26 @@ impl Workspace {
         self.result += new_result - prev_result;
         self.error += new_error - prev_error;
 
-        [self.result(), self.error()]
+        [self.result, self.error]
     }
 
-    // TODO Change these to go_to_100
-    fn check_roundoff(&mut self) -> Result<(), Error> {
+    fn check_roundoff(&mut self) {
         if self.roundoff_type1 + self.roundoff_type2 >= 10 || self.roundoff_type3 >= 20 {
-            let output = self.integral_estimate();
-            let kind = Kind::FailedToReachToleranceRoundoff;
-            return Err(Error::new(kind, output));
-        } // goto 100
+            self.set_error_kind(Kind::FailedToReachToleranceRoundoff);
+        }
 
         if self.roundoff_type2 >= 5 {
-            self.error_type2 = true;
+            self.extrapolation_error = true;
         }
-        Ok(())
     }
 
-    // TODO Change these to go_to_100
-    fn check_singularity(&self) -> Result<(), Error> {
-        let lower_limit = self.lower_limit;
-        let upper_limit = self.upper_limit;
-        let midpoint = (lower_limit + upper_limit) * 0.5;
-        if subinterval_too_small(lower_limit, midpoint, upper_limit) {
-            let output = self.integral_estimate();
-            let kind = Kind::PossibleSingularity {
-                lower: lower_limit,
-                upper: upper_limit,
-            };
-            Err(Error::new(kind, output))
-        } else {
-            Ok(())
+    fn check_singularity(&mut self) {
+        let lower = self.lower_limit;
+        let upper = self.upper_limit;
+        let midpoint = (lower + upper) * 0.5;
+
+        if subinterval_too_small(lower, midpoint, upper) {
+            self.set_error_kind(Kind::PossibleSingularity { lower, upper });
         }
     }
 
@@ -416,7 +407,6 @@ impl Workspace {
 
     fn store(&mut self, integral: BasicInternal) {
         self.store.push(integral);
-        self.num_stored += 1;
     }
 
     fn pop(&mut self) -> Option<BasicInternal> {
@@ -425,6 +415,10 @@ impl Workspace {
 
     fn push(&mut self, integral: BasicInternal) {
         self.heap.push(integral);
+    }
+
+    fn peek(&self) -> Option<&BasicInternal> {
+        self.heap.peek()
     }
 
     fn integral_estimate(&self) -> Adaptive {
@@ -447,64 +441,73 @@ impl Workspace {
         }
     }
 
-    // XXX This function is entered if:
-    //  - There is an error ANYWHERE in the bisection
-    //      + If _no_ extrapolation has occurred, this goes to 115
-    //  - The error output from extrapolation < extrapolation tolerance
-    //  - If there is an error in the extrapolation
-    fn go_to_100(&self) -> Result<Adaptive, Error> {
-        if self.table.extrapolation_error() == f64::MAX {
-            self.go_to_115()
+    fn on_compute_result(self) -> Result<Adaptive, Error> {
+        let output = self.integral_estimate();
+
+        if let Some(kind) = self.error_kind {
+            Err(Error::new(kind, output))
         } else {
-            // TODO
-            Ok(Adaptive::empty())
+            Ok(output)
         }
     }
 
-    fn go_to_105(&self) -> Result<Adaptive, Error> {
-        if self.table.extrapolation_error() / self.table.extrapolation_result().abs()
-            > self.error / self.result.abs()
-        {
-            self.go_to_115()
-        } else {
-            self.go_to_110()
-        }
-    }
-
-    // test on divergence
-    fn go_to_110(&self) -> Result<Adaptive, Error> {
+    fn on_return_error(self) -> Result<Adaptive, Error> {
         let output = self.table.integral_estimate(self.iteration);
+
+        if let Some(kind) = self.error_kind {
+            Err(Error::new(kind, output))
+        } else {
+            Ok(output)
+        }
+    }
+
+    fn on_break(mut self) -> Result<Adaptive, Error> {
+        if self.table.err_ext == f64::MAX {
+            return self.on_compute_result();
+        }
+
+        if self.is_err() || self.extrapolation_error {
+            if self.extrapolation_error {
+                self.table.err_ext += self.correction;
+            }
+
+            if !self.is_err() {
+                self.set_error_kind(Kind::ExtrapolationRoundoffDetected);
+            }
+
+            if self.table.res_ext != 0.0 && self.result != 0.0 {
+                if self.table.err_ext / self.table.res_ext.abs() > self.error / self.result.abs() {
+                    return self.on_compute_result();
+                }
+            } else if self.table.err_ext > self.error {
+                return self.on_compute_result();
+            } else if self.result == 0.0 {
+                return self.on_return_error();
+            }
+        }
+
         let max_area = f64::max(self.table.extrapolation_result().abs(), self.result.abs());
+
         if !self.positive_integrand && max_area < 0.01 * self.initial_abs {
-            return Ok(output);
+            return self.on_return_error();
         }
 
         let ratio = self.table.extrapolation_result() / self.result;
 
-        if ratio < 0.01 || ratio > 100.0 || self.error > self.result.abs() {
-            let kind = Kind::Divergence;
-            return Err(Error::new(kind, output));
+        if !(0.01..=100.0).contains(&ratio) || self.error > self.result.abs() {
+            // ier = 6 -> 5
+            self.set_error_kind(Kind::Divergence);
         }
 
-        Ok(output)
+        self.on_return_error()
     }
 
-    fn go_to_115(&self) -> Result<Adaptive, Error> {
-        let output = self.integral_estimate();
-        Ok(output)
+    fn is_err(&self) -> bool {
+        self.error_kind.is_some()
     }
 
-    fn go_to_130(&self) -> Result<Adaptive, Error> {
-        let output = self.table.integral_estimate(self.iteration);
-        Ok(output)
-    }
-
-    fn error(&self) -> f64 {
-        self.error
-    }
-
-    fn result(&self) -> f64 {
-        self.result
+    fn set_error_kind(&mut self, kind: Kind) {
+        self.error_kind = Some(kind);
     }
 }
 
@@ -729,21 +732,6 @@ impl ExtrapolationTable {
         self
     }
 
-    fn check_extrapolation_roundoff(
-        &self,
-        result: f64,
-        error: f64,
-        iterations: usize,
-    ) -> Result<(), Error> {
-        if self.ktmin > 5 && self.err_ext < 0.001 * error {
-            let output = Adaptive::new(result, error, iterations);
-            let kind = Kind::FailedToReachToleranceRoundoffExtrapolation;
-            Err(Error::new(kind, output))
-        } else {
-            Ok(())
-        }
-    }
-
     fn integral_estimate(&self, iterations: usize) -> Adaptive {
         let result = self.res_ext;
         let error = self.err_ext;
@@ -766,15 +754,15 @@ struct InfiniteInterval<I: Integrand> {
 }
 
 impl<I: Integrand> InfiniteInterval<I> {
-    fn transform_evaluate(&self, t: &f64) -> f64 {
+    fn transform_evaluate(&self, t: f64) -> f64 {
         let x = (1.0 - t) / t;
-        let y = self.function.evaluate(&x) + self.function.evaluate(&(-x));
+        let y = self.function.evaluate(x) + self.function.evaluate(-x);
         y / (t.powi(2))
     }
 }
 
 impl<I: Integrand> Integrand for InfiniteInterval<I> {
-    fn evaluate(&self, x: &f64) -> f64 {
+    fn evaluate(&self, x: f64) -> f64 {
         self.transform_evaluate(x)
     }
 }
@@ -785,15 +773,15 @@ struct SemiInfiniteIntervalPositive<I: Integrand> {
 }
 
 impl<I: Integrand> SemiInfiniteIntervalPositive<I> {
-    fn transform_evaluate(&self, t: &f64) -> f64 {
+    fn transform_evaluate(&self, t: f64) -> f64 {
         let x = self.lower + (1.0 - t) / t;
-        let y = self.function.evaluate(&x);
+        let y = self.function.evaluate(x);
         y / (t.powi(2))
     }
 }
 
 impl<I: Integrand> Integrand for SemiInfiniteIntervalPositive<I> {
-    fn evaluate(&self, x: &f64) -> f64 {
+    fn evaluate(&self, x: f64) -> f64 {
         self.transform_evaluate(x)
     }
 }
@@ -804,15 +792,15 @@ struct SemiInfiniteIntervalNegative<I: Integrand> {
 }
 
 impl<I: Integrand> SemiInfiniteIntervalNegative<I> {
-    fn transform_evaluate(&self, t: &f64) -> f64 {
+    fn transform_evaluate(&self, t: f64) -> f64 {
         let x = self.upper - (1.0 - t) / t;
-        let y = self.function.evaluate(&x);
+        let y = self.function.evaluate(x);
         y / (t.powi(2))
     }
 }
 
 impl<I: Integrand> Integrand for SemiInfiniteIntervalNegative<I> {
-    fn evaluate(&self, x: &f64) -> f64 {
+    fn evaluate(&self, x: f64) -> f64 {
         self.transform_evaluate(x)
     }
 }

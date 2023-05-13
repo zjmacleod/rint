@@ -21,11 +21,11 @@ pub mod rule;
 ///     std_dev: f64,
 /// }
 /// impl Integrand for GaussianExponential {
-///     fn evaluate(&self, x: &f64) -> f64 {
+///     fn evaluate(&self, x: f64) -> f64 {
 ///         self.amplitude * f64::exp(-(x - self.mean).powi(2) / (2.0 * self.std_dev.powi(2)))
 ///     }
 /// }
 ///```
 pub trait Integrand {
-    fn evaluate(&self, x: &f64) -> f64;
+    fn evaluate(&self, x: f64) -> f64;
 }

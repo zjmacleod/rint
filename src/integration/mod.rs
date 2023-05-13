@@ -2,8 +2,6 @@ pub mod adaptive;
 pub mod basic;
 pub mod singularity;
 
-pub(crate) mod workspace;
-
 pub use adaptive::Adaptive;
 pub use adaptive::GaussKronrodAdaptive;
 pub use basic::Basic;
