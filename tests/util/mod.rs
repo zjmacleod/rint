@@ -43,6 +43,19 @@ impl Integrand for Function3 {
     }
 }
 
+/* f11(x) = log(1/x)^(alpha - 1) */
+/* integ(f11,x,0,1) = Gamma(alpha) */
+pub(crate) struct Function11 {
+    pub(crate) alpha: f64,
+}
+
+impl Integrand for Function11 {
+    fn evaluate(&self, x: f64) -> f64 {
+        let alpha = self.alpha;
+        f64::ln(1.0 / x).powf(alpha - 1.0)
+    }
+}
+
 /* f16(x) = x^(alpha - 1) / (1 + 10 x)^2*/
 pub(crate) struct Function16 {
     pub(crate) alpha: i32,
