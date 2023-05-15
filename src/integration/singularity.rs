@@ -43,7 +43,7 @@ where
     ///     - `ErrorBound::Absolute(v) where v > 0.0`,
     ///     - `ErrorBound::Relative(v) where v > 50.0 * f64::EPSILON`,
     ///     - `ErrorBound::Either { absolute, relative } where absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
-    pub fn new(
+    fn new(
         lower: f64,
         upper: f64,
         error_bound: ErrorBound,
@@ -243,6 +243,73 @@ where
     /// Return the value of the `lower` integration limit.
     pub fn lower(&self) -> f64 {
         self.lower
+    }
+}
+
+impl<I> GaussKronrodAdaptiveSingularity<I, GaussKronrod21>
+where
+    I: Integrand,
+{
+    /// # Errors
+    pub fn general(
+        lower: f64,
+        upper: f64,
+        error_bound: ErrorBound,
+        function: I,
+        max_iterations: usize,
+    ) -> Result<Self, Error> {
+        let rule = GaussKronrod21;
+        Self::new(lower, upper, error_bound, rule, function, max_iterations)
+    }
+}
+
+impl<I> GaussKronrodAdaptiveSingularity<InfiniteInterval<I>, GaussKronrod15>
+where
+    I: Integrand,
+{
+    /// # Errors
+    pub fn infinite(
+        error_bound: ErrorBound,
+        function: I,
+        max_iterations: usize,
+    ) -> Result<Self, Error> {
+        let rule = GaussKronrod15;
+        let transformed = InfiniteInterval::new(function);
+        Self::new(0.0, 1.0, error_bound, rule, transformed, max_iterations)
+    }
+}
+
+impl<I> GaussKronrodAdaptiveSingularity<SemiInfiniteIntervalPositive<I>, GaussKronrod15>
+where
+    I: Integrand,
+{
+    /// # Errors
+    pub fn semi_infinite_positive(
+        lower: f64,
+        error_bound: ErrorBound,
+        function: I,
+        max_iterations: usize,
+    ) -> Result<Self, Error> {
+        let rule = GaussKronrod15;
+        let transformed = SemiInfiniteIntervalPositive::new(function, lower);
+        Self::new(0.0, 1.0, error_bound, rule, transformed, max_iterations)
+    }
+}
+
+impl<I> GaussKronrodAdaptiveSingularity<SemiInfiniteIntervalNegative<I>, GaussKronrod15>
+where
+    I: Integrand,
+{
+    /// # Errors
+    pub fn semi_infinite_negative(
+        upper: f64,
+        error_bound: ErrorBound,
+        function: I,
+        max_iterations: usize,
+    ) -> Result<Self, Error> {
+        let rule = GaussKronrod15;
+        let transformed = SemiInfiniteIntervalNegative::new(function, upper);
+        Self::new(0.0, 1.0, error_bound, rule, transformed, max_iterations)
     }
 }
 
@@ -737,7 +804,7 @@ impl ExtrapolationTable {
     }
 }
 
-struct InfiniteInterval<I: Integrand> {
+pub struct InfiniteInterval<I: Integrand> {
     function: I,
 }
 
@@ -749,7 +816,7 @@ impl<I: Integrand> InfiniteInterval<I> {
     fn transform_evaluate(&self, t: f64) -> f64 {
         let x = (1.0 - t) / t;
         let y = self.function.evaluate(x) + self.function.evaluate(-x);
-        y / (t.powi(2))
+        (y / t) / t
     }
 }
 
@@ -759,7 +826,7 @@ impl<I: Integrand> Integrand for InfiniteInterval<I> {
     }
 }
 
-struct SemiInfiniteIntervalPositive<I: Integrand> {
+pub struct SemiInfiniteIntervalPositive<I: Integrand> {
     lower: f64,
     function: I,
 }
@@ -782,7 +849,7 @@ impl<I: Integrand> Integrand for SemiInfiniteIntervalPositive<I> {
     }
 }
 
-struct SemiInfiniteIntervalNegative<I: Integrand> {
+pub struct SemiInfiniteIntervalNegative<I: Integrand> {
     upper: f64,
     function: I,
 }

@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::f64::consts::PI;
 
 use gauss_kronrod_integration::Integrand;
@@ -56,9 +58,31 @@ impl Integrand for Function11 {
     }
 }
 
+pub(crate) struct Function15 {
+    pub(crate) alpha: i32,
+}
+
+impl Integrand for Function15 {
+    fn evaluate(&self, x: f64) -> f64 {
+        let alpha = self.alpha;
+        x.powi(2) * f64::exp(-2.0f64.powi(-alpha) * x)
+    }
+}
+
 /* f16(x) = x^(alpha - 1) / (1 + 10 x)^2*/
 pub(crate) struct Function16 {
     pub(crate) alpha: i32,
+}
+
+/* myfn1(x) = exp(-x - x^2) */
+/* integ(myfn1,x,-inf,inf) = sqrt(pi) exp(-1/4) */
+
+pub(crate) struct MyFunciton1;
+
+impl Integrand for MyFunciton1 {
+    fn evaluate(&self, x: f64) -> f64 {
+        f64::exp(-x - x.powi(2))
+    }
 }
 
 impl Integrand for Function16 {
@@ -71,6 +95,16 @@ impl Integrand for Function16 {
         } else {
             x.powi(alpha - 1) / (1.0 + 10.0 * x).powi(2)
         }
+    }
+}
+
+/* f455(x) = log(x)/(1+100*x^2) */
+/* integ(f455,x,0,inf) = -log(10)/20 */
+pub(crate) struct Function455;
+
+impl Integrand for Function455 {
+    fn evaluate(&self, x: f64) -> f64 {
+        x.ln() / (1.0 + 100.0 * x.powi(2))
     }
 }
 
@@ -118,40 +152,40 @@ pub(crate) fn test_relative_error(
     Ok(())
 }
 
-pub(crate) fn test_absolute_error(
-    calculated: f64,
-    target: f64,
-    absolute_error: f64,
-    description: &str,
-) -> Result<(), String> {
-    if calculated.is_nan() || target.is_nan() {
-        if calculated.is_nan() != calculated.is_nan() {
-            return Err(format!(
-                "Failed test {description}: calculated.is_nan() != target.is_nan()"
-            ));
-        }
-    }
-
-    if calculated.is_infinite() || target.is_infinite() {
-        if calculated.is_infinite() != calculated.is_infinite() {
-            return Err(format!(
-                "Failed test {description}: calculated.is_infinite() != target.is_infinite()"
-            ));
-        }
-    }
-
-    if (target > 0.0 && target < f64::MIN_POSITIVE) || (target < 0.0 && target > -f64::MIN_POSITIVE)
-    {
-        return Err(format!(
-            "Failed test {description}: target value smaller than f64::MIN_POSITIVE"
-        ));
-    } else {
-        if (calculated - target).abs() > absolute_error {
-            return Err(format!("Failed test {description}: calculated absolute error is smaller than target relative error"));
-        }
-    }
-    Ok(())
-}
+//pub(crate) fn test_absolute_error(
+//    calculated: f64,
+//    target: f64,
+//    absolute_error: f64,
+//    description: &str,
+//) -> Result<(), String> {
+//    if calculated.is_nan() || target.is_nan() {
+//        if calculated.is_nan() != calculated.is_nan() {
+//            return Err(format!(
+//                "Failed test {description}: calculated.is_nan() != target.is_nan()"
+//            ));
+//        }
+//    }
+//
+//    if calculated.is_infinite() || target.is_infinite() {
+//        if calculated.is_infinite() != calculated.is_infinite() {
+//            return Err(format!(
+//                "Failed test {description}: calculated.is_infinite() != target.is_infinite()"
+//            ));
+//        }
+//    }
+//
+//    if (target > 0.0 && target < f64::MIN_POSITIVE) || (target < 0.0 && target > -f64::MIN_POSITIVE)
+//    {
+//        return Err(format!(
+//            "Failed test {description}: target value smaller than f64::MIN_POSITIVE"
+//        ));
+//    } else {
+//        if (calculated - target).abs() > absolute_error {
+//            return Err(format!("Failed test {description}: calculated absolute error is smaller than target relative error"));
+//        }
+//    }
+//    Ok(())
+//}
 
 pub(crate) fn test_int(calculated: usize, target: usize, description: &str) -> Result<(), String> {
     if calculated == target {
