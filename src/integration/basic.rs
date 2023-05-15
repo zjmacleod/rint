@@ -122,7 +122,7 @@ impl Basic {
 /// The integration routine tries to be as efficient as possible by reusing function
 /// evaluations of the lower n-point Gauss integration in the calculation of the higher-order
 /// Kronrod extension.
-pub struct GaussKronrodBasic<'a, I, R>
+pub struct GaussKronrodBasic<I, R>
 where
     I: Integrand,
     R: Rule,
@@ -130,10 +130,10 @@ where
     lower: f64,
     upper: f64,
     rule: R,
-    function: &'a I,
+    function: I,
 }
 
-impl<'a, I, R> GaussKronrodBasic<'a, I, R>
+impl<I, R> GaussKronrodBasic<I, R>
 where
     I: Integrand,
     R: Rule,
@@ -144,7 +144,7 @@ where
     /// [`Integrand`] trait and selects a Gauss-Kronrod quadrature [`Rule`],
     /// `rule`, to integrate the function with between the integration limis,
     /// `upper` and `lower`.
-    pub fn new(lower: f64, upper: f64, rule: R, function: &'a I) -> Self {
+    pub fn new(lower: f64, upper: f64, rule: R, function: I) -> Self {
         Self {
             lower,
             upper,

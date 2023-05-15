@@ -3,7 +3,7 @@ use std::collections::binary_heap::{BinaryHeap, IntoIter};
 use crate::integration::adaptive::{Error, Kind};
 use crate::integration::basic::BasicInternal;
 use crate::integration::{subinterval_too_small, Adaptive, ErrorBound, GaussKronrodBasic};
-use crate::rule::Rule;
+use crate::rule::{GaussKronrod15, GaussKronrod21, Rule};
 use crate::Integrand;
 
 /// An integral with singularities to be evaluated with an adaptive Gauss-Kronrod quadrature.
@@ -14,7 +14,7 @@ use crate::Integrand;
 /// [`ErrorBound::Relative`] to work to a specified relative error,
 /// or [`ErrorBound::Either`] to return a result as soon as _either_ the relative
 /// or absolute error bound has been satisfied.
-pub struct GaussKronrodAdaptiveSingularity<'a, I, R>
+pub struct GaussKronrodAdaptiveSingularity<I, R>
 where
     I: Integrand,
     R: Rule,
@@ -23,11 +23,11 @@ where
     upper: f64,
     error_bound: ErrorBound,
     rule: R,
-    function: &'a I,
+    function: I,
     max_iterations: usize,
 }
 
-impl<'a, I, R> GaussKronrodAdaptiveSingularity<'a, I, R>
+impl<I, R> GaussKronrodAdaptiveSingularity<I, R>
 where
     I: Integrand,
     R: Rule,
@@ -48,7 +48,7 @@ where
         upper: f64,
         error_bound: ErrorBound,
         rule: R,
-        function: &'a I,
+        function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
         match error_bound {
@@ -119,7 +119,7 @@ where
 
     /// # Errors
     pub fn integrate(&self) -> Result<Adaptive, Error> {
-        let initial = GaussKronrodBasic::new(self.lower, self.upper, self.rule, self.function)
+        let initial = GaussKronrodBasic::new(self.lower, self.upper, self.rule, &self.function)
             .integrate_internal();
 
         if let Some(output) = self.check_initial_integration(&initial)? {
@@ -133,7 +133,7 @@ where
 
             let current_interval = previous.abs_interval_length();
 
-            let [lower, upper] = previous.bisect(self.function, self.rule);
+            let [lower, upper] = previous.bisect(&self.function, self.rule);
 
             let previous_error = previous.error();
             let iteration_error = lower.error() + upper.error();
@@ -736,6 +736,10 @@ struct InfiniteInterval<I: Integrand> {
 }
 
 impl<I: Integrand> InfiniteInterval<I> {
+    fn new(function: I) -> Self {
+        Self { function }
+    }
+
     fn transform_evaluate(&self, t: f64) -> f64 {
         let x = (1.0 - t) / t;
         let y = self.function.evaluate(x) + self.function.evaluate(-x);
@@ -755,6 +759,10 @@ struct SemiInfiniteIntervalPositive<I: Integrand> {
 }
 
 impl<I: Integrand> SemiInfiniteIntervalPositive<I> {
+    fn new(function: I, lower: f64) -> Self {
+        Self { lower, function }
+    }
+
     fn transform_evaluate(&self, t: f64) -> f64 {
         let x = self.lower + (1.0 - t) / t;
         let y = self.function.evaluate(x);
@@ -774,6 +782,10 @@ struct SemiInfiniteIntervalNegative<I: Integrand> {
 }
 
 impl<I: Integrand> SemiInfiniteIntervalNegative<I> {
+    fn new(function: I, upper: f64) -> Self {
+        Self { upper, function }
+    }
+
     fn transform_evaluate(&self, t: f64) -> f64 {
         let x = self.upper - (1.0 - t) / t;
         let y = self.function.evaluate(x);

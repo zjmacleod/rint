@@ -29,3 +29,9 @@ pub mod rule;
 pub trait Integrand {
     fn evaluate(&self, x: f64) -> f64;
 }
+
+impl<I: Integrand> Integrand for &I {
+    fn evaluate(&self, x: f64) -> f64 {
+        I::evaluate(self, x)
+    }
+}

@@ -64,7 +64,7 @@ impl Adaptive {
 /// [`ErrorBound::Relative`] to work to a specified relative error,
 /// or [`ErrorBound::Either`] to return a result as soon as _either_ the relative
 /// or absolute error bound has been satisfied.
-pub struct GaussKronrodAdaptive<'a, I, R>
+pub struct GaussKronrodAdaptive<I, R>
 where
     I: Integrand,
     R: Rule,
@@ -73,11 +73,11 @@ where
     upper: f64,
     error_bound: ErrorBound,
     rule: R,
-    function: &'a I,
+    function: I,
     max_iterations: usize,
 }
 
-impl<'a, I, R> GaussKronrodAdaptive<'a, I, R>
+impl<I, R> GaussKronrodAdaptive<I, R>
 where
     I: Integrand,
     R: Rule,
@@ -98,7 +98,7 @@ where
         upper: f64,
         error_bound: ErrorBound,
         rule: R,
-        function: &'a I,
+        function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
         match error_bound {
@@ -173,7 +173,7 @@ where
     /// Integration can fail if user suplied tolerance cannot be achieved within the maximum number
     /// of iterations.
     pub fn integrate(&self) -> Result<Adaptive, Error> {
-        let initial = GaussKronrodBasic::new(self.lower, self.upper, self.rule, self.function)
+        let initial = GaussKronrodBasic::new(self.lower, self.upper, self.rule, &self.function)
             .integrate_internal();
 
         if let Some(output) = self.check_initial_integration(&initial)? {
@@ -185,7 +185,7 @@ where
         while workspace.iteration < self.max_iterations {
             let previous = workspace.retrieve_largest_error()?;
 
-            let [lower, upper] = previous.bisect(self.function, self.rule);
+            let [lower, upper] = previous.bisect(&self.function, self.rule);
 
             let (result, error) = workspace.iteration_result_error(&previous, &lower, &upper);
 
