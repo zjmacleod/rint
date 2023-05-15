@@ -52,6 +52,7 @@ fn rescale_error(error: f64, result_abs: f64, result_asc: f64) -> f64 {
     error
 }
 
+#[inline]
 pub(crate) fn subinterval_too_small(lower: f64, midpoint: f64, upper: f64) -> bool {
     let eps = f64::EPSILON;
     let min = f64::MIN_POSITIVE;

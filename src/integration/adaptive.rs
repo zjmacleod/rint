@@ -47,7 +47,7 @@ impl Adaptive {
         Self::new(result, error, iterations)
     }
 
-    pub(crate) fn empty() -> Self {
+    pub(crate) fn unevaluated() -> Self {
         Self {
             result: f64::NAN,
             error: f64::NAN,
@@ -104,23 +104,20 @@ where
         match error_bound {
             ErrorBound::Absolute(v) => {
                 if v <= 0.0 {
-                    let output = Adaptive::empty();
                     let kind = Kind::RelativeBoundNegativeOrZero;
-                    return Err(Error::new(kind, output));
+                    return Err(Error::unevaluated(kind));
                 }
             }
             ErrorBound::Relative(v) => {
                 if v < 50.0 * f64::EPSILON {
-                    let output = Adaptive::empty();
                     let kind = Kind::AbsoluteBoundTooSmall;
-                    return Err(Error::new(kind, output));
+                    return Err(Error::unevaluated(kind));
                 }
             }
             ErrorBound::Either { absolute, relative } => {
                 if absolute <= 0.0 && relative < 50.0 * f64::EPSILON {
-                    let output = Adaptive::empty();
                     let kind = Kind::InvalidTolerance;
-                    return Err(Error::new(kind, output));
+                    return Err(Error::unevaluated(kind));
                 }
             }
         }
@@ -265,9 +262,8 @@ impl Workspace {
             self.upper_limit = previous.upper;
             Ok(previous)
         } else {
-            let output = Adaptive::empty();
             let kind = Kind::UninitialisedWorkspace;
-            Err(Error::new(kind, output))
+            Err(Error::unevaluated(kind))
         }
     }
 
@@ -405,6 +401,11 @@ impl Error {
     #[must_use]
     pub fn iterations(&self) -> usize {
         self.integral.iterations()
+    }
+
+    pub(crate) fn unevaluated(kind: Kind) -> Self {
+        let output = Adaptive::unevaluated();
+        Error::new(kind, output)
     }
 }
 

@@ -54,23 +54,20 @@ where
         match error_bound {
             ErrorBound::Absolute(v) => {
                 if v <= 0.0 {
-                    let partial_result = Adaptive::new(0.0, 0.0, 0);
                     let kind = Kind::RelativeBoundNegativeOrZero;
-                    return Err(Error::new(kind, partial_result));
+                    return Err(Error::unevaluated(kind));
                 }
             }
             ErrorBound::Relative(v) => {
                 if v < 50.0 * f64::EPSILON {
-                    let partial_result = Adaptive::new(0.0, 0.0, 0);
                     let kind = Kind::AbsoluteBoundTooSmall;
-                    return Err(Error::new(kind, partial_result));
+                    return Err(Error::unevaluated(kind));
                 }
             }
             ErrorBound::Either { absolute, relative } => {
                 if absolute <= 0.0 && relative < 50.0 * f64::EPSILON {
-                    let partial_result = Adaptive::new(0.0, 0.0, 0);
                     let kind = Kind::InvalidTolerance;
-                    return Err(Error::new(kind, partial_result));
+                    return Err(Error::unevaluated(kind));
                 }
             }
         }
@@ -142,14 +139,10 @@ where
 
             let iteration_tolerance = self.error_bound.tolerance(result);
 
-            workspace.check_roundoff();
-            workspace.check_singularity();
-
-            workspace.push(lower);
-            workspace.push(upper);
+            workspace.update(lower, upper);
 
             if error <= iteration_tolerance {
-                return workspace.on_compute_result();
+                return workspace.compute_result();
             }
 
             if workspace.is_err() {
@@ -163,13 +156,13 @@ where
 
             if workspace.iteration == 2 {
                 workspace.smallest_interval *= 0.375;
-                workspace.error_over_large_intervals = workspace.error;
-                workspace.ertest = iteration_tolerance;
+                workspace.large_interval_error = workspace.error;
+                workspace.table.tolerance = iteration_tolerance;
                 workspace.table.append_table(workspace.result);
                 continue;
             }
 
-            workspace.update_error_over_large_intervals(
+            workspace.update_large_interval_error(
                 current_interval,
                 previous_error,
                 iteration_error,
@@ -192,8 +185,8 @@ where
                 workspace.extrapolate = true;
             }
 
-            if !workspace.extrapolation_error
-                && workspace.error_over_large_intervals > workspace.ertest
+            if !workspace.table.error_detected
+                && workspace.large_interval_error > workspace.table.tolerance
             {
                 if workspace.increase_nrmax() {
                     continue;
@@ -205,19 +198,19 @@ where
                 std::mem::swap(&mut workspace.heap, &mut workspace.store);
             }
 
-            let (ext_result, ext_error) = workspace.table.extrapolate(result);
+            let [ext_result, ext_error] = workspace.table.extrapolate(result);
 
-            if workspace.table.ktmin > 5 && workspace.table.err_ext < 0.001 * workspace.error {
+            if workspace.table.ktmin > 5 && workspace.table.error < 0.001 * workspace.error {
                 workspace.set_error_kind(Kind::ExtrapolationRoundoffDetected);
             }
 
-            if ext_error < workspace.table.err_ext {
+            if ext_error < workspace.table.error {
                 workspace.table.ktmin = 0;
-                workspace.table.err_ext = ext_error;
-                workspace.table.res_ext = ext_result;
-                workspace.correction = workspace.error_over_large_intervals;
-                workspace.table.ertest = self.error_bound.tolerance(ext_result);
-                if workspace.table.err_ext <= workspace.table.ertest {
+                workspace.table.error = ext_error;
+                workspace.table.result = ext_result;
+                workspace.table.correction = workspace.large_interval_error;
+                workspace.table.tolerance = self.error_bound.tolerance(ext_result);
+                if workspace.table.error <= workspace.table.tolerance {
                     break;
                 }
             }
@@ -226,13 +219,10 @@ where
                 break;
             }
 
-            workspace.extrapolate = false;
-            workspace.error_over_large_intervals = workspace.error;
-            workspace.heap.append(&mut workspace.store);
-            workspace.smallest_interval *= 0.5;
+            workspace.prepare_next_iteration();
         }
 
-        workspace.on_break()
+        workspace.check_error_and_compute()
     }
 
     /// Return the value of the `upper` integration limit.
@@ -316,67 +306,55 @@ where
 struct Workspace {
     heap: BinaryHeap<BasicInternal>,
     iteration: usize,
-    roundoff_type1: usize,
-    roundoff_type2: usize,
-    roundoff_type3: usize,
-    extrapolation_error: bool,
     result: f64,
     error: f64,
-    lower_limit: f64,
-    upper_limit: f64,
+    large_interval_error: f64,
     table: ExtrapolationTable,
     smallest_interval: f64,
-    error_over_large_intervals: f64,
-    ertest: f64,
-    positive_integrand: bool,
-    initial_abs: f64,
-    correction: f64,
     extrapolate: bool,
     store: BinaryHeap<BasicInternal>,
     error_kind: Option<Kind>,
+    initial_absolute_result: f64,
+    positive_integrand: bool,
+    roundoff_count: usize,
+    roundoff_on_high_iteration_count: usize,
 }
 
 impl Workspace {
     fn new(max_iterations: usize, initial: BasicInternal) -> Self {
         let mut heap = BinaryHeap::with_capacity(2 * max_iterations + 1);
 
+        let iteration = 1;
         let result = initial.result();
         let error = initial.error();
-        let lower_limit = initial.lower();
-        let upper_limit = initial.upper();
+        let large_interval_error = error;
         let table = ExtrapolationTable::initialise(&initial);
         let smallest_interval = initial.abs_interval_length();
-        let error_over_large_intervals = error;
-        let ertest = f64::MAX;
-        let positive_integrand = initial.positivity();
-        let initial_abs = initial.result_abs();
-        let correction = 0.0;
+        let extrapolate = false;
         let store = BinaryHeap::with_capacity(2 * max_iterations + 1);
         let error_kind = None;
+        let initial_absolute_result = initial.result_abs();
+        let positive_integrand = initial.positivity();
+        let roundoff_count = 0;
+        let roundoff_on_high_iteration_count = 0;
 
         heap.push(initial);
 
         Self {
             heap,
-            iteration: 1,
-            roundoff_type1: 0,
-            roundoff_type2: 0,
-            roundoff_type3: 0,
-            extrapolation_error: false,
+            iteration,
             result,
             error,
-            lower_limit,
-            upper_limit,
+            large_interval_error,
             table,
             smallest_interval,
-            error_over_large_intervals,
-            ertest,
-            positive_integrand,
-            initial_abs,
-            correction,
-            extrapolate: false,
+            extrapolate,
             store,
             error_kind,
+            initial_absolute_result,
+            positive_integrand,
+            roundoff_count,
+            roundoff_on_high_iteration_count,
         }
     }
 
@@ -395,14 +373,10 @@ impl Workspace {
     fn retrieve_largest_error(&mut self) -> Result<BasicInternal, Error> {
         self.iteration += 1;
         if let Some(previous) = self.pop() {
-            self.lower_limit = previous.lower;
-            self.upper_limit = previous.upper;
-
             Ok(previous)
         } else {
-            let output = Adaptive::empty();
             let kind = Kind::UninitialisedWorkspace;
-            Err(Error::new(kind, output))
+            Err(Error::unevaluated(kind))
         }
     }
 
@@ -424,12 +398,12 @@ impl Workspace {
 
             if delta <= 1e-5 * new_result.abs() && new_error >= 0.99 * prev_error {
                 if self.extrapolate {
-                    self.roundoff_type2 += 1;
+                    self.table.roundoff_count += 1;
                 } else {
-                    self.roundoff_type1 += 1;
+                    self.roundoff_count += 1;
                 }
             } else if self.iteration > 10 && new_error > prev_error {
-                self.roundoff_type3 += 1;
+                self.roundoff_on_high_iteration_count += 1;
             }
         }
 
@@ -440,23 +414,33 @@ impl Workspace {
     }
 
     fn check_roundoff(&mut self) {
-        if self.roundoff_type1 + self.roundoff_type2 >= 10 || self.roundoff_type3 >= 20 {
+        if self.roundoff_count + self.table.roundoff_count >= 10
+            || self.roundoff_on_high_iteration_count >= 20
+        {
             self.set_error_kind(Kind::FailedToReachToleranceRoundoff);
         }
 
-        if self.roundoff_type2 >= 5 {
-            self.extrapolation_error = true;
+        if self.table.roundoff_count >= 5 {
+            self.table.error_detected = true;
         }
     }
 
-    fn check_singularity(&mut self) {
-        let lower = self.lower_limit;
-        let upper = self.upper_limit;
-        let midpoint = (lower + upper) * 0.5;
+    fn update(&mut self, lower: BasicInternal, upper: BasicInternal) {
+        let lower_limit = lower.lower();
+        let upper_limit = upper.upper();
+        let midpoint = (lower_limit + upper_limit) * 0.5;
 
-        if subinterval_too_small(lower, midpoint, upper) {
-            self.set_error_kind(Kind::PossibleSingularity { lower, upper });
+        self.check_roundoff();
+
+        if subinterval_too_small(lower_limit, midpoint, upper_limit) {
+            self.set_error_kind(Kind::PossibleSingularity {
+                lower: lower_limit,
+                upper: upper_limit,
+            });
         }
+
+        self.push(lower);
+        self.push(upper);
     }
 
     fn sum_results(&self) -> f64 {
@@ -488,21 +472,21 @@ impl Workspace {
         Adaptive::new(result, error, iterations)
     }
 
-    fn update_error_over_large_intervals(
+    fn update_large_interval_error(
         &mut self,
         iteration_interval: f64,
         previous_error: f64,
         iteration_error: f64,
     ) {
-        self.error_over_large_intervals += -previous_error;
+        self.large_interval_error += -previous_error;
 
         let half_iteration_interval = iteration_interval * 0.5;
         if half_iteration_interval > self.smallest_interval {
-            self.error_over_large_intervals += iteration_error;
+            self.large_interval_error += iteration_error;
         }
     }
 
-    fn on_compute_result(self) -> Result<Adaptive, Error> {
+    fn compute_result(self) -> Result<Adaptive, Error> {
         let output = self.integral_estimate();
 
         if let Some(kind) = self.error_kind {
@@ -512,7 +496,7 @@ impl Workspace {
         }
     }
 
-    fn on_return_error(self) -> Result<Adaptive, Error> {
+    fn compute_extrapolated_result(self) -> Result<Adaptive, Error> {
         let output = self.table.integral_estimate(self.iteration);
 
         if let Some(kind) = self.error_kind {
@@ -522,44 +506,44 @@ impl Workspace {
         }
     }
 
-    fn on_break(mut self) -> Result<Adaptive, Error> {
-        if self.table.err_ext == f64::MAX {
-            return self.on_compute_result();
+    fn check_error_and_compute(mut self) -> Result<Adaptive, Error> {
+        if self.table.error == f64::MAX {
+            return self.compute_result();
         }
 
-        if self.is_err() || self.extrapolation_error {
-            if self.extrapolation_error {
-                self.table.err_ext += self.correction;
+        if self.is_err() || self.table.is_err() {
+            if self.table.is_err() {
+                self.table.error += self.table.correction;
             }
 
             if !self.is_err() {
                 self.set_error_kind(Kind::ExtrapolationRoundoffDetected);
             }
 
-            if self.table.res_ext != 0.0 && self.result != 0.0 {
-                if self.table.err_ext / self.table.res_ext.abs() > self.error / self.result.abs() {
-                    return self.on_compute_result();
+            if self.table.result != 0.0 && self.result != 0.0 {
+                if self.table.error / self.table.result.abs() > self.error / self.result.abs() {
+                    return self.compute_result();
                 }
-            } else if self.table.err_ext > self.error {
-                return self.on_compute_result();
+            } else if self.table.error > self.error {
+                return self.compute_result();
             } else if self.result == 0.0 {
-                return self.on_return_error();
+                return self.compute_extrapolated_result();
             }
         }
 
-        let max_area = f64::max(self.table.extrapolation_result().abs(), self.result.abs());
+        let max_area = f64::max(self.table.result.abs(), self.result.abs());
 
-        if !self.positive_integrand && max_area < 0.01 * self.initial_abs {
-            return self.on_return_error();
+        if !self.positive_integrand && max_area < 0.01 * self.initial_absolute_result {
+            return self.compute_extrapolated_result();
         }
 
-        let ratio = self.table.extrapolation_result() / self.result;
+        let ratio = self.table.result / self.result;
 
         if !(0.01..=100.0).contains(&ratio) || self.error > self.result.abs() {
             self.set_error_kind(Kind::Divergence);
         }
 
-        self.on_return_error()
+        self.compute_extrapolated_result()
     }
 
     fn is_err(&self) -> bool {
@@ -568,6 +552,13 @@ impl Workspace {
 
     fn set_error_kind(&mut self, kind: Kind) {
         self.error_kind = Some(kind);
+    }
+
+    fn prepare_next_iteration(&mut self) {
+        self.extrapolate = false;
+        self.large_interval_error = self.error;
+        self.heap.append(&mut self.store);
+        self.smallest_interval *= 0.5;
     }
 }
 
@@ -581,94 +572,90 @@ impl IntoIterator for Workspace {
 }
 
 struct ExtrapolationTable {
-    number: usize,
+    count: usize,
     results: [f64; 52],
-    cached_value_0: f64,
-    cached_value_1: f64,
-    cached_value_2: f64,
     cached: Cached,
-    res_ext: f64,
-    err_ext: f64,
-    ertest: f64,
+    error_detected: bool,
+    result: f64,
+    error: f64,
+    tolerance: f64,
     ktmin: usize,
+    roundoff_count: usize,
+    correction: f64,
 }
 
 #[derive(Debug, PartialEq)]
 enum Cached {
-    Zero,
-    One,
-    Two,
-    All,
+    Empty,
+    One(f64),
+    Two(f64, f64),
+    Full(f64, f64, f64),
 }
 
 impl ExtrapolationTable {
     fn new() -> Self {
-        let number = 0;
+        let count = 0;
         let results = [0.0; 52];
-        let cached_value_0 = 0.0;
-        let cached_value_1 = 0.0;
-        let cached_value_2 = 0.0;
-        let cached = Cached::Zero;
-        let res_ext = 0.0;
-        let err_ext = f64::MAX;
-        let ertest = f64::MAX;
+        let cached = Cached::Empty;
+        let error_detected = false;
+        let result = 0.0;
+        let error = f64::MAX;
+        let tolerance = f64::MAX;
         let ktmin = 0;
+        let roundoff_count = 0;
+        let correction = 0.0;
 
         Self {
-            number,
+            count,
             results,
-            cached_value_0,
-            cached_value_1,
-            cached_value_2,
             cached,
-            res_ext,
-            err_ext,
-            ertest,
+            error_detected,
+            result,
+            error,
+            tolerance,
             ktmin,
+            roundoff_count,
+            correction,
         }
     }
 
     fn initialise(initial: &BasicInternal) -> Self {
         let mut table = Self::new();
-        table.res_ext = initial.result();
+        table.result = initial.result();
         table.append_table(initial.result());
         table
     }
 
+    fn is_err(&self) -> bool {
+        self.error_detected
+    }
+
     fn cache(&mut self, value: f64) -> &mut Self {
         match self.cached {
-            Cached::All => {
-                std::mem::swap(&mut self.cached_value_0, &mut self.cached_value_1);
-                std::mem::swap(&mut self.cached_value_1, &mut self.cached_value_2);
-                self.cached_value_2 = value;
+            Cached::Full(_, a, b) | Cached::Two(a, b) => {
+                self.cached = Cached::Full(a, b, value);
             }
-            Cached::Two => {
-                self.cached_value_2 = value;
-                self.cached = Cached::All;
+            Cached::One(a) => {
+                self.cached = Cached::Two(a, value);
             }
-            Cached::One => {
-                self.cached_value_1 = value;
-                self.cached = Cached::Two;
-            }
-            Cached::Zero => {
-                self.cached_value_0 = value;
-                self.cached = Cached::One;
+            Cached::Empty => {
+                self.cached = Cached::One(value);
             }
         }
         self
     }
 
     fn append_table(&mut self, result: f64) -> &mut Self {
-        self.results[self.number] = result;
-        self.number += 1;
+        self.results[self.count] = result;
+        self.count += 1;
         self
     }
 
     // Adapted directly from GSL
     #[must_use]
-    fn extrapolate(&mut self, value: f64) -> (f64, f64) {
+    fn extrapolate(&mut self, value: f64) -> [f64; 2] {
         self.append_table(value);
-        let n_current = self.number - 1;
+        let n_current = self.count - 1;
 
         let current = self.results[n_current];
 
@@ -685,7 +672,7 @@ impl ExtrapolationTable {
         if n_current < 2 {
             result = current;
             abserr = f64::max(absolute, relative);
-            return (result, abserr);
+            return [result, abserr];
         }
 
         self.results[n_current + 2] = self.results[n_current];
@@ -712,7 +699,7 @@ impl ExtrapolationTable {
                 absolute = err2 + err3;
                 relative = 5.0 * f64::EPSILON * f64::abs(res);
                 abserr = f64::max(absolute, relative);
-                return (result, abserr);
+                return [result, abserr];
             }
 
             let e3 = self.results[n_current - 2 * i];
@@ -755,12 +742,10 @@ impl ExtrapolationTable {
         }
 
         self.shift_table(n_original, n_final, new_element);
-        self.number = n_final + 1;
+        self.count = n_final + 1;
 
-        if let Cached::All = self.cached {
-            abserr = f64::abs(result - self.cached_value_2)
-                + f64::abs(result - self.cached_value_1)
-                + f64::abs(result - self.cached_value_0);
+        if let Cached::Full(a, b, c) = self.cached {
+            abserr = f64::abs(result - c) + f64::abs(result - b) + f64::abs(result - a);
         } else {
             abserr = f64::MAX;
         }
@@ -770,7 +755,7 @@ impl ExtrapolationTable {
 
         self.ktmin += 1;
 
-        (result, abserr)
+        [result, abserr]
     }
 
     fn shift_table(&mut self, n_original: usize, n_final: usize, new_element: usize) -> &mut Self {
@@ -793,14 +778,9 @@ impl ExtrapolationTable {
     }
 
     fn integral_estimate(&self, iterations: usize) -> Adaptive {
-        let result = self.res_ext;
-        let error = self.err_ext;
+        let result = self.result;
+        let error = self.error;
         Adaptive::new(result, error, iterations)
-    }
-
-    #[inline]
-    fn extrapolation_result(&self) -> f64 {
-        self.res_ext
     }
 }
 
@@ -884,38 +864,23 @@ mod tests {
         let value2 = 100.0;
         let value = 999.0;
 
-        assert_eq!(table.cached, Cached::Zero);
-        assert_eq!(table.cached_value_0, 0.0);
-        assert_eq!(table.cached_value_1, 0.0);
-        assert_eq!(table.cached_value_2, 0.0);
+        assert_eq!(table.cached, Cached::Empty);
 
         table.cache(value0);
 
-        assert_eq!(table.cached, Cached::One);
-        assert_eq!(table.cached_value_0, 1.0);
-        assert_eq!(table.cached_value_1, 0.0);
-        assert_eq!(table.cached_value_2, 0.0);
+        assert_eq!(table.cached, Cached::One(1.0));
 
         table.cache(value1);
 
-        assert_eq!(table.cached, Cached::Two);
-        assert_eq!(table.cached_value_0, 1.0);
-        assert_eq!(table.cached_value_1, 10.0);
-        assert_eq!(table.cached_value_2, 0.0);
+        assert_eq!(table.cached, Cached::Two(1.0, 10.0));
 
         table.cache(value2);
 
-        assert_eq!(table.cached, Cached::All);
-        assert_eq!(table.cached_value_0, 1.0);
-        assert_eq!(table.cached_value_1, 10.0);
-        assert_eq!(table.cached_value_2, 100.0);
+        assert_eq!(table.cached, Cached::Full(1.0, 10.0, 100.0));
 
         table.cache(value);
 
-        assert_eq!(table.cached, Cached::All);
-        assert_eq!(table.cached_value_0, 10.0);
-        assert_eq!(table.cached_value_1, 100.0);
-        assert_eq!(table.cached_value_2, 999.0);
+        assert_eq!(table.cached, Cached::Full(10.0, 100.0, 999.0));
     }
 
     #[test]
@@ -937,7 +902,7 @@ mod tests {
 
         let table = ExtrapolationTable::initialise(&value);
 
-        assert!(table.number == 1);
+        assert!(table.count == 1);
         assert!((table.results[0] - value.result()) < 1e-10);
     }
 }
