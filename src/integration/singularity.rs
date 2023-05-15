@@ -195,14 +195,8 @@ where
             if !workspace.extrapolation_error
                 && workspace.error_over_large_intervals > workspace.ertest
             {
-                'here: while let Some(next) = workspace.peek() {
-                    if next.abs_interval_length() > workspace.smallest_interval {
-                        if let Some(next) = workspace.pop() {
-                            workspace.store(next);
-                        };
-                        continue;
-                    }
-                    break 'here;
+                if workspace.increase_nrmax() {
+                    continue;
                 }
 
                 // If we reach here then _all_ the results are now in the store
@@ -317,6 +311,18 @@ impl Workspace {
             store,
             error_kind,
         }
+    }
+
+    fn increase_nrmax(&mut self) -> bool {
+        while let Some(next) = self.peek() {
+            if next.abs_interval_length() > self.smallest_interval {
+                return true;
+            }
+            if let Some(next) = self.pop() {
+                self.store(next);
+            };
+        }
+        false
     }
 
     fn retrieve_largest_error(&mut self) -> Result<BasicInternal, Error> {
