@@ -6,6 +6,7 @@ pub use adaptive::Adaptive;
 pub use adaptive::GaussKronrodAdaptive;
 pub use basic::Basic;
 pub use basic::GaussKronrodBasic;
+pub use singularity::GaussKronrodAdaptiveSingularity;
 
 /// User selected error bound type.
 pub enum ErrorBound {
