@@ -118,9 +118,6 @@ where
     }
 
     /// # Errors
-    // TODO add extrapolation
-    // XXX goto compute_result = use workspace.integral_estimate()
-    // XXX goto return_error = use table.integral_estimate()
     pub fn integrate(&self) -> Result<Adaptive, Error> {
         let initial = GaussKronrodBasic::new(self.lower, self.upper, self.rule, self.function)
             .integrate_internal();
@@ -134,8 +131,7 @@ where
         while workspace.iteration < self.max_iterations {
             let previous = workspace.retrieve_largest_error()?;
 
-            let half_current_interval = previous.abs_interval_length() / 2.0;
-            workspace.update_smallest_interval(half_current_interval);
+            let current_interval = previous.abs_interval_length();
 
             let [lower, upper] = previous.bisect(self.function, self.rule);
 
@@ -153,7 +149,6 @@ where
             workspace.push(upper);
 
             if error <= iteration_tolerance {
-                // XXX check this is calculating from both heap and store
                 return workspace.on_compute_result();
             }
 
@@ -167,8 +162,7 @@ where
             }
 
             if workspace.iteration == 2 {
-                // XXX quadpack multiplies this by 0.375
-                workspace.smallest_interval = half_current_interval;
+                workspace.smallest_interval *= 0.375;
                 workspace.error_over_large_intervals = workspace.error;
                 workspace.ertest = iteration_tolerance;
                 workspace.table.append_table(workspace.result);
@@ -176,7 +170,7 @@ where
             }
 
             workspace.update_error_over_large_intervals(
-                half_current_interval,
+                current_interval,
                 previous_error,
                 iteration_error,
             );
@@ -201,13 +195,14 @@ where
             if !workspace.extrapolation_error
                 && workspace.error_over_large_intervals > workspace.ertest
             {
-                while let Some(next) = workspace.peek() {
+                'here: while let Some(next) = workspace.peek() {
                     if next.abs_interval_length() > workspace.smallest_interval {
+                        if let Some(next) = workspace.pop() {
+                            workspace.store(next);
+                        };
                         continue;
                     }
-                    if let Some(next) = workspace.pop() {
-                        workspace.store(next);
-                    };
+                    break 'here;
                 }
 
                 // If we reach here then _all_ the results are now in the store
@@ -218,14 +213,11 @@ where
 
             let (ext_result, ext_error) = workspace.table.extrapolate(result);
 
-            if workspace.table.ktmin > 5
-                && workspace.table.extrapolation_error() < 0.001 * workspace.error
-            {
-                // ier = 5 -> 4
+            if workspace.table.ktmin > 5 && workspace.table.err_ext < 0.001 * workspace.error {
                 workspace.set_error_kind(Kind::ExtrapolationRoundoffDetected);
             }
 
-            if ext_error < workspace.table.extrapolation_error() {
+            if ext_error < workspace.table.err_ext {
                 workspace.table.ktmin = 0;
                 workspace.table.err_ext = ext_error;
                 workspace.table.res_ext = ext_result;
@@ -243,6 +235,7 @@ where
             workspace.extrapolate = false;
             workspace.error_over_large_intervals = workspace.error;
             workspace.heap.append(&mut workspace.store);
+            workspace.smallest_interval *= 0.5;
         }
 
         workspace.on_break()
@@ -340,12 +333,6 @@ impl Workspace {
         }
     }
 
-    fn update_smallest_interval(&mut self, half_current_interval: f64) {
-        if half_current_interval < self.smallest_interval {
-            self.smallest_interval = half_current_interval;
-        }
-    }
-
     fn improved_result_error(
         &mut self,
         previous: &BasicInternal,
@@ -373,8 +360,8 @@ impl Workspace {
             }
         }
 
-        self.result += new_result - prev_result;
-        self.error += new_error - prev_error;
+        self.result = (self.result + new_result) - prev_result;
+        self.error = (self.error + new_error) - prev_error;
 
         [self.result, self.error]
     }
@@ -436,7 +423,8 @@ impl Workspace {
     ) {
         self.error_over_large_intervals += -previous_error;
 
-        if iteration_interval > self.smallest_interval {
+        let half_iteration_interval = iteration_interval * 0.5;
+        if half_iteration_interval > self.smallest_interval {
             self.error_over_large_intervals += iteration_error;
         }
     }
@@ -495,7 +483,6 @@ impl Workspace {
         let ratio = self.table.extrapolation_result() / self.result;
 
         if !(0.01..=100.0).contains(&ratio) || self.error > self.result.abs() {
-            // ier = 6 -> 5
             self.set_error_kind(Kind::Divergence);
         }
 
@@ -668,7 +655,7 @@ impl ExtrapolationTable {
                 break;
             }
 
-            let ss = (1.0 / delta1 + 1.0 / delta2) - 1.0 / delta3;
+            let ss = ((1.0 / delta1) + (1.0 / delta2)) - (1.0 / delta3);
 
             // Test to detect irregular behaviour in the table, and eventually
             // omit a part of the table by adjusting the value of n.
@@ -678,7 +665,7 @@ impl ExtrapolationTable {
             }
 
             // Compute a new element and eventually adjust the value of result.
-            res = e1 + 1.0 / ss;
+            res = e1 + (1.0 / ss);
             self.results[n_current - 2 * i] = res;
 
             let error = err2 + f64::abs(res - e2) + err3;
@@ -736,11 +723,6 @@ impl ExtrapolationTable {
         let result = self.res_ext;
         let error = self.err_ext;
         Adaptive::new(result, error, iterations)
-    }
-
-    #[inline]
-    fn extrapolation_error(&self) -> f64 {
-        self.err_ext
     }
 
     #[inline]
