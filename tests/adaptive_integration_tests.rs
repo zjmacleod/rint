@@ -1,8 +1,6 @@
-use gauss_kronrod_integration::integration::adaptive::Kind;
-use gauss_kronrod_integration::integration::{ErrorBound, GaussKronrodAdaptive};
-use gauss_kronrod_integration::rule::{
-    GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod51, GaussKronrod61,
-};
+use rint::integration::adaptive::Kind;
+use rint::integration::{ErrorBound, GaussKronrodAdaptive};
+use rint::rule::{GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod51, GaussKronrod61};
 
 mod util;
 

@@ -1,5 +1,5 @@
-//use gauss_kronrod_integration::integration::adaptive::Kind;
-use gauss_kronrod_integration::integration::{ErrorBound, GaussKronrodAdaptiveSingularity};
+//use rint::integration::adaptive::Kind;
+use rint::integration::{ErrorBound, GaussKronrodAdaptiveSingularity};
 
 mod util;
 

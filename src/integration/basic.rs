@@ -25,9 +25,9 @@
 //! By convention `upper > lower`, however this is not mandatory.
 //!
 //!```rust
-//! use gauss_kronrod_integration::Integrand;
-//! use gauss_kronrod_integration::integration::GaussKronrodBasic;
-//! use gauss_kronrod_integration::rule::GaussKronrod15;
+//! use rint::Integrand;
+//! use rint::integration::GaussKronrodBasic;
+//! use rint::rule::GaussKronrod15;
 //!
 //! /* f1(x) = x^alpha * log(1/x) */
 //! /* integ(f1,x,0,1) = 1/(alpha + 1)^2 */

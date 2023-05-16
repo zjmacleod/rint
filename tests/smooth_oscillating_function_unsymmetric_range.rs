@@ -4,8 +4,8 @@
 //
 // Ported from gsl-2.6/integration/test.c
 
-use gauss_kronrod_integration::integration::GaussKronrodBasic;
-use gauss_kronrod_integration::rule::{
+use rint::integration::GaussKronrodBasic;
+use rint::rule::{
     GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod41, GaussKronrod51, GaussKronrod61,
 };
 

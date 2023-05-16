@@ -14,7 +14,7 @@ pub mod rule;
 /// i.e. function `f(x)` should be evaluated at a specified variable `x`. The trait should be
 /// implemented on a struct containing all of the constant parameters required by the function.
 ///```rust
-/// use gauss_kronrod_integration::Integrand;
+/// use rint::Integrand;
 /// struct GaussianExponential {
 ///     amplitude: f64,
 ///     mean: f64,

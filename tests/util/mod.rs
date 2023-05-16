@@ -2,7 +2,7 @@
 
 use std::f64::consts::PI;
 
-use gauss_kronrod_integration::Integrand;
+use rint::Integrand;
 
 /* These are the test functions from table 4.1 of the QUADPACK book */
 
