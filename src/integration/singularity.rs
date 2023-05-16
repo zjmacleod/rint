@@ -2,7 +2,7 @@ use std::collections::binary_heap::{BinaryHeap, IntoIter};
 
 use crate::integration::adaptive::{Error, Kind};
 use crate::integration::basic::BasicInternal;
-use crate::integration::{subinterval_too_small, Adaptive, ErrorBound, GaussKronrodBasic};
+use crate::integration::{subinterval_too_small, ErrorBound, GaussKronrodBasic, IntegralEstimate};
 use crate::rule::{GaussKronrod15, GaussKronrod21, Rule};
 use crate::Integrand;
 
@@ -88,12 +88,12 @@ where
     fn check_initial_integration(
         &self,
         initial: &BasicInternal,
-    ) -> Result<Option<Adaptive>, Error> {
+    ) -> Result<Option<IntegralEstimate>, Error> {
         let tolerance = self.error_bound.tolerance(initial.result());
         let roundoff = Self::roundoff(initial.result_abs());
 
         if initial.error() <= roundoff && initial.error() > tolerance {
-            let output = Adaptive::from_basic(initial, 1);
+            let output = IntegralEstimate::from_basic(initial, 1);
             let kind = Kind::RoundoffErrorDetected;
 
             Err(Error::new(kind, output))
@@ -101,11 +101,11 @@ where
             && initial.error().to_bits() != initial.result_asc().to_bits())
             || initial.error() == 0.0
         {
-            let output = Adaptive::from_basic(initial, 1);
+            let output = IntegralEstimate::from_basic(initial, 1);
 
             Ok(Some(output))
         } else if self.max_iterations == 1 {
-            let output = Adaptive::from_basic(initial, 1);
+            let output = IntegralEstimate::from_basic(initial, 1);
             let kind = Kind::MaximumIterationsReached;
 
             Err(Error::new(kind, output))
@@ -115,7 +115,7 @@ where
     }
 
     /// # Errors
-    pub fn integrate(&self) -> Result<Adaptive, Error> {
+    pub fn integrate(&self) -> Result<IntegralEstimate, Error> {
         let initial = GaussKronrodBasic::new(self.lower, self.upper, self.rule, &self.function)
             .integrate_internal();
 
@@ -465,11 +465,11 @@ impl Workspace {
         self.heap.peek()
     }
 
-    fn integral_estimate(&self) -> Adaptive {
+    fn integral_estimate(&self) -> IntegralEstimate {
         let error = self.error;
         let iterations = self.iteration;
         let result = self.sum_results();
-        Adaptive::new(result, error, iterations)
+        IntegralEstimate::new(result, error, iterations)
     }
 
     fn update_large_interval_error(
@@ -486,7 +486,7 @@ impl Workspace {
         }
     }
 
-    fn compute_result(self) -> Result<Adaptive, Error> {
+    fn compute_result(self) -> Result<IntegralEstimate, Error> {
         let output = self.integral_estimate();
 
         if let Some(kind) = self.error_kind {
@@ -496,7 +496,7 @@ impl Workspace {
         }
     }
 
-    fn compute_extrapolated_result(self) -> Result<Adaptive, Error> {
+    fn compute_extrapolated_result(self) -> Result<IntegralEstimate, Error> {
         let output = self.table.integral_estimate(self.iteration);
 
         if let Some(kind) = self.error_kind {
@@ -506,7 +506,7 @@ impl Workspace {
         }
     }
 
-    fn check_error_and_compute(mut self) -> Result<Adaptive, Error> {
+    fn check_error_and_compute(mut self) -> Result<IntegralEstimate, Error> {
         if self.table.error == f64::MAX {
             return self.compute_result();
         }
@@ -777,10 +777,10 @@ impl ExtrapolationTable {
         self
     }
 
-    fn integral_estimate(&self, iterations: usize) -> Adaptive {
+    fn integral_estimate(&self, iterations: usize) -> IntegralEstimate {
         let result = self.result;
         let error = self.error;
-        Adaptive::new(result, error, iterations)
+        IntegralEstimate::new(result, error, iterations)
     }
 }
 

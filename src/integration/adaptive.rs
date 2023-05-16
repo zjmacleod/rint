@@ -9,13 +9,13 @@ use crate::Integrand;
 /// The value of a function evaluated with Gauss-Kronrod integration and associated error
 /// estimation.
 #[derive(Debug)]
-pub struct Adaptive {
+pub struct IntegralEstimate {
     result: f64,
     error: f64,
     iterations: usize,
 }
 
-impl Adaptive {
+impl IntegralEstimate {
     pub(crate) fn new(result: f64, error: f64, iterations: usize) -> Self {
         Self {
             result,
@@ -23,6 +23,7 @@ impl Adaptive {
             iterations,
         }
     }
+
     /// Return the numerically approximated value of the integral.
     #[must_use]
     pub fn result(&self) -> f64 {
@@ -49,8 +50,8 @@ impl Adaptive {
 
     pub(crate) fn unevaluated() -> Self {
         Self {
-            result: f64::NAN,
-            error: f64::NAN,
+            result: 0.0,
+            error: 0.0,
             iterations: 0,
         }
     }
@@ -138,12 +139,12 @@ where
     pub(crate) fn check_initial_integration(
         &self,
         initial: &BasicInternal,
-    ) -> Result<Option<Adaptive>, Error> {
+    ) -> Result<Option<IntegralEstimate>, Error> {
         let tolerance = self.error_bound.tolerance(initial.result());
         let roundoff = Self::roundoff(initial.result_abs());
 
         if initial.error() <= roundoff && initial.error() > tolerance {
-            let output = Adaptive::from_basic(initial, 1);
+            let output = IntegralEstimate::from_basic(initial, 1);
             let kind = Kind::RoundoffErrorDetected;
 
             Err(Error::new(kind, output))
@@ -151,11 +152,11 @@ where
             && initial.error().to_bits() != initial.result_asc().to_bits())
             || initial.error() == 0.0
         {
-            let output = Adaptive::from_basic(initial, 1);
+            let output = IntegralEstimate::from_basic(initial, 1);
 
             Ok(Some(output))
         } else if self.max_iterations == 1 {
-            let output = Adaptive::from_basic(initial, 1);
+            let output = IntegralEstimate::from_basic(initial, 1);
             let kind = Kind::MaximumIterationsReached;
 
             Err(Error::new(kind, output))
@@ -164,12 +165,12 @@ where
         }
     }
 
-    /// Integrate the function and return a [`Adaptive`] integration result.
+    /// Integrate the function and return a [`IntegralEstimate`] integration result.
     ///
     /// # Errors
     /// Integration can fail if user suplied tolerance cannot be achieved within the maximum number
     /// of iterations.
-    pub fn integrate(&self) -> Result<Adaptive, Error> {
+    pub fn integrate(&self) -> Result<IntegralEstimate, Error> {
         let initial = GaussKronrodBasic::new(self.lower, self.upper, self.rule, &self.function)
             .integrate_internal();
 
@@ -336,11 +337,11 @@ impl Workspace {
         self.heap.push(integral);
     }
 
-    fn integral_estimate(&self) -> Adaptive {
+    fn integral_estimate(&self) -> IntegralEstimate {
         let error = self.error;
         let iterations = self.iteration;
         let result = self.sum_results();
-        Adaptive::new(result, error, iterations)
+        IntegralEstimate::new(result, error, iterations)
     }
 }
 
@@ -356,7 +357,7 @@ impl IntoIterator for Workspace {
 #[derive(Debug)]
 pub struct Error {
     kind: Kind,
-    integral: Adaptive,
+    integral: IntegralEstimate,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
@@ -373,12 +374,12 @@ pub enum Kind {
 }
 
 impl Error {
-    pub(crate) fn new(kind: Kind, integral: Adaptive) -> Self {
+    pub(crate) fn new(kind: Kind, integral: IntegralEstimate) -> Self {
         Self { kind, integral }
     }
 
     pub(crate) fn unevaluated(kind: Kind) -> Self {
-        let output = Adaptive::unevaluated();
+        let output = IntegralEstimate::unevaluated();
         Error::new(kind, output)
     }
 
@@ -388,7 +389,7 @@ impl Error {
     }
 
     #[must_use]
-    pub fn estimate(&self) -> &Adaptive {
+    pub fn estimate(&self) -> &IntegralEstimate {
         &self.integral
     }
 

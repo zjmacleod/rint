@@ -2,8 +2,8 @@ pub mod adaptive;
 pub mod basic;
 pub mod singularity;
 
-pub use adaptive::Adaptive;
 pub use adaptive::GaussKronrodAdaptive;
+pub use adaptive::IntegralEstimate;
 pub use basic::Basic;
 pub use basic::GaussKronrodBasic;
 pub use singularity::GaussKronrodAdaptiveSingularity;
