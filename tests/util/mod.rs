@@ -1,5 +1,8 @@
 #![allow(dead_code)]
 
+#[macro_use]
+pub(crate) mod macros;
+
 use std::f64::consts::PI;
 
 use rint::Integrand;
@@ -10,6 +13,12 @@ use rint::Integrand;
 /* integ(f1,x,0,1) = 1/(alpha + 1)^2 */
 pub(crate) struct Function1 {
     pub(crate) alpha: f64,
+}
+
+impl Function1 {
+    pub(crate) fn new(alpha: f64) -> Self {
+        Self { alpha }
+    }
 }
 
 impl Integrand for Function1 {
@@ -25,6 +34,12 @@ pub(crate) struct Function2 {
     pub(crate) alpha: f64,
 }
 
+impl Function2 {
+    pub(crate) fn new(alpha: f64) -> Self {
+        Self { alpha }
+    }
+}
+
 impl Integrand for Function2 {
     fn evaluate(&self, x: f64) -> f64 {
         let alpha = self.alpha;
@@ -36,6 +51,12 @@ impl Integrand for Function2 {
 /* integ(f3,x,0,pi) = pi J_0(2^alpha) */
 pub(crate) struct Function3 {
     pub(crate) alpha: f64,
+}
+
+impl Function3 {
+    pub(crate) fn new(alpha: f64) -> Self {
+        Self { alpha }
+    }
 }
 
 impl Integrand for Function3 {
@@ -51,6 +72,12 @@ pub(crate) struct Function11 {
     pub(crate) alpha: f64,
 }
 
+impl Function11 {
+    pub(crate) fn new(alpha: f64) -> Self {
+        Self { alpha }
+    }
+}
+
 impl Integrand for Function11 {
     fn evaluate(&self, x: f64) -> f64 {
         let alpha = self.alpha;
@@ -60,6 +87,12 @@ impl Integrand for Function11 {
 
 pub(crate) struct Function15 {
     pub(crate) alpha: i32,
+}
+
+impl Function15 {
+    pub(crate) fn new(alpha: i32) -> Self {
+        Self { alpha }
+    }
 }
 
 impl Integrand for Function15 {
@@ -74,14 +107,9 @@ pub(crate) struct Function16 {
     pub(crate) alpha: i32,
 }
 
-/* myfn1(x) = exp(-x - x^2) */
-/* integ(myfn1,x,-inf,inf) = sqrt(pi) exp(-1/4) */
-
-pub(crate) struct MyFunciton1;
-
-impl Integrand for MyFunciton1 {
-    fn evaluate(&self, x: f64) -> f64 {
-        f64::exp(-x - x.powi(2))
+impl Function16 {
+    pub(crate) fn new(alpha: i32) -> Self {
+        Self { alpha }
     }
 }
 
@@ -98,6 +126,40 @@ impl Integrand for Function16 {
     }
 }
 
+/* myfn1(x) = exp(-x - x^2) */
+/* integ(myfn1,x,-inf,inf) = sqrt(pi) exp(-1/4) */
+
+pub(crate) struct MyFunciton1;
+
+impl MyFunciton1 {
+    pub(crate) fn new() -> Self {
+        Self
+    }
+}
+
+impl Integrand for MyFunciton1 {
+    fn evaluate(&self, x: f64) -> f64 {
+        f64::exp(-x - x.powi(2))
+    }
+}
+
+pub(crate) struct MyFunciton2 {
+    pub(crate) alpha: f64,
+}
+
+impl MyFunciton2 {
+    pub(crate) fn new(alpha: f64) -> Self {
+        Self { alpha }
+    }
+}
+
+impl Integrand for MyFunciton2 {
+    fn evaluate(&self, x: f64) -> f64 {
+        let alpha = self.alpha;
+        f64::exp(alpha * x)
+    }
+}
+
 /* f455(x) = log(x)/(1+100*x^2) */
 /* integ(f455,x,0,inf) = -log(10)/20 */
 pub(crate) struct Function455;
@@ -105,6 +167,12 @@ pub(crate) struct Function455;
 impl Integrand for Function455 {
     fn evaluate(&self, x: f64) -> f64 {
         x.ln() / (1.0 + 100.0 * x.powi(2))
+    }
+}
+
+impl Function455 {
+    pub(crate) fn new() -> Self {
+        Self
     }
 }
 
