@@ -11,536 +11,98 @@ use rint::rule::{
 
 mod util;
 
-#[test]
-fn gauss_kronrod_15() -> Result<(), String> {
-    let exp_result = 1.555688196612745777E+01;
-    let exp_abserr = 2.350164577239293706E+01;
-    let exp_resabs = 1.555688196612745777E+01;
-    let exp_resasc = 2.350164577239293706E+01;
-
-    let abs_error_bound = 1.0e-15;
-    let rel_error_bound = 1.0e-7;
-    let alpha = -0.9;
-
-    let lower = 0.0;
-    let upper = 1.0;
-
-    let function = util::Function1 { alpha };
-    let rule = GaussKronrod15;
-
-    let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
-
-    let integral_result = integral.integrate();
-    let result = integral_result.result();
-    let abserr = integral_result.error();
-    let resabs = integral_result.result_abs();
-    let resasc = integral_result.result_asc();
-
-    util::test_relative_error(
-        result,
-        exp_result,
-        abs_error_bound,
-        "basic(f1,15) singular result",
-    )?;
-    util::test_relative_error(
-        abserr,
-        exp_abserr,
-        rel_error_bound,
-        "basic(f1,15) singular abserr",
-    )?;
-    util::test_relative_error(
-        resabs,
-        exp_resabs,
-        abs_error_bound,
-        "basic(f1,15) singular resabs",
-    )?;
-    util::test_relative_error(
-        resasc,
-        exp_resasc,
-        abs_error_bound,
-        "basic(f1,15) singular resasc",
-    )?;
-
-    let lower = 1.0;
-    let upper = 0.0;
-
-    let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
-
-    let integral_result = integral.integrate();
-    let result = integral_result.result();
-    let abserr = integral_result.error();
-    let resabs = integral_result.result_abs();
-    let resasc = integral_result.result_asc();
-
-    util::test_relative_error(
-        result,
-        -exp_result,
-        abs_error_bound,
-        "basic(f1,15) reverse result",
-    )?;
-    util::test_relative_error(
-        abserr,
-        exp_abserr,
-        rel_error_bound,
-        "basic(f1,15) reverse abserr",
-    )?;
-    util::test_relative_error(
-        resabs,
-        exp_resabs,
-        abs_error_bound,
-        "basic(f1,15) reverse resabs",
-    )?;
-    util::test_relative_error(
-        resasc,
-        exp_resasc,
-        abs_error_bound,
-        "basic(f1,15) reverse resasc",
-    )?;
-
-    Ok(())
+basic_test! {
+        name: basic_gauss_kronrod_positive_function_with_singularity_15_point,
+        function: util::Function1,
+        alpha: f64 => -0.9,
+        rule: GaussKronrod15,
+        lower: 0.0,
+        upper: 1.0,
+        exp_result:     1.555688196612745777E+01,
+        exp_error:      2.350164577239293706E+01,
+        exp_result_abs: 1.555688196612745777E+01,
+        exp_result_asc: 2.350164577239293706E+01,
+        abs_error_bound: 1.0e-15,
+        rel_error_bound: 1.0e-7,
+        "Function1 with singularity GaussKronrodBasic 15-point"
 }
 
-#[test]
-fn gauss_kronrod_21() -> Result<(), String> {
-    let exp_result = 1.799045317938126232E+01;
-    let exp_abserr = 2.782360287710622515E+01;
-    let exp_resabs = 1.799045317938126232E+01;
-    let exp_resasc = 2.782360287710622515E+01;
-
-    let abs_error_bound = 1.0e-15;
-    let rel_error_bound = 1.0e-7;
-    let alpha = -0.9;
-
-    let lower = 0.0;
-    let upper = 1.0;
-
-    let function = util::Function1 { alpha };
-    let rule = GaussKronrod21;
-
-    let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
-
-    let integral_result = integral.integrate();
-    let result = integral_result.result();
-    let abserr = integral_result.error();
-    let resabs = integral_result.result_abs();
-    let resasc = integral_result.result_asc();
-
-    util::test_relative_error(
-        result,
-        exp_result,
-        abs_error_bound,
-        "basic(f1,21) singular result",
-    )?;
-    util::test_relative_error(
-        abserr,
-        exp_abserr,
-        rel_error_bound,
-        "basic(f1,21) singular abserr",
-    )?;
-    util::test_relative_error(
-        resabs,
-        exp_resabs,
-        abs_error_bound,
-        "basic(f1,21) singular resabs",
-    )?;
-    util::test_relative_error(
-        resasc,
-        exp_resasc,
-        abs_error_bound,
-        "basic(f1,21) singular resasc",
-    )?;
-
-    let lower = 1.0;
-    let upper = 0.0;
-
-    let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
-
-    let integral_result = integral.integrate();
-    let result = integral_result.result();
-    let abserr = integral_result.error();
-    let resabs = integral_result.result_abs();
-    let resasc = integral_result.result_asc();
-
-    util::test_relative_error(
-        result,
-        -exp_result,
-        abs_error_bound,
-        "basic(f1,21) reverse result",
-    )?;
-    util::test_relative_error(
-        abserr,
-        exp_abserr,
-        rel_error_bound,
-        "basic(f1,21) reverse abserr",
-    )?;
-    util::test_relative_error(
-        resabs,
-        exp_resabs,
-        abs_error_bound,
-        "basic(f1,21) reverse resabs",
-    )?;
-    util::test_relative_error(
-        resasc,
-        exp_resasc,
-        abs_error_bound,
-        "basic(f1,21) reverse resasc",
-    )?;
-
-    Ok(())
+basic_test! {
+        name: basic_gauss_kronrod_positive_function_with_singularity_21_point,
+        function: util::Function1,
+        alpha: f64 => -0.9,
+        rule: GaussKronrod21,
+        lower: 0.0,
+        upper: 1.0,
+        exp_result:     1.799045317938126232E+01,
+        exp_error:      2.782360287710622515E+01,
+        exp_result_abs: 1.799045317938126232E+01,
+        exp_result_asc: 2.782360287710622515E+01,
+        abs_error_bound: 1.0e-15,
+        rel_error_bound: 1.0e-7,
+        "Function1 with singularity GaussKronrodBasic 21-point"
 }
 
-#[test]
-fn gauss_kronrod_31() -> Result<(), String> {
-    let exp_result = 2.081873305159121657E+01;
-    let exp_abserr = 3.296500137482590276E+01;
-    let exp_resabs = 2.081873305159121301E+01;
-    let exp_resasc = 3.296500137482590276E+01;
-
-    let abs_error_bound = 1.0e-15;
-    let rel_error_bound = 1.0e-7;
-    let alpha = -0.9;
-
-    let lower = 0.0;
-    let upper = 1.0;
-
-    let function = util::Function1 { alpha };
-    let rule = GaussKronrod31;
-
-    let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
-
-    let integral_result = integral.integrate();
-    let result = integral_result.result();
-    let abserr = integral_result.error();
-    let resabs = integral_result.result_abs();
-    let resasc = integral_result.result_asc();
-
-    util::test_relative_error(
-        result,
-        exp_result,
-        abs_error_bound,
-        "basic(f1,31) singular result",
-    )?;
-    util::test_relative_error(
-        abserr,
-        exp_abserr,
-        rel_error_bound,
-        "basic(f1,31) singular abserr",
-    )?;
-    util::test_relative_error(
-        resabs,
-        exp_resabs,
-        abs_error_bound,
-        "basic(f1,31) singular resabs",
-    )?;
-    util::test_relative_error(
-        resasc,
-        exp_resasc,
-        abs_error_bound,
-        "basic(f1,31) singular resasc",
-    )?;
-
-    let lower = 1.0;
-    let upper = 0.0;
-
-    let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
-
-    let integral_result = integral.integrate();
-    let result = integral_result.result();
-    let abserr = integral_result.error();
-    let resabs = integral_result.result_abs();
-    let resasc = integral_result.result_asc();
-
-    util::test_relative_error(
-        result,
-        -exp_result,
-        abs_error_bound,
-        "basic(f1,31) reverse result",
-    )?;
-    util::test_relative_error(
-        abserr,
-        exp_abserr,
-        rel_error_bound,
-        "basic(f1,31) reverse abserr",
-    )?;
-    util::test_relative_error(
-        resabs,
-        exp_resabs,
-        abs_error_bound,
-        "basic(f1,31) reverse resabs",
-    )?;
-    util::test_relative_error(
-        resasc,
-        exp_resasc,
-        abs_error_bound,
-        "basic(f1,31) reverse resasc",
-    )?;
-
-    Ok(())
+basic_test! {
+        name: basic_gauss_kronrod_positive_function_with_singularity_31_point,
+        function: util::Function1,
+        alpha: f64 => -0.9,
+        rule: GaussKronrod31,
+        lower: 0.0,
+        upper: 1.0,
+        exp_result:     2.081873305159121657E+01,
+        exp_error:      3.296500137482590276E+01,
+        exp_result_abs: 2.081873305159121301E+01,
+        exp_result_asc: 3.296500137482590276E+01,
+        abs_error_bound: 1.0e-15,
+        rel_error_bound: 1.0e-7,
+        "Function1 with singularity GaussKronrodBasic 31-point"
 }
 
-#[test]
-fn gauss_kronrod_41() -> Result<(), String> {
-    let exp_result = 2.288677623903126701E+01;
-    let exp_abserr = 3.671538820274916048E+01;
-    let exp_resabs = 2.288677623903126701E+01;
-    let exp_resasc = 3.671538820274916048E+01;
-
-    let abs_error_bound = 1.0e-15;
-    let rel_error_bound = 1.0e-7;
-    let alpha = -0.9;
-
-    let lower = 0.0;
-    let upper = 1.0;
-
-    let function = util::Function1 { alpha };
-    let rule = GaussKronrod41;
-
-    let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
-
-    let integral_result = integral.integrate();
-    let result = integral_result.result();
-    let abserr = integral_result.error();
-    let resabs = integral_result.result_abs();
-    let resasc = integral_result.result_asc();
-
-    util::test_relative_error(
-        result,
-        exp_result,
-        abs_error_bound,
-        "basic(f1,41) singular result",
-    )?;
-    util::test_relative_error(
-        abserr,
-        exp_abserr,
-        rel_error_bound,
-        "basic(f1,41) singular abserr",
-    )?;
-    util::test_relative_error(
-        resabs,
-        exp_resabs,
-        abs_error_bound,
-        "basic(f1,41) singular resabs",
-    )?;
-    util::test_relative_error(
-        resasc,
-        exp_resasc,
-        abs_error_bound,
-        "basic(f1,41) singular resasc",
-    )?;
-
-    let lower = 1.0;
-    let upper = 0.0;
-
-    let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
-
-    let integral_result = integral.integrate();
-    let result = integral_result.result();
-    let abserr = integral_result.error();
-    let resabs = integral_result.result_abs();
-    let resasc = integral_result.result_asc();
-
-    util::test_relative_error(
-        result,
-        -exp_result,
-        abs_error_bound,
-        "basic(f1,41) reverse result",
-    )?;
-    util::test_relative_error(
-        abserr,
-        exp_abserr,
-        rel_error_bound,
-        "basic(f1,41) reverse abserr",
-    )?;
-    util::test_relative_error(
-        resabs,
-        exp_resabs,
-        abs_error_bound,
-        "basic(f1,41) reverse resabs",
-    )?;
-    util::test_relative_error(
-        resasc,
-        exp_resasc,
-        abs_error_bound,
-        "basic(f1,41) reverse resasc",
-    )?;
-
-    Ok(())
+basic_test! {
+        name: basic_gauss_kronrod_positive_function_with_singularity_41_point,
+        function: util::Function1,
+        alpha: f64 => -0.9,
+        rule: GaussKronrod41,
+        lower: 0.0,
+        upper: 1.0,
+        exp_result:     2.288677623903126701E+01,
+        exp_error:      3.671538820274916048E+01,
+        exp_result_abs: 2.288677623903126701E+01,
+        exp_result_asc: 3.671538820274916048E+01,
+        abs_error_bound: 1.0e-15,
+        rel_error_bound: 1.0e-7,
+        "Function1 with singularity GaussKronrodBasic 41-point"
 }
 
-#[test]
-fn gauss_kronrod_51() -> Result<(), String> {
-    let exp_result = 2.449953612016972215E+01;
-    let exp_abserr = 3.967771249391228849E+01;
-    let exp_resabs = 2.449953612016972215E+01;
-    let exp_resasc = 3.967771249391228849E+01;
-
-    let abs_error_bound = 1.0e-15;
-    let rel_error_bound = 1.0e-7;
-    let alpha = -0.9;
-
-    let lower = 0.0;
-    let upper = 1.0;
-
-    let function = util::Function1 { alpha };
-    let rule = GaussKronrod51;
-
-    let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
-
-    let integral_result = integral.integrate();
-    let result = integral_result.result();
-    let abserr = integral_result.error();
-    let resabs = integral_result.result_abs();
-    let resasc = integral_result.result_asc();
-
-    util::test_relative_error(
-        result,
-        exp_result,
-        abs_error_bound,
-        "basic(f1,51) singular result",
-    )?;
-    util::test_relative_error(
-        abserr,
-        exp_abserr,
-        rel_error_bound,
-        "basic(f1,51) singular abserr",
-    )?;
-    util::test_relative_error(
-        resabs,
-        exp_resabs,
-        abs_error_bound,
-        "basic(f1,51) singular resabs",
-    )?;
-    util::test_relative_error(
-        resasc,
-        exp_resasc,
-        abs_error_bound,
-        "basic(f1,51) singular resasc",
-    )?;
-
-    let lower = 1.0;
-    let upper = 0.0;
-
-    let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
-
-    let integral_result = integral.integrate();
-    let result = integral_result.result();
-    let abserr = integral_result.error();
-    let resabs = integral_result.result_abs();
-    let resasc = integral_result.result_asc();
-
-    util::test_relative_error(
-        result,
-        -exp_result,
-        abs_error_bound,
-        "basic(f1,51) reverse result",
-    )?;
-    util::test_relative_error(
-        abserr,
-        exp_abserr,
-        rel_error_bound,
-        "basic(f1,51) reverse abserr",
-    )?;
-    util::test_relative_error(
-        resabs,
-        exp_resabs,
-        abs_error_bound,
-        "basic(f1,51) reverse resabs",
-    )?;
-    util::test_relative_error(
-        resasc,
-        exp_resasc,
-        abs_error_bound,
-        "basic(f1,51) reverse resasc",
-    )?;
-
-    Ok(())
+basic_test! {
+        name: basic_gauss_kronrod_positive_function_with_singularity_51_point,
+        function: util::Function1,
+        alpha: f64 => -0.9,
+        rule: GaussKronrod51,
+        lower: 0.0,
+        upper: 1.0,
+        exp_result:     2.449953612016972215E+01,
+        exp_error:      3.967771249391228849E+01,
+        exp_result_abs: 2.449953612016972215E+01,
+        exp_result_asc: 3.967771249391228849E+01,
+        abs_error_bound: 1.0e-15,
+        rel_error_bound: 1.0e-7,
+        "Function1 with singularity GaussKronrodBasic 51-point"
 }
 
-#[test]
-fn gauss_kronrod_61() -> Result<(), String> {
-    let exp_result = 2.583030240976628988E+01;
-    let exp_abserr = 4.213750493076978643E+01;
-    let exp_resabs = 2.583030240976628988E+01;
-    let exp_resasc = 4.213750493076978643E+01;
-
-    let abs_error_bound = 1.0e-15;
-    let rel_error_bound = 1.0e-7;
-    let alpha = -0.9;
-
-    let lower = 0.0;
-    let upper = 1.0;
-
-    let function = util::Function1 { alpha };
-    let rule = GaussKronrod61;
-
-    let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
-
-    let integral_result = integral.integrate();
-    let result = integral_result.result();
-    let abserr = integral_result.error();
-    let resabs = integral_result.result_abs();
-    let resasc = integral_result.result_asc();
-
-    util::test_relative_error(
-        result,
-        exp_result,
-        abs_error_bound,
-        "basic(f1,61) singular result",
-    )?;
-    util::test_relative_error(
-        abserr,
-        exp_abserr,
-        rel_error_bound,
-        "basic(f1,61) singular abserr",
-    )?;
-    util::test_relative_error(
-        resabs,
-        exp_resabs,
-        abs_error_bound,
-        "basic(f1,61) singular resabs",
-    )?;
-    util::test_relative_error(
-        resasc,
-        exp_resasc,
-        abs_error_bound,
-        "basic(f1,61) singular resasc",
-    )?;
-
-    let lower = 1.0;
-    let upper = 0.0;
-
-    let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
-
-    let integral_result = integral.integrate();
-    let result = integral_result.result();
-    let abserr = integral_result.error();
-    let resabs = integral_result.result_abs();
-    let resasc = integral_result.result_asc();
-
-    util::test_relative_error(
-        result,
-        -exp_result,
-        abs_error_bound,
-        "basic(f1,61) reverse result",
-    )?;
-    util::test_relative_error(
-        abserr,
-        exp_abserr,
-        rel_error_bound,
-        "basic(f1,61) reverse abserr",
-    )?;
-    util::test_relative_error(
-        resabs,
-        exp_resabs,
-        abs_error_bound,
-        "basic(f1,61) reverse resabs",
-    )?;
-    util::test_relative_error(
-        resasc,
-        exp_resasc,
-        abs_error_bound,
-        "basic(f1,61) reverse resasc",
-    )?;
-
-    Ok(())
+basic_test! {
+        name: basic_gauss_kronrod_positive_function_with_singularity_61_point,
+        function: util::Function1,
+        alpha: f64 => -0.9,
+        rule: GaussKronrod61,
+        lower: 0.0,
+        upper: 1.0,
+        exp_result:     2.583030240976628988E+01,
+        exp_error:      4.213750493076978643E+01,
+        exp_result_abs: 2.583030240976628988E+01,
+        exp_result_asc: 4.213750493076978643E+01,
+        abs_error_bound: 1.0e-15,
+        rel_error_bound: 1.0e-7,
+        "Function1 with singularity GaussKronrodBasic 61-point"
 }
