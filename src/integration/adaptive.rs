@@ -364,6 +364,11 @@ impl Error {
     pub fn iterations(&self) -> usize {
         self.integral.iterations()
     }
+
+    #[must_use]
+    pub fn function_evaluations(&self) -> usize {
+        self.integral.function_evaluations()
+    }
 }
 
 impl std::fmt::Display for Error {
