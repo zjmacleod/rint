@@ -94,7 +94,7 @@ where
 
         if initial.error() <= roundoff && initial.error() > tolerance {
             let output = Adaptive::from_basic(initial, 1);
-            let kind = Kind::FailedToReachToleranceRoundoff;
+            let kind = Kind::RoundoffErrorDetected;
 
             Err(Error::new(kind, output))
         } else if (initial.error() <= tolerance
@@ -201,7 +201,7 @@ where
             let [ext_result, ext_error] = workspace.table.extrapolate(result);
 
             if workspace.table.ktmin > 5 && workspace.table.error < 0.001 * workspace.error {
-                workspace.set_error_kind(Kind::ExtrapolationRoundoffDetected);
+                workspace.set_error_kind(Kind::DoesNotConverge);
             }
 
             if ext_error < workspace.table.error {
@@ -215,7 +215,7 @@ where
                 }
             }
 
-            if let Some(Kind::ExtrapolationRoundoffDetected) = workspace.error_kind {
+            if let Some(Kind::DoesNotConverge) = workspace.error_kind {
                 break;
             }
 
@@ -417,7 +417,7 @@ impl Workspace {
         if self.roundoff_count + self.table.roundoff_count >= 10
             || self.roundoff_on_high_iteration_count >= 20
         {
-            self.set_error_kind(Kind::FailedToReachToleranceRoundoff);
+            self.set_error_kind(Kind::RoundoffErrorDetected);
         }
 
         if self.table.roundoff_count >= 5 {
@@ -433,7 +433,7 @@ impl Workspace {
         self.check_roundoff();
 
         if subinterval_too_small(lower_limit, midpoint, upper_limit) {
-            self.set_error_kind(Kind::PossibleSingularity {
+            self.set_error_kind(Kind::BadIntegrandBehaviour {
                 lower: lower_limit,
                 upper: upper_limit,
             });
@@ -517,7 +517,7 @@ impl Workspace {
             }
 
             if !self.is_err() {
-                self.set_error_kind(Kind::ExtrapolationRoundoffDetected);
+                self.set_error_kind(Kind::DoesNotConverge);
             }
 
             if self.table.result != 0.0 && self.result != 0.0 {
@@ -540,7 +540,7 @@ impl Workspace {
         let ratio = self.table.result / self.result;
 
         if !(0.01..=100.0).contains(&ratio) || self.error > self.result.abs() {
-            self.set_error_kind(Kind::Divergence);
+            self.set_error_kind(Kind::DivergentOrSlowlyConverging);
         }
 
         self.compute_extrapolated_result()

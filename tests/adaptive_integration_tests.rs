@@ -193,7 +193,7 @@ fn test_adaptive_oscillating_should_error_roundoff_31() -> Result<(), String> {
     let integral_result = integral.integrate();
 
     if let Err(err) = integral_result {
-        if let Kind::FailedToReachToleranceRoundoff = err.kind() {
+        if let Kind::RoundoffErrorDetected = err.kind() {
             let result = err.result();
             let error = err.error();
             let iterations = err.iterations();
@@ -234,7 +234,7 @@ fn test_adaptive_oscillating_should_error_roundoff_31() -> Result<(), String> {
     let integral_result = integral.integrate();
 
     if let Err(err) = integral_result {
-        if let Kind::FailedToReachToleranceRoundoff = err.kind() {
+        if let Kind::RoundoffErrorDetected = err.kind() {
             let result = err.result();
             let error = err.error();
             let iterations = err.iterations();
@@ -288,11 +288,11 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
     let integral_result = integral.integrate();
 
     if let Err(err) = integral_result {
-        if let Kind::PossibleSingularity { lower, upper } = err.kind() {
+        if let Kind::BadIntegrandBehaviour { lower, upper } = err.kind() {
             let iterations = err.iterations();
 
-            assert!(*lower < -0.1f64);
-            assert!(*upper > -0.1f64);
+            assert!(lower < -0.1f64);
+            assert!(upper > -0.1f64);
 
             util::test_int(
                 iterations,
@@ -318,11 +318,11 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
     let integral_result = integral.integrate();
 
     if let Err(err) = integral_result {
-        if let Kind::PossibleSingularity { lower, upper } = err.kind() {
+        if let Kind::BadIntegrandBehaviour { lower, upper } = err.kind() {
             let iterations = err.iterations();
 
-            assert!(*lower > -0.1f64);
-            assert!(*upper < -0.1f64);
+            assert!(lower > -0.1f64);
+            assert!(upper < -0.1f64);
 
             util::test_int(
                 iterations,

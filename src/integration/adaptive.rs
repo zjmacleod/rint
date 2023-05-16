@@ -144,7 +144,7 @@ where
 
         if initial.error() <= roundoff && initial.error() > tolerance {
             let output = Adaptive::from_basic(initial, 1);
-            let kind = Kind::FailedToReachToleranceRoundoff;
+            let kind = Kind::RoundoffErrorDetected;
 
             Err(Error::new(kind, output))
         } else if (initial.error() <= tolerance
@@ -302,7 +302,7 @@ impl Workspace {
     fn check_roundoff(&self) -> Result<(), Error> {
         if self.roundoff_type1 >= 6 || self.roundoff_type2 >= 20 {
             let output = self.integral_estimate();
-            let kind = Kind::FailedToReachToleranceRoundoff;
+            let kind = Kind::RoundoffErrorDetected;
             return Err(Error::new(kind, output));
         }
         Ok(())
@@ -314,7 +314,7 @@ impl Workspace {
         let midpoint = (lower_limit + upper_limit) * 0.5;
         if subinterval_too_small(lower_limit, midpoint, upper_limit) {
             let output = self.integral_estimate();
-            let kind = Kind::PossibleSingularity {
+            let kind = Kind::BadIntegrandBehaviour {
                 lower: lower_limit,
                 upper: upper_limit,
             };
@@ -354,23 +354,22 @@ impl IntoIterator for Workspace {
 }
 
 #[derive(Debug)]
-pub enum Kind {
-    RelativeBoundNegativeOrZero,
-    AbsoluteBoundTooSmall,
-    InvalidTolerance,
-    FailedToReachToleranceRoundoff,
-    FailedToReachToleranceRoundoffExtrapolation,
-    MaximumIterationsReached,
-    PossibleSingularity { lower: f64, upper: f64 },
-    UninitialisedWorkspace,
-    Divergence,
-    ExtrapolationRoundoffDetected,
-}
-
-#[derive(Debug)]
 pub struct Error {
     kind: Kind,
     integral: Adaptive,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+pub enum Kind {
+    MaximumIterationsReached,
+    RoundoffErrorDetected,
+    BadIntegrandBehaviour { lower: f64, upper: f64 },
+    DoesNotConverge,
+    DivergentOrSlowlyConverging,
+    UninitialisedWorkspace,
+    RelativeBoundNegativeOrZero,
+    AbsoluteBoundTooSmall,
+    InvalidTolerance,
 }
 
 impl Error {
@@ -378,13 +377,18 @@ impl Error {
         Self { kind, integral }
     }
 
-    #[must_use]
-    pub fn kind(&self) -> &Kind {
-        &self.kind
+    pub(crate) fn unevaluated(kind: Kind) -> Self {
+        let output = Adaptive::unevaluated();
+        Error::new(kind, output)
     }
 
     #[must_use]
-    pub fn integral(&self) -> &Adaptive {
+    pub fn kind(&self) -> Kind {
+        self.kind
+    }
+
+    #[must_use]
+    pub fn estimate(&self) -> &Adaptive {
         &self.integral
     }
 
@@ -402,62 +406,69 @@ impl Error {
     pub fn iterations(&self) -> usize {
         self.integral.iterations()
     }
-
-    pub(crate) fn unevaluated(kind: Kind) -> Self {
-        let output = Adaptive::unevaluated();
-        Error::new(kind, output)
-    }
 }
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let result = self.result();
+        let error = self.error();
+        let iterations = self.iterations();
         match self.kind() {
+            Kind::MaximumIterationsReached => {
+                write!(
+                    f,
+                    "Maximum number of iterations/subdivisions reached. Try increasing max_iterations. If this yields no improvement it is advised to analyse the integrand to determine integration difficulties. If the position of a local difficulty can be determined, one may gain from splitting the total integration interval and calling the integrator on each sub-interval.\nresult:\t{result:.10e}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                )
+            }
+
+            Kind::RoundoffErrorDetected => {
+                write!(
+                    f,
+                    "Roundoff error detected. This prevents the requested tolerance from being achieved and the returned error may be under-estimated.\nresult:\t{result:.10e}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                )
+            }
+
+            Kind::BadIntegrandBehaviour { lower, upper } => {
+                write!(
+                    f,
+                    "Extremely bad integrand behaviour. Possible non-integrable singularity, divergence, or discontinuity detected between ({lower},{upper}).\nresult:\t{result:.10e}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                )
+            }
+
+            Kind::DoesNotConverge => {
+                write!(
+                    f,
+                    "The algorithm does not converge. Roundoff error is detected in the extrapolation table. It is assumed that the requested tolerance cannot be achieved and the returned result is the best which can be obtained.\nresult:\t{result:.10e}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                )
+            }
+
+            Kind::DivergentOrSlowlyConverging => {
+                write!(
+                    f,
+                    "The integral is probably divergent or slowly convergent. NOTE: divergence can also occur with any other error kind.\nresult:\t{result:.10e}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                )
+            }
+
+            Kind::UninitialisedWorkspace => {
+                write!(f, "The integration Workspace was not properly initialised. This error should not be possible. If this error is returned, contact the crate maintainers.")
+            }
+
             Kind::RelativeBoundNegativeOrZero => {
                 write!(
                     f,
                     "Invalid error bound: relative bound must be non-zero and positive."
                 )
             }
+
             Kind::AbsoluteBoundTooSmall => {
                 write!(
                     f,
                     "Invalid error bound: absolute bound must be larger than 50.0 * f64::EPSILON."
                 )
             }
+
             Kind::InvalidTolerance => {
                 write!(f, "Invalid tolerance: relative bound must be non-zero and positive and absolute bound must be larger than 50.0 * f64::EPSILON.")
-            }
-            Kind::FailedToReachToleranceRoundoff => {
-                let result = self.result();
-                let error = self.error();
-                write!(f, "Failed to reach tolerance due to roundoff error. Result: {result}, error: {error}.")
-            }
-            Kind::FailedToReachToleranceRoundoffExtrapolation => {
-                let result = self.result();
-                let error = self.error();
-                write!(f, "Failed to reach tolerance due to roundoff error in extrapolation table. Result: {result}, error: {error}.")
-            }
-            Kind::MaximumIterationsReached => {
-                let result = self.result();
-                let error = self.error();
-                write!(
-                    f,
-                    "Maximum number of iterations reached. Result: {result}, error: {error}."
-                )
-            }
-            Kind::PossibleSingularity { lower, upper } => {
-                let result = self.result();
-                let error = self.error();
-                write!(f, "Possible singularity detected between ({lower},{upper}). Result: {result}, error: {error}.")
-            }
-            Kind::Divergence => {
-                write!(f, "Possible divergence detected in the integrand.")
-            }
-            Kind::UninitialisedWorkspace => {
-                write!(f, "The integration Workspace was not properly initialised.")
-            }
-            Kind::ExtrapolationRoundoffDetected => {
-                write!(f, "Error in extrapolation table detected.")
             }
         }
     }
