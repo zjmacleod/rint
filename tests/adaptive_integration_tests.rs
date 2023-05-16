@@ -11,6 +11,7 @@ fn test_adaptive_smooth_relative_error_15() -> Result<(), String> {
     let exp_result = 7.716049382715854665E-02;
     let exp_abserr = 6.679384885865053037E-12;
     let exp_iterations = 6;
+    let exp_evaluations = 165;
 
     let rel_error_bound = 1e-6;
     let abs_error_bound = 1e-15;
@@ -30,6 +31,7 @@ fn test_adaptive_smooth_relative_error_15() -> Result<(), String> {
     let result = integral_result.result();
     let error = integral_result.error();
     let iterations = integral_result.iterations();
+    let evaluations = integral_result.function_evaluations();
 
     util::test_relative_error(
         result,
@@ -48,6 +50,11 @@ fn test_adaptive_smooth_relative_error_15() -> Result<(), String> {
         exp_iterations,
         "adaptive(f1,15) smooth iterations",
     )?;
+    util::test_int(
+        evaluations,
+        exp_evaluations,
+        "adaptive(f1,15) smooth evaluations",
+    )?;
 
     let error_bound = ErrorBound::Relative(1e-10);
     let lower = 1.0;
@@ -62,6 +69,7 @@ fn test_adaptive_smooth_relative_error_15() -> Result<(), String> {
     let result = integral_result.result();
     let error = integral_result.error();
     let iterations = integral_result.iterations();
+    let evaluations = integral_result.function_evaluations();
 
     util::test_relative_error(
         result,
@@ -80,6 +88,11 @@ fn test_adaptive_smooth_relative_error_15() -> Result<(), String> {
         exp_iterations,
         "adaptive(f1,15) smooth iterations reverse",
     )?;
+    util::test_int(
+        evaluations,
+        exp_evaluations,
+        "adaptive(f1,15) smooth evaluations reverse",
+    )?;
 
     Ok(())
 }
@@ -91,6 +104,7 @@ fn test_adaptive_smooth_absolute_error_21() -> Result<(), String> {
     let exp_result = 7.716049382716050342E-02;
     let exp_abserr = 2.227969521869139532E-15;
     let exp_iterations = 8;
+    let exp_evaluations = 315;
 
     let error_bound = ErrorBound::Absolute(1e-14);
 
@@ -111,6 +125,7 @@ fn test_adaptive_smooth_absolute_error_21() -> Result<(), String> {
     let result = integral_result.result();
     let error = integral_result.error();
     let iterations = integral_result.iterations();
+    let evaluations = integral_result.function_evaluations();
 
     util::test_relative_error(
         result,
@@ -129,6 +144,11 @@ fn test_adaptive_smooth_absolute_error_21() -> Result<(), String> {
         exp_iterations,
         "adaptive(f1,21) smooth iterations",
     )?;
+    util::test_int(
+        evaluations,
+        exp_evaluations,
+        "adaptive(f1,21) smooth evaluations",
+    )?;
 
     let error_bound = ErrorBound::Absolute(1e-14);
     let lower = 1.0;
@@ -143,6 +163,7 @@ fn test_adaptive_smooth_absolute_error_21() -> Result<(), String> {
     let result = integral_result.result();
     let error = integral_result.error();
     let iterations = integral_result.iterations();
+    let evaluations = integral_result.function_evaluations();
 
     util::test_relative_error(
         result,
@@ -161,6 +182,11 @@ fn test_adaptive_smooth_absolute_error_21() -> Result<(), String> {
         exp_iterations,
         "adaptive(f1,21) smooth iterations reverse",
     )?;
+    util::test_int(
+        evaluations,
+        exp_evaluations,
+        "adaptive(f1,21) smooth evaluations reverse",
+    )?;
 
     Ok(())
 }
@@ -172,6 +198,7 @@ fn test_adaptive_oscillating_should_error_roundoff_31() -> Result<(), String> {
     let exp_result = -7.238969575482959717E-01;
     let exp_abserr = 1.285805464427459261E-14;
     let exp_iterations = 1;
+    let exp_evaluations = 31;
 
     let error_bound = ErrorBound::Absolute(1e-14);
 
@@ -195,6 +222,7 @@ fn test_adaptive_oscillating_should_error_roundoff_31() -> Result<(), String> {
             let result = err.result();
             let error = err.error();
             let iterations = err.iterations();
+            let evaluations = err.function_evaluations();
 
             util::test_relative_error(
                 result,
@@ -212,6 +240,11 @@ fn test_adaptive_oscillating_should_error_roundoff_31() -> Result<(), String> {
                 iterations,
                 exp_iterations,
                 "adaptive(f3,31) smooth iterations",
+            )?;
+            util::test_int(
+                evaluations,
+                exp_evaluations,
+                "adaptive(f3,31) smooth evaluations",
             )?;
         } else {
             return Err(String::from("wrong error kind"));
@@ -236,6 +269,7 @@ fn test_adaptive_oscillating_should_error_roundoff_31() -> Result<(), String> {
             let result = err.result();
             let error = err.error();
             let iterations = err.iterations();
+            let evaluations = err.function_evaluations();
 
             util::test_relative_error(
                 result,
@@ -254,6 +288,11 @@ fn test_adaptive_oscillating_should_error_roundoff_31() -> Result<(), String> {
                 exp_iterations,
                 "adaptive(f3,31) smooth iterations reverse",
             )?;
+            util::test_int(
+                evaluations,
+                exp_evaluations,
+                "adaptive(f3,31) smooth evaluations reverse",
+            )?;
         } else {
             return Err(String::from("wrong error kind"));
         }
@@ -269,6 +308,7 @@ fn test_adaptive_oscillating_should_error_roundoff_31() -> Result<(), String> {
 #[test]
 fn test_adaptive_singularity_51() -> Result<(), String> {
     let exp_iterations = 51;
+    let exp_evaluations = 5151;
 
     let error_bound = ErrorBound::Absolute(1e-14);
 
@@ -288,6 +328,7 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
     if let Err(err) = integral_result {
         if let Kind::BadIntegrandBehaviour { lower, upper } = err.kind() {
             let iterations = err.iterations();
+            let evaluations = err.function_evaluations();
 
             assert!(lower < -0.1f64);
             assert!(upper > -0.1f64);
@@ -296,6 +337,11 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
                 iterations,
                 exp_iterations,
                 "adaptive(f16,51) smooth iterations",
+            )?;
+            util::test_int(
+                evaluations,
+                exp_evaluations,
+                "adaptive(f16,51) smooth evaluations",
             )?;
         } else {
             return Err(String::from("wrong error kind"));
@@ -318,6 +364,7 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
     if let Err(err) = integral_result {
         if let Kind::BadIntegrandBehaviour { lower, upper } = err.kind() {
             let iterations = err.iterations();
+            let evaluations = err.function_evaluations();
 
             assert!(lower > -0.1f64);
             assert!(upper < -0.1f64);
@@ -326,6 +373,11 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
                 iterations,
                 exp_iterations,
                 "adaptive(f16,51) smooth iterations reverse",
+            )?;
+            util::test_int(
+                evaluations,
+                exp_evaluations,
+                "adaptive(f16,51) smooth evaluations reverse",
             )?;
         } else {
             return Err(String::from("wrong error kind"));
@@ -344,6 +396,7 @@ fn test_adaptive_max_iterations_61() -> Result<(), String> {
     let exp_result = 9.565151449233894709;
     let exp_abserr = 1.570369823891028460E+01;
     let exp_iterations = 3;
+    let exp_evaluations = 305;
 
     let abs_error_bound = 1e-15;
     let rel_error_bound = 1e-6;
@@ -367,6 +420,7 @@ fn test_adaptive_max_iterations_61() -> Result<(), String> {
             let result = err.result();
             let error = err.error();
             let iterations = err.iterations();
+            let evaluations = err.function_evaluations();
 
             util::test_relative_error(
                 result,
@@ -384,6 +438,11 @@ fn test_adaptive_max_iterations_61() -> Result<(), String> {
                 iterations,
                 exp_iterations,
                 "adaptive(f16,61) smooth iterations",
+            )?;
+            util::test_int(
+                evaluations,
+                exp_evaluations,
+                "adaptive(f16,61) smooth evaluations",
             )?;
         } else {
             return Err(String::from("wrong error kind"));
@@ -408,6 +467,7 @@ fn test_adaptive_max_iterations_61() -> Result<(), String> {
             let result = err.result();
             let error = err.error();
             let iterations = err.iterations();
+            let evaluations = err.function_evaluations();
 
             util::test_relative_error(
                 result,
@@ -425,6 +485,11 @@ fn test_adaptive_max_iterations_61() -> Result<(), String> {
                 iterations,
                 exp_iterations,
                 "adaptive(f16,61) smooth iterations negative reverse",
+            )?;
+            util::test_int(
+                evaluations,
+                exp_evaluations,
+                "adaptive(f16,61) smooth evaluations reverse",
             )?;
         } else {
             return Err(String::from("wrong error kind"));
