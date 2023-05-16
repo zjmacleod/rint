@@ -188,7 +188,7 @@ where
             if !workspace.table.error_detected
                 && workspace.large_interval_error > workspace.table.tolerance
             {
-                if workspace.increase_nrmax() {
+                if workspace.remaining_large_intervals() {
                     continue;
                 }
 
@@ -358,7 +358,7 @@ impl Workspace {
         }
     }
 
-    fn increase_nrmax(&mut self) -> bool {
+    fn remaining_large_intervals(&mut self) -> bool {
         while let Some(next) = self.peek() {
             if next.abs_interval_length() > self.smallest_interval {
                 return true;
