@@ -93,7 +93,7 @@ where
         let roundoff = Self::roundoff(initial.result_abs());
 
         if initial.error() <= roundoff && initial.error() > tolerance {
-            let output = IntegralEstimate::from_basic(initial, 1);
+            let output = IntegralEstimate::from_basic(initial, 1, self.rule.evaluations());
             let kind = Kind::RoundoffErrorDetected;
 
             Err(Error::new(kind, output))
@@ -101,11 +101,11 @@ where
             && initial.error().to_bits() != initial.result_asc().to_bits())
             || initial.error() == 0.0
         {
-            let output = IntegralEstimate::from_basic(initial, 1);
+            let output = IntegralEstimate::from_basic(initial, 1, self.rule.evaluations());
 
             Ok(Some(output))
         } else if self.max_iterations == 1 {
-            let output = IntegralEstimate::from_basic(initial, 1);
+            let output = IntegralEstimate::from_basic(initial, 1, self.rule.evaluations());
             let kind = Kind::MaximumIterationsReached;
 
             Err(Error::new(kind, output))
@@ -123,7 +123,7 @@ where
             return Ok(output);
         }
 
-        let mut workspace = Workspace::new(self.max_iterations, initial);
+        let mut workspace = self.initialise_workspace(initial);
 
         while workspace.iteration < self.max_iterations {
             let previous = workspace.retrieve_largest_error()?;
@@ -234,6 +234,45 @@ where
     pub fn lower(&self) -> f64 {
         self.lower
     }
+
+    fn initialise_workspace(&self, initial: BasicInternal) -> Workspace {
+        let mut heap = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
+
+        let iteration = 1;
+        let result = initial.result();
+        let error = initial.error();
+        let large_interval_error = error;
+        let table = ExtrapolationTable::initialise(&initial);
+        let smallest_interval = initial.abs_interval_length();
+        let extrapolate = false;
+        let store = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
+        let error_kind = None;
+        let initial_absolute_result = initial.result_abs();
+        let positive_integrand = initial.positivity();
+        let roundoff_count = 0;
+        let roundoff_on_high_iteration_count = 0;
+        let function_evaluations_per_integration = self.rule.evaluations();
+
+        heap.push(initial);
+
+        Workspace {
+            heap,
+            iteration,
+            result,
+            error,
+            large_interval_error,
+            table,
+            smallest_interval,
+            extrapolate,
+            store,
+            error_kind,
+            initial_absolute_result,
+            positive_integrand,
+            roundoff_count,
+            roundoff_on_high_iteration_count,
+            function_evaluations_per_integration,
+        }
+    }
 }
 
 impl<I> GaussKronrodAdaptiveSingularity<I, GaussKronrod21>
@@ -318,46 +357,10 @@ struct Workspace {
     positive_integrand: bool,
     roundoff_count: usize,
     roundoff_on_high_iteration_count: usize,
+    function_evaluations_per_integration: usize,
 }
 
 impl Workspace {
-    fn new(max_iterations: usize, initial: BasicInternal) -> Self {
-        let mut heap = BinaryHeap::with_capacity(2 * max_iterations + 1);
-
-        let iteration = 1;
-        let result = initial.result();
-        let error = initial.error();
-        let large_interval_error = error;
-        let table = ExtrapolationTable::initialise(&initial);
-        let smallest_interval = initial.abs_interval_length();
-        let extrapolate = false;
-        let store = BinaryHeap::with_capacity(2 * max_iterations + 1);
-        let error_kind = None;
-        let initial_absolute_result = initial.result_abs();
-        let positive_integrand = initial.positivity();
-        let roundoff_count = 0;
-        let roundoff_on_high_iteration_count = 0;
-
-        heap.push(initial);
-
-        Self {
-            heap,
-            iteration,
-            result,
-            error,
-            large_interval_error,
-            table,
-            smallest_interval,
-            extrapolate,
-            store,
-            error_kind,
-            initial_absolute_result,
-            positive_integrand,
-            roundoff_count,
-            roundoff_on_high_iteration_count,
-        }
-    }
-
     fn remaining_large_intervals(&mut self) -> bool {
         while let Some(next) = self.peek() {
             if next.abs_interval_length() > self.smallest_interval {
@@ -466,10 +469,15 @@ impl Workspace {
     }
 
     fn integral_estimate(&self) -> IntegralEstimate {
+        let result = self.sum_results();
         let error = self.error;
         let iterations = self.iteration;
-        let result = self.sum_results();
-        IntegralEstimate::new(result, error, iterations)
+        let function_evaluations = (2 * iterations - 1) * self.function_evaluations_per_integration;
+        IntegralEstimate::new()
+            .with_result(result)
+            .with_error(error)
+            .with_iterations(iterations)
+            .with_function_evaluations(function_evaluations)
     }
 
     fn update_large_interval_error(
@@ -497,7 +505,11 @@ impl Workspace {
     }
 
     fn compute_extrapolated_result(self) -> Result<IntegralEstimate, Error> {
-        let output = self.table.integral_estimate(self.iteration);
+        let function_evaluations =
+            (2 * self.iteration - 1) * self.function_evaluations_per_integration;
+        let output = self
+            .table
+            .integral_estimate(self.iteration, function_evaluations);
 
         if let Some(kind) = self.error_kind {
             Err(Error::new(kind, output))
@@ -777,10 +789,18 @@ impl ExtrapolationTable {
         self
     }
 
-    fn integral_estimate(&self, iterations: usize) -> IntegralEstimate {
+    fn integral_estimate(
+        &self,
+        iterations: usize,
+        function_evaluations: usize,
+    ) -> IntegralEstimate {
         let result = self.result;
         let error = self.error;
-        IntegralEstimate::new(result, error, iterations)
+        IntegralEstimate::new()
+            .with_result(result)
+            .with_error(error)
+            .with_iterations(iterations)
+            .with_function_evaluations(function_evaluations)
     }
 }
 

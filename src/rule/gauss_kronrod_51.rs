@@ -3,7 +3,7 @@ use crate::rule::Rule;
 /// The unit struct of the 51-point Gauss-Kronrod quadrature rule.
 ///
 /// The 51-point rule combines a 25-point Gaussian rule with a 51-point Kronrod extension.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct GaussKronrod51;
 
 impl Rule for GaussKronrod51 {
@@ -11,6 +11,7 @@ impl Rule for GaussKronrod51 {
     type Extended = [f64; 13];
 
     const KRONROD_CENTRE: f64 = 0.061_580_818_067_832_935_078_759_824_240_066;
+    const EVALUATIONS: usize = 51;
 
     fn shared_nodes(&self) -> Self::Shared {
         SHARED_NODES

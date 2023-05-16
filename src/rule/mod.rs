@@ -1,4 +1,6 @@
 //! Non-adaptive Gauss-Kronrod quadrature integration routines.
+use std::fmt::Debug;
+
 pub(crate) mod gauss_kronrod_15;
 pub(crate) mod gauss_kronrod_21;
 pub(crate) mod gauss_kronrod_31;
@@ -37,11 +39,12 @@ mod private {
 /// The [`Rule`] trait defines a Gauss-Kronrod quadrature rule, returning the sets of points `x_i`
 /// and weights `w_i` for the `n`-point Gauss rule and the corresponding `(2n - 1)`-point Kronrod
 /// extension.
-pub trait Rule: private::Sealed + Clone + Copy {
+pub trait Rule: private::Sealed + Clone + Copy + Debug {
     type Shared: IntoIterator<Item = f64>;
     type Extended: IntoIterator<Item = f64>;
 
     const KRONROD_CENTRE: f64;
+    const EVALUATIONS: usize;
 
     fn shared_nodes(&self) -> Self::Shared;
     fn gauss_weights(&self) -> Self::Shared;
@@ -51,5 +54,8 @@ pub trait Rule: private::Sealed + Clone + Copy {
     fn gauss_centre(&self) -> Option<f64>;
     fn kronrod_centre(&self) -> f64 {
         Self::KRONROD_CENTRE
+    }
+    fn evaluations(&self) -> usize {
+        Self::EVALUATIONS
     }
 }

@@ -1,11 +1,12 @@
 pub mod adaptive;
 pub mod basic;
+pub mod estimate;
 pub mod singularity;
 
 pub use adaptive::GaussKronrodAdaptive;
-pub use adaptive::IntegralEstimate;
 pub use basic::Basic;
 pub use basic::GaussKronrodBasic;
+pub use estimate::IntegralEstimate;
 pub use singularity::GaussKronrodAdaptiveSingularity;
 
 /// User selected error bound type.

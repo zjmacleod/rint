@@ -2,60 +2,9 @@ use std::collections::binary_heap::{BinaryHeap, IntoIter};
 
 use crate::integration::basic::BasicInternal;
 use crate::integration::subinterval_too_small;
-use crate::integration::{ErrorBound, GaussKronrodBasic};
+use crate::integration::{ErrorBound, GaussKronrodBasic, IntegralEstimate};
 use crate::rule::Rule;
 use crate::Integrand;
-
-/// The value of a function evaluated with Gauss-Kronrod integration and associated error
-/// estimation.
-#[derive(Debug)]
-pub struct IntegralEstimate {
-    result: f64,
-    error: f64,
-    iterations: usize,
-}
-
-impl IntegralEstimate {
-    pub(crate) fn new(result: f64, error: f64, iterations: usize) -> Self {
-        Self {
-            result,
-            error,
-            iterations,
-        }
-    }
-
-    /// Return the numerically approximated value of the integral.
-    #[must_use]
-    pub fn result(&self) -> f64 {
-        self.result
-    }
-
-    /// Return the numerically approximated error.
-    #[must_use]
-    pub fn error(&self) -> f64 {
-        self.error
-    }
-
-    /// Return the number of iterations used in the adaptive integration routine.
-    #[must_use]
-    pub fn iterations(&self) -> usize {
-        self.iterations
-    }
-
-    pub(crate) fn from_basic(basic: &BasicInternal, iterations: usize) -> Self {
-        let result = basic.result();
-        let error = basic.error();
-        Self::new(result, error, iterations)
-    }
-
-    pub(crate) fn unevaluated() -> Self {
-        Self {
-            result: 0.0,
-            error: 0.0,
-            iterations: 0,
-        }
-    }
-}
 
 /// An integral to be evaluated with an adaptive Gauss-Kronrod quadrature.
 ///
@@ -144,7 +93,7 @@ where
         let roundoff = Self::roundoff(initial.result_abs());
 
         if initial.error() <= roundoff && initial.error() > tolerance {
-            let output = IntegralEstimate::from_basic(initial, 1);
+            let output = IntegralEstimate::from_basic(initial, 1, self.rule.evaluations());
             let kind = Kind::RoundoffErrorDetected;
 
             Err(Error::new(kind, output))
@@ -152,11 +101,11 @@ where
             && initial.error().to_bits() != initial.result_asc().to_bits())
             || initial.error() == 0.0
         {
-            let output = IntegralEstimate::from_basic(initial, 1);
+            let output = IntegralEstimate::from_basic(initial, 1, self.rule.evaluations());
 
             Ok(Some(output))
         } else if self.max_iterations == 1 {
-            let output = IntegralEstimate::from_basic(initial, 1);
+            let output = IntegralEstimate::from_basic(initial, 1, self.rule.evaluations());
             let kind = Kind::MaximumIterationsReached;
 
             Err(Error::new(kind, output))
@@ -178,7 +127,7 @@ where
             return Ok(output);
         }
 
-        let mut workspace = Workspace::new(self.max_iterations, initial);
+        let mut workspace = self.initialise_workspace(initial);
 
         while workspace.iteration < self.max_iterations {
             let previous = workspace.retrieve_largest_error()?;
@@ -220,6 +169,30 @@ where
     pub fn lower(&self) -> f64 {
         self.lower
     }
+
+    fn initialise_workspace(&self, initial: BasicInternal) -> Workspace {
+        let mut heap = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
+
+        let result = initial.result();
+        let error = initial.error();
+        let lower_limit = initial.lower();
+        let upper_limit = initial.upper();
+        let function_evaluations_per_integration = self.rule.evaluations();
+
+        heap.push(initial);
+
+        Workspace {
+            heap,
+            iteration: 1,
+            roundoff_type1: 0,
+            roundoff_type2: 0,
+            result,
+            error,
+            lower_limit,
+            upper_limit,
+            function_evaluations_per_integration,
+        }
+    }
 }
 
 struct Workspace {
@@ -231,31 +204,10 @@ struct Workspace {
     error: f64,
     lower_limit: f64,
     upper_limit: f64,
+    function_evaluations_per_integration: usize,
 }
 
 impl Workspace {
-    fn new(max_iterations: usize, initial: BasicInternal) -> Self {
-        let mut heap = BinaryHeap::with_capacity(2 * max_iterations + 1);
-
-        let result = initial.result();
-        let error = initial.error();
-        let lower_limit = initial.lower();
-        let upper_limit = initial.upper();
-
-        heap.push(initial);
-
-        Self {
-            heap,
-            iteration: 1,
-            roundoff_type1: 0,
-            roundoff_type2: 0,
-            result,
-            error,
-            lower_limit,
-            upper_limit,
-        }
-    }
-
     fn retrieve_largest_error(&mut self) -> Result<BasicInternal, Error> {
         self.iteration += 1;
         if let Some(previous) = self.pop() {
@@ -338,10 +290,15 @@ impl Workspace {
     }
 
     fn integral_estimate(&self) -> IntegralEstimate {
+        let result = self.sum_results();
         let error = self.error;
         let iterations = self.iteration;
-        let result = self.sum_results();
-        IntegralEstimate::new(result, error, iterations)
+        let function_evaluations = (2 * iterations - 1) * self.function_evaluations_per_integration;
+        IntegralEstimate::new()
+            .with_result(result)
+            .with_error(error)
+            .with_iterations(iterations)
+            .with_function_evaluations(function_evaluations)
     }
 }
 
@@ -379,7 +336,7 @@ impl Error {
     }
 
     pub(crate) fn unevaluated(kind: Kind) -> Self {
-        let output = IntegralEstimate::unevaluated();
+        let output = IntegralEstimate::new();
         Error::new(kind, output)
     }
 
