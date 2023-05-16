@@ -393,7 +393,7 @@ fn test_singularity_myfn1_absolute_error_infinite() -> Result<(), String> {
 
 /* Test infinite range integral myfn1 using a absolute error bound lower */
 #[test]
-fn test_singularity_myfn1_absolute_error_semi_infinite() -> Result<(), String> {
+fn test_singularity_myfn2_absolute_error_semi_infinite() -> Result<(), String> {
     let exp_result = 2.718281828459044647E+00;
     let exp_abserr = 1.588185109253204805E-10;
     let exp_iterations = 5;
@@ -421,23 +421,23 @@ fn test_singularity_myfn1_absolute_error_semi_infinite() -> Result<(), String> {
         result,
         exp_result,
         abs_error_bound,
-        "adaptive(myfn1,15) myfn1 result",
+        "adaptive(myfn2,15) myfn1 result",
     )?;
     util::test_relative_error(
         error,
         exp_abserr,
         rel_error_bound,
-        "adaptive(myfn1,15) myfn1 abserr",
+        "adaptive(myfn2,15) myfn1 abserr",
     )?;
     util::test_int(
         iterations,
         exp_iterations,
-        "adaptive(myfn1,15) myfn1 iterations",
+        "adaptive(myfn2,15) myfn1 iterations",
     )?;
     util::test_int(
         evaluations,
         exp_evaluations,
-        "adaptive(myfn1,15) myfn1 evaluations",
+        "adaptive(myfn2,15) myfn1 evaluations",
     )?;
 
     Ok(())
