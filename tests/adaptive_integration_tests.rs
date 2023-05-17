@@ -1,5 +1,4 @@
-use rint::integration::adaptive::Kind;
-use rint::integration::{ErrorBound, GaussKronrodAdaptive};
+use rint::integration::{ErrorBound, GaussKronrodAdaptive, Kind};
 use rint::rule::{GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod51, GaussKronrod61};
 
 mod util;

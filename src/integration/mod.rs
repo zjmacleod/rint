@@ -29,6 +29,134 @@ impl ErrorBound {
     }
 }
 
+#[derive(Debug)]
+pub struct Error {
+    kind: Kind,
+    integral: IntegralEstimate,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+pub enum Kind {
+    MaximumIterationsReached,
+    RoundoffErrorDetected,
+    BadIntegrandBehaviour { lower: f64, upper: f64 },
+    DoesNotConverge,
+    DivergentOrSlowlyConverging,
+    UninitialisedWorkspace,
+    RelativeBoundNegativeOrZero,
+    AbsoluteBoundTooSmall,
+    InvalidTolerance,
+}
+
+impl Error {
+    pub(crate) fn new(kind: Kind, integral: IntegralEstimate) -> Self {
+        Self { kind, integral }
+    }
+
+    pub(crate) fn unevaluated(kind: Kind) -> Self {
+        let output = IntegralEstimate::new();
+        Error::new(kind, output)
+    }
+
+    #[must_use]
+    pub fn kind(&self) -> Kind {
+        self.kind
+    }
+
+    #[must_use]
+    pub fn estimate(&self) -> &IntegralEstimate {
+        &self.integral
+    }
+
+    #[must_use]
+    pub fn result(&self) -> f64 {
+        self.integral.result()
+    }
+
+    #[must_use]
+    pub fn error(&self) -> f64 {
+        self.integral.error()
+    }
+
+    #[must_use]
+    pub fn iterations(&self) -> usize {
+        self.integral.iterations()
+    }
+
+    #[must_use]
+    pub fn function_evaluations(&self) -> usize {
+        self.integral.function_evaluations()
+    }
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let result = self.result();
+        let error = self.error();
+        let iterations = self.iterations();
+        match self.kind() {
+            Kind::MaximumIterationsReached => {
+                write!(
+                    f,
+                    "Maximum number of iterations/subdivisions reached. Try increasing max_iterations. If this yields no improvement it is advised to analyse the integrand to determine integration difficulties. If the position of a local difficulty can be determined, one may gain from splitting the total integration interval and calling the integrator on each sub-interval.\nresult:\t{result:.10e}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                )
+            }
+
+            Kind::RoundoffErrorDetected => {
+                write!(
+                    f,
+                    "Roundoff error detected. This prevents the requested tolerance from being achieved and the returned error may be under-estimated.\nresult:\t{result:.10e}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                )
+            }
+
+            Kind::BadIntegrandBehaviour { lower, upper } => {
+                write!(
+                    f,
+                    "Extremely bad integrand behaviour. Possible non-integrable singularity, divergence, or discontinuity detected between ({lower},{upper}).\nresult:\t{result:.10e}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                )
+            }
+
+            Kind::DoesNotConverge => {
+                write!(
+                    f,
+                    "The algorithm does not converge. Roundoff error is detected in the extrapolation table. It is assumed that the requested tolerance cannot be achieved and the returned result is the best which can be obtained.\nresult:\t{result:.10e}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                )
+            }
+
+            Kind::DivergentOrSlowlyConverging => {
+                write!(
+                    f,
+                    "The integral is probably divergent or slowly convergent. NOTE: divergence can also occur with any other error kind.\nresult:\t{result:.10e}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                )
+            }
+
+            Kind::UninitialisedWorkspace => {
+                write!(f, "The integration Workspace was not properly initialised. This error should not be possible. If this error is returned, contact the crate maintainers.")
+            }
+
+            Kind::RelativeBoundNegativeOrZero => {
+                write!(
+                    f,
+                    "Invalid error bound: relative bound must be non-zero and positive."
+                )
+            }
+
+            Kind::AbsoluteBoundTooSmall => {
+                write!(
+                    f,
+                    "Invalid error bound: absolute bound must be larger than 50.0 * f64::EPSILON."
+                )
+            }
+
+            Kind::InvalidTolerance => {
+                write!(f, "Invalid tolerance: relative bound must be non-zero and positive and absolute bound must be larger than 50.0 * f64::EPSILON.")
+            }
+        }
+    }
+}
+
+impl std::error::Error for Error {}
+
 fn rescale_error(error: f64, result_abs: f64, result_asc: f64) -> f64 {
     let mut error = error.abs();
 

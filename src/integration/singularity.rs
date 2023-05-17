@@ -1,8 +1,9 @@
 use std::collections::binary_heap::{BinaryHeap, IntoIter};
 
-use crate::integration::adaptive::{Error, Kind};
 use crate::integration::basic::BasicInternal;
-use crate::integration::{subinterval_too_small, ErrorBound, GaussKronrodBasic, IntegralEstimate};
+use crate::integration::{
+    subinterval_too_small, Error, ErrorBound, GaussKronrodBasic, IntegralEstimate, Kind,
+};
 use crate::rule::{GaussKronrod15, GaussKronrod21, Rule};
 use crate::Integrand;
 
