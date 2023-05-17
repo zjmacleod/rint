@@ -157,7 +157,7 @@ impl std::fmt::Display for Error {
 
 impl std::error::Error for Error {}
 
-fn rescale_error(error: f64, result_abs: f64, result_asc: f64) -> f64 {
+pub(crate) fn rescale_error(error: f64, result_abs: f64, result_asc: f64) -> f64 {
     let mut error = error.abs();
 
     if result_asc != 0.0 && error != 0.0 {
