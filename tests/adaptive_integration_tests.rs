@@ -6,301 +6,81 @@ mod util;
 
 // Test the smooth Function1 with 15 point adaptive integration and relative error
 // bound.
-#[test]
-fn test_adaptive_smooth_relative_error_15() -> Result<(), String> {
-    let exp_result = 7.716049382715854665E-02;
-    let exp_abserr = 6.679384885865053037E-12;
-    let exp_iterations = 6;
-    let exp_evaluations = 165;
-
-    let rel_error_bound = 1e-6;
-    let abs_error_bound = 1e-15;
-    let rule = GaussKronrod15;
-    let error_bound = ErrorBound::Relative(1e-10);
-    let alpha = 2.6;
-
-    let lower = 0.0;
-    let upper = 1.0;
-
-    let function = util::Function1 { alpha };
-
-    let integral =
-        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
-
-    let integral_result = integral.integrate().unwrap();
-    let result = integral_result.result();
-    let error = integral_result.error();
-    let iterations = integral_result.iterations();
-    let evaluations = integral_result.function_evaluations();
-
-    util::test_relative_error(
-        result,
-        exp_result,
-        abs_error_bound,
-        "adaptive(f1,15) smooth result",
-    )?;
-    util::test_relative_error(
-        error,
-        exp_abserr,
-        rel_error_bound,
-        "adaptive(f1,15) smooth abserr",
-    )?;
-    util::test_int(
-        iterations,
-        exp_iterations,
-        "adaptive(f1,15) smooth iterations",
-    )?;
-    util::test_int(
-        evaluations,
-        exp_evaluations,
-        "adaptive(f1,15) smooth evaluations",
-    )?;
-
-    let error_bound = ErrorBound::Relative(1e-10);
-    let lower = 1.0;
-    let upper = 0.0;
-
-    let function = util::Function1 { alpha };
-
-    let integral =
-        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
-
-    let integral_result = integral.integrate().unwrap();
-    let result = integral_result.result();
-    let error = integral_result.error();
-    let iterations = integral_result.iterations();
-    let evaluations = integral_result.function_evaluations();
-
-    util::test_relative_error(
-        result,
-        -exp_result,
-        abs_error_bound,
-        "adaptive(f1,15) smooth result reverse",
-    )?;
-    util::test_relative_error(
-        error,
-        exp_abserr,
-        rel_error_bound,
-        "adaptive(f1,15) smooth abserr reverse",
-    )?;
-    util::test_int(
-        iterations,
-        exp_iterations,
-        "adaptive(f1,15) smooth iterations reverse",
-    )?;
-    util::test_int(
-        evaluations,
-        exp_evaluations,
-        "adaptive(f1,15) smooth evaluations reverse",
-    )?;
-
-    Ok(())
+adaptive_test_passing! {
+        name: adaptive_gauss_kronrod_smooth_positive_function_relative_error_bound_15_point,
+        function: util::Function1,
+        alpha: f64 => 2.6,
+        rule: GaussKronrod15,
+        lower: 0.0,
+        upper: 1.0,
+        exp_result:      7.716049382715854665E-02,
+        exp_error:       6.679384885865053037E-12,
+        exp_iterations:  6,
+        exp_evaluations: 165,
+        tolerance_rel: 1e-10,
+        test_abs_error_bound: 1e-15,
+        test_rel_error_bound: 1e-6,
+        "Function1 GaussKronrodAdaptive relative bound 15-point"
 }
 
 // Test the smooth Function1 with 21 point adaptive integration and absolute error
 // bound.
-#[test]
-fn test_adaptive_smooth_absolute_error_21() -> Result<(), String> {
-    let exp_result = 7.716049382716050342E-02;
-    let exp_abserr = 2.227969521869139532E-15;
-    let exp_iterations = 8;
-    let exp_evaluations = 315;
-
-    let error_bound = ErrorBound::Absolute(1e-14);
-
-    let abs_error_bound = 1e-15;
-    let rel_error_bound = 1e-6;
-    let rule = GaussKronrod21;
-    let alpha = 2.6;
-
-    let lower = 0.0;
-    let upper = 1.0;
-
-    let function = util::Function1 { alpha };
-
-    let integral =
-        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
-
-    let integral_result = integral.integrate().unwrap();
-    let result = integral_result.result();
-    let error = integral_result.error();
-    let iterations = integral_result.iterations();
-    let evaluations = integral_result.function_evaluations();
-
-    util::test_relative_error(
-        result,
-        exp_result,
-        abs_error_bound,
-        "adaptive(f1,21) smooth result",
-    )?;
-    util::test_relative_error(
-        error,
-        exp_abserr,
-        rel_error_bound,
-        "adaptive(f1,21) smooth abserr",
-    )?;
-    util::test_int(
-        iterations,
-        exp_iterations,
-        "adaptive(f1,21) smooth iterations",
-    )?;
-    util::test_int(
-        evaluations,
-        exp_evaluations,
-        "adaptive(f1,21) smooth evaluations",
-    )?;
-
-    let error_bound = ErrorBound::Absolute(1e-14);
-    let lower = 1.0;
-    let upper = 0.0;
-
-    let function = util::Function1 { alpha };
-
-    let integral =
-        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
-
-    let integral_result = integral.integrate().unwrap();
-    let result = integral_result.result();
-    let error = integral_result.error();
-    let iterations = integral_result.iterations();
-    let evaluations = integral_result.function_evaluations();
-
-    util::test_relative_error(
-        result,
-        -exp_result,
-        abs_error_bound,
-        "adaptive(f1,21) smooth result reverse",
-    )?;
-    util::test_relative_error(
-        error,
-        exp_abserr,
-        rel_error_bound,
-        "adaptive(f1,21) smooth abserr reverse",
-    )?;
-    util::test_int(
-        iterations,
-        exp_iterations,
-        "adaptive(f1,21) smooth iterations reverse",
-    )?;
-    util::test_int(
-        evaluations,
-        exp_evaluations,
-        "adaptive(f1,21) smooth evaluations reverse",
-    )?;
-
-    Ok(())
+adaptive_test_passing! {
+        name: adaptive_gauss_kronrod_smooth_positive_function_absolute_error_bound_21_point,
+        function: util::Function1,
+        alpha: f64 => 2.6,
+        rule: GaussKronrod21,
+        lower: 0.0,
+        upper: 1.0,
+        exp_result:      7.716049382716050342E-02,
+        exp_error:       2.227969521869139532E-15,
+        exp_iterations:  8,
+        exp_evaluations: 315,
+        tolerance_abs: 1e-14,
+        test_abs_error_bound: 1e-15,
+        test_rel_error_bound: 1e-6,
+        "Function1 GaussKronrodAdaptive absolute bound 21-point"
 }
 
 // Test oscillating Function3 with 31 point adaptive integration and absolute error
 // bound. Should terminate due to roundoff error.
-#[test]
-fn test_adaptive_oscillating_should_error_roundoff_31() -> Result<(), String> {
-    let exp_result = -7.238969575482959717E-01;
-    let exp_abserr = 1.285805464427459261E-14;
-    let exp_iterations = 1;
-    let exp_evaluations = 31;
+adaptive_test_error! {
+        name: adaptive_gauss_kronrod_terminates_due_to_roundoff_error_31_point,
+        function: util::Function3,
+        alpha: f64 => 1.3,
+        rule: GaussKronrod31,
+        lower: 0.3,
+        upper: 2.71,
+        exp_result:      -7.238969575482959717E-01,
+        exp_error:        1.285805464427459261E-14,
+        exp_iterations:  1,
+        exp_evaluations: 31,
+        tolerance_abs: 1e-14,
+        test_abs_error_bound: 1e-15,
+        test_rel_error_bound: 1e-6,
+        kind: RoundoffErrorDetected,
+        "Function3 GaussKronrodAdaptive absolute bound 31-point (terminates due to roundoff error)"
+}
 
-    let error_bound = ErrorBound::Absolute(1e-14);
-
-    let abs_error_bound = 1e-15;
-    let rel_error_bound = 1e-6;
-    let rule = GaussKronrod31;
-    let alpha = 1.3;
-
-    let lower = 0.3;
-    let upper = 2.71;
-
-    let function = util::Function3 { alpha };
-
-    let integral =
-        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
-
-    let integral_result = integral.integrate();
-
-    if let Err(err) = integral_result {
-        if let Kind::RoundoffErrorDetected = err.kind() {
-            let result = err.result();
-            let error = err.error();
-            let iterations = err.iterations();
-            let evaluations = err.function_evaluations();
-
-            util::test_relative_error(
-                result,
-                exp_result,
-                abs_error_bound,
-                "adaptive(f3,31) smooth result",
-            )?;
-            util::test_relative_error(
-                error,
-                exp_abserr,
-                rel_error_bound,
-                "adaptive(f3,31) smooth abserr",
-            )?;
-            util::test_int(
-                iterations,
-                exp_iterations,
-                "adaptive(f3,31) smooth iterations",
-            )?;
-            util::test_int(
-                evaluations,
-                exp_evaluations,
-                "adaptive(f3,31) smooth evaluations",
-            )?;
-        } else {
-            return Err(String::from("wrong error kind"));
-        }
-    } else {
-        return Err(String::from("should have been error"));
-    }
-
-    let error_bound = ErrorBound::Absolute(1e-14);
-    let lower = 2.71;
-    let upper = 0.3;
-
-    let function = util::Function3 { alpha };
-
-    let integral =
-        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
-
-    let integral_result = integral.integrate();
-
-    if let Err(err) = integral_result {
-        if let Kind::RoundoffErrorDetected = err.kind() {
-            let result = err.result();
-            let error = err.error();
-            let iterations = err.iterations();
-            let evaluations = err.function_evaluations();
-
-            util::test_relative_error(
-                result,
-                -exp_result,
-                abs_error_bound,
-                "adaptive(f3,31) smooth result reverse",
-            )?;
-            util::test_relative_error(
-                error,
-                exp_abserr,
-                rel_error_bound,
-                "adaptive(f3,31) smooth abserr reverse",
-            )?;
-            util::test_int(
-                iterations,
-                exp_iterations,
-                "adaptive(f3,31) smooth iterations reverse",
-            )?;
-            util::test_int(
-                evaluations,
-                exp_evaluations,
-                "adaptive(f3,31) smooth evaluations reverse",
-            )?;
-        } else {
-            return Err(String::from("wrong error kind"));
-        }
-    } else {
-        return Err(String::from("should have been error"));
-    }
-
-    Ok(())
+// Test Function16 with 61 point adaptive integration and absolute error
+// bound. Should terminate due to max iterations reached
+adaptive_test_error! {
+        name: adaptive_gauss_kronrod_terminates_due_to_max_iterations_reached_61_point,
+        function: util::Function16,
+        alpha: i32 => 1,
+        rule: GaussKronrod61,
+        lower: -1.0,
+        upper:  1.0,
+        iterations: 3,
+        exp_result:      9.565151449233894709,
+        exp_error:       1.570369823891028460E+01,
+        exp_iterations:  3,
+        exp_evaluations: 305,
+        tolerance_abs: 1e-14,
+        test_abs_error_bound: 1e-15,
+        test_rel_error_bound: 1e-6,
+        kind: MaximumIterationsReached,
+        "Function16 GaussKronrodAdaptive absolute bound 61-point (terminates due to max iterations reached)"
 }
 
 // Test Function16 with 51 point adaptive integration and absolute error
@@ -385,118 +165,5 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
     } else {
         return Err(String::from("should have been error"));
     }
-    Ok(())
-}
-
-// TODO: This should return an error, but we successfully integrate,
-// Test Function16 with 61 point adaptive integration and absolute error
-// bound. Should terminate due to max iterations reached
-#[test]
-fn test_adaptive_max_iterations_61() -> Result<(), String> {
-    let exp_result = 9.565151449233894709;
-    let exp_abserr = 1.570369823891028460E+01;
-    let exp_iterations = 3;
-    let exp_evaluations = 305;
-
-    let abs_error_bound = 1e-15;
-    let rel_error_bound = 1e-6;
-    let error_bound = ErrorBound::Absolute(1e-14);
-
-    let rule = GaussKronrod61;
-    let alpha = 1;
-
-    let lower = -1.0;
-    let upper = 1.0;
-
-    let function = util::Function16 { alpha };
-
-    let integral =
-        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 3).unwrap();
-
-    let integral_result = integral.integrate();
-
-    if let Err(err) = integral_result {
-        if let Kind::MaximumIterationsReached = err.kind() {
-            let result = err.result();
-            let error = err.error();
-            let iterations = err.iterations();
-            let evaluations = err.function_evaluations();
-
-            util::test_relative_error(
-                result,
-                exp_result,
-                abs_error_bound,
-                "adaptive(f16,61) smooth result",
-            )?;
-            util::test_relative_error(
-                error,
-                exp_abserr,
-                rel_error_bound,
-                "adaptive(f16,61) smooth abserr",
-            )?;
-            util::test_int(
-                iterations,
-                exp_iterations,
-                "adaptive(f16,61) smooth iterations",
-            )?;
-            util::test_int(
-                evaluations,
-                exp_evaluations,
-                "adaptive(f16,61) smooth evaluations",
-            )?;
-        } else {
-            return Err(String::from("wrong error kind"));
-        }
-    } else {
-        return Err(String::from("should have been error"));
-    }
-
-    let error_bound = ErrorBound::Absolute(1e-14);
-    let lower = 1.0;
-    let upper = -1.0;
-
-    let function = util::Function16 { alpha };
-
-    let integral =
-        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 3).unwrap();
-
-    let integral_result = integral.integrate();
-
-    if let Err(err) = integral_result {
-        if let Kind::MaximumIterationsReached = err.kind() {
-            let result = err.result();
-            let error = err.error();
-            let iterations = err.iterations();
-            let evaluations = err.function_evaluations();
-
-            util::test_relative_error(
-                result,
-                -exp_result,
-                abs_error_bound,
-                "adaptive(f16,61) smooth result negative reverse",
-            )?;
-            util::test_relative_error(
-                error,
-                exp_abserr,
-                rel_error_bound,
-                "adaptive(f16,61) smooth abserr negative reverse",
-            )?;
-            util::test_int(
-                iterations,
-                exp_iterations,
-                "adaptive(f16,61) smooth iterations negative reverse",
-            )?;
-            util::test_int(
-                evaluations,
-                exp_evaluations,
-                "adaptive(f16,61) smooth evaluations reverse",
-            )?;
-        } else {
-            return Err(String::from("wrong error kind"));
-        }
-    } else {
-        return Err(String::from("should have been error"));
-    }
-
     Ok(())
 }
