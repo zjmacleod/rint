@@ -201,16 +201,11 @@ where
 
             let [ext_result, ext_error] = workspace.table.extrapolate(result);
 
-            if workspace.table.ktmin > 5 && workspace.table.error < 0.001 * workspace.error {
-                workspace.set_error_kind(Kind::DoesNotConverge);
-            }
+            workspace.check_convergence();
 
             if ext_error < workspace.table.error {
-                workspace.table.ktmin = 0;
-                workspace.table.error = ext_error;
-                workspace.table.result = ext_result;
-                workspace.table.correction = workspace.large_interval_error;
-                workspace.table.tolerance = self.error_bound.tolerance(ext_result);
+                let ext_tolerance = self.error_bound.tolerance(ext_result);
+                workspace.update_table_values(ext_result, ext_error, ext_tolerance);
                 if workspace.table.error <= workspace.table.tolerance {
                     break;
                 }
@@ -572,6 +567,20 @@ impl Workspace {
         self.large_interval_error = self.error;
         self.heap.append(&mut self.store);
         self.smallest_interval *= 0.5;
+    }
+
+    fn update_table_values(&mut self, ext_result: f64, ext_error: f64, tolerance: f64) {
+        self.table.ktmin = 0;
+        self.table.error = ext_error;
+        self.table.result = ext_result;
+        self.table.correction = self.large_interval_error;
+        self.table.tolerance = tolerance;
+    }
+
+    fn check_convergence(&mut self) {
+        if self.table.ktmin > 5 && self.table.error < 0.001 * self.error {
+            self.set_error_kind(Kind::DoesNotConverge);
+        }
     }
 }
 
