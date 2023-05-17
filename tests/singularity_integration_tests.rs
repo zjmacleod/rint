@@ -1,5 +1,5 @@
 //use rint::integration::adaptive::Kind;
-use rint::integration::{ErrorBound, GaussKronrodAdaptiveSingularity};
+use rint::integration::{ErrorBound, AdaptiveSingularity};
 
 mod util;
 
@@ -18,7 +18,7 @@ singularity_test! {
         tolerance_rel: 1e-10,
         test_abs_error_bound: 1e-15,
         test_rel_error_bound: 1e-6,
-        "Function1 GaussKronrodAdaptiveSinularity::general relative bound"
+        "Function1 AdaptiveSingularity::general relative bound"
 }
 
 // XXX Test passes but result for error estimate 2e-14 off from GSL.
@@ -35,7 +35,7 @@ singularity_test! {
         tolerance_abs: 1e-7,
         test_abs_error_bound: 1e-15,
         test_rel_error_bound: 1e-3,
-        "Function11 GaussKronrodAdaptiveSinularity::general absolute bound"
+        "Function11 AdaptiveSingularity::general absolute bound"
 }
 
 /* Test infinite range integral f455 using a relative error bound */
@@ -50,7 +50,7 @@ singularity_test! {
         tolerance_rel: 1e-3,
         test_abs_error_bound: 1e-14,
         test_rel_error_bound: 1e-5,
-        "Function455 GaussKronrodAdaptiveSinularity::semi_infinite_positive relative bound"
+        "Function455 AdaptiveSingularity::semi_infinite_positive relative bound"
 }
 
 /* Test infinite range integral f15 using a relative error bound */
@@ -66,7 +66,7 @@ singularity_test! {
         tolerance_rel: 1e-7,
         test_abs_error_bound: 1e-14,
         test_rel_error_bound: 1e-5,
-        "Function15 GaussKronrodAdaptiveSinularity::semi_infinite_positive relative bound"
+        "Function15 AdaptiveSingularity::semi_infinite_positive relative bound"
 }
 
 /* Test infinite range integral f16 using an absolute error bound */
@@ -82,7 +82,7 @@ singularity_test! {
         tolerance_abs: 1e-7,
         test_abs_error_bound: 1e-14,
         test_rel_error_bound: 1e-5,
-        "Function16 GaussKronrodAdaptiveSinularity::semi_infinite_positive absolute bound"
+        "Function16 AdaptiveSingularity::semi_infinite_positive absolute bound"
 }
 
 /* Test infinite range integral myfn1 using a absolute error bound */
@@ -96,7 +96,7 @@ singularity_test! {
         tolerance_abs: 1e-7,
         test_abs_error_bound: 1e-14,
         test_rel_error_bound: 1e-5,
-        "MyFunction1 GaussKronrodAdaptiveSinularity::infinite absolute bound"
+        "MyFunction1 AdaptiveSingularity::infinite absolute bound"
 }
 
 /* Test infinite range integral myfn2 using a absolute error bound lower */
@@ -112,5 +112,5 @@ singularity_test! {
         tolerance_abs: 1e-7,
         test_abs_error_bound: 1e-14,
         test_rel_error_bound: 1e-5,
-        "MyFunction2 GaussKronrodAdaptiveSinularity::semi_infinite_negative absolute bound"
+        "MyFunction2 AdaptiveSingularity::semi_infinite_negative absolute bound"
 }

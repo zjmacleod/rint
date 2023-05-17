@@ -26,7 +26,7 @@
 //!
 //!```rust
 //! use rint::Integrand;
-//! use rint::integration::GaussKronrodBasic;
+//! use rint::integration::Basic;
 //! use rint::rule::GaussKronrod15;
 //!
 //! /* f1(x) = x^alpha * log(1/x) */
@@ -55,7 +55,7 @@
 //!
 //! let function = Function1 { alpha };
 //! let rule = GaussKronrod15;
-//! let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
+//! let integral = Basic::new(lower, upper, rule, &function);
 //!
 //! let integral_result = integral.integrate();
 //! let result = integral_result.result();
@@ -76,14 +76,14 @@ use crate::Integrand;
 
 /// The value of a function evaluated with Gauss-Kronrod integration and associated error
 /// estimation.
-pub struct Basic {
+pub struct BasicEstimate {
     error: f64,
     result: f64,
     result_abs: f64,
     result_asc: f64,
 }
 
-impl Basic {
+impl BasicEstimate {
     /// Return the numerically evaluated approximation of the integral `I = int_a^b f(x) dx`.
     #[must_use]
     #[inline]
@@ -99,7 +99,7 @@ impl Basic {
     }
 
     /// Return the numerically evaluated approximation of the integral `I_{asc} = int_a^b |f(x) - I/(b - a)| dx`,
-    /// where `I` is the integral value returned by [`Basic::result`].
+    /// where `I` is the integral value returned by [`BasicEstimate::result`].
     #[must_use]
     #[inline]
     pub fn result_asc(&self) -> f64 {
@@ -122,7 +122,7 @@ impl Basic {
 /// The integration routine tries to be as efficient as possible by reusing function
 /// evaluations of the lower n-point Gauss integration in the calculation of the higher-order
 /// Kronrod extension.
-pub struct GaussKronrodBasic<I, R>
+pub struct Basic<I, R>
 where
     I: Integrand,
     R: Rule,
@@ -133,12 +133,12 @@ where
     function: I,
 }
 
-impl<I, R> GaussKronrodBasic<I, R>
+impl<I, R> Basic<I, R>
 where
     I: Integrand,
     R: Rule,
 {
-    /// Create a new [`GaussKronrodBasic`].
+    /// Create a new [`Basic`].
     ///
     /// The user first defines a `function` which is a `struct` implementing the
     /// [`Integrand`] trait and selects a Gauss-Kronrod quadrature [`Rule`],
@@ -236,7 +236,7 @@ where
         }
     }
 
-    pub fn integrate(&self) -> Basic {
+    pub fn integrate(&self) -> BasicEstimate {
         self.integrate_internal().into()
     }
 
@@ -279,9 +279,9 @@ impl Ord for BasicInternal {
     }
 }
 
-impl From<BasicInternal> for Basic {
-    fn from(other: BasicInternal) -> Basic {
-        Basic {
+impl From<BasicInternal> for BasicEstimate {
+    fn from(other: BasicInternal) -> BasicEstimate {
+        BasicEstimate {
             error: other.error,
             result: other.result,
             result_abs: other.result_abs,
@@ -346,11 +346,9 @@ impl BasicInternal {
         let upper = self.upper();
         let mid = (upper + lower) * 0.5;
 
-        let lower_integral =
-            GaussKronrodBasic::new(lower, mid, rule, function).integrate_internal();
+        let lower_integral = Basic::new(lower, mid, rule, function).integrate_internal();
 
-        let upper_integral =
-            GaussKronrodBasic::new(mid, upper, rule, function).integrate_internal();
+        let upper_integral = Basic::new(mid, upper, rule, function).integrate_internal();
 
         [lower_integral, upper_integral]
     }

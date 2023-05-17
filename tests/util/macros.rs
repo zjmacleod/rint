@@ -32,7 +32,7 @@ macro_rules! basic_test {
             let function = <$type>::new(alpha);
             let rule = $rule;
 
-            let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
+            let integral = Basic::new(lower, upper, rule, &function);
 
             let integral_result = integral.integrate();
             let result = integral_result.result();
@@ -68,7 +68,7 @@ macro_rules! basic_test {
             let lower = $upper;
             let upper = $lower;
 
-            let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
+            let integral = Basic::new(lower, upper, rule, &function);
 
             let integral_result = integral.integrate();
             let result = integral_result.result();
@@ -133,7 +133,7 @@ macro_rules! basic_test {
             let function = <$type>::new();
             let rule = $rule;
 
-            let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
+            let integral = Basic::new(lower, upper, rule, &function);
 
             let integral_result = integral.integrate();
             let result = integral_result.result();
@@ -169,7 +169,7 @@ macro_rules! basic_test {
             let lower = $upper;
             let upper = $lower;
 
-            let integral = GaussKronrodBasic::new(lower, upper, rule, &function);
+            let integral = Basic::new(lower, upper, rule, &function);
 
             let integral_result = integral.integrate();
             let result = integral_result.result();
@@ -244,7 +244,7 @@ macro_rules! adaptive_test_passing {
             let function = <$type>::new(alpha);
 
             let integral =
-                GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000)
+                Adaptive::new(lower, upper, error_bound, rule, &function, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -281,7 +281,7 @@ macro_rules! adaptive_test_passing {
             let upper = $lower;
 
             let integral =
-                GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000)
+                Adaptive::new(lower, upper, error_bound, rule, &function, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -351,7 +351,7 @@ macro_rules! adaptive_test_passing {
             let function = <$type>::new(alpha);
 
             let integral =
-                GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000)
+                Adaptive::new(lower, upper, error_bound, rule, &function, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -388,7 +388,7 @@ macro_rules! adaptive_test_passing {
             let upper = $lower;
 
             let integral =
-                GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000)
+                Adaptive::new(lower, upper, error_bound, rule, &function, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -463,7 +463,7 @@ macro_rules! adaptive_test_error {
             let function = <$type>::new(alpha);
 
             let integral =
-                GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000)
+                Adaptive::new(lower, upper, error_bound, rule, &function, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate();
@@ -515,7 +515,7 @@ macro_rules! adaptive_test_error {
             let upper = $lower;
 
             let integral =
-                GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000)
+                Adaptive::new(lower, upper, error_bound, rule, &function, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate();
@@ -601,7 +601,7 @@ macro_rules! adaptive_test_error {
             let function = <$type>::new(alpha);
 
             let integral =
-                GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000)
+                Adaptive::new(lower, upper, error_bound, rule, &function, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate();
@@ -653,7 +653,7 @@ macro_rules! adaptive_test_error {
             let upper = $lower;
 
             let integral =
-                GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000)
+                Adaptive::new(lower, upper, error_bound, rule, &function, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate();
@@ -740,7 +740,7 @@ macro_rules! adaptive_test_error {
             let function = <$type>::new(alpha);
 
             let integral =
-                GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, $iter)
+                Adaptive::new(lower, upper, error_bound, rule, &function, $iter)
                     .unwrap();
 
             let integral_result = integral.integrate();
@@ -792,7 +792,7 @@ macro_rules! adaptive_test_error {
             let upper = $lower;
 
             let integral =
-                GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, $iter)
+                Adaptive::new(lower, upper, error_bound, rule, &function, $iter)
                     .unwrap();
 
             let integral_result = integral.integrate();
@@ -879,7 +879,7 @@ macro_rules! adaptive_test_error {
             let function = <$type>::new(alpha);
 
             let integral =
-                GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, $iter)
+                Adaptive::new(lower, upper, error_bound, rule, &function, $iter)
                     .unwrap();
 
             let integral_result = integral.integrate();
@@ -931,7 +931,7 @@ macro_rules! adaptive_test_error {
             let upper = $lower;
 
             let integral =
-                GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, $iter)
+                Adaptive::new(lower, upper, error_bound, rule, &function, $iter)
                     .unwrap();
 
             let integral_result = integral.integrate();
@@ -1017,7 +1017,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new(alpha);
 
-            let integral = GaussKronrodAdaptiveSingularity::general(
+            let integral = AdaptiveSingularity::general(
                 lower,
                 upper,
                 error_bound,
@@ -1059,7 +1059,7 @@ macro_rules! singularity_test {
             let upper = $lower;
             let error_bound = ErrorBound::Relative($tolerance);
 
-            let integral = GaussKronrodAdaptiveSingularity::general(
+            let integral = AdaptiveSingularity::general(
                 lower,
                 upper,
                 error_bound,
@@ -1132,7 +1132,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new(alpha);
 
-            let integral = GaussKronrodAdaptiveSingularity::general(
+            let integral = AdaptiveSingularity::general(
                 lower,
                 upper,
                 error_bound,
@@ -1174,7 +1174,7 @@ macro_rules! singularity_test {
             let upper = $lower;
             let error_bound = ErrorBound::Absolute($tolerance);
 
-            let integral = GaussKronrodAdaptiveSingularity::general(
+            let integral = AdaptiveSingularity::general(
                 lower,
                 upper,
                 error_bound,
@@ -1245,7 +1245,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new(alpha);
 
-            let integral = GaussKronrodAdaptiveSingularity::semi_infinite_negative(
+            let integral = AdaptiveSingularity::semi_infinite_negative(
                 upper,
                 error_bound,
                 &function,
@@ -1315,7 +1315,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new(alpha);
 
-            let integral = GaussKronrodAdaptiveSingularity::semi_infinite_negative(
+            let integral = AdaptiveSingularity::semi_infinite_negative(
                 upper,
                 error_bound,
                 &function,
@@ -1385,7 +1385,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new(alpha);
 
-            let integral = GaussKronrodAdaptiveSingularity::semi_infinite_positive(
+            let integral = AdaptiveSingularity::semi_infinite_positive(
                 lower,
                 error_bound,
                 &function,
@@ -1455,7 +1455,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new(alpha);
 
-            let integral = GaussKronrodAdaptiveSingularity::semi_infinite_positive(
+            let integral = AdaptiveSingularity::semi_infinite_positive(
                 lower,
                 error_bound,
                 &function,
@@ -1523,7 +1523,7 @@ macro_rules! singularity_test {
             let function = <$type>::new(alpha);
 
             let integral =
-                GaussKronrodAdaptiveSingularity::infinite(error_bound, &function, 1000).unwrap();
+                AdaptiveSingularity::infinite(error_bound, &function, 1000).unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -1585,7 +1585,7 @@ macro_rules! singularity_test {
             let function = <$type>::new(alpha);
 
             let integral =
-                GaussKronrodAdaptiveSingularity::infinite(error_bound, &function, 1000).unwrap();
+                AdaptiveSingularity::infinite(error_bound, &function, 1000).unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -1649,7 +1649,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new();
 
-            let integral = GaussKronrodAdaptiveSingularity::general(
+            let integral = AdaptiveSingularity::general(
                 lower,
                 upper,
                 error_bound,
@@ -1691,7 +1691,7 @@ macro_rules! singularity_test {
             let upper = $lower;
             let error_bound = ErrorBound::Relative(1e-10);
 
-            let integral = GaussKronrodAdaptiveSingularity::general(
+            let integral = AdaptiveSingularity::general(
                 lower,
                 upper,
                 error_bound,
@@ -1762,7 +1762,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new();
 
-            let integral = GaussKronrodAdaptiveSingularity::general(
+            let integral = AdaptiveSingularity::general(
                 lower,
                 upper,
                 error_bound,
@@ -1804,7 +1804,7 @@ macro_rules! singularity_test {
             let upper = $lower;
             let error_bound = ErrorBound::Absolute(1e-10);
 
-            let integral = GaussKronrodAdaptiveSingularity::general(
+            let integral = AdaptiveSingularity::general(
                 lower,
                 upper,
                 error_bound,
@@ -1873,7 +1873,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new();
 
-            let integral = GaussKronrodAdaptiveSingularity::semi_infinite_negative(
+            let integral = AdaptiveSingularity::semi_infinite_negative(
                 upper,
                 error_bound,
                 &function,
@@ -1941,7 +1941,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new();
 
-            let integral = GaussKronrodAdaptiveSingularity::semi_infinite_negative(
+            let integral = AdaptiveSingularity::semi_infinite_negative(
                 upper,
                 error_bound,
                 &function,
@@ -2009,7 +2009,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new();
 
-            let integral = GaussKronrodAdaptiveSingularity::semi_infinite_positive(
+            let integral = AdaptiveSingularity::semi_infinite_positive(
                 lower,
                 error_bound,
                 &function,
@@ -2077,7 +2077,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new();
 
-            let integral = GaussKronrodAdaptiveSingularity::semi_infinite_positive(
+            let integral = AdaptiveSingularity::semi_infinite_positive(
                 lower,
                 error_bound,
                 &function,
@@ -2143,7 +2143,7 @@ macro_rules! singularity_test {
             let function = <$type>::new();
 
             let integral =
-                GaussKronrodAdaptiveSingularity::infinite(error_bound, &function, 1000).unwrap();
+                AdaptiveSingularity::infinite(error_bound, &function, 1000).unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -2203,7 +2203,7 @@ macro_rules! singularity_test {
             let function = <$type>::new();
 
             let integral =
-                GaussKronrodAdaptiveSingularity::infinite(error_bound, &function, 1000).unwrap();
+                AdaptiveSingularity::infinite(error_bound, &function, 1000).unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();

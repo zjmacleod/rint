@@ -4,7 +4,7 @@
 //
 // Ported from gsl-2.6/integration/test.c
 
-use rint::integration::GaussKronrodBasic;
+use rint::integration::Basic;
 use rint::rule::{
     GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod41, GaussKronrod51, GaussKronrod61,
 };
@@ -24,7 +24,7 @@ basic_test! {
         exp_result_asc: 2.350164577239293706E+01,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-7,
-        "Function1 with singularity GaussKronrodBasic 15-point"
+        "Function1 with singularity Basic 15-point"
 }
 
 basic_test! {
@@ -40,7 +40,7 @@ basic_test! {
         exp_result_asc: 2.782360287710622515E+01,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-7,
-        "Function1 with singularity GaussKronrodBasic 21-point"
+        "Function1 with singularity Basic 21-point"
 }
 
 basic_test! {
@@ -56,7 +56,7 @@ basic_test! {
         exp_result_asc: 3.296500137482590276E+01,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-7,
-        "Function1 with singularity GaussKronrodBasic 31-point"
+        "Function1 with singularity Basic 31-point"
 }
 
 basic_test! {
@@ -72,7 +72,7 @@ basic_test! {
         exp_result_asc: 3.671538820274916048E+01,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-7,
-        "Function1 with singularity GaussKronrodBasic 41-point"
+        "Function1 with singularity Basic 41-point"
 }
 
 basic_test! {
@@ -88,7 +88,7 @@ basic_test! {
         exp_result_asc: 3.967771249391228849E+01,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-7,
-        "Function1 with singularity GaussKronrodBasic 51-point"
+        "Function1 with singularity Basic 51-point"
 }
 
 basic_test! {
@@ -104,5 +104,5 @@ basic_test! {
         exp_result_asc: 4.213750493076978643E+01,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-7,
-        "Function1 with singularity GaussKronrodBasic 61-point"
+        "Function1 with singularity Basic 61-point"
 }

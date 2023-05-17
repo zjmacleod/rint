@@ -2,7 +2,7 @@ use std::collections::binary_heap::{BinaryHeap, IntoIter};
 
 use crate::integration::basic::BasicInternal;
 use crate::integration::subinterval_too_small;
-use crate::integration::{Error, ErrorBound, GaussKronrodBasic, IntegralEstimate, Kind};
+use crate::integration::{Error, ErrorBound, Basic, IntegralEstimate, Kind};
 use crate::rule::Rule;
 use crate::Integrand;
 
@@ -14,7 +14,7 @@ use crate::Integrand;
 /// [`ErrorBound::Relative`] to work to a specified relative error,
 /// or [`ErrorBound::Either`] to return a result as soon as _either_ the relative
 /// or absolute error bound has been satisfied.
-pub struct GaussKronrodAdaptive<I, R>
+pub struct Adaptive<I, R>
 where
     I: Integrand,
     R: Rule,
@@ -27,12 +27,12 @@ where
     max_iterations: usize,
 }
 
-impl<I, R> GaussKronrodAdaptive<I, R>
+impl<I, R> Adaptive<I, R>
 where
     I: Integrand,
     R: Rule,
 {
-    /// Create a new [`GaussKronrodAdaptive`].
+    /// Create a new [`Adaptive`].
     ///
     /// The user defines a `function` which is a `struct` implementing the
     /// [`Integrand`] trait, and integration limis `upper` and `lower`.
@@ -120,7 +120,7 @@ where
     /// Integration can fail if user suplied tolerance cannot be achieved within the maximum number
     /// of iterations.
     pub fn integrate(&self) -> Result<IntegralEstimate, Error> {
-        let initial = GaussKronrodBasic::new(self.lower, self.upper, self.rule, &self.function)
+        let initial = Basic::new(self.lower, self.upper, self.rule, &self.function)
             .integrate_internal();
 
         if let Some(output) = self.check_initial_integration(&initial)? {

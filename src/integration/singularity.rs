@@ -1,9 +1,7 @@
 use std::collections::binary_heap::{BinaryHeap, IntoIter};
 
 use crate::integration::basic::BasicInternal;
-use crate::integration::{
-    subinterval_too_small, Error, ErrorBound, GaussKronrodBasic, IntegralEstimate, Kind,
-};
+use crate::integration::{subinterval_too_small, Basic, Error, ErrorBound, IntegralEstimate, Kind};
 use crate::rule::{GaussKronrod15, GaussKronrod21, Rule};
 use crate::Integrand;
 
@@ -15,7 +13,7 @@ use crate::Integrand;
 /// [`ErrorBound::Relative`] to work to a specified relative error,
 /// or [`ErrorBound::Either`] to return a result as soon as _either_ the relative
 /// or absolute error bound has been satisfied.
-pub struct GaussKronrodAdaptiveSingularity<I, R>
+pub struct AdaptiveSingularity<I, R>
 where
     I: Integrand,
     R: Rule,
@@ -28,12 +26,12 @@ where
     max_iterations: usize,
 }
 
-impl<I, R> GaussKronrodAdaptiveSingularity<I, R>
+impl<I, R> AdaptiveSingularity<I, R>
 where
     I: Integrand,
     R: Rule,
 {
-    /// Create a new [`GaussKronrodAdaptiveSingularity`].
+    /// Create a new [`AdaptiveSingularity`].
     ///
     /// The user defines a `function` which is a `struct` implementing the
     /// [`Integrand`] trait, and integration limis `upper` and `lower`.
@@ -117,8 +115,8 @@ where
 
     /// # Errors
     pub fn integrate(&self) -> Result<IntegralEstimate, Error> {
-        let initial = GaussKronrodBasic::new(self.lower, self.upper, self.rule, &self.function)
-            .integrate_internal();
+        let initial =
+            Basic::new(self.lower, self.upper, self.rule, &self.function).integrate_internal();
 
         if let Some(output) = self.check_initial_integration(&initial)? {
             return Ok(output);
@@ -271,7 +269,7 @@ where
     }
 }
 
-impl<I> GaussKronrodAdaptiveSingularity<I, GaussKronrod21>
+impl<I> AdaptiveSingularity<I, GaussKronrod21>
 where
     I: Integrand,
 {
@@ -288,7 +286,7 @@ where
     }
 }
 
-impl<I> GaussKronrodAdaptiveSingularity<InfiniteInterval<I>, GaussKronrod15>
+impl<I> AdaptiveSingularity<InfiniteInterval<I>, GaussKronrod15>
 where
     I: Integrand,
 {
@@ -304,7 +302,7 @@ where
     }
 }
 
-impl<I> GaussKronrodAdaptiveSingularity<SemiInfiniteIntervalPositive<I>, GaussKronrod15>
+impl<I> AdaptiveSingularity<SemiInfiniteIntervalPositive<I>, GaussKronrod15>
 where
     I: Integrand,
 {
@@ -321,7 +319,7 @@ where
     }
 }
 
-impl<I> GaussKronrodAdaptiveSingularity<SemiInfiniteIntervalNegative<I>, GaussKronrod15>
+impl<I> AdaptiveSingularity<SemiInfiniteIntervalNegative<I>, GaussKronrod15>
 where
     I: Integrand,
 {

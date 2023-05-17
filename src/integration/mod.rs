@@ -3,11 +3,10 @@ pub mod basic;
 pub mod estimate;
 pub mod singularity;
 
-pub use adaptive::GaussKronrodAdaptive;
-pub use basic::Basic;
-pub use basic::GaussKronrodBasic;
+pub use adaptive::Adaptive;
+pub use basic::{Basic, BasicEstimate};
 pub use estimate::IntegralEstimate;
-pub use singularity::GaussKronrodAdaptiveSingularity;
+pub use singularity::AdaptiveSingularity;
 
 /// User selected error bound type.
 pub enum ErrorBound {

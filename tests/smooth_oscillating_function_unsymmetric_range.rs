@@ -4,7 +4,7 @@
 //
 // Ported from gsl-2.6/integration/test.c
 
-use rint::integration::GaussKronrodBasic;
+use rint::integration::Basic;
 use rint::rule::{
     GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod41, GaussKronrod51, GaussKronrod61,
 };
@@ -24,7 +24,7 @@ basic_test! {
         exp_result_asc:  9.334560307787327371E-01,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-7,
-        "Function3 GaussKronrodBasic 15-point"
+        "Function3 Basic 15-point"
 }
 
 basic_test! {
@@ -40,7 +40,7 @@ basic_test! {
         exp_result_asc:  9.297591249133687619E-01,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-7,
-        "Function3 GaussKronrodBasic 21-point"
+        "Function3 Basic 21-point"
 }
 
 basic_test! {
@@ -56,7 +56,7 @@ basic_test! {
         exp_result_asc:  9.277828092501518853E-01,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-7,
-        "Function3 GaussKronrodBasic 31-point"
+        "Function3 Basic 31-point"
 }
 
 basic_test! {
@@ -72,7 +72,7 @@ basic_test! {
         exp_result_asc:  9.264382258645686985E-01,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-7,
-        "Function3 GaussKronrodBasic 41-point"
+        "Function3 Basic 41-point"
 }
 
 basic_test! {
@@ -88,7 +88,7 @@ basic_test! {
         exp_result_asc:  9.264666884071264263E-01,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-7,
-        "Function3 GaussKronrodBasic 51-point"
+        "Function3 Basic 51-point"
 }
 
 basic_test! {
@@ -104,5 +104,5 @@ basic_test! {
         exp_result_asc:  9.270469641771273972E-01,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-7,
-        "Function3 GaussKronrodBasic 61-point"
+        "Function3 Basic 61-point"
 }

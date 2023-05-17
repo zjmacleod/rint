@@ -1,7 +1,7 @@
 // Test the basic Gauss-Kronrod integration rules with a smooth positive function.
 // Ported from gsl-2.6/integration/test.c
 
-use rint::integration::GaussKronrodBasic;
+use rint::integration::Basic;
 use rint::rule::{
     GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod41, GaussKronrod51, GaussKronrod61,
 };
@@ -21,7 +21,7 @@ basic_test! {
         exp_result_asc: 4.434273814139995384E-02,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-7,
-        "Function1 GaussKronrodBasic 15-point"
+        "Function1 Basic 15-point"
 }
 
 basic_test! {
@@ -37,7 +37,7 @@ basic_test! {
         exp_result_asc: 4.434311425038358484E-02,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-7,
-        "Function1 GaussKronrodBasic 21-point"
+        "Function1 Basic 21-point"
 }
 
 basic_test! {
@@ -53,7 +53,7 @@ basic_test! {
         exp_result_asc: 4.427995051868838933E-02,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-7,
-        "Function1 GaussKronrodBasic 31-point"
+        "Function1 Basic 31-point"
 }
 
 basic_test! {
@@ -69,7 +69,7 @@ basic_test! {
         exp_result_asc: 4.421521169637691873E-02,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-7,
-        "Function1 GaussKronrodBasic 41-point"
+        "Function1 Basic 41-point"
 }
 
 basic_test! {
@@ -85,7 +85,7 @@ basic_test! {
         exp_result_asc: 4.416474291216854892E-02,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-5,
-        "Function1 GaussKronrodBasic 51-point"
+        "Function1 Basic 51-point"
 }
 
 basic_test! {
@@ -101,5 +101,5 @@ basic_test! {
         exp_result_asc: 4.419287685934316506E-02,
         abs_error_bound: 1.0e-15,
         rel_error_bound: 1.0e-5,
-        "Function1 GaussKronrodBasic 61-point"
+        "Function1 Basic 61-point"
 }

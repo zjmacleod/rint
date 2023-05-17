@@ -1,4 +1,4 @@
-use rint::integration::{ErrorBound, GaussKronrodAdaptive, Kind};
+use rint::integration::{ErrorBound, Adaptive, Kind};
 use rint::rule::{GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod51, GaussKronrod61};
 
 mod util;
@@ -19,7 +19,7 @@ adaptive_test_passing! {
         tolerance_rel: 1e-10,
         test_abs_error_bound: 1e-15,
         test_rel_error_bound: 1e-6,
-        "Function1 GaussKronrodAdaptive relative bound 15-point"
+        "Function1 Adaptive relative bound 15-point"
 }
 
 // Test the smooth Function1 with 21 point adaptive integration and absolute error
@@ -38,7 +38,7 @@ adaptive_test_passing! {
         tolerance_abs: 1e-14,
         test_abs_error_bound: 1e-15,
         test_rel_error_bound: 1e-6,
-        "Function1 GaussKronrodAdaptive absolute bound 21-point"
+        "Function1 Adaptive absolute bound 21-point"
 }
 
 // Test oscillating Function3 with 31 point adaptive integration and absolute error
@@ -58,7 +58,7 @@ adaptive_test_error! {
         test_abs_error_bound: 1e-15,
         test_rel_error_bound: 1e-6,
         kind: RoundoffErrorDetected,
-        "Function3 GaussKronrodAdaptive absolute bound 31-point (terminates due to roundoff error)"
+        "Function3 Adaptive absolute bound 31-point (terminates due to roundoff error)"
 }
 
 // Test Function16 with 61 point adaptive integration and absolute error
@@ -79,7 +79,7 @@ adaptive_test_error! {
         test_abs_error_bound: 1e-15,
         test_rel_error_bound: 1e-6,
         kind: MaximumIterationsReached,
-        "Function16 GaussKronrodAdaptive absolute bound 61-point (terminates due to max iterations reached)"
+        "Function16 Adaptive absolute bound 61-point (terminates due to max iterations reached)"
 }
 
 // Test Function16 with 51 point adaptive integration and absolute error
@@ -100,7 +100,7 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
     let function = util::Function16 { alpha };
 
     let integral =
-        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
+        Adaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
 
     let integral_result = integral.integrate();
 
@@ -136,7 +136,7 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
     let function = util::Function16 { alpha };
 
     let integral =
-        GaussKronrodAdaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
+        Adaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
 
     let integral_result = integral.integrate();
 
