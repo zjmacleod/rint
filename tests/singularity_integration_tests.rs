@@ -1,5 +1,5 @@
-//use rint::integration::adaptive::Kind;
-use rint::integration::{AdaptiveSingularity, ErrorBound};
+//use rint::quadrature::adaptive::Kind;
+use rint::quadrature::{AdaptiveSingularity, ErrorBound};
 
 mod util;
 

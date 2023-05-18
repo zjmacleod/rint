@@ -26,8 +26,8 @@
 //!
 //!```rust
 //! use rint::Integrand;
-//! use rint::integration::Basic;
-//! use rint::rule::GaussKronrod15;
+//! use rint::quadrature::Basic;
+//! use rint::quadrature::rule::GaussKronrod15;
 //!
 //! /* f1(x) = x^alpha * log(1/x) */
 //! /* integ(f1,x,0,1) = 1/(alpha + 1)^2 */
