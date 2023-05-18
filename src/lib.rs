@@ -1,11 +1,11 @@
-//! Gauss-Kronrod numerical integration routines written in Rust.
+//! Numerical integration routines written in Rust.
 //!
-//! This library exposes various Gauss-Kronrod numerical integration routines written in pure Rust.
-//! The algorithms are heavily inspired by the GNU Scientific Library numerical integration routines.
+//! This library exposes various numerical integration routines written in pure Rust.
+//! The algorithms are heavily inspired by the GNU Scientific Library & QUADPACK numerical integration routines.
 //!
 #![deny(clippy::pedantic)]
 #![allow(clippy::module_name_repetitions, clippy::excessive_precision)]
-pub mod integration;
+pub mod quadrature;
 pub mod rule;
 
 /// The integrand of a one-dimensional integral.
