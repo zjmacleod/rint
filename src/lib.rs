@@ -5,6 +5,7 @@
 //!
 #![deny(clippy::pedantic)]
 #![allow(clippy::module_name_repetitions, clippy::excessive_precision)]
+pub mod multi;
 pub mod quadrature;
 
 /// The integrand of a one-dimensional integral.
@@ -32,5 +33,15 @@ pub trait Integrand {
 impl<I: Integrand> Integrand for &I {
     fn evaluate(&self, x: f64) -> f64 {
         I::evaluate(self, x)
+    }
+}
+
+pub trait MultiDimensionalIntegrand {
+    fn evaluate(&self, coordinates: &[f64]) -> f64;
+}
+
+impl<I: MultiDimensionalIntegrand> MultiDimensionalIntegrand for &I {
+    fn evaluate(&self, coordinates: &[f64]) -> f64 {
+        I::evaluate(self, coordinates)
     }
 }
