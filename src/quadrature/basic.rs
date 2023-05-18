@@ -169,6 +169,7 @@ where
         let initial_abs = initial_kronrod.abs();
 
         // XXX Can we get rid of this additional allocation?
+        // Vec<(kronrod_weight, (rate_plus, rate_minus))>
         let mut function_values: Vec<(f64, (f64, f64))> = Vec::with_capacity(61);
 
         let (gauss_result, kronrod_shared, abs_shared) = self
