@@ -120,8 +120,8 @@ where
     /// Integration can fail if user suplied tolerance cannot be achieved within the maximum number
     /// of iterations.
     pub fn integrate(&self) -> Result<IntegralEstimate, Error> {
-        let initial = Basic::new(self.lower, self.upper, self.rule, &self.function)
-            .integrate_internal();
+        let initial =
+            Basic::new(self.lower, self.upper, self.rule, &self.function).integrate_internal();
 
         if let Some(output) = self.check_initial_integration(&initial)? {
             return Ok(output);
@@ -134,7 +134,7 @@ where
 
             let [lower, upper] = previous.bisect(&self.function, self.rule);
 
-            let (result, error) = workspace.iteration_result_error(&previous, &lower, &upper);
+            let (result, error) = workspace.improved_result_error(&previous, &lower, &upper);
 
             let iteration_tolerance = self.error_bound.tolerance(result);
 
@@ -173,23 +173,26 @@ where
     fn initialise_workspace(&self, initial: BasicInternal) -> Workspace {
         let mut heap = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
 
+        let iteration = 1;
         let result = initial.result();
         let error = initial.error();
         let lower_limit = initial.lower();
         let upper_limit = initial.upper();
+        let roundoff_count = 0;
+        let roundoff_on_high_iteration_count = 0;
         let function_evaluations_per_integration = self.rule.evaluations();
 
         heap.push(initial);
 
         Workspace {
             heap,
-            iteration: 1,
-            roundoff_type1: 0,
-            roundoff_type2: 0,
+            iteration,
             result,
             error,
             lower_limit,
             upper_limit,
+            roundoff_count,
+            roundoff_on_high_iteration_count,
             function_evaluations_per_integration,
         }
     }
@@ -198,12 +201,12 @@ where
 struct Workspace {
     heap: BinaryHeap<BasicInternal>,
     iteration: usize,
-    roundoff_type1: usize,
-    roundoff_type2: usize,
     result: f64,
     error: f64,
     lower_limit: f64,
     upper_limit: f64,
+    roundoff_count: usize,
+    roundoff_on_high_iteration_count: usize,
     function_evaluations_per_integration: usize,
 }
 
@@ -220,7 +223,15 @@ impl Workspace {
         }
     }
 
-    fn iteration_result_error(
+    fn pop(&mut self) -> Option<BasicInternal> {
+        self.heap.pop()
+    }
+
+    fn push(&mut self, integral: BasicInternal) {
+        self.heap.push(integral);
+    }
+
+    fn improved_result_error(
         &mut self,
         previous: &BasicInternal,
         lower: &BasicInternal,
@@ -237,10 +248,10 @@ impl Workspace {
             let delta = (prev_result - new_result).abs();
 
             if delta <= 1e-5 * new_result.abs() && new_error >= 0.99 * prev_error {
-                self.roundoff_type1 += 1;
+                self.roundoff_count += 1;
             }
             if self.iteration >= 10 && new_error >= prev_error {
-                self.roundoff_type2 += 1;
+                self.roundoff_on_high_iteration_count += 1;
             }
         }
 
@@ -253,7 +264,7 @@ impl Workspace {
     }
 
     fn check_roundoff(&self) -> Result<(), Error> {
-        if self.roundoff_type1 >= 6 || self.roundoff_type2 >= 20 {
+        if self.roundoff_count >= 6 || self.roundoff_on_high_iteration_count >= 20 {
             let output = self.integral_estimate();
             let kind = Kind::RoundoffErrorDetected;
             return Err(Error::new(kind, output));
@@ -279,14 +290,6 @@ impl Workspace {
 
     fn sum_results(&self) -> f64 {
         self.heap.iter().fold(0.0f64, |a, v| a + v.result())
-    }
-
-    fn pop(&mut self) -> Option<BasicInternal> {
-        self.heap.pop()
-    }
-
-    fn push(&mut self, integral: BasicInternal) {
-        self.heap.push(integral);
     }
 
     fn integral_estimate(&self) -> IntegralEstimate {

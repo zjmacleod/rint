@@ -286,10 +286,36 @@ where
     }
 }
 
+pub struct InfiniteInterval<I: Integrand> {
+    function: I,
+}
+
+impl<I: Integrand> InfiniteInterval<I> {
+    fn new(function: I) -> Self {
+        Self { function }
+    }
+
+    // TODO the calculation of the number of function evaluations is wrong for this type, since
+    // there are two evaluations per call to .evaluate()
+    fn transform_evaluate(&self, t: f64) -> f64 {
+        let x = (1.0 - t) / t;
+        let y = self.function.evaluate(x) + self.function.evaluate(-x);
+        (y / t) / t
+    }
+}
+
+impl<I: Integrand> Integrand for InfiniteInterval<I> {
+    fn evaluate(&self, x: f64) -> f64 {
+        self.transform_evaluate(x)
+    }
+}
+
 impl<I> AdaptiveSingularity<InfiniteInterval<I>, GaussKronrod15>
 where
     I: Integrand,
 {
+    // TODO the calculation of the number of function evaluations is wrong for this type, since
+    // there are two evaluations per call to .evaluate()
     /// # Errors
     pub fn infinite(
         error_bound: ErrorBound,
@@ -299,6 +325,29 @@ where
         let rule = GaussKronrod15;
         let transformed = InfiniteInterval::new(function);
         Self::new(0.0, 1.0, error_bound, rule, transformed, max_iterations)
+    }
+}
+
+pub struct SemiInfiniteIntervalPositive<I: Integrand> {
+    lower: f64,
+    function: I,
+}
+
+impl<I: Integrand> SemiInfiniteIntervalPositive<I> {
+    fn new(function: I, lower: f64) -> Self {
+        Self { lower, function }
+    }
+
+    fn transform_evaluate(&self, t: f64) -> f64 {
+        let x = self.lower + (1.0 - t) / t;
+        let y = self.function.evaluate(x);
+        y / (t.powi(2))
+    }
+}
+
+impl<I: Integrand> Integrand for SemiInfiniteIntervalPositive<I> {
+    fn evaluate(&self, x: f64) -> f64 {
+        self.transform_evaluate(x)
     }
 }
 
@@ -316,6 +365,29 @@ where
         let rule = GaussKronrod15;
         let transformed = SemiInfiniteIntervalPositive::new(function, lower);
         Self::new(0.0, 1.0, error_bound, rule, transformed, max_iterations)
+    }
+}
+
+pub struct SemiInfiniteIntervalNegative<I: Integrand> {
+    upper: f64,
+    function: I,
+}
+
+impl<I: Integrand> SemiInfiniteIntervalNegative<I> {
+    fn new(function: I, upper: f64) -> Self {
+        Self { upper, function }
+    }
+
+    fn transform_evaluate(&self, t: f64) -> f64 {
+        let x = self.upper - (1.0 - t) / t;
+        let y = self.function.evaluate(x);
+        y / (t.powi(2))
+    }
+}
+
+impl<I: Integrand> Integrand for SemiInfiniteIntervalNegative<I> {
+    fn evaluate(&self, x: f64) -> f64 {
+        self.transform_evaluate(x)
     }
 }
 
@@ -355,18 +427,6 @@ struct Workspace {
 }
 
 impl Workspace {
-    fn remaining_large_intervals(&mut self) -> bool {
-        while let Some(next) = self.peek() {
-            if next.abs_interval_length() > self.smallest_interval {
-                return true;
-            }
-            if let Some(next) = self.pop() {
-                self.store(next);
-            };
-        }
-        false
-    }
-
     fn retrieve_largest_error(&mut self) -> Result<BasicInternal, Error> {
         self.iteration += 1;
         if let Some(previous) = self.pop() {
@@ -375,6 +435,28 @@ impl Workspace {
             let kind = Kind::UninitialisedWorkspace;
             Err(Error::unevaluated(kind))
         }
+    }
+
+    fn pop(&mut self) -> Option<BasicInternal> {
+        self.heap.pop()
+    }
+
+    fn push(&mut self, integral: BasicInternal) {
+        self.heap.push(integral);
+    }
+
+    fn peek(&self) -> Option<&BasicInternal> {
+        self.heap.peek()
+    }
+
+    fn store(&mut self, integral: BasicInternal) {
+        self.store.push(integral);
+    }
+
+    fn sum_results(&self) -> f64 {
+        let store = self.store.iter().fold(0.0f64, |a, v| a + v.result());
+        let heap = self.heap.iter().fold(0.0f64, |a, v| a + v.result());
+        store + heap
     }
 
     fn improved_result_error(
@@ -410,58 +492,6 @@ impl Workspace {
         [self.result, self.error]
     }
 
-    fn check_roundoff(&mut self) {
-        if self.roundoff_count + self.table.roundoff_count >= 10
-            || self.roundoff_on_high_iteration_count >= 20
-        {
-            self.set_error_kind(Kind::RoundoffErrorDetected);
-        }
-
-        if self.table.roundoff_count >= 5 {
-            self.table.error_detected = true;
-        }
-    }
-
-    fn update(&mut self, lower: BasicInternal, upper: BasicInternal) {
-        let lower_limit = lower.lower();
-        let upper_limit = upper.upper();
-        let midpoint = (lower_limit + upper_limit) * 0.5;
-
-        self.check_roundoff();
-
-        if subinterval_too_small(lower_limit, midpoint, upper_limit) {
-            self.set_error_kind(Kind::BadIntegrandBehaviour {
-                lower: lower_limit,
-                upper: upper_limit,
-            });
-        }
-
-        self.push(lower);
-        self.push(upper);
-    }
-
-    fn sum_results(&self) -> f64 {
-        let store = self.store.iter().fold(0.0f64, |a, v| a + v.result());
-        let heap = self.heap.iter().fold(0.0f64, |a, v| a + v.result());
-        store + heap
-    }
-
-    fn store(&mut self, integral: BasicInternal) {
-        self.store.push(integral);
-    }
-
-    fn pop(&mut self) -> Option<BasicInternal> {
-        self.heap.pop()
-    }
-
-    fn push(&mut self, integral: BasicInternal) {
-        self.heap.push(integral);
-    }
-
-    fn peek(&self) -> Option<&BasicInternal> {
-        self.heap.peek()
-    }
-
     fn integral_estimate(&self) -> IntegralEstimate {
         let result = self.sum_results();
         let error = self.error;
@@ -474,18 +504,11 @@ impl Workspace {
             .with_function_evaluations(function_evaluations)
     }
 
-    fn update_large_interval_error(
-        &mut self,
-        iteration_interval: f64,
-        previous_error: f64,
-        iteration_error: f64,
-    ) {
-        self.large_interval_error += -previous_error;
-
-        let half_iteration_interval = iteration_interval * 0.5;
-        if half_iteration_interval > self.smallest_interval {
-            self.large_interval_error += iteration_error;
-        }
+    fn prepare_next_iteration(&mut self) {
+        self.extrapolate = false;
+        self.large_interval_error = self.error;
+        self.heap.append(&mut self.store);
+        self.smallest_interval *= 0.5;
     }
 
     fn compute_result(self) -> Result<IntegralEstimate, Error> {
@@ -552,6 +575,36 @@ impl Workspace {
         self.compute_extrapolated_result()
     }
 
+    fn check_roundoff(&mut self) {
+        if self.roundoff_count + self.table.roundoff_count >= 10
+            || self.roundoff_on_high_iteration_count >= 20
+        {
+            self.set_error_kind(Kind::RoundoffErrorDetected);
+        }
+
+        if self.table.roundoff_count >= 5 {
+            self.table.error_detected = true;
+        }
+    }
+
+    fn check_convergence(&mut self) {
+        if self.table.ktmin > 5 && self.table.error < 0.001 * self.error {
+            self.set_error_kind(Kind::DoesNotConverge);
+        }
+    }
+
+    fn remaining_large_intervals(&mut self) -> bool {
+        while let Some(next) = self.peek() {
+            if next.abs_interval_length() > self.smallest_interval {
+                return true;
+            }
+            if let Some(next) = self.pop() {
+                self.store(next);
+            };
+        }
+        false
+    }
+
     fn is_err(&self) -> bool {
         self.error_kind.is_some()
     }
@@ -560,11 +613,36 @@ impl Workspace {
         self.error_kind = Some(kind);
     }
 
-    fn prepare_next_iteration(&mut self) {
-        self.extrapolate = false;
-        self.large_interval_error = self.error;
-        self.heap.append(&mut self.store);
-        self.smallest_interval *= 0.5;
+    fn update(&mut self, lower: BasicInternal, upper: BasicInternal) {
+        let lower_limit = lower.lower();
+        let upper_limit = upper.upper();
+        let midpoint = (lower_limit + upper_limit) * 0.5;
+
+        self.check_roundoff();
+
+        if subinterval_too_small(lower_limit, midpoint, upper_limit) {
+            self.set_error_kind(Kind::BadIntegrandBehaviour {
+                lower: lower_limit,
+                upper: upper_limit,
+            });
+        }
+
+        self.push(lower);
+        self.push(upper);
+    }
+
+    fn update_large_interval_error(
+        &mut self,
+        iteration_interval: f64,
+        previous_error: f64,
+        iteration_error: f64,
+    ) {
+        self.large_interval_error += -previous_error;
+
+        let half_iteration_interval = iteration_interval * 0.5;
+        if half_iteration_interval > self.smallest_interval {
+            self.large_interval_error += iteration_error;
+        }
     }
 
     fn update_table_values(&mut self, ext_result: f64, ext_error: f64, tolerance: f64) {
@@ -794,74 +872,6 @@ impl ExtrapolationTable {
             .with_error(error)
             .with_iterations(iterations)
             .with_function_evaluations(function_evaluations)
-    }
-}
-
-pub struct InfiniteInterval<I: Integrand> {
-    function: I,
-}
-
-impl<I: Integrand> InfiniteInterval<I> {
-    fn new(function: I) -> Self {
-        Self { function }
-    }
-
-    fn transform_evaluate(&self, t: f64) -> f64 {
-        let x = (1.0 - t) / t;
-        let y = self.function.evaluate(x) + self.function.evaluate(-x);
-        (y / t) / t
-    }
-}
-
-impl<I: Integrand> Integrand for InfiniteInterval<I> {
-    fn evaluate(&self, x: f64) -> f64 {
-        self.transform_evaluate(x)
-    }
-}
-
-pub struct SemiInfiniteIntervalPositive<I: Integrand> {
-    lower: f64,
-    function: I,
-}
-
-impl<I: Integrand> SemiInfiniteIntervalPositive<I> {
-    fn new(function: I, lower: f64) -> Self {
-        Self { lower, function }
-    }
-
-    fn transform_evaluate(&self, t: f64) -> f64 {
-        let x = self.lower + (1.0 - t) / t;
-        let y = self.function.evaluate(x);
-        y / (t.powi(2))
-    }
-}
-
-impl<I: Integrand> Integrand for SemiInfiniteIntervalPositive<I> {
-    fn evaluate(&self, x: f64) -> f64 {
-        self.transform_evaluate(x)
-    }
-}
-
-pub struct SemiInfiniteIntervalNegative<I: Integrand> {
-    upper: f64,
-    function: I,
-}
-
-impl<I: Integrand> SemiInfiniteIntervalNegative<I> {
-    fn new(function: I, upper: f64) -> Self {
-        Self { upper, function }
-    }
-
-    fn transform_evaluate(&self, t: f64) -> f64 {
-        let x = self.upper - (1.0 - t) / t;
-        let y = self.function.evaluate(x);
-        y / (t.powi(2))
-    }
-}
-
-impl<I: Integrand> Integrand for SemiInfiniteIntervalNegative<I> {
-    fn evaluate(&self, x: f64) -> f64 {
-        self.transform_evaluate(x)
     }
 }
 
