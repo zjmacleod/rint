@@ -40,17 +40,14 @@ mod private {
 /// and weights `w_i` for the `n`-point Gauss rule and the corresponding `(2n - 1)`-point Kronrod
 /// extension.
 pub trait Rule: private::Sealed + Clone + Copy + Debug {
-    type Shared: IntoIterator<Item = f64>;
-    type Extended: IntoIterator<Item = f64>;
+    type Shared: IntoIterator<Item = (f64, f64, f64)>;
+    type Extended: IntoIterator<Item = (f64, f64)>;
 
     const KRONROD_CENTRE: f64;
     const EVALUATIONS: usize;
 
-    fn shared_nodes(&self) -> Self::Shared;
-    fn gauss_weights(&self) -> Self::Shared;
-    fn kronrod_weights(&self) -> Self::Shared;
-    fn extended_nodes(&self) -> Self::Extended;
-    fn extended_weights(&self) -> Self::Extended;
+    fn shared_data(&self) -> Self::Shared;
+    fn extended_data(&self) -> Self::Extended;
     fn gauss_centre(&self) -> Option<f64>;
     fn kronrod_centre(&self) -> f64 {
         Self::KRONROD_CENTRE

@@ -174,15 +174,9 @@ where
 
         let (gauss_result, kronrod_shared, abs_shared) = self
             .rule
-            .shared_nodes()
+            .shared_data()
             .into_iter()
-            .zip(
-                self.rule
-                    .gauss_weights()
-                    .into_iter()
-                    .zip(self.rule.kronrod_weights().into_iter()),
-            )
-            .map(|(t, (g, k))| {
+            .map(|(t, g, k)| {
                 let abscissa = half_length * t;
                 let rate_plus = self.function.evaluate(centre + abscissa);
                 let rate_minus = self.function.evaluate(centre - abscissa);
@@ -197,9 +191,8 @@ where
 
         let (kronrod_result, abs_result) = self
             .rule
-            .extended_nodes()
+            .extended_data()
             .into_iter()
-            .zip(self.rule.extended_weights().into_iter())
             .map(|(t, k)| {
                 let abscissa = half_length * t;
                 let rate_plus = self.function.evaluate(centre + abscissa);
