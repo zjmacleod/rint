@@ -1,4 +1,4 @@
-use rint::integration::{ErrorBound, Adaptive, Kind};
+use rint::integration::{Adaptive, ErrorBound, Kind};
 use rint::rule::{GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod51, GaussKronrod61};
 
 mod util;
@@ -99,8 +99,7 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
 
     let function = util::Function16 { alpha };
 
-    let integral =
-        Adaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
+    let integral = Adaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
 
     let integral_result = integral.integrate();
 
@@ -135,8 +134,7 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
 
     let function = util::Function16 { alpha };
 
-    let integral =
-        Adaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
+    let integral = Adaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
 
     let integral_result = integral.integrate();
 
