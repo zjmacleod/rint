@@ -1,7 +1,9 @@
-pub mod adaptive;
-pub mod basic;
-pub mod estimate;
-pub mod singularity;
+mod adaptive;
+mod basic;
+mod estimate;
+mod singularity;
+
+pub mod rule;
 
 pub use adaptive::Adaptive;
 pub use basic::{Basic, BasicEstimate};

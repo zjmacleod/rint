@@ -1,9 +1,9 @@
 use std::collections::binary_heap::BinaryHeap;
 
-use crate::integration::basic::BasicInternal;
-use crate::integration::subinterval_too_small;
-use crate::integration::{Basic, Error, ErrorBound, IntegralEstimate, Kind};
-use crate::rule::Rule;
+use crate::quadrature::basic::BasicInternal;
+use crate::quadrature::rule::Rule;
+use crate::quadrature::subinterval_too_small;
+use crate::quadrature::{Basic, Error, ErrorBound, IntegralEstimate, Kind};
 use crate::Integrand;
 
 /// An integral to be evaluated with an adaptive Gauss-Kronrod quadrature.

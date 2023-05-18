@@ -70,8 +70,8 @@
 //!```
 use std::cmp::Ordering;
 
-use crate::integration::rescale_error;
-use crate::rule::Rule;
+use crate::quadrature::rescale_error;
+use crate::quadrature::rule::Rule;
 use crate::Integrand;
 
 /// The value of a function evaluated with Gauss-Kronrod integration and associated error

@@ -6,7 +6,6 @@
 #![deny(clippy::pedantic)]
 #![allow(clippy::module_name_repetitions, clippy::excessive_precision)]
 pub mod quadrature;
-pub mod rule;
 
 /// The integrand of a one-dimensional integral.
 ///

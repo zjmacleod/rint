@@ -1,8 +1,8 @@
 use std::collections::binary_heap::BinaryHeap;
 
-use crate::integration::basic::BasicInternal;
-use crate::integration::{subinterval_too_small, Basic, Error, ErrorBound, IntegralEstimate, Kind};
-use crate::rule::{GaussKronrod15, GaussKronrod21, Rule};
+use crate::quadrature::basic::BasicInternal;
+use crate::quadrature::rule::{GaussKronrod15, GaussKronrod21, Rule};
+use crate::quadrature::{subinterval_too_small, Basic, Error, ErrorBound, IntegralEstimate, Kind};
 use crate::Integrand;
 
 /// An integral with singularities to be evaluated with an adaptive Gauss-Kronrod quadrature.

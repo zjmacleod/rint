@@ -1,4 +1,4 @@
-use crate::integration::basic::BasicInternal;
+use crate::quadrature::basic::BasicInternal;
 
 /// The value of a function evaluated with Gauss-Kronrod integration and associated error
 /// estimation.

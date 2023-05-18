@@ -1,4 +1,4 @@
-use crate::rule::Rule;
+use crate::quadrature::rule::Rule;
 
 /// The unit struct of the 51-point Gauss-Kronrod quadrature rule.
 ///
