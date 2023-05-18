@@ -1,4 +1,4 @@
-use std::collections::binary_heap::{BinaryHeap, IntoIter};
+use std::collections::binary_heap::BinaryHeap;
 
 use crate::integration::basic::BasicInternal;
 use crate::integration::{subinterval_too_small, Basic, Error, ErrorBound, IntegralEstimate, Kind};
@@ -573,21 +573,6 @@ impl Workspace {
         self.table.result = ext_result;
         self.table.correction = self.large_interval_error;
         self.table.tolerance = tolerance;
-    }
-
-    fn check_convergence(&mut self) {
-        if self.table.ktmin > 5 && self.table.error < 0.001 * self.error {
-            self.set_error_kind(Kind::DoesNotConverge);
-        }
-    }
-}
-
-impl IntoIterator for Workspace {
-    type Item = BasicInternal;
-    type IntoIter = IntoIter<BasicInternal>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.heap.into_iter()
     }
 }
 

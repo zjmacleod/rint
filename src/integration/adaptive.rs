@@ -1,8 +1,8 @@
-use std::collections::binary_heap::{BinaryHeap, IntoIter};
+use std::collections::binary_heap::BinaryHeap;
 
 use crate::integration::basic::BasicInternal;
 use crate::integration::subinterval_too_small;
-use crate::integration::{Error, ErrorBound, Basic, IntegralEstimate, Kind};
+use crate::integration::{Basic, Error, ErrorBound, IntegralEstimate, Kind};
 use crate::rule::Rule;
 use crate::Integrand;
 
@@ -299,14 +299,5 @@ impl Workspace {
             .with_error(error)
             .with_iterations(iterations)
             .with_function_evaluations(function_evaluations)
-    }
-}
-
-impl IntoIterator for Workspace {
-    type Item = BasicInternal;
-    type IntoIter = IntoIter<BasicInternal>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.heap.into_iter()
     }
 }
