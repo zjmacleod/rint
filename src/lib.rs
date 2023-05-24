@@ -36,12 +36,12 @@ impl<I: Integrand> Integrand for &I {
     }
 }
 
-pub trait MultiDimensionalIntegrand {
-    fn evaluate(&self, coordinates: &[f64]) -> f64;
+pub trait MultiDimensionalIntegrand<const N: usize> {
+    fn evaluate(&self, coordinates: &[f64; N]) -> f64;
 }
 
-impl<I: MultiDimensionalIntegrand> MultiDimensionalIntegrand for &I {
-    fn evaluate(&self, coordinates: &[f64]) -> f64 {
+impl<I: MultiDimensionalIntegrand<N>, const N: usize> MultiDimensionalIntegrand<N> for &I {
+    fn evaluate(&self, coordinates: &[f64; N]) -> f64 {
         I::evaluate(self, coordinates)
     }
 }
