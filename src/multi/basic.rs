@@ -3,6 +3,7 @@
 use crate::multi::{Error, Kind};
 use crate::quadrature::rule::GaussKronrod15;
 use crate::quadrature::IntegralEstimate;
+use crate::Limits;
 use crate::MultiDimensionalIntegrand;
 
 pub(crate) struct Region<const N: usize> {
@@ -90,6 +91,26 @@ impl<const N: usize> Region<N> {
     fn function_evaluations(&self) -> usize {
         self.function_evaluations
     }
+
+    fn bisect<I: MultiDimensionalIntegrand<N>>(&self, function: &I) -> [Region<N>; 2] {
+        let axis_to_bisect = self.largest_error_axis;
+        let previous_limits = self.limits();
+
+        let [lower, upper] = previous_limits[axis_to_bisect].bisect();
+
+        let mut lower_limits = *previous_limits;
+        lower_limits[axis_to_bisect] = lower;
+
+        let mut upper_limits = *previous_limits;
+        upper_limits[axis_to_bisect] = upper;
+
+        let lower_integral =
+            BasicMultiDimensional::new_unchecked(lower_limits, function).integrate_internal();
+        let upper_integral =
+            BasicMultiDimensional::new_unchecked(upper_limits, function).integrate_internal();
+
+        [lower_integral, upper_integral]
+    }
 }
 
 pub struct BasicMultiDimensional<I, const N: usize>
@@ -113,6 +134,10 @@ where
         } else {
             Ok(Self { limits, function })
         }
+    }
+
+    fn new_unchecked(limits: [Limits; N], function: I) -> Self {
+        Self { limits, function }
     }
 
     fn geometry(&self) -> Geometry<N> {
@@ -456,38 +481,6 @@ struct Geometry<const N: usize> {
     volume: f64,
 }
 
-#[derive(Copy, Clone, Debug)]
-pub struct Limits {
-    lower: f64,
-    upper: f64,
-}
-
-impl Limits {
-    fn new(lower: f64, upper: f64) -> Self {
-        Self { lower, upper }
-    }
-
-    fn lower(&self) -> f64 {
-        self.lower
-    }
-
-    fn upper(&self) -> f64 {
-        self.upper
-    }
-
-    fn centre(&self) -> f64 {
-        (self.upper + self.lower) * 0.5
-    }
-
-    fn width(&self) -> f64 {
-        (self.upper - self.lower)
-    }
-
-    fn half_width(&self) -> f64 {
-        self.width() * 0.5
-    }
-}
-
 const fn minimum_function_calls(n: usize) -> usize {
     let two_pow_n = {
         let mut exp = n;
@@ -775,5 +768,102 @@ mod tests {
         assert!(minimum_function_calls(n) == 57);
         let n = 5;
         assert!(minimum_function_calls(n) == 93);
+    }
+
+    #[test]
+    fn polynomial_fraction_multidimensional_integrals() {
+        {
+            struct Simple;
+
+            impl MultiDimensionalIntegrand<3> for Simple {
+                fn evaluate(&self, coordinates: &[f64; 3]) -> f64 {
+                    let x = coordinates[0];
+                    let y = coordinates[1];
+                    let z = coordinates[2];
+                    let numerator = x.powi(2) + y.powi(2) + z.powi(2);
+                    let denominator = 1.0 + x * y * z;
+                    numerator / denominator
+                }
+            }
+
+            let limits = [
+                Limits::new(0.0, 2.0),
+                Limits::new(0.0, 3.0),
+                Limits::new(0.0, 1.0),
+            ];
+
+            let function = Simple;
+            let integral = BasicMultiDimensional::new(limits, function).unwrap();
+
+            let integral_result = integral.integrate_internal();
+
+            let result = integral_result.result();
+            let should_be = 16.174_761_084;
+
+            assert!((result - should_be).abs() / should_be.abs() < 1e-3);
+        }
+
+        {
+            struct Simple;
+
+            impl MultiDimensionalIntegrand<3> for Simple {
+                fn evaluate(&self, coordinates: &[f64; 3]) -> f64 {
+                    let x = coordinates[0];
+                    let y = coordinates[1];
+                    let z = coordinates[2];
+                    let numerator = x.powi(2) + y.powi(2) + z.powi(2);
+                    let denominator = 1.0 + x.powi(2);
+                    numerator / denominator
+                }
+            }
+
+            let limits = [
+                Limits::new(0.0, 2.0),
+                Limits::new(0.0, 3.0),
+                Limits::new(0.0, 1.0),
+            ];
+
+            let function = Simple;
+            let integral = BasicMultiDimensional::new(limits, function).unwrap();
+
+            let integral_result = integral.integrate_internal();
+
+            let result = integral_result.result();
+            let should_be = 13.750_041_016;
+
+            assert!((result - should_be).abs() / should_be.abs() < 1e-4);
+        }
+        {
+            struct Simple;
+
+            impl MultiDimensionalIntegrand<3> for Simple {
+                fn evaluate(&self, coordinates: &[f64; 3]) -> f64 {
+                    let x = coordinates[0];
+                    let y = coordinates[1];
+                    let z = coordinates[2];
+                    let numerator = x.powi(2) + x * y * z + z.powi(2);
+                    let denominator = 1.0 + y.powi(2);
+                    numerator / denominator
+                }
+            }
+
+            let limits = [
+                Limits::new(0.0, 2.0),
+                Limits::new(0.0, 3.0),
+                Limits::new(0.0, 1.0),
+            ];
+
+            let function = Simple;
+            let integral = BasicMultiDimensional::new(limits, function).unwrap();
+
+            let integral_result = integral.integrate_internal();
+
+            let result = integral_result.result();
+            let should_be = 5.314_778_459;
+
+            println!("{}", integral_result.error());
+
+            assert!((result - should_be).abs() / should_be.abs() < 1e-2);
+        }
     }
 }

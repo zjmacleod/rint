@@ -25,7 +25,7 @@
 //! By convention `upper > lower`, however this is not mandatory.
 //!
 //!```rust
-//! use rint::Integrand;
+//! use rint::{Limits, Integrand};
 //! use rint::quadrature::Basic;
 //! use rint::quadrature::rule::GaussKronrod15;
 //!
@@ -50,12 +50,11 @@
 //! let rel_error_bound = 1.0e-15;
 //! let alpha = 2.6;
 //!
-//! let lower = 0.0;
-//! let upper = 1.0;
+//! let limits = Limits::new(0.0, 1.0);
 //!
 //! let function = Function1 { alpha };
 //! let rule = GaussKronrod15;
-//! let integral = Basic::new(lower, upper, rule, &function);
+//! let integral = Basic::new(limits, rule, &function);
 //!
 //! let integral_result = integral.integrate();
 //! let result = integral_result.result();
@@ -73,6 +72,7 @@ use std::cmp::Ordering;
 use crate::quadrature::rescale_error;
 use crate::quadrature::rule::Rule;
 use crate::Integrand;
+use crate::Limits;
 
 /// The value of a function evaluated with Gauss-Kronrod integration and associated error
 /// estimation.
@@ -127,8 +127,7 @@ where
     I: Integrand,
     R: Rule,
 {
-    lower: f64,
-    upper: f64,
+    limits: Limits,
     rule: R,
     function: I,
 }
@@ -143,11 +142,10 @@ where
     /// The user first defines a `function` which is a `struct` implementing the
     /// [`Integrand`] trait and selects a Gauss-Kronrod quadrature [`Rule`],
     /// `rule`, to integrate the function with between the integration limis,
-    /// `upper` and `lower`.
-    pub fn new(lower: f64, upper: f64, rule: R, function: I) -> Self {
+    /// `limits`.
+    pub fn new(limits: Limits, rule: R, function: I) -> Self {
         Self {
-            lower,
-            upper,
+            limits,
             rule,
             function,
         }
@@ -155,8 +153,8 @@ where
 
     /// Integrate `function`, returning a [`Basic`] integration result.
     pub(crate) fn integrate_internal(&self) -> BasicInternal {
-        let centre = 0.5 * (self.upper + self.lower);
-        let half_length = 0.5 * (self.upper - self.lower);
+        let centre = self.limits.centre();
+        let half_length = self.limits.half_width();
         let abs_half_length = half_length.abs();
         let f_centre = self.function.evaluate(centre);
 
@@ -230,8 +228,7 @@ where
             result,
             result_abs,
             result_asc,
-            lower: self.lower,
-            upper: self.upper,
+            limits: self.limits,
         }
     }
 
@@ -239,14 +236,9 @@ where
         self.integrate_internal().into()
     }
 
-    /// Return the value of the `upper` integration limit.
-    pub fn upper(&self) -> f64 {
-        self.upper
-    }
-
-    /// Return the value of the `lower` integration limit.
-    pub fn lower(&self) -> f64 {
-        self.lower
+    /// Return the integration [`Limits`].
+    pub fn limits(&self) -> Limits {
+        self.limits
     }
 }
 
@@ -256,8 +248,7 @@ pub(crate) struct BasicInternal {
     pub(crate) result: f64,
     pub(crate) result_abs: f64,
     pub(crate) result_asc: f64,
-    pub(crate) lower: f64,
-    pub(crate) upper: f64,
+    pub(crate) limits: Limits,
 }
 
 impl Eq for BasicInternal {}
@@ -315,15 +306,8 @@ impl BasicInternal {
     }
 
     #[must_use]
-    #[inline]
-    pub(crate) fn lower(&self) -> f64 {
-        self.lower
-    }
-
-    #[must_use]
-    #[inline]
-    pub(crate) fn upper(&self) -> f64 {
-        self.upper
+    pub(crate) fn limits(&self) -> Limits {
+        self.limits
     }
 
     pub(crate) fn total_cmp_error(&self, other: &Self) -> Ordering {
@@ -331,8 +315,8 @@ impl BasicInternal {
     }
 
     pub(crate) fn total_cmp_interval_length(&self, other: &Self) -> Ordering {
-        let inverse_length = 1.0 / (self.upper - self.lower).abs();
-        let other_inverse_length = 1.0 / (other.upper - other.lower).abs();
+        let inverse_length = 1.0 / (self.limits.width()).abs();
+        let other_inverse_length = 1.0 / (other.limits.width()).abs();
         inverse_length.total_cmp(&other_inverse_length)
     }
 
@@ -341,13 +325,10 @@ impl BasicInternal {
         function: &F,
         rule: R,
     ) -> [BasicInternal; 2] {
-        let lower = self.lower();
-        let upper = self.upper();
-        let mid = (upper + lower) * 0.5;
+        let [lower, upper] = self.limits.bisect();
+        let lower_integral = Basic::new(lower, rule, function).integrate_internal();
 
-        let lower_integral = Basic::new(lower, mid, rule, function).integrate_internal();
-
-        let upper_integral = Basic::new(mid, upper, rule, function).integrate_internal();
+        let upper_integral = Basic::new(upper, rule, function).integrate_internal();
 
         [lower_integral, upper_integral]
     }
@@ -357,7 +338,7 @@ impl BasicInternal {
     }
 
     pub(crate) fn abs_interval_length(&self) -> f64 {
-        (self.upper() - self.lower()).abs()
+        self.limits.width().abs()
     }
 }
 
@@ -374,32 +355,28 @@ mod tests {
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
-            lower: 0.0,
-            upper: 1.0,
+            limits: Limits::new(0.0, 1.0),
         };
         let b = BasicInternal {
             error: 1.533,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
-            lower: 0.0,
-            upper: 1.0,
+            limits: Limits::new(0.0, 1.0),
         };
         let c = BasicInternal {
             error: 1.533,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
-            lower: 0.5,
-            upper: 1.0,
+            limits: Limits::new(0.5, 1.0),
         };
         let d = BasicInternal {
             error: 1.60,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
-            lower: 0.0,
-            upper: 1.0,
+            limits: Limits::new(0.0, 1.0),
         };
 
         let mut bh = BinaryHeap::new();
@@ -414,32 +391,28 @@ mod tests {
                 result: 1.0,
                 result_abs: 1.0,
                 result_asc: 1.0,
-                lower: 0.0,
-                upper: 1.0,
+                limits: Limits::new(0.0, 1.0),
             },
             BasicInternal {
                 error: 1.533,
                 result: 1.0,
                 result_abs: 1.0,
                 result_asc: 1.0,
-                lower: 0.5,
-                upper: 1.0,
+                limits: Limits::new(0.5, 1.0),
             },
             BasicInternal {
                 error: 1.60,
                 result: 1.0,
                 result_abs: 1.0,
                 result_asc: 1.0,
-                lower: 0.0,
-                upper: 1.0,
+                limits: Limits::new(0.0, 1.0),
             },
             BasicInternal {
                 error: 2.0,
                 result: 1.0,
                 result_abs: 1.0,
                 result_asc: 1.0,
-                lower: 0.0,
-                upper: 1.0,
+                limits: Limits::new(0.0, 1.0),
             },
         ];
 

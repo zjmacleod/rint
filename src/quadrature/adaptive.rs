@@ -5,11 +5,12 @@ use crate::quadrature::rule::Rule;
 use crate::quadrature::subinterval_too_small;
 use crate::quadrature::{Basic, Error, ErrorBound, IntegralEstimate, Kind};
 use crate::Integrand;
+use crate::Limits;
 
 /// An integral to be evaluated with an adaptive Gauss-Kronrod quadrature.
 ///
-/// The user constructs a `function` implementing [`Integrand`], provides `upper`
-/// and `lower` integration limits, and provides an `error_bound`, which can be
+/// The user constructs a `function` implementing [`Integrand`], provides
+/// integration [`Limits`], and provides an `error_bound`, which can be
 /// [`ErrorBound::Absolute`] to work to a specified absolute error,
 /// [`ErrorBound::Relative`] to work to a specified relative error,
 /// or [`ErrorBound::Either`] to return a result as soon as _either_ the relative
@@ -19,8 +20,7 @@ where
     I: Integrand,
     R: Rule,
 {
-    lower: f64,
-    upper: f64,
+    limits: Limits,
     error_bound: ErrorBound,
     rule: R,
     function: I,
@@ -35,7 +35,7 @@ where
     /// Create a new [`Adaptive`].
     ///
     /// The user defines a `function` which is a `struct` implementing the
-    /// [`Integrand`] trait, and integration limis `upper` and `lower`.
+    /// [`Integrand`] trait, and integration [`Limits`].
     ///
     /// # Errors
     /// Function will return an error if the user provided `ErrorBound` does not satisfy the
@@ -44,8 +44,7 @@ where
     ///     - `ErrorBound::Relative(v) where v > 50.0 * f64::EPSILON`,
     ///     - `ErrorBound::Either { absolute, relative } where absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
     pub fn new(
-        lower: f64,
-        upper: f64,
+        limits: Limits,
         error_bound: ErrorBound,
         rule: R,
         function: I,
@@ -72,8 +71,7 @@ where
             }
         }
         Ok(Self {
-            lower,
-            upper,
+            limits,
             error_bound,
             rule,
             function,
@@ -120,8 +118,7 @@ where
     /// Integration can fail if user suplied tolerance cannot be achieved within the maximum number
     /// of iterations.
     pub fn integrate(&self) -> Result<IntegralEstimate, Error> {
-        let initial =
-            Basic::new(self.lower, self.upper, self.rule, &self.function).integrate_internal();
+        let initial = Basic::new(self.limits, self.rule, &self.function).integrate_internal();
 
         if let Some(output) = self.check_initial_integration(&initial)? {
             return Ok(output);
@@ -160,14 +157,9 @@ where
         }
     }
 
-    /// Return the value of the `upper` integration limit.
-    pub fn upper(&self) -> f64 {
-        self.upper
-    }
-
-    /// Return the value of the `lower` integration limit.
-    pub fn lower(&self) -> f64 {
-        self.lower
+    /// Return the integration [`Limits`]
+    pub fn limits(&self) -> Limits {
+        self.limits
     }
 
     fn initialise_workspace(&self, initial: BasicInternal) -> Workspace {
@@ -176,8 +168,7 @@ where
         let iteration = 1;
         let result = initial.result();
         let error = initial.error();
-        let lower_limit = initial.lower();
-        let upper_limit = initial.upper();
+        let limits = initial.limits();
         let roundoff_count = 0;
         let roundoff_on_high_iteration_count = 0;
         let function_evaluations_per_integration = self.rule.evaluations();
@@ -189,8 +180,7 @@ where
             iteration,
             result,
             error,
-            lower_limit,
-            upper_limit,
+            limits,
             roundoff_count,
             roundoff_on_high_iteration_count,
             function_evaluations_per_integration,
@@ -203,8 +193,7 @@ struct Workspace {
     iteration: usize,
     result: f64,
     error: f64,
-    lower_limit: f64,
-    upper_limit: f64,
+    limits: Limits,
     roundoff_count: usize,
     roundoff_on_high_iteration_count: usize,
     function_evaluations_per_integration: usize,
@@ -214,8 +203,7 @@ impl Workspace {
     fn retrieve_largest_error(&mut self) -> Result<BasicInternal, Error> {
         self.iteration += 1;
         if let Some(previous) = self.pop() {
-            self.lower_limit = previous.lower;
-            self.upper_limit = previous.upper;
+            self.limits = previous.limits();
             Ok(previous)
         } else {
             let kind = Kind::UninitialisedWorkspace;
@@ -273,15 +261,10 @@ impl Workspace {
     }
 
     fn check_singularity(&self) -> Result<(), Error> {
-        let lower_limit = self.lower_limit;
-        let upper_limit = self.upper_limit;
-        let midpoint = (lower_limit + upper_limit) * 0.5;
-        if subinterval_too_small(lower_limit, midpoint, upper_limit) {
+        let limits = self.limits;
+        if subinterval_too_small(limits) {
             let output = self.integral_estimate();
-            let kind = Kind::BadIntegrandBehaviour {
-                lower: lower_limit,
-                upper: upper_limit,
-            };
+            let kind = Kind::BadIntegrandBehaviour { limits };
             Err(Error::new(kind, output))
         } else {
             Ok(())

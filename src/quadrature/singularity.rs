@@ -4,6 +4,7 @@ use crate::quadrature::basic::BasicInternal;
 use crate::quadrature::rule::{GaussKronrod15, GaussKronrod21, Rule};
 use crate::quadrature::{subinterval_too_small, Basic, Error, ErrorBound, IntegralEstimate, Kind};
 use crate::Integrand;
+use crate::Limits;
 
 /// An integral with singularities to be evaluated with an adaptive Gauss-Kronrod quadrature.
 ///
@@ -18,8 +19,7 @@ where
     I: Integrand,
     R: Rule,
 {
-    lower: f64,
-    upper: f64,
+    limits: Limits,
     error_bound: ErrorBound,
     rule: R,
     function: I,
@@ -35,7 +35,7 @@ where
     /// Create a new [`AdaptiveSingularity`].
     ///
     /// The user defines a `function` which is a `struct` implementing the
-    /// [`Integrand`] trait, and integration limis `upper` and `lower`.
+    /// [`Integrand`] trait, and integration [`Limits`].
     ///
     /// # Errors
     /// Function will return an error if the user provided `ErrorBound` does not satisfy the
@@ -44,8 +44,7 @@ where
     ///     - `ErrorBound::Relative(v) where v > 50.0 * f64::EPSILON`,
     ///     - `ErrorBound::Either { absolute, relative } where absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
     fn new(
-        lower: f64,
-        upper: f64,
+        limits: Limits,
         error_bound: ErrorBound,
         rule: R,
         function: I,
@@ -73,8 +72,7 @@ where
             }
         }
         Ok(Self {
-            lower,
-            upper,
+            limits,
             error_bound,
             rule,
             function,
@@ -84,15 +82,14 @@ where
     }
 
     fn new_with_evaluations_multiplier(
-        lower: f64,
-        upper: f64,
+        limits: Limits,
         error_bound: ErrorBound,
         rule: R,
         function: I,
         max_iterations: usize,
         evaluations_multiplier: usize,
     ) -> Result<Self, Error> {
-        let mut v = Self::new(lower, upper, error_bound, rule, function, max_iterations)?;
+        let mut v = Self::new(limits, error_bound, rule, function, max_iterations)?;
         v.evaluations_multiplier = evaluations_multiplier;
         Ok(v)
     }
@@ -132,8 +129,7 @@ where
 
     /// # Errors
     pub fn integrate(&self) -> Result<IntegralEstimate, Error> {
-        let initial =
-            Basic::new(self.lower, self.upper, self.rule, &self.function).integrate_internal();
+        let initial = Basic::new(self.limits, self.rule, &self.function).integrate_internal();
 
         if let Some(output) = self.check_initial_integration(&initial)? {
             return Ok(output);
@@ -236,14 +232,9 @@ where
         workspace.check_error_and_compute()
     }
 
-    /// Return the value of the `upper` integration limit.
-    pub fn upper(&self) -> f64 {
-        self.upper
-    }
-
-    /// Return the value of the `lower` integration limit.
-    pub fn lower(&self) -> f64 {
-        self.lower
+    /// Return the integration [`Limits`].
+    pub fn limits(&self) -> Limits {
+        self.limits
     }
 
     fn initialise_workspace(&self, initial: BasicInternal) -> Workspace {
@@ -293,14 +284,13 @@ where
 {
     /// # Errors
     pub fn general(
-        lower: f64,
-        upper: f64,
+        limits: Limits,
         error_bound: ErrorBound,
         function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
         let rule = GaussKronrod21;
-        Self::new(lower, upper, error_bound, rule, function, max_iterations)
+        Self::new(limits, error_bound, rule, function, max_iterations)
     }
 }
 
@@ -344,8 +334,7 @@ where
         let transformed = InfiniteInterval::new(function);
         let evaluations_multiplier = 2;
         Self::new_with_evaluations_multiplier(
-            0.0,
-            1.0,
+            Limits::new(0.0, 1.0),
             error_bound,
             rule,
             transformed,
@@ -393,8 +382,7 @@ where
         let transformed = SemiInfiniteIntervalPositive::new(function, lower);
         let evaluations_multiplier = 2;
         Self::new_with_evaluations_multiplier(
-            0.0,
-            1.0,
+            Limits::new(0.0, 1.0),
             error_bound,
             rule,
             transformed,
@@ -442,8 +430,7 @@ where
         let transformed = SemiInfiniteIntervalNegative::new(function, upper);
         let evaluations_multiplier = 2;
         Self::new_with_evaluations_multiplier(
-            0.0,
-            1.0,
+            Limits::new(0.0, 1.0),
             error_bound,
             rule,
             transformed,
@@ -659,17 +646,14 @@ impl Workspace {
     }
 
     fn update(&mut self, lower: BasicInternal, upper: BasicInternal) {
-        let lower_limit = lower.lower();
-        let upper_limit = upper.upper();
-        let midpoint = (lower_limit + upper_limit) * 0.5;
+        let lower_limit = lower.limits().lower();
+        let upper_limit = upper.limits().upper();
+        let limits = Limits::new(lower_limit, upper_limit);
 
         self.check_roundoff();
 
-        if subinterval_too_small(lower_limit, midpoint, upper_limit) {
-            self.set_error_kind(Kind::BadIntegrandBehaviour {
-                lower: lower_limit,
-                upper: upper_limit,
-            });
+        if subinterval_too_small(limits) {
+            self.set_error_kind(Kind::BadIntegrandBehaviour { limits });
         }
 
         self.push(lower);
@@ -957,15 +941,13 @@ mod tests {
         let result = 0.0;
         let result_abs = 0.0;
         let result_asc = 0.0;
-        let lower = 0.0;
-        let upper = 0.0;
+        let limits = Limits::new(0.0, 0.0);
         let value = BasicInternal {
             error,
             result,
             result_abs,
             result_asc,
-            lower,
-            upper,
+            limits,
         };
 
         let table = ExtrapolationTable::initialise(&value);

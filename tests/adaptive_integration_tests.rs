@@ -1,5 +1,8 @@
+use rint::quadrature::rule::{
+    GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod51, GaussKronrod61,
+};
 use rint::quadrature::{Adaptive, ErrorBound, Kind};
-use rint::quadrature::rule::{GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod51, GaussKronrod61};
+use rint::Limits;
 
 mod util;
 
@@ -99,17 +102,24 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
 
     let function = util::Function16 { alpha };
 
-    let integral = Adaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
+    let integral = Adaptive::new(
+        Limits::new(lower, upper),
+        error_bound,
+        rule,
+        &function,
+        1000,
+    )
+    .unwrap();
 
     let integral_result = integral.integrate();
 
     if let Err(err) = integral_result {
-        if let Kind::BadIntegrandBehaviour { lower, upper } = err.kind() {
+        if let Kind::BadIntegrandBehaviour { limits } = err.kind() {
             let iterations = err.iterations();
             let evaluations = err.function_evaluations();
 
-            assert!(lower < -0.1f64);
-            assert!(upper > -0.1f64);
+            assert!(limits.lower() < -0.1f64);
+            assert!(limits.upper() > -0.1f64);
 
             util::test_int(
                 iterations,
@@ -134,17 +144,24 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
 
     let function = util::Function16 { alpha };
 
-    let integral = Adaptive::new(lower, upper, error_bound, rule, &function, 1000).unwrap();
+    let integral = Adaptive::new(
+        Limits::new(lower, upper),
+        error_bound,
+        rule,
+        &function,
+        1000,
+    )
+    .unwrap();
 
     let integral_result = integral.integrate();
 
     if let Err(err) = integral_result {
-        if let Kind::BadIntegrandBehaviour { lower, upper } = err.kind() {
+        if let Kind::BadIntegrandBehaviour { limits } = err.kind() {
             let iterations = err.iterations();
             let evaluations = err.function_evaluations();
 
-            assert!(lower > -0.1f64);
-            assert!(upper < -0.1f64);
+            assert!(limits.lower() > -0.1f64);
+            assert!(limits.upper() < -0.1f64);
 
             util::test_int(
                 iterations,
