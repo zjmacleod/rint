@@ -1,6 +1,6 @@
 use std::collections::binary_heap::BinaryHeap;
 
-use crate::quadrature::basic::BasicInternal;
+use crate::quadrature::basic::Region;
 use crate::quadrature::rule::{GaussKronrod15, GaussKronrod21, Rule};
 use crate::quadrature::{subinterval_too_small, Basic, Error, ErrorBound, IntegralEstimate, Kind};
 use crate::Integrand;
@@ -100,7 +100,7 @@ where
 
     fn check_initial_integration(
         &self,
-        initial: &BasicInternal,
+        initial: &Region,
     ) -> Result<Option<IntegralEstimate>, Error> {
         let tolerance = self.error_bound.tolerance(initial.result());
         let roundoff = Self::roundoff(initial.result_abs());
@@ -237,7 +237,7 @@ where
         self.limits
     }
 
-    fn initialise_workspace(&self, initial: BasicInternal) -> Workspace {
+    fn initialise_workspace(&self, initial: Region) -> Workspace {
         let mut heap = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
 
         let iteration = 1;
@@ -441,7 +441,7 @@ where
 }
 
 struct Workspace {
-    heap: BinaryHeap<BasicInternal>,
+    heap: BinaryHeap<Region>,
     iteration: usize,
     result: f64,
     error: f64,
@@ -449,7 +449,7 @@ struct Workspace {
     table: ExtrapolationTable,
     smallest_interval: f64,
     extrapolate: bool,
-    store: BinaryHeap<BasicInternal>,
+    store: BinaryHeap<Region>,
     error_kind: Option<Kind>,
     initial_absolute_result: f64,
     positive_integrand: bool,
@@ -459,7 +459,7 @@ struct Workspace {
 }
 
 impl Workspace {
-    fn retrieve_largest_error(&mut self) -> Result<BasicInternal, Error> {
+    fn retrieve_largest_error(&mut self) -> Result<Region, Error> {
         self.iteration += 1;
         if let Some(previous) = self.pop() {
             Ok(previous)
@@ -469,19 +469,19 @@ impl Workspace {
         }
     }
 
-    fn pop(&mut self) -> Option<BasicInternal> {
+    fn pop(&mut self) -> Option<Region> {
         self.heap.pop()
     }
 
-    fn push(&mut self, integral: BasicInternal) {
+    fn push(&mut self, integral: Region) {
         self.heap.push(integral);
     }
 
-    fn peek(&self) -> Option<&BasicInternal> {
+    fn peek(&self) -> Option<&Region> {
         self.heap.peek()
     }
 
-    fn store(&mut self, integral: BasicInternal) {
+    fn store(&mut self, integral: Region) {
         self.store.push(integral);
     }
 
@@ -493,9 +493,9 @@ impl Workspace {
 
     fn improved_result_error(
         &mut self,
-        previous: &BasicInternal,
-        lower: &BasicInternal,
-        upper: &BasicInternal,
+        previous: &Region,
+        lower: &Region,
+        upper: &Region,
     ) -> [f64; 2] {
         let prev_result = previous.result();
         let prev_error = previous.error();
@@ -645,7 +645,7 @@ impl Workspace {
         self.error_kind = Some(kind);
     }
 
-    fn update(&mut self, lower: BasicInternal, upper: BasicInternal) {
+    fn update(&mut self, lower: Region, upper: Region) {
         let lower_limit = lower.limits().lower();
         let upper_limit = upper.limits().upper();
         let limits = Limits::new(lower_limit, upper_limit);
@@ -731,7 +731,7 @@ impl ExtrapolationTable {
         }
     }
 
-    fn initialise(initial: &BasicInternal) -> Self {
+    fn initialise(initial: &Region) -> Self {
         let mut table = Self::new();
         table.result = initial.result();
         table.append_table(initial.result());
@@ -942,7 +942,7 @@ mod tests {
         let result_abs = 0.0;
         let result_asc = 0.0;
         let limits = Limits::new(0.0, 0.0);
-        let value = BasicInternal {
+        let value = Region {
             error,
             result,
             result_abs,

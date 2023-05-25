@@ -152,7 +152,7 @@ where
     }
 
     /// Integrate `function`, returning a [`Basic`] integration result.
-    pub(crate) fn integrate_internal(&self) -> BasicInternal {
+    pub(crate) fn integrate_internal(&self) -> Region {
         let centre = self.limits.centre();
         let half_length = self.limits.half_width();
         let abs_half_length = half_length.abs();
@@ -223,7 +223,7 @@ where
         let result_asc = asc_result * abs_half_length;
         let error = rescale_error(error, result_abs, result_asc);
 
-        BasicInternal {
+        Region {
             error,
             result,
             result_abs,
@@ -243,7 +243,7 @@ where
 }
 
 #[derive(Debug, PartialEq)]
-pub(crate) struct BasicInternal {
+pub(crate) struct Region {
     pub(crate) error: f64,
     pub(crate) result: f64,
     pub(crate) result_abs: f64,
@@ -251,15 +251,15 @@ pub(crate) struct BasicInternal {
     pub(crate) limits: Limits,
 }
 
-impl Eq for BasicInternal {}
+impl Eq for Region {}
 
-impl PartialOrd for BasicInternal {
+impl PartialOrd for Region {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for BasicInternal {
+impl Ord for Region {
     fn cmp(&self, other: &Self) -> Ordering {
         let mut ordering = self.total_cmp_error(other);
         if let Ordering::Equal = ordering {
@@ -269,8 +269,8 @@ impl Ord for BasicInternal {
     }
 }
 
-impl From<BasicInternal> for BasicEstimate {
-    fn from(other: BasicInternal) -> BasicEstimate {
+impl From<Region> for BasicEstimate {
+    fn from(other: Region) -> BasicEstimate {
         BasicEstimate {
             error: other.error,
             result: other.result,
@@ -280,7 +280,7 @@ impl From<BasicInternal> for BasicEstimate {
     }
 }
 
-impl BasicInternal {
+impl Region {
     #[must_use]
     #[inline]
     pub(crate) fn result(&self) -> f64 {
@@ -320,11 +320,7 @@ impl BasicInternal {
         inverse_length.total_cmp(&other_inverse_length)
     }
 
-    pub(crate) fn bisect<F: Integrand, R: Rule>(
-        &self,
-        function: &F,
-        rule: R,
-    ) -> [BasicInternal; 2] {
+    pub(crate) fn bisect<F: Integrand, R: Rule>(&self, function: &F, rule: R) -> [Region; 2] {
         let [lower, upper] = self.limits.bisect();
         let lower_integral = Basic::new(lower, rule, function).integrate_internal();
 
@@ -350,28 +346,28 @@ mod tests {
     fn test_ordering_of_basic_internal() {
         use std::collections::BinaryHeap;
 
-        let a = BasicInternal {
+        let a = Region {
             error: 2.0,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
             limits: Limits::new(0.0, 1.0),
         };
-        let b = BasicInternal {
+        let b = Region {
             error: 1.533,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
             limits: Limits::new(0.0, 1.0),
         };
-        let c = BasicInternal {
+        let c = Region {
             error: 1.533,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
             limits: Limits::new(0.5, 1.0),
         };
-        let d = BasicInternal {
+        let d = Region {
             error: 1.60,
             result: 1.0,
             result_abs: 1.0,
@@ -386,28 +382,28 @@ mod tests {
         bh.push(d);
         let vec = bh.into_sorted_vec();
         let check = vec![
-            BasicInternal {
+            Region {
                 error: 1.533,
                 result: 1.0,
                 result_abs: 1.0,
                 result_asc: 1.0,
                 limits: Limits::new(0.0, 1.0),
             },
-            BasicInternal {
+            Region {
                 error: 1.533,
                 result: 1.0,
                 result_abs: 1.0,
                 result_asc: 1.0,
                 limits: Limits::new(0.5, 1.0),
             },
-            BasicInternal {
+            Region {
                 error: 1.60,
                 result: 1.0,
                 result_abs: 1.0,
                 result_asc: 1.0,
                 limits: Limits::new(0.0, 1.0),
             },
-            BasicInternal {
+            Region {
                 error: 2.0,
                 result: 1.0,
                 result_abs: 1.0,

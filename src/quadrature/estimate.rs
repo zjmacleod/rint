@@ -1,4 +1,4 @@
-use crate::quadrature::basic::BasicInternal;
+use crate::quadrature::basic::Region;
 
 /// The value of a function evaluated with Gauss-Kronrod integration and associated error
 /// estimation.
@@ -67,7 +67,7 @@ impl IntegralEstimate {
     }
 
     pub(crate) fn from_basic(
-        basic: &BasicInternal,
+        basic: &Region,
         iterations: usize,
         function_evaluations: usize,
     ) -> Self {

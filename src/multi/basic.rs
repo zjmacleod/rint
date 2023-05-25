@@ -6,7 +6,7 @@ use crate::quadrature::IntegralEstimate;
 use crate::Limits;
 use crate::MultiDimensionalIntegrand;
 
-pub(crate) struct Region<const N: usize> {
+pub(crate) struct MultiDimensionalRegion<const N: usize> {
     pub(crate) error: f64,
     pub(crate) result: f64,
     pub(crate) result_abs: f64,
@@ -16,7 +16,7 @@ pub(crate) struct Region<const N: usize> {
     pub(crate) function_evaluations: usize,
 }
 
-impl<const N: usize> Region<N> {
+impl<const N: usize> MultiDimensionalRegion<N> {
     fn unevaluated() -> Self {
         Self {
             error: 0.0,
@@ -92,7 +92,10 @@ impl<const N: usize> Region<N> {
         self.function_evaluations
     }
 
-    fn bisect<I: MultiDimensionalIntegrand<N>>(&self, function: &I) -> [Region<N>; 2] {
+    fn bisect<I: MultiDimensionalIntegrand<N>>(
+        &self,
+        function: &I,
+    ) -> [MultiDimensionalRegion<N>; 2] {
         let axis_to_bisect = self.largest_error_axis;
         let previous_limits = self.limits();
 
@@ -105,15 +108,15 @@ impl<const N: usize> Region<N> {
         upper_limits[axis_to_bisect] = upper;
 
         let lower_integral =
-            BasicMultiDimensional::new_unchecked(lower_limits, function).integrate_internal();
+            MultiDimensionalBasic::new_unchecked(lower_limits, function).integrate_internal();
         let upper_integral =
-            BasicMultiDimensional::new_unchecked(upper_limits, function).integrate_internal();
+            MultiDimensionalBasic::new_unchecked(upper_limits, function).integrate_internal();
 
         [lower_integral, upper_integral]
     }
 }
 
-pub struct BasicMultiDimensional<I, const N: usize>
+pub struct MultiDimensionalBasic<I, const N: usize>
 where
     I: MultiDimensionalIntegrand<N>,
 {
@@ -121,7 +124,7 @@ where
     function: I,
 }
 
-impl<I, const N: usize> BasicMultiDimensional<I, N>
+impl<I, const N: usize> MultiDimensionalBasic<I, N>
 where
     I: MultiDimensionalIntegrand<N>,
 {
@@ -166,7 +169,7 @@ where
     }
 
     #[allow(clippy::too_many_lines)]
-    fn integrate_internal(&self) -> Region<N> {
+    fn integrate_internal(&self) -> MultiDimensionalRegion<N> {
         let Geometry {
             centres,
             widths,
@@ -307,7 +310,7 @@ where
 
         let function_evaluations = self.minimum_function_calls();
 
-        Region::unevaluated()
+        MultiDimensionalRegion::unevaluated()
             .with_error(error)
             .with_result(result)
             .with_result_abs(result_abs)
@@ -532,7 +535,7 @@ mod tests {
 
         let foo = Foo { alpha: 1.0 };
 
-        let integral = BasicMultiDimensional::new(limits, &foo).unwrap();
+        let integral = MultiDimensionalBasic::new(limits, &foo).unwrap();
 
         let lambda_2: f64 = 0.358_568_582_800_318_073;
         let lambda_4: f64 = 0.948_683_298_050_513_796;
@@ -588,7 +591,7 @@ mod tests {
 
         let foo = Foo { alpha: 1.0 };
 
-        let integral = BasicMultiDimensional::new(limits, &foo).unwrap();
+        let integral = MultiDimensionalBasic::new(limits, &foo).unwrap();
 
         let Geometry {
             centres,
@@ -625,7 +628,7 @@ mod tests {
 
             let foo = Foo { alpha: 1.0 };
 
-            let integral = BasicMultiDimensional::new(limits, &foo);
+            let integral = MultiDimensionalBasic::new(limits, &foo);
 
             assert!(integral.is_err());
         }
@@ -648,7 +651,7 @@ mod tests {
 
             let bar = Bar { alpha: 1.0 };
 
-            let integral = BasicMultiDimensional::new(limits, &bar);
+            let integral = MultiDimensionalBasic::new(limits, &bar);
 
             assert!(integral.is_err());
         }
@@ -671,7 +674,7 @@ mod tests {
             let limits = [limit; 2];
 
             let function = Simple;
-            let integral = BasicMultiDimensional::new(limits, function).unwrap();
+            let integral = MultiDimensionalBasic::new(limits, function).unwrap();
 
             let integral_result = integral.integrate_internal();
 
@@ -696,7 +699,7 @@ mod tests {
             let limits = [limit; 2];
 
             let function = Simple;
-            let integral = BasicMultiDimensional::new(limits, function).unwrap();
+            let integral = MultiDimensionalBasic::new(limits, function).unwrap();
 
             let integral_result = integral.integrate_internal();
 
@@ -720,7 +723,7 @@ mod tests {
             let limits = [Limits::new(-2.0, 2.0), Limits::new(-3.0, 3.0)];
 
             let function = Simple;
-            let integral = BasicMultiDimensional::new(limits, function).unwrap();
+            let integral = MultiDimensionalBasic::new(limits, function).unwrap();
 
             let integral_result = integral.integrate_internal();
 
@@ -747,7 +750,7 @@ mod tests {
             let limits = [Limits::new(0.0, 2.0), Limits::new(0.0, 3.0)];
 
             let function = Simple;
-            let integral = BasicMultiDimensional::new(limits, function).unwrap();
+            let integral = MultiDimensionalBasic::new(limits, function).unwrap();
 
             let integral_result = integral.integrate_internal();
 
@@ -793,7 +796,7 @@ mod tests {
             ];
 
             let function = Simple;
-            let integral = BasicMultiDimensional::new(limits, function).unwrap();
+            let integral = MultiDimensionalBasic::new(limits, function).unwrap();
 
             let integral_result = integral.integrate_internal();
 
@@ -824,7 +827,7 @@ mod tests {
             ];
 
             let function = Simple;
-            let integral = BasicMultiDimensional::new(limits, function).unwrap();
+            let integral = MultiDimensionalBasic::new(limits, function).unwrap();
 
             let integral_result = integral.integrate_internal();
 
@@ -854,7 +857,7 @@ mod tests {
             ];
 
             let function = Simple;
-            let integral = BasicMultiDimensional::new(limits, function).unwrap();
+            let integral = MultiDimensionalBasic::new(limits, function).unwrap();
 
             let integral_result = integral.integrate_internal();
 

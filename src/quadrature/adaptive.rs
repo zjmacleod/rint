@@ -1,6 +1,6 @@
 use std::collections::binary_heap::BinaryHeap;
 
-use crate::quadrature::basic::BasicInternal;
+use crate::quadrature::basic::Region;
 use crate::quadrature::rule::Rule;
 use crate::quadrature::subinterval_too_small;
 use crate::quadrature::{Basic, Error, ErrorBound, IntegralEstimate, Kind};
@@ -85,7 +85,7 @@ where
 
     pub(crate) fn check_initial_integration(
         &self,
-        initial: &BasicInternal,
+        initial: &Region,
     ) -> Result<Option<IntegralEstimate>, Error> {
         let tolerance = self.error_bound.tolerance(initial.result());
         let roundoff = Self::roundoff(initial.result_abs());
@@ -162,7 +162,7 @@ where
         self.limits
     }
 
-    fn initialise_workspace(&self, initial: BasicInternal) -> Workspace {
+    fn initialise_workspace(&self, initial: Region) -> Workspace {
         let mut heap = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
 
         let iteration = 1;
@@ -189,7 +189,7 @@ where
 }
 
 struct Workspace {
-    heap: BinaryHeap<BasicInternal>,
+    heap: BinaryHeap<Region>,
     iteration: usize,
     result: f64,
     error: f64,
@@ -200,7 +200,7 @@ struct Workspace {
 }
 
 impl Workspace {
-    fn retrieve_largest_error(&mut self) -> Result<BasicInternal, Error> {
+    fn retrieve_largest_error(&mut self) -> Result<Region, Error> {
         self.iteration += 1;
         if let Some(previous) = self.pop() {
             self.limits = previous.limits();
@@ -211,19 +211,19 @@ impl Workspace {
         }
     }
 
-    fn pop(&mut self) -> Option<BasicInternal> {
+    fn pop(&mut self) -> Option<Region> {
         self.heap.pop()
     }
 
-    fn push(&mut self, integral: BasicInternal) {
+    fn push(&mut self, integral: Region) {
         self.heap.push(integral);
     }
 
     fn improved_result_error(
         &mut self,
-        previous: &BasicInternal,
-        lower: &BasicInternal,
-        upper: &BasicInternal,
+        previous: &Region,
+        lower: &Region,
+        upper: &Region,
     ) -> (f64, f64) {
         let prev_result = previous.result();
         let prev_error = previous.error();
