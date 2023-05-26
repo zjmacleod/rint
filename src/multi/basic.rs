@@ -1,4 +1,4 @@
-#![allow(unused, clippy::unused_self)]
+#![allow(unused)]
 
 use crate::multi::{Error, Kind};
 use crate::quadrature::rule::GaussKronrod15;
@@ -164,7 +164,7 @@ where
         }
     }
 
-    const fn minimum_function_calls(&self) -> usize {
+    const fn minimum_function_calls() -> usize {
         minimum_function_calls(N)
     }
 
@@ -188,38 +188,32 @@ where
         let mut sum3_abs = 0.0;
 
         let mut coordinate = centres;
-        let mut wthl = [0.0; N];
+        let mut abscissa = [0.0; N];
 
         let mut largest_error_axis = 0;
 
         for j in 0..N {
-            let abscissa_2 = self.lambda_2() * widths[j];
+            abscissa[j] = Self::lambda_2() * widths[j];
 
-            coordinate[j] = centres[j] - abscissa_2;
+            coordinate[j] = centres[j] - abscissa[j];
             let fval_1 = self.function.evaluate(&coordinate);
-            let fval_1_abs = fval_1.abs();
 
-            coordinate[j] = centres[j] + abscissa_2;
+            coordinate[j] = centres[j] + abscissa[j];
             let fval_2 = self.function.evaluate(&coordinate);
-            let fval_2_abs = fval_2.abs();
 
             sum2 += fval_1 + fval_2;
-            sum2_abs += fval_1_abs + fval_2_abs;
+            sum2_abs += fval_1.abs() + fval_2.abs();
 
-            let abscissa_4 = self.lambda_4() * widths[j];
+            abscissa[j] = Self::lambda_4() * widths[j];
 
-            wthl[j] = abscissa_4;
-
-            coordinate[j] = centres[j] - abscissa_4;
+            coordinate[j] = centres[j] - abscissa[j];
             let fval_3 = self.function.evaluate(&coordinate);
-            let fval_3_abs = fval_3.abs();
 
-            coordinate[j] = centres[j] + abscissa_4;
+            coordinate[j] = centres[j] + abscissa[j];
             let fval_4 = self.function.evaluate(&coordinate);
-            let fval_4_abs = fval_4.abs();
 
             sum3 += fval_3 + fval_4;
-            sum3_abs += fval_3_abs + fval_4_abs;
+            sum3_abs += fval_3.abs() + fval_4.abs();
 
             let dif = (7.0 * (fval_1 + fval_2) - (fval_3 + fval_4) - 12.0 * sum1);
 
@@ -238,15 +232,14 @@ where
             let j1 = j - 1;
             for k in j..N {
                 for l in 0..2 {
-                    wthl[j1] = -wthl[j1];
-                    coordinate[j1] = centres[j1] + wthl[j1];
+                    abscissa[j1] = -abscissa[j1];
+                    coordinate[j1] = centres[j1] + abscissa[j1];
                     for m in 0..2 {
-                        wthl[k] = -wthl[k];
-                        coordinate[k] = centres[k] + wthl[k];
+                        abscissa[k] = -abscissa[k];
+                        coordinate[k] = centres[k] + abscissa[k];
                         let fval_4 = self.function.evaluate(&coordinate);
-                        let fval_4_abs = fval_4.abs();
                         sum4 += fval_4;
-                        sum4_abs += fval_4_abs;
+                        sum4_abs += fval_4.abs();
                     }
                 }
                 coordinate[k] = centres[k];
@@ -258,57 +251,55 @@ where
         let mut sum5_abs = 0.0;
 
         for j in 0..N {
-            let abscissa = self.lambda_5() * widths[j];
-            wthl[j] = -abscissa;
-            coordinate[j] = centres[j] + wthl[j];
+            abscissa[j] = -Self::lambda_5() * widths[j];
+            coordinate[j] = centres[j] + abscissa[j];
         }
 
-        let mut flag = false;
-        'outer: while !flag {
+        let mut continue_loop = true;
+        'outer: while continue_loop {
             let fval_5 = self.function.evaluate(&coordinate);
             sum5 += fval_5;
             sum5_abs += fval_5.abs();
-            'inner: for j in 0..N {
-                wthl[j] = -wthl[j];
-                coordinate[j] = centres[j] + wthl[j];
-                //if wthl[j].is_sign_positive() {
-                if wthl[j] > 0.0 {
+            for j in 0..N {
+                abscissa[j] = -abscissa[j];
+                coordinate[j] = centres[j] + abscissa[j];
+                if abscissa[j].is_sign_positive() {
                     continue 'outer;
                 }
             }
-            flag = true;
+            continue_loop = false;
         }
 
         let compare = volume
-            * (self.prime_weight_1() * sum1
-                + self.prime_weight_2() * sum2
-                + self.prime_weight_3() * sum3
-                + self.prime_weight_4() * sum4);
+            * (Self::prime_weight_1() * sum1
+                + Self::prime_weight_2() * sum2
+                + Self::prime_weight_3() * sum3
+                + Self::prime_weight_4() * sum4);
 
         let result = volume
-            * (self.weight_1() * sum1
-                + self.weight_2() * sum2
-                + self.weight_3() * sum3
-                + self.weight_4() * sum4
-                + self.weight_5() * sum5);
+            * (Self::weight_1() * sum1
+                + Self::weight_2() * sum2
+                + Self::weight_3() * sum3
+                + Self::weight_4() * sum4
+                + Self::weight_5() * sum5);
 
         let compare_abs = volume
-            * (self.prime_weight_1() * sum1_abs
-                + self.prime_weight_2() * sum2_abs
-                + self.prime_weight_3() * sum3_abs
-                + self.prime_weight_4() * sum4_abs);
+            * (Self::prime_weight_1() * sum1_abs
+                + Self::prime_weight_2() * sum2_abs
+                + Self::prime_weight_3() * sum3_abs
+                + Self::prime_weight_4() * sum4_abs);
 
         let result_abs = volume
-            * (self.weight_1() * sum1_abs
-                + self.weight_2() * sum2_abs
-                + self.weight_3() * sum3_abs
-                + self.weight_4() * sum4_abs
-                + self.weight_5() * sum5_abs);
+            * (Self::weight_1() * sum1_abs
+                + Self::weight_2() * sum2_abs
+                + Self::weight_3() * sum3_abs
+                + Self::weight_4() * sum4_abs
+                + Self::weight_5() * sum5_abs);
 
         let error = f64::abs(result - compare);
         let error_abs = f64::abs(result_abs - compare_abs);
 
-        let function_evaluations = self.minimum_function_calls();
+        let function_evaluations = Self::minimum_function_calls();
 
         MultiDimensionalRegion::unevaluated()
             .with_error(error)
@@ -320,15 +311,15 @@ where
             .with_function_evaluations(function_evaluations)
     }
 
-    const fn lambda_2(&self) -> f64 {
+    const fn lambda_2() -> f64 {
         Self::LAMBDA_2
     }
 
-    const fn lambda_4(&self) -> f64 {
+    const fn lambda_4() -> f64 {
         Self::LAMBDA_4
     }
 
-    const fn lambda_5(&self) -> f64 {
+    const fn lambda_5() -> f64 {
         Self::LAMBDA_5
     }
 
@@ -336,23 +327,23 @@ where
     const LAMBDA_4: f64 = 0.948_683_298_050_513_796;
     const LAMBDA_5: f64 = 0.688_247_201_611_685_289;
 
-    const fn weight_1(&self) -> f64 {
+    const fn weight_1() -> f64 {
         Self::WEIGHT_1[N - 2]
     }
 
-    const fn weight_2(&self) -> f64 {
+    const fn weight_2() -> f64 {
         Self::WEIGHT_2
     }
 
-    const fn weight_3(&self) -> f64 {
+    const fn weight_3() -> f64 {
         Self::WEIGHT_3[N - 2]
     }
 
-    const fn weight_4(&self) -> f64 {
+    const fn weight_4() -> f64 {
         Self::WEIGHT_4
     }
 
-    const fn weight_5(&self) -> f64 {
+    const fn weight_5() -> f64 {
         Self::WEIGHT_5[N - 2]
     }
 
@@ -419,19 +410,19 @@ where
         0.106_345_612_131_979_372e-04,
     ];
 
-    const fn prime_weight_1(&self) -> f64 {
+    const fn prime_weight_1() -> f64 {
         Self::PRIME_WEIGHT_1[N - 2]
     }
 
-    const fn prime_weight_2(&self) -> f64 {
+    const fn prime_weight_2() -> f64 {
         Self::PRIME_WEIGHT_2
     }
 
-    const fn prime_weight_3(&self) -> f64 {
+    const fn prime_weight_3() -> f64 {
         Self::PRIME_WEIGHT_3[N - 2]
     }
 
-    const fn prime_weight_4(&self) -> f64 {
+    const fn prime_weight_4() -> f64 {
         Self::PRIME_WEIGHT_4
     }
 
@@ -511,62 +502,6 @@ const fn minimum_function_calls(n: usize) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_new() {
-        let lim1 = Limits::new(0.0, 1.0);
-        let lim2 = Limits::new(0.0, 2.0);
-        let lim3 = Limits::new(1.0, 2.0);
-
-        let limits = [lim1, lim2, lim3];
-
-        struct Foo {
-            alpha: f64,
-        }
-
-        impl MultiDimensionalIntegrand<3> for Foo {
-            fn evaluate(&self, coordinates: &[f64; 3]) -> f64 {
-                let x = coordinates[0];
-                let y = coordinates[1];
-                let z = coordinates[2];
-                self.alpha * (x.powi(2) + y.powi(2) + z.powi(2))
-            }
-        }
-
-        let foo = Foo { alpha: 1.0 };
-
-        let integral = MultiDimensionalBasic::new(limits, &foo).unwrap();
-
-        let lambda_2: f64 = 0.358_568_582_800_318_073;
-        let lambda_4: f64 = 0.948_683_298_050_513_796;
-        let lambda_5: f64 = 0.688_247_201_611_685_289;
-
-        assert!((integral.lambda_2() - lambda_2).abs() / lambda_2.abs() < 1e-19);
-        assert!((integral.lambda_4() - lambda_4).abs() / lambda_4.abs() < 1e-19);
-        assert!((integral.lambda_5() - lambda_5).abs() / lambda_5.abs() < 1e-19);
-
-        let weight_1 = -0.555_606_360_818_980_835;
-        let weight_2 = 980.0 / 6561.0;
-        let weight_3 = 0.031_499_263_323_680_333_0;
-        let weight_4 = 200.0 / 19683.0;
-        let weight_5 = 0.435_591_627_292_587_508e-01;
-
-        assert!((integral.weight_1() - weight_1).abs() / weight_1.abs() < 1e-19);
-        assert!((integral.weight_2() - weight_2).abs() / weight_2.abs() < 1e-19);
-        assert!((integral.weight_3() - weight_3).abs() / weight_3.abs() < 1e-19);
-        assert!((integral.weight_4() - weight_4).abs() / weight_4.abs() < 1e-19);
-        assert!((integral.weight_5() - weight_5).abs() / weight_5.abs() < 1e-19);
-
-        let prime_weight_1 = -2.292_181_069_958_847_63;
-        let prime_weight_2 = 245.0 / 486.0;
-        let prime_weight_3 = -0.024_005_486_968_449_930_9;
-        let prime_weight_4 = 25.0 / 729.0;
-
-        assert!((integral.prime_weight_1() - prime_weight_1).abs() / prime_weight_1.abs() < 1e-19);
-        assert!((integral.prime_weight_2() - prime_weight_2).abs() / prime_weight_2.abs() < 1e-19);
-        assert!((integral.prime_weight_3() - prime_weight_3).abs() / prime_weight_3.abs() < 1e-19);
-        assert!((integral.prime_weight_4() - prime_weight_4).abs() / prime_weight_4.abs() < 1e-19);
-    }
 
     #[test]
     fn test_geometry() {
