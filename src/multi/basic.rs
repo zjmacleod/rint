@@ -176,7 +176,6 @@ where
             volume,
         } = self.geometry();
 
-        // centre_function_value
         let sum1 = self.function.evaluate(&centres);
         let sum1_abs = sum1.abs();
 

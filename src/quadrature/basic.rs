@@ -223,13 +223,12 @@ where
         let result_asc = asc_result * abs_half_length;
         let error = rescale_error(error, result_abs, result_asc);
 
-        Region {
-            error,
-            result,
-            result_abs,
-            result_asc,
-            limits: self.limits,
-        }
+        Region::unevaluated()
+            .with_error(error)
+            .with_result(result)
+            .with_result_abs(result_abs)
+            .with_result_asc(result_asc)
+            .with_limits(self.limits)
     }
 
     pub fn integrate(&self) -> BasicEstimate {
@@ -281,6 +280,41 @@ impl From<Region> for BasicEstimate {
 }
 
 impl Region {
+    pub(crate) fn unevaluated() -> Self {
+        Self {
+            error: 0.0,
+            result: 0.0,
+            result_abs: 0.0,
+            result_asc: 0.0,
+            limits: Limits::new(0.0, 0.0),
+        }
+    }
+
+    pub(crate) fn with_result(mut self, result: f64) -> Self {
+        self.result = result;
+        self
+    }
+
+    pub(crate) fn with_result_asc(mut self, result_asc: f64) -> Self {
+        self.result_asc = result_asc;
+        self
+    }
+
+    pub(crate) fn with_result_abs(mut self, result_abs: f64) -> Self {
+        self.result_abs = result_abs;
+        self
+    }
+
+    pub(crate) fn with_error(mut self, error: f64) -> Self {
+        self.error = error;
+        self
+    }
+
+    pub(crate) fn with_limits(mut self, limits: Limits) -> Self {
+        self.limits = limits;
+        self
+    }
+
     #[must_use]
     #[inline]
     pub(crate) fn result(&self) -> f64 {
