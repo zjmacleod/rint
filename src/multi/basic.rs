@@ -1,8 +1,4 @@
-#![allow(unused)]
-
 use crate::multi::{Error, Kind};
-use crate::quadrature::rule::GaussKronrod15;
-use crate::quadrature::IntegralEstimate;
 use crate::Limits;
 use crate::MultiDimensionalIntegrand;
 
@@ -150,11 +146,9 @@ where
         let mut volume = 1.0;
 
         for j in 0..N {
-            let centre = self.limits[j].centre();
-            let width = self.limits[j].half_width();
-            centres[j] = centre;
-            widths[j] = width;
-            volume *= 2.0 * width;
+            centres[j] = self.limits[j].centre();
+            widths[j] = self.limits[j].half_width();
+            volume *= 2.0 * widths[j];
         }
 
         Geometry {
@@ -214,7 +208,7 @@ where
             sum3 += fval_3 + fval_4;
             sum3_abs += fval_3.abs() + fval_4.abs();
 
-            let dif = (7.0 * (fval_1 + fval_2) - (fval_3 + fval_4) - 12.0 * sum1);
+            let dif = 7.0 * (fval_1 + fval_2) - (fval_3 + fval_4) - 12.0 * sum1;
 
             if dif >= difmax {
                 difmax = dif;
@@ -230,10 +224,10 @@ where
         for j in 1..N {
             let j1 = j - 1;
             for k in j..N {
-                for l in 0..2 {
+                for _l in 0..2 {
                     abscissa[j1] = -abscissa[j1];
                     coordinate[j1] = centres[j1] + abscissa[j1];
-                    for m in 0..2 {
+                    for _m in 0..2 {
                         abscissa[k] = -abscissa[k];
                         coordinate[k] = centres[k] + abscissa[k];
                         let fval_4 = self.function.evaluate(&coordinate);
@@ -310,6 +304,10 @@ where
             .with_function_evaluations(function_evaluations)
     }
 
+    const LAMBDA_2: f64 = 0.358_568_582_800_318_073;
+    const LAMBDA_4: f64 = 0.948_683_298_050_513_796;
+    const LAMBDA_5: f64 = 0.688_247_201_611_685_289;
+
     const fn lambda_2() -> f64 {
         Self::LAMBDA_2
     }
@@ -321,10 +319,6 @@ where
     const fn lambda_5() -> f64 {
         Self::LAMBDA_5
     }
-
-    const LAMBDA_2: f64 = 0.358_568_582_800_318_073;
-    const LAMBDA_4: f64 = 0.948_683_298_050_513_796;
-    const LAMBDA_5: f64 = 0.688_247_201_611_685_289;
 
     const fn weight_1() -> f64 {
         Self::WEIGHT_1[N - 2]
@@ -797,8 +791,6 @@ mod tests {
 
             let result = integral_result.result();
             let should_be = 5.314_778_459;
-
-            println!("{}", integral_result.error());
 
             assert!((result - should_be).abs() / should_be.abs() < 1e-2);
         }

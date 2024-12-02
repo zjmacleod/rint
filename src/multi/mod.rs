@@ -1,5 +1,6 @@
 use crate::quadrature::IntegralEstimate;
 
+pub mod adaptive;
 pub mod basic;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
