@@ -1,5 +1,5 @@
 mod adaptive;
-mod basic;
+pub(crate) mod basic;
 mod estimate;
 mod singularity;
 

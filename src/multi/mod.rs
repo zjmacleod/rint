@@ -2,6 +2,7 @@ use crate::quadrature::IntegralEstimate;
 
 pub mod adaptive;
 pub mod basic;
+pub mod rule;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub enum Kind {
