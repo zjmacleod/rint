@@ -24,6 +24,7 @@ where
     rule: R,
     function: I,
     max_iterations: usize,
+    evaluations_multiplier: usize,
 }
 
 impl<I, R> AdaptiveSingularity<I, R>
@@ -50,6 +51,7 @@ where
         function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
+        let evaluations_multiplier = 1;
         match error_bound {
             ErrorBound::Absolute(v) => {
                 if v <= 0.0 {
@@ -77,7 +79,22 @@ where
             rule,
             function,
             max_iterations,
+            evaluations_multiplier,
         })
+    }
+
+    fn new_with_evaluations_multiplier(
+        lower: f64,
+        upper: f64,
+        error_bound: ErrorBound,
+        rule: R,
+        function: I,
+        max_iterations: usize,
+        evaluations_multiplier: usize,
+    ) -> Result<Self, Error> {
+        let mut v = Self::new(lower, upper, error_bound, rule, function, max_iterations)?;
+        v.evaluations_multiplier = evaluations_multiplier;
+        Ok(v)
     }
 
     fn roundoff(result_abs: f64) -> f64 {
@@ -245,7 +262,8 @@ where
         let positive_integrand = initial.positivity();
         let roundoff_count = 0;
         let roundoff_on_high_iteration_count = 0;
-        let function_evaluations_per_integration = self.rule.evaluations();
+        let function_evaluations_per_integration =
+            self.rule.evaluations() * self.evaluations_multiplier;
 
         heap.push(initial);
 
@@ -324,7 +342,16 @@ where
     ) -> Result<Self, Error> {
         let rule = GaussKronrod15;
         let transformed = InfiniteInterval::new(function);
-        Self::new(0.0, 1.0, error_bound, rule, transformed, max_iterations)
+        let evaluations_multiplier = 2;
+        Self::new_with_evaluations_multiplier(
+            0.0,
+            1.0,
+            error_bound,
+            rule,
+            transformed,
+            max_iterations,
+            evaluations_multiplier,
+        )
     }
 }
 
@@ -364,7 +391,16 @@ where
     ) -> Result<Self, Error> {
         let rule = GaussKronrod15;
         let transformed = SemiInfiniteIntervalPositive::new(function, lower);
-        Self::new(0.0, 1.0, error_bound, rule, transformed, max_iterations)
+        let evaluations_multiplier = 2;
+        Self::new_with_evaluations_multiplier(
+            0.0,
+            1.0,
+            error_bound,
+            rule,
+            transformed,
+            max_iterations,
+            evaluations_multiplier,
+        )
     }
 }
 
@@ -404,7 +440,16 @@ where
     ) -> Result<Self, Error> {
         let rule = GaussKronrod15;
         let transformed = SemiInfiniteIntervalNegative::new(function, upper);
-        Self::new(0.0, 1.0, error_bound, rule, transformed, max_iterations)
+        let evaluations_multiplier = 2;
+        Self::new_with_evaluations_multiplier(
+            0.0,
+            1.0,
+            error_bound,
+            rule,
+            transformed,
+            max_iterations,
+            evaluations_multiplier,
+        )
     }
 }
 
