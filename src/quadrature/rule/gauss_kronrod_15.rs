@@ -1,3 +1,4 @@
+use crate::quadrature::rule::private::{ExtendedData, SharedData};
 use crate::quadrature::rule::Rule;
 
 /// The unit struct of the 15-point Gauss-Kronrod quadrature rule.
@@ -7,8 +8,8 @@ use crate::quadrature::rule::Rule;
 pub struct GaussKronrod15;
 
 impl Rule for GaussKronrod15 {
-    type Shared = [(f64, f64, f64); 3];
-    type Extended = [(f64, f64); 4];
+    type Shared = [SharedData; 3];
+    type Extended = [ExtendedData; 4];
 
     const KRONROD_CENTRE: f64 = 0.209_482_141_084_727_828_012_999_174_891_714;
     const EVALUATIONS: usize = 15;
@@ -26,38 +27,38 @@ impl Rule for GaussKronrod15 {
     }
 }
 
-static SHARED_DATA: [(f64, f64, f64); 3] = [
-    (
+static SHARED_DATA: [SharedData; 3] = [
+    SharedData::new(
         0.949_107_912_342_758_524_526_189_684_047_851,
         0.129_484_966_168_869_693_270_611_432_679_082,
         0.063_092_092_629_978_553_290_700_663_189_204,
     ),
-    (
+    SharedData::new(
         0.741_531_185_599_394_439_863_864_773_280_788,
         0.279_705_391_489_276_667_901_467_771_423_780,
         0.140_653_259_715_525_918_745_189_590_510_238,
     ),
-    (
+    SharedData::new(
         0.405_845_151_377_397_166_906_606_412_076_961,
         0.381_830_050_505_118_944_950_369_775_488_975,
         0.190_350_578_064_785_409_913_256_402_421_014,
     ),
 ];
 
-static EXTENDED_DATA: [(f64, f64); 4] = [
-    (
+static EXTENDED_DATA: [ExtendedData; 4] = [
+    ExtendedData::new(
         0.991_455_371_120_812_639_206_854_697_526_329,
         0.022_935_322_010_529_224_963_732_008_058_970,
     ),
-    (
+    ExtendedData::new(
         0.864_864_423_359_769_072_789_712_788_640_926,
         0.104_790_010_322_250_183_839_876_322_541_518,
     ),
-    (
+    ExtendedData::new(
         0.586_087_235_467_691_130_294_144_838_258_730,
         0.169_004_726_639_267_902_826_583_426_598_550,
     ),
-    (
+    ExtendedData::new(
         0.207_784_955_007_898_467_600_689_403_773_245,
         0.204_432_940_075_298_892_414_161_999_234_649,
     ),

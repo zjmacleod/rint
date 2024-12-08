@@ -176,14 +176,17 @@ where
             .rule
             .shared_data()
             .into_iter()
-            .map(|(t, g, k)| {
-                let abscissa = half_length * t;
+            .map(|data| {
+                let point = data.point();
+                let gauss = data.gauss();
+                let kronrod = data.kronrod();
+                let abscissa = half_length * point;
                 let rate_plus = self.function.evaluate(centre + abscissa);
                 let rate_minus = self.function.evaluate(centre - abscissa);
                 let rate = rate_plus + rate_minus;
                 let rate_abs = rate_plus.abs() + rate_minus.abs();
-                function_values.push((k, (rate_plus, rate_minus)));
-                (g * rate, k * rate, k * rate_abs)
+                function_values.push((kronrod, (rate_plus, rate_minus)));
+                (gauss * rate, kronrod * rate, kronrod * rate_abs)
             })
             .fold((initial_gauss, initial_kronrod, initial_abs), |a, v| {
                 (a.0 + v.0, a.1 + v.1, a.2 + v.2)
@@ -193,14 +196,16 @@ where
             .rule
             .extended_data()
             .into_iter()
-            .map(|(t, k)| {
-                let abscissa = half_length * t;
+            .map(|data| {
+                let point = data.point();
+                let kronrod = data.kronrod();
+                let abscissa = half_length * point;
                 let rate_plus = self.function.evaluate(centre + abscissa);
                 let rate_minus = self.function.evaluate(centre - abscissa);
                 let rate = rate_plus + rate_minus;
                 let rate_abs = rate_plus.abs() + rate_minus.abs();
-                function_values.push((k, (rate_plus, rate_minus)));
-                (k * rate, k * rate_abs)
+                function_values.push((kronrod, (rate_plus, rate_minus)));
+                (kronrod * rate, kronrod * rate_abs)
             })
             .fold((kronrod_shared, abs_shared), |a, v| (a.0 + v.0, a.1 + v.1));
 

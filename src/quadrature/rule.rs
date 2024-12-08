@@ -15,7 +15,7 @@ pub use gauss_kronrod_41::GaussKronrod41;
 pub use gauss_kronrod_51::GaussKronrod51;
 pub use gauss_kronrod_61::GaussKronrod61;
 
-mod private {
+pub(crate) mod private {
     pub trait Sealed {}
 
     impl Sealed for super::GaussKronrod15 {}
@@ -24,6 +24,50 @@ mod private {
     impl Sealed for super::GaussKronrod41 {}
     impl Sealed for super::GaussKronrod51 {}
     impl Sealed for super::GaussKronrod61 {}
+
+    #[derive(Clone, Copy)]
+    pub struct SharedData {
+        point: f64,
+        gauss: f64,
+        kronrod: f64,
+    }
+
+    impl SharedData {
+        pub(crate) const fn new(point: f64, gauss: f64, kronrod: f64) -> Self {
+            Self {
+                point,
+                gauss,
+                kronrod,
+            }
+        }
+        pub(crate) const fn point(&self) -> f64 {
+            self.point
+        }
+        pub(crate) const fn gauss(&self) -> f64 {
+            self.gauss
+        }
+        pub(crate) const fn kronrod(&self) -> f64 {
+            self.kronrod
+        }
+    }
+
+    #[derive(Clone, Copy)]
+    pub struct ExtendedData {
+        point: f64,
+        kronrod: f64,
+    }
+
+    impl ExtendedData {
+        pub(crate) const fn new(point: f64, kronrod: f64) -> Self {
+            Self { point, kronrod }
+        }
+        pub(crate) const fn point(&self) -> f64 {
+            self.point
+        }
+        pub(crate) const fn kronrod(&self) -> f64 {
+            self.kronrod
+        }
+    }
 }
 
 /// Gauss-Kronrod integration rule.
@@ -40,8 +84,8 @@ mod private {
 /// and weights `w_i` for the `n`-point Gauss rule and the corresponding `(2n - 1)`-point Kronrod
 /// extension.
 pub trait Rule: private::Sealed + Clone + Copy + Debug {
-    type Shared: IntoIterator<Item = (f64, f64, f64)>;
-    type Extended: IntoIterator<Item = (f64, f64)>;
+    type Shared: IntoIterator<Item = private::SharedData>;
+    type Extended: IntoIterator<Item = private::ExtendedData>;
 
     const KRONROD_CENTRE: f64;
     const EVALUATIONS: usize;
