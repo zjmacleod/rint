@@ -1,3 +1,4 @@
+#![allow(unused)]
 use crate::multi::{Error, Kind};
 use crate::Limits;
 use crate::MultiDimensionalIntegrand;
