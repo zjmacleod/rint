@@ -303,8 +303,6 @@ impl<I: Integrand> InfiniteInterval<I> {
         Self { function }
     }
 
-    // TODO the calculation of the number of function evaluations is wrong for this type, since
-    // there are two evaluations per call to .evaluate()
     fn transform_evaluate(&self, t: f64) -> f64 {
         let x = (1.0 - t) / t;
         let y = self.function.evaluate(x) + self.function.evaluate(-x);
@@ -322,8 +320,6 @@ impl<I> AdaptiveSingularity<InfiniteInterval<I>, GaussKronrod15>
 where
     I: Integrand,
 {
-    // TODO the calculation of the number of function evaluations is wrong for this type, since
-    // there are two evaluations per call to .evaluate()
     /// # Errors
     pub fn infinite(
         error_bound: ErrorBound,
