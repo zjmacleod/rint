@@ -8,6 +8,7 @@ use rint::quadrature::rule::{
     GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod41, GaussKronrod51, GaussKronrod61,
 };
 use rint::quadrature::Basic;
+use rint::Limits;
 
 mod util;
 

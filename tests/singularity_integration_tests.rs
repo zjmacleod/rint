@@ -1,5 +1,6 @@
 //use rint::quadrature::adaptive::Kind;
 use rint::quadrature::{AdaptiveSingularity, ErrorBound};
+use rint::Limits;
 
 mod util;
 

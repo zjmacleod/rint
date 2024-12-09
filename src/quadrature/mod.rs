@@ -1,5 +1,5 @@
 mod adaptive;
-mod basic;
+pub(crate) mod basic;
 mod estimate;
 mod singularity;
 
@@ -9,6 +9,8 @@ pub use adaptive::Adaptive;
 pub use basic::{Basic, BasicEstimate};
 pub use estimate::IntegralEstimate;
 pub use singularity::AdaptiveSingularity;
+
+use crate::Limits;
 
 /// User selected error bound type.
 pub enum ErrorBound {
@@ -40,7 +42,7 @@ pub struct Error {
 pub enum Kind {
     MaximumIterationsReached,
     RoundoffErrorDetected,
-    BadIntegrandBehaviour { lower: f64, upper: f64 },
+    BadIntegrandBehaviour { limits: Limits },
     DoesNotConverge,
     DivergentOrSlowlyConverging,
     UninitialisedWorkspace,
@@ -110,7 +112,9 @@ impl std::fmt::Display for Error {
                 )
             }
 
-            Kind::BadIntegrandBehaviour { lower, upper } => {
+            Kind::BadIntegrandBehaviour { limits } => {
+                let lower = limits.lower();
+                let upper = limits.upper();
                 write!(
                     f,
                     "Extremely bad integrand behaviour. Possible non-integrable singularity, divergence, or discontinuity detected between ({lower},{upper}).\nresult:\t{result:.10e}\nerror\t{error:.10e}\niterations:\t{iterations}."
@@ -183,7 +187,11 @@ pub(crate) fn rescale_error(error: f64, result_abs: f64, result_asc: f64) -> f64
 }
 
 #[inline]
-pub(crate) fn subinterval_too_small(lower: f64, midpoint: f64, upper: f64) -> bool {
+pub(crate) fn subinterval_too_small(limits: Limits) -> bool {
+    let lower = limits.lower();
+    let upper = limits.upper();
+    let midpoint = limits.centre();
+
     let eps = f64::EPSILON;
     let min = f64::MIN_POSITIVE;
 
