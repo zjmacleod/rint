@@ -1,5 +1,7 @@
+use rint::quadrature::rule::{
+    GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod51, GaussKronrod61,
+};
 use rint::quadrature::{Adaptive, ErrorBound, Kind};
-use rint::quadrature::rule::{GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod51, GaussKronrod61};
 
 mod util;
 
