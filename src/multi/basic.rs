@@ -3,24 +3,24 @@ use crate::multi::{Error, Kind};
 use crate::Limits;
 use crate::MultiDimensionalIntegrand;
 
-pub(crate) struct MultiDimensionalRegion<const N: usize> {
+pub(crate) struct MultiDimensionalRegion<const NDIM: usize> {
     pub(crate) error: f64,
     pub(crate) result: f64,
     pub(crate) result_abs: f64,
     pub(crate) error_abs: f64,
-    pub(crate) limits: [Limits; N],
+    pub(crate) limits: [Limits; NDIM],
     pub(crate) largest_error_axis: usize,
     pub(crate) function_evaluations: usize,
 }
 
-impl<const N: usize> MultiDimensionalRegion<N> {
+impl<const NDIM: usize> MultiDimensionalRegion<NDIM> {
     fn unevaluated() -> Self {
         Self {
             error: 0.0,
             result: 0.0,
             result_abs: 0.0,
             error_abs: 0.0,
-            limits: [Limits::new(0.0, 0.0); N],
+            limits: [Limits::new(0.0, 0.0); NDIM],
             largest_error_axis: 0,
             function_evaluations: 0,
         }
@@ -46,7 +46,7 @@ impl<const N: usize> MultiDimensionalRegion<N> {
         self
     }
 
-    fn with_limits(mut self, limits: [Limits; N]) -> Self {
+    fn with_limits(mut self, limits: [Limits; NDIM]) -> Self {
         self.limits = limits;
         self
     }
@@ -77,7 +77,7 @@ impl<const N: usize> MultiDimensionalRegion<N> {
         self.error_abs
     }
 
-    fn limits(&self) -> &[Limits; N] {
+    fn limits(&self) -> &[Limits; NDIM] {
         &self.limits
     }
 
@@ -89,10 +89,10 @@ impl<const N: usize> MultiDimensionalRegion<N> {
         self.function_evaluations
     }
 
-    fn bisect<I: MultiDimensionalIntegrand<N>>(
+    fn bisect<I: MultiDimensionalIntegrand<NDIM>>(
         &self,
         function: &I,
-    ) -> [MultiDimensionalRegion<N>; 2] {
+    ) -> [MultiDimensionalRegion<NDIM>; 2] {
         let axis_to_bisect = self.largest_error_axis;
         let previous_limits = self.limits();
 
@@ -113,40 +113,40 @@ impl<const N: usize> MultiDimensionalRegion<N> {
     }
 }
 
-pub struct MultiDimensionalBasic<I, const N: usize>
+pub struct MultiDimensionalBasic<I, const NDIM: usize>
 where
-    I: MultiDimensionalIntegrand<N>,
+    I: MultiDimensionalIntegrand<NDIM>,
 {
-    limits: [Limits; N],
+    limits: [Limits; NDIM],
     function: I,
 }
 
-impl<I, const N: usize> MultiDimensionalBasic<I, N>
+impl<I, const NDIM: usize> MultiDimensionalBasic<I, NDIM>
 where
-    I: MultiDimensionalIntegrand<N>,
+    I: MultiDimensionalIntegrand<NDIM>,
 {
     /// # Errors
     /// TODO
     #[allow(clippy::cast_possible_truncation)]
-    pub fn new(limits: [Limits; N], function: I) -> Result<Self, Error> {
-        if N < 2 || N > 15 {
+    pub fn new(limits: [Limits; NDIM], function: I) -> Result<Self, Error> {
+        if NDIM < 2 || NDIM > 15 {
             Err(Error::unevaluated(Kind::WrongDimensionality))
         } else {
             Ok(Self { limits, function })
         }
     }
 
-    fn new_unchecked(limits: [Limits; N], function: I) -> Self {
+    fn new_unchecked(limits: [Limits; NDIM], function: I) -> Self {
         Self { limits, function }
     }
 
-    fn geometry(&self) -> Geometry<N> {
-        let mut centres = [0.0; N];
-        let mut widths = [0.0; N];
+    fn geometry(&self) -> Geometry<NDIM> {
+        let mut centres = [0.0; NDIM];
+        let mut widths = [0.0; NDIM];
 
         let mut volume = 1.0;
 
-        for j in 0..N {
+        for j in 0..NDIM {
             centres[j] = self.limits[j].centre();
             widths[j] = self.limits[j].half_width();
             volume *= 2.0 * widths[j];
@@ -160,11 +160,11 @@ where
     }
 
     const fn minimum_function_calls() -> usize {
-        minimum_function_calls(N)
+        minimum_function_calls(NDIM)
     }
 
     #[allow(clippy::too_many_lines)]
-    fn integrate_internal(&self) -> MultiDimensionalRegion<N> {
+    fn integrate_internal(&self) -> MultiDimensionalRegion<NDIM> {
         let Geometry {
             centres,
             widths,
@@ -182,11 +182,11 @@ where
         let mut sum3_abs = 0.0;
 
         let mut coordinate = centres;
-        let mut abscissa = [0.0; N];
+        let mut abscissa = [0.0; NDIM];
 
         let mut largest_error_axis = 0;
 
-        for j in 0..N {
+        for j in 0..NDIM {
             abscissa[j] = Self::lambda_2() * widths[j];
 
             coordinate[j] = centres[j] - abscissa[j];
@@ -222,9 +222,9 @@ where
 
         let mut sum4 = 0.0;
         let mut sum4_abs = 0.0;
-        for j in 1..N {
+        for j in 1..NDIM {
             let j1 = j - 1;
-            for k in j..N {
+            for k in j..NDIM {
                 for _l in 0..2 {
                     abscissa[j1] = -abscissa[j1];
                     coordinate[j1] = centres[j1] + abscissa[j1];
@@ -244,7 +244,7 @@ where
         let mut sum5 = 0.0;
         let mut sum5_abs = 0.0;
 
-        for j in 0..N {
+        for j in 0..NDIM {
             abscissa[j] = -Self::lambda_5() * widths[j];
             coordinate[j] = centres[j] + abscissa[j];
         }
@@ -254,7 +254,7 @@ where
             let fval_5 = self.function.evaluate(&coordinate);
             sum5 += fval_5;
             sum5_abs += fval_5.abs();
-            for j in 0..N {
+            for j in 0..NDIM {
                 abscissa[j] = -abscissa[j];
                 coordinate[j] = centres[j] + abscissa[j];
                 if abscissa[j].is_sign_positive() {
@@ -322,7 +322,7 @@ where
     }
 
     const fn weight_1() -> f64 {
-        Self::WEIGHT_1[N - 2]
+        Self::WEIGHT_1[NDIM - 2]
     }
 
     const fn weight_2() -> f64 {
@@ -330,7 +330,7 @@ where
     }
 
     const fn weight_3() -> f64 {
-        Self::WEIGHT_3[N - 2]
+        Self::WEIGHT_3[NDIM - 2]
     }
 
     const fn weight_4() -> f64 {
@@ -338,10 +338,10 @@ where
     }
 
     const fn weight_5() -> f64 {
-        Self::WEIGHT_5[N - 2]
+        Self::WEIGHT_5[NDIM - 2]
     }
 
-    // The weights w1 for fixed dimension N, where w1_n = WEIGHT_1_DIM_MINUS_2[N-2]
+    // The weights w1 for fixed dimension NDIM, where w1_n = WEIGHT_1_DIM_MINUS_2[NDIM-2]
     // w1 / 2^n
     const WEIGHT_1: [f64; 14] = [
         -0.193_872_885_230_909_911,
@@ -363,7 +363,7 @@ where
     //w2 / 2^n
     const WEIGHT_2: f64 = 980.0 / 6561.0;
 
-    // The weights w3 for fixed dimension N, where w3_n = WEIGHT_1_DIM_MINUS_2[N-2]
+    // The weights w3 for fixed dimension NDIM, where w3_n = WEIGHT_1_DIM_MINUS_2[NDIM-2]
     // w3 / 2^n
     const WEIGHT_3: [f64; 14] = [
         0.051_821_368_693_796_676_8,
@@ -385,7 +385,7 @@ where
     //w4 / 2^n
     const WEIGHT_4: f64 = 200.0 / 19683.0;
 
-    // The weights w5 for fixed dimension N, where w5_n = WEIGHT_1_DIM_MINUS_2[N-2]
+    // The weights w5 for fixed dimension NDIM, where w5_n = WEIGHT_1_DIM_MINUS_2[NDIM-2]
     // w5 / 2^n
     const WEIGHT_5: [f64; 14] = [
         0.871_183_254_585_174_982e-01,
@@ -405,7 +405,7 @@ where
     ];
 
     const fn prime_weight_1() -> f64 {
-        Self::PRIME_WEIGHT_1[N - 2]
+        Self::PRIME_WEIGHT_1[NDIM - 2]
     }
 
     const fn prime_weight_2() -> f64 {
@@ -413,7 +413,7 @@ where
     }
 
     const fn prime_weight_3() -> f64 {
-        Self::PRIME_WEIGHT_3[N - 2]
+        Self::PRIME_WEIGHT_3[NDIM - 2]
     }
 
     const fn prime_weight_4() -> f64 {
@@ -463,9 +463,9 @@ where
     const PRIME_WEIGHT_4: f64 = 25.0 / 729.0;
 }
 
-struct Geometry<const N: usize> {
-    centres: [f64; N],
-    widths: [f64; N],
+struct Geometry<const NDIM: usize> {
+    centres: [f64; NDIM],
+    widths: [f64; NDIM],
     volume: f64,
 }
 
