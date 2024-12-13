@@ -1,9 +1,11 @@
 mod adaptive;
 pub(crate) mod basic;
 mod estimate;
+pub mod rule;
 mod singularity;
 
-pub mod rule;
+#[cfg(test)]
+mod tests;
 
 pub use adaptive::Adaptive;
 pub use basic::{Basic, BasicEstimate};
