@@ -44,8 +44,6 @@
 //!
 //! let exp_result: f64 = 7.716049357767090777E-02;
 //! let exp_abserr: f64 = 2.990224871000550874E-06;
-//! let exp_resabs: f64 = 7.716049357767090777E-02;
-//! let exp_resasc: f64 = 4.434273814139995384E-02;
 //!
 //! let rel_error_bound = 1.0e-15;
 //! let alpha = 2.6;
@@ -59,60 +57,17 @@
 //! let integral_result = integral.integrate();
 //! let result = integral_result.result();
 //! let abserr = integral_result.error();
-//! let resabs = integral_result.result_abs();
-//! let resasc = integral_result.result_asc();
 //!
 //! assert!((exp_result - result).abs() / exp_result.abs() < rel_error_bound);
 //! assert!((exp_abserr - abserr).abs() / exp_abserr.abs() < rel_error_bound);
-//! assert!((exp_resabs - resabs).abs() / exp_resabs.abs() < rel_error_bound);
-//! assert!((exp_resasc - resasc).abs() / exp_resasc.abs() < rel_error_bound);
 //!```
 use std::cmp::Ordering;
 
 use crate::quadrature::rescale_error;
 use crate::quadrature::rule::Rule;
+use crate::quadrature::IntegralEstimate;
 use crate::Integrand;
 use crate::Limits;
-
-/// The value of a function evaluated with Gauss-Kronrod integration and associated error
-/// estimation.
-pub struct BasicEstimate {
-    error: f64,
-    result: f64,
-    result_abs: f64,
-    result_asc: f64,
-}
-
-impl BasicEstimate {
-    /// Return the numerically evaluated approximation of the integral `I = int_a^b f(x) dx`.
-    #[must_use]
-    #[inline]
-    pub fn result(&self) -> f64 {
-        self.result
-    }
-
-    /// Return the numerically evaluated approximation of the integral `I_{abs} = int_a^b |f(x)| dx`.
-    #[must_use]
-    #[inline]
-    pub fn result_abs(&self) -> f64 {
-        self.result_abs
-    }
-
-    /// Return the numerically evaluated approximation of the integral `I_{asc} = int_a^b |f(x) - I/(b - a)| dx`,
-    /// where `I` is the integral value returned by [`BasicEstimate::result`].
-    #[must_use]
-    #[inline]
-    pub fn result_asc(&self) -> f64 {
-        self.result_asc
-    }
-
-    /// Return the numerically evaluated approximation of the absolute error in the numerical routine.
-    #[must_use]
-    #[inline]
-    pub fn error(&self) -> f64 {
-        self.error
-    }
-}
 
 /// A basic Gauss-Kronrod integration routine.
 ///
@@ -231,8 +186,13 @@ where
             .with_limits(self.limits)
     }
 
-    pub fn integrate(&self) -> BasicEstimate {
-        self.integrate_internal().into()
+    pub fn integrate(&self) -> IntegralEstimate {
+        let integral = self.integrate_internal();
+        IntegralEstimate::new()
+            .with_result(integral.result())
+            .with_error(integral.error())
+            .with_iterations(1)
+            .with_function_evaluations(self.rule.evaluations())
     }
 
     /// Return the integration [`Limits`].
@@ -265,17 +225,6 @@ impl Ord for Region {
             ordering = self.total_cmp_interval_length(other);
         }
         ordering
-    }
-}
-
-impl From<Region> for BasicEstimate {
-    fn from(other: Region) -> BasicEstimate {
-        BasicEstimate {
-            error: other.error,
-            result: other.result,
-            result_abs: other.result_abs,
-            result_asc: other.result_asc,
-        }
     }
 }
 

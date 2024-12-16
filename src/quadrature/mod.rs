@@ -8,7 +8,7 @@ mod singularity;
 mod tests;
 
 pub use adaptive::Adaptive;
-pub use basic::{Basic, BasicEstimate};
+pub use basic::Basic;
 pub use estimate::IntegralEstimate;
 pub use singularity::AdaptiveSingularity;
 
