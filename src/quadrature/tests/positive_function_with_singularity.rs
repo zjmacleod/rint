@@ -4,9 +4,7 @@
 //
 // Ported from gsl-2.6/integration/test.c
 
-use crate::quadrature::rule::{
-    GaussKronrod15, GaussKronrod21, GaussKronrod31, GaussKronrod41, GaussKronrod51, GaussKronrod61,
-};
+use crate::quadrature::rule::Rule;
 use crate::quadrature::Basic;
 use crate::Limits;
 
@@ -14,7 +12,7 @@ basic_test! {
         name: basic_gauss_kronrod_positive_function_with_singularity_15_point,
         function: util::Function1,
         alpha: f64 => -0.9,
-        rule: GaussKronrod15,
+        rule: Rule::GaussKronrod15,
         lower: 0.0,
         upper: 1.0,
         exp_result:     1.555688196612745777E+01,
@@ -30,7 +28,7 @@ basic_test! {
         name: basic_gauss_kronrod_positive_function_with_singularity_21_point,
         function: util::Function1,
         alpha: f64 => -0.9,
-        rule: GaussKronrod21,
+        rule: Rule::GaussKronrod21,
         lower: 0.0,
         upper: 1.0,
         exp_result:     1.799045317938126232E+01,
@@ -46,7 +44,7 @@ basic_test! {
         name: basic_gauss_kronrod_positive_function_with_singularity_31_point,
         function: util::Function1,
         alpha: f64 => -0.9,
-        rule: GaussKronrod31,
+        rule: Rule::GaussKronrod31,
         lower: 0.0,
         upper: 1.0,
         exp_result:     2.081873305159121657E+01,
@@ -62,7 +60,7 @@ basic_test! {
         name: basic_gauss_kronrod_positive_function_with_singularity_41_point,
         function: util::Function1,
         alpha: f64 => -0.9,
-        rule: GaussKronrod41,
+        rule: Rule::GaussKronrod41,
         lower: 0.0,
         upper: 1.0,
         exp_result:     2.288677623903126701E+01,
@@ -78,7 +76,7 @@ basic_test! {
         name: basic_gauss_kronrod_positive_function_with_singularity_51_point,
         function: util::Function1,
         alpha: f64 => -0.9,
-        rule: GaussKronrod51,
+        rule: Rule::GaussKronrod51,
         lower: 0.0,
         upper: 1.0,
         exp_result:     2.449953612016972215E+01,
@@ -94,7 +92,7 @@ basic_test! {
         name: basic_gauss_kronrod_positive_function_with_singularity_61_point,
         function: util::Function1,
         alpha: f64 => -0.9,
-        rule: GaussKronrod61,
+        rule: Rule::GaussKronrod61,
         lower: 0.0,
         upper: 1.0,
         exp_result:     2.583030240976628988E+01,

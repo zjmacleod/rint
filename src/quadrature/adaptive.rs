@@ -15,22 +15,20 @@ use crate::Limits;
 /// [`ErrorBound::Relative`] to work to a specified relative error,
 /// or [`ErrorBound::Either`] to return a result as soon as _either_ the relative
 /// or absolute error bound has been satisfied.
-pub struct Adaptive<I, R>
+pub struct Adaptive<I>
 where
     I: Integrand,
-    R: Rule,
 {
     limits: Limits,
     error_bound: ErrorBound,
-    rule: R,
+    rule: Rule,
     function: I,
     max_iterations: usize,
 }
 
-impl<I, R> Adaptive<I, R>
+impl<I> Adaptive<I>
 where
     I: Integrand,
-    R: Rule,
 {
     /// Create a new [`Adaptive`].
     ///
@@ -46,7 +44,7 @@ where
     pub fn new(
         limits: Limits,
         error_bound: ErrorBound,
-        rule: R,
+        rule: Rule,
         function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
@@ -91,7 +89,7 @@ where
         let roundoff = Self::roundoff(initial.result_abs());
 
         if initial.error() <= roundoff && initial.error() > tolerance {
-            let output = IntegralEstimate::from_basic(initial, 1, self.rule.evaluations());
+            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
             let kind = Kind::RoundoffErrorDetected;
 
             Err(Error::new(kind, output))
@@ -99,11 +97,11 @@ where
             && initial.error().to_bits() != initial.result_asc().to_bits())
             || initial.error() == 0.0
         {
-            let output = IntegralEstimate::from_basic(initial, 1, self.rule.evaluations());
+            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
 
             Ok(Some(output))
         } else if self.max_iterations == 1 {
-            let output = IntegralEstimate::from_basic(initial, 1, self.rule.evaluations());
+            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
             let kind = Kind::MaximumIterationsReached;
 
             Err(Error::new(kind, output))

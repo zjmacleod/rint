@@ -1,7 +1,7 @@
 use std::collections::binary_heap::BinaryHeap;
 
 use crate::quadrature::basic::Region;
-use crate::quadrature::rule::{GaussKronrod15, GaussKronrod21, Rule};
+use crate::quadrature::rule::Rule;
 use crate::quadrature::{subinterval_too_small, Basic, Error, ErrorBound, IntegralEstimate, Kind};
 use crate::Integrand;
 use crate::Limits;
@@ -14,23 +14,21 @@ use crate::Limits;
 /// [`ErrorBound::Relative`] to work to a specified relative error,
 /// or [`ErrorBound::Either`] to return a result as soon as _either_ the relative
 /// or absolute error bound has been satisfied.
-pub struct AdaptiveSingularity<I, R>
+pub struct AdaptiveSingularity<I>
 where
     I: Integrand,
-    R: Rule,
 {
     limits: Limits,
     error_bound: ErrorBound,
-    rule: R,
+    rule: Rule,
     function: I,
     max_iterations: usize,
     evaluations_multiplier: usize,
 }
 
-impl<I, R> AdaptiveSingularity<I, R>
+impl<I> AdaptiveSingularity<I>
 where
     I: Integrand,
-    R: Rule,
 {
     /// Create a new [`AdaptiveSingularity`].
     ///
@@ -46,7 +44,7 @@ where
     fn new(
         limits: Limits,
         error_bound: ErrorBound,
-        rule: R,
+        rule: Rule,
         function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
@@ -84,7 +82,7 @@ where
     fn new_with_evaluations_multiplier(
         limits: Limits,
         error_bound: ErrorBound,
-        rule: R,
+        rule: Rule,
         function: I,
         max_iterations: usize,
         evaluations_multiplier: usize,
@@ -106,7 +104,7 @@ where
         let roundoff = Self::roundoff(initial.result_abs());
 
         if initial.error() <= roundoff && initial.error() > tolerance {
-            let output = IntegralEstimate::from_basic(initial, 1, self.rule.evaluations());
+            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
             let kind = Kind::RoundoffErrorDetected;
 
             Err(Error::new(kind, output))
@@ -114,11 +112,11 @@ where
             && initial.error().to_bits() != initial.result_asc().to_bits())
             || initial.error() == 0.0
         {
-            let output = IntegralEstimate::from_basic(initial, 1, self.rule.evaluations());
+            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
 
             Ok(Some(output))
         } else if self.max_iterations == 1 {
-            let output = IntegralEstimate::from_basic(initial, 1, self.rule.evaluations());
+            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
             let kind = Kind::MaximumIterationsReached;
 
             Err(Error::new(kind, output))
@@ -278,7 +276,7 @@ where
     }
 }
 
-impl<I> AdaptiveSingularity<I, GaussKronrod21>
+impl<I> AdaptiveSingularity<I>
 where
     I: Integrand,
 {
@@ -289,7 +287,7 @@ where
         function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
-        let rule = GaussKronrod21;
+        let rule = Rule::GaussKronrod21;
         Self::new(limits, error_bound, rule, function, max_iterations)
     }
 }
@@ -316,7 +314,7 @@ impl<I: Integrand> Integrand for InfiniteInterval<I> {
     }
 }
 
-impl<I> AdaptiveSingularity<InfiniteInterval<I>, GaussKronrod15>
+impl<I> AdaptiveSingularity<InfiniteInterval<I>>
 where
     I: Integrand,
 {
@@ -326,7 +324,7 @@ where
         function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
-        let rule = GaussKronrod15;
+        let rule = Rule::GaussKronrod15;
         let transformed = InfiniteInterval::new(function);
         let evaluations_multiplier = 2;
         Self::new_with_evaluations_multiplier(
@@ -363,7 +361,7 @@ impl<I: Integrand> Integrand for SemiInfiniteIntervalPositive<I> {
     }
 }
 
-impl<I> AdaptiveSingularity<SemiInfiniteIntervalPositive<I>, GaussKronrod15>
+impl<I> AdaptiveSingularity<SemiInfiniteIntervalPositive<I>>
 where
     I: Integrand,
 {
@@ -374,7 +372,7 @@ where
         function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
-        let rule = GaussKronrod15;
+        let rule = Rule::GaussKronrod15;
         let transformed = SemiInfiniteIntervalPositive::new(function, lower);
         let evaluations_multiplier = 2;
         Self::new_with_evaluations_multiplier(
@@ -411,7 +409,7 @@ impl<I: Integrand> Integrand for SemiInfiniteIntervalNegative<I> {
     }
 }
 
-impl<I> AdaptiveSingularity<SemiInfiniteIntervalNegative<I>, GaussKronrod15>
+impl<I> AdaptiveSingularity<SemiInfiniteIntervalNegative<I>>
 where
     I: Integrand,
 {
@@ -422,7 +420,7 @@ where
         function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
-        let rule = GaussKronrod15;
+        let rule = Rule::GaussKronrod15;
         let transformed = SemiInfiniteIntervalNegative::new(function, upper);
         let evaluations_multiplier = 2;
         Self::new_with_evaluations_multiplier(

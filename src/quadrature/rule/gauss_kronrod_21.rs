@@ -1,13 +1,13 @@
-use crate::quadrature::rule::private::{ExtendedData, SharedData};
-use crate::quadrature::rule::Rule;
+use crate::quadrature::rule::Integrate;
+use crate::quadrature::rule::{ExtendedData, SharedData};
 
 /// The unit struct of the 21-point Gauss-Kronrod quadrature rule.
 ///
 /// The 21-point rule combines a 10-point Gaussian rule with a 21-point Kronrod extension.
 #[derive(Clone, Copy, Debug)]
-pub struct GaussKronrod21;
+pub(crate) struct GaussKronrod21;
 
-impl Rule for GaussKronrod21 {
+impl Integrate for GaussKronrod21 {
     type Shared = [SharedData; 5];
     type Extended = [ExtendedData; 5];
 

@@ -5,7 +5,7 @@
 //!
 #![deny(clippy::pedantic)]
 #![allow(clippy::module_name_repetitions, clippy::excessive_precision)]
-pub mod limits;
+mod limits;
 pub mod multi;
 pub mod quadrature;
 

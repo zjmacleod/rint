@@ -1,7 +1,7 @@
 mod adaptive;
 pub(crate) mod basic;
 mod estimate;
-pub mod rule;
+mod rule;
 mod singularity;
 
 #[cfg(test)]
@@ -10,6 +10,7 @@ mod tests;
 pub use adaptive::Adaptive;
 pub use basic::Basic;
 pub use estimate::IntegralEstimate;
+pub use rule::Rule;
 pub use singularity::AdaptiveSingularity;
 
 use crate::Limits;

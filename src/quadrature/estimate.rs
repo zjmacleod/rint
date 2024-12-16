@@ -1,7 +1,7 @@
 use crate::quadrature::basic::Region;
+use crate::quadrature::{Adaptive, AdaptiveSingularity, Basic, Error, ErrorBound, Rule};
+use crate::{Integrand, Limits};
 
-/// The value of a function evaluated with Gauss-Kronrod integration and associated error
-/// estimation.
 /// The value of a function evaluated with Gauss-Kronrod integration and associated error
 /// estimation.
 #[derive(Debug)]
@@ -10,6 +10,90 @@ pub struct IntegralEstimate {
     error: f64,
     iterations: usize,
     function_evaluations: usize,
+}
+
+impl IntegralEstimate {
+    /// Return the numerically approximated value of the integral.
+    #[must_use]
+    pub fn result(&self) -> f64 {
+        self.result
+    }
+
+    /// Return the numerically approximated error.
+    #[must_use]
+    pub fn error(&self) -> f64 {
+        self.error
+    }
+
+    /// Return the number of iterations used in the adaptive integration routine.
+    #[must_use]
+    pub fn iterations(&self) -> usize {
+        self.iterations
+    }
+
+    /// Return the number of function evaluations used in the adaptive integration routine.
+    #[must_use]
+    pub fn function_evaluations(&self) -> usize {
+        self.function_evaluations
+    }
+}
+
+/// Integrators
+impl IntegralEstimate {
+    /// Integrate a function using a basic (non-adaptive) Gauss-Kronrod integration rule.
+    pub fn basic<I: Integrand>(limits: Limits, rule: Rule, function: I) -> Self {
+        Basic::new(limits, rule, function).integrate()
+    }
+
+    /// Integrate a function using an adaptive Gauss-Kronrod integration routine.
+    pub fn adaptive<I: Integrand>(
+        limits: Limits,
+        error_bound: ErrorBound,
+        rule: Rule,
+        function: I,
+        max_iterations: usize,
+    ) -> Result<Self, Error> {
+        Adaptive::new(limits, error_bound, rule, function, max_iterations)?.integrate()
+    }
+
+    /// Integrate a function with possible singularities in the integration region using an adaptive
+    /// Gauss-Kronrod integration routine.
+    pub fn adaptive_singularity<I: Integrand>(
+        limits: Limits,
+        error_bound: ErrorBound,
+        function: I,
+        max_iterations: usize,
+    ) -> Result<Self, Error> {
+        AdaptiveSingularity::general(limits, error_bound, function, max_iterations)?.integrate()
+    }
+
+    pub fn infinite<I: Integrand>(
+        error_bound: ErrorBound,
+        function: I,
+        max_iterations: usize,
+    ) -> Result<Self, Error> {
+        AdaptiveSingularity::infinite(error_bound, function, max_iterations)?.integrate()
+    }
+
+    pub fn semi_infinite_positive<I: Integrand>(
+        lower: f64,
+        error_bound: ErrorBound,
+        function: I,
+        max_iterations: usize,
+    ) -> Result<Self, Error> {
+        AdaptiveSingularity::semi_infinite_positive(lower, error_bound, function, max_iterations)?
+            .integrate()
+    }
+
+    pub fn semi_infinite_negative<I: Integrand>(
+        upper: f64,
+        error_bound: ErrorBound,
+        function: I,
+        max_iterations: usize,
+    ) -> Result<Self, Error> {
+        AdaptiveSingularity::semi_infinite_negative(upper, error_bound, function, max_iterations)?
+            .integrate()
+    }
 }
 
 impl IntegralEstimate {
@@ -42,31 +126,7 @@ impl IntegralEstimate {
         self
     }
 
-    /// Return the numerically approximated value of the integral.
-    #[must_use]
-    pub fn result(&self) -> f64 {
-        self.result
-    }
-
-    /// Return the numerically approximated error.
-    #[must_use]
-    pub fn error(&self) -> f64 {
-        self.error
-    }
-
-    /// Return the number of iterations used in the adaptive integration routine.
-    #[must_use]
-    pub fn iterations(&self) -> usize {
-        self.iterations
-    }
-
-    /// Return the number of function evaluations used in the adaptive integration routine.
-    #[must_use]
-    pub fn function_evaluations(&self) -> usize {
-        self.function_evaluations
-    }
-
-    pub(crate) fn from_basic(
+    pub(crate) fn from_region(
         basic: &Region,
         iterations: usize,
         function_evaluations: usize,
