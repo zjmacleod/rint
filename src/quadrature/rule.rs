@@ -66,25 +66,25 @@ pub enum Rule {
 }
 
 impl Rule {
-    pub(crate) fn evaluations(&self) -> usize {
+    pub(crate) fn evaluations(self) -> usize {
         match self {
-            Rule::GaussKronrod15 => gauss_kronrod_15::GaussKronrod15.evaluations(),
-            Rule::GaussKronrod21 => gauss_kronrod_21::GaussKronrod21.evaluations(),
-            Rule::GaussKronrod31 => gauss_kronrod_31::GaussKronrod31.evaluations(),
-            Rule::GaussKronrod41 => gauss_kronrod_41::GaussKronrod41.evaluations(),
-            Rule::GaussKronrod51 => gauss_kronrod_51::GaussKronrod51.evaluations(),
-            Rule::GaussKronrod61 => gauss_kronrod_61::GaussKronrod61.evaluations(),
+            Rule::GaussKronrod15 => gauss_kronrod_15::GaussKronrod15::evaluations(),
+            Rule::GaussKronrod21 => gauss_kronrod_21::GaussKronrod21::evaluations(),
+            Rule::GaussKronrod31 => gauss_kronrod_31::GaussKronrod31::evaluations(),
+            Rule::GaussKronrod41 => gauss_kronrod_41::GaussKronrod41::evaluations(),
+            Rule::GaussKronrod51 => gauss_kronrod_51::GaussKronrod51::evaluations(),
+            Rule::GaussKronrod61 => gauss_kronrod_61::GaussKronrod61::evaluations(),
         }
     }
 
-    pub(crate) fn integrate<I: Integrand>(&self, limits: &Limits, function: &I) -> Region {
+    pub(crate) fn integrate<I: Integrand>(self, limits: &Limits, function: &I) -> Region {
         match self {
-            Rule::GaussKronrod15 => gauss_kronrod_15::GaussKronrod15.integrate(limits, function),
-            Rule::GaussKronrod21 => gauss_kronrod_21::GaussKronrod21.integrate(limits, function),
-            Rule::GaussKronrod31 => gauss_kronrod_31::GaussKronrod31.integrate(limits, function),
-            Rule::GaussKronrod41 => gauss_kronrod_41::GaussKronrod41.integrate(limits, function),
-            Rule::GaussKronrod51 => gauss_kronrod_51::GaussKronrod51.integrate(limits, function),
-            Rule::GaussKronrod61 => gauss_kronrod_61::GaussKronrod61.integrate(limits, function),
+            Rule::GaussKronrod15 => gauss_kronrod_15::GaussKronrod15::integrate(limits, function),
+            Rule::GaussKronrod21 => gauss_kronrod_21::GaussKronrod21::integrate(limits, function),
+            Rule::GaussKronrod31 => gauss_kronrod_31::GaussKronrod31::integrate(limits, function),
+            Rule::GaussKronrod41 => gauss_kronrod_41::GaussKronrod41::integrate(limits, function),
+            Rule::GaussKronrod51 => gauss_kronrod_51::GaussKronrod51::integrate(limits, function),
+            Rule::GaussKronrod61 => gauss_kronrod_61::GaussKronrod61::integrate(limits, function),
         }
     }
 }
@@ -109,24 +109,24 @@ pub(crate) trait Integrate {
     const KRONROD_CENTRE: f64;
     const EVALUATIONS: usize;
 
-    fn shared_data(&self) -> Self::Shared;
-    fn extended_data(&self) -> Self::Extended;
-    fn gauss_centre(&self) -> Option<f64>;
-    fn kronrod_centre(&self) -> f64 {
+    fn shared_data() -> Self::Shared;
+    fn extended_data() -> Self::Extended;
+    fn gauss_centre() -> Option<f64>;
+    fn kronrod_centre() -> f64 {
         Self::KRONROD_CENTRE
     }
-    fn evaluations(&self) -> usize {
+    fn evaluations() -> usize {
         Self::EVALUATIONS
     }
 
-    fn integrate<I: Integrand>(&self, limits: &Limits, function: &I) -> Region {
+    fn integrate<I: Integrand>(limits: &Limits, function: &I) -> Region {
         let centre = limits.centre();
         let half_length = limits.half_width();
         let abs_half_length = half_length.abs();
         let f_centre = function.evaluate(centre);
 
-        let initial_kronrod = self.kronrod_centre() * f_centre;
-        let initial_gauss = if let Some(v) = self.gauss_centre() {
+        let initial_kronrod = Self::kronrod_centre() * f_centre;
+        let initial_gauss = if let Some(v) = Self::gauss_centre() {
             v * f_centre
         } else {
             0.0
@@ -137,8 +137,7 @@ pub(crate) trait Integrate {
         // Vec<(kronrod_weight, (rate_plus, rate_minus))>
         let mut function_values: Vec<(f64, (f64, f64))> = Vec::with_capacity(61);
 
-        let (gauss_result, kronrod_shared, abs_shared) = self
-            .shared_data()
+        let (gauss_result, kronrod_shared, abs_shared) = Self::shared_data()
             .into_iter()
             .map(|data| {
                 let point = data.point();
@@ -156,8 +155,7 @@ pub(crate) trait Integrate {
                 (a.0 + v.0, a.1 + v.1, a.2 + v.2)
             });
 
-        let (kronrod_result, abs_result) = self
-            .extended_data()
+        let (kronrod_result, abs_result) = Self::extended_data()
             .into_iter()
             .map(|data| {
                 let point = data.point();
@@ -174,7 +172,7 @@ pub(crate) trait Integrate {
 
         let mean = kronrod_result * 0.5;
 
-        let initial_asc = self.kronrod_centre() * (f_centre - mean).abs();
+        let initial_asc = Self::kronrod_centre() * (f_centre - mean).abs();
 
         let asc_result = function_values
             .iter()

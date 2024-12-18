@@ -97,7 +97,7 @@ impl IntegralEstimate {
 }
 
 impl IntegralEstimate {
-    pub(crate) fn new() -> Self {
+    pub(crate) const fn new() -> Self {
         Self {
             result: 0.0,
             error: 0.0,

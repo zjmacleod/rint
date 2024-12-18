@@ -18,11 +18,11 @@ pub struct Error {
 }
 
 impl Error {
-    pub(crate) fn new(kind: Kind, integral: IntegralEstimate) -> Self {
+    pub(crate) const fn new(kind: Kind, integral: IntegralEstimate) -> Self {
         Self { kind, integral }
     }
 
-    pub(crate) fn unevaluated(kind: Kind) -> Self {
+    pub(crate) const fn unevaluated(kind: Kind) -> Self {
         let output = IntegralEstimate::new();
         Error::new(kind, output)
     }

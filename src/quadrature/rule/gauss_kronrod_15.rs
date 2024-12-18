@@ -14,15 +14,15 @@ impl Integrate for GaussKronrod15 {
     const KRONROD_CENTRE: f64 = 0.209_482_141_084_727_828_012_999_174_891_714;
     const EVALUATIONS: usize = 15;
 
-    fn shared_data(&self) -> Self::Shared {
+    fn shared_data() -> Self::Shared {
         SHARED_DATA
     }
 
-    fn extended_data(&self) -> Self::Extended {
+    fn extended_data() -> Self::Extended {
         EXTENDED_DATA
     }
 
-    fn gauss_centre(&self) -> Option<f64> {
+    fn gauss_centre() -> Option<f64> {
         Some(0.417_959_183_673_469_387_755_102_040_816_327)
     }
 }

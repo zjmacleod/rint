@@ -4,7 +4,7 @@
 //! The algorithms are heavily inspired by the GNU Scientific Library & QUADPACK numerical integration routines.
 //!
 #![deny(clippy::pedantic)]
-#![allow(clippy::module_name_repetitions, clippy::excessive_precision)]
+#![allow(clippy::excessive_precision, clippy::module_name_repetitions)]
 mod limits;
 pub mod multi;
 pub mod quadrature;
