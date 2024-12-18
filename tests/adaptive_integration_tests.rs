@@ -10,7 +10,7 @@ adaptive_test_passing! {
         name: adaptive_gauss_kronrod_smooth_positive_function_relative_error_bound_15_point,
         function: util::Function1,
         alpha: f64 => 2.6,
-        rule: Rule::GaussKronrod15,
+        rule: gk15,
         lower: 0.0,
         upper: 1.0,
         exp_result:      7.716049382715854665E-02,
@@ -29,7 +29,7 @@ adaptive_test_passing! {
         name: adaptive_gauss_kronrod_smooth_positive_function_absolute_error_bound_21_point,
         function: util::Function1,
         alpha: f64 => 2.6,
-        rule: Rule::GaussKronrod21,
+        rule: gk21,
         lower: 0.0,
         upper: 1.0,
         exp_result:      7.716049382716050342E-02,
@@ -48,7 +48,7 @@ adaptive_test_error! {
         name: adaptive_gauss_kronrod_terminates_due_to_roundoff_error_31_point,
         function: util::Function3,
         alpha: f64 => 1.3,
-        rule: Rule::GaussKronrod31,
+        rule: gk31,
         lower: 0.3,
         upper: 2.71,
         exp_result:      -7.238969575482959717E-01,
@@ -68,7 +68,7 @@ adaptive_test_error! {
         name: adaptive_gauss_kronrod_terminates_due_to_max_iterations_reached_61_point,
         function: util::Function16,
         alpha: i32 => 1,
-        rule: Rule::GaussKronrod61,
+        rule: gk61,
         lower: -1.0,
         upper:  1.0,
         iterations: 3,
@@ -92,7 +92,7 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
 
     let error_bound = ErrorBound::Absolute(1e-14);
 
-    let rule = Rule::GaussKronrod51;
+    let rule = Rule::gk51();
     let alpha = 2;
 
     let lower = -1.0;
@@ -101,10 +101,10 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
     let function = util::Function16 { alpha };
 
     let integral = Adaptive::new(
+        &function,
+        rule,
         Limits::new(lower, upper),
         error_bound,
-        rule,
-        &function,
         1000,
     )
     .unwrap();
@@ -136,6 +136,7 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
         return Err(String::from("should have been error"));
     }
 
+    let rule = Rule::gk51();
     let error_bound = ErrorBound::Absolute(1e-14);
     let lower = 1.0;
     let upper = -1.0;
@@ -143,10 +144,10 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
     let function = util::Function16 { alpha };
 
     let integral = Adaptive::new(
+        &function,
+        rule,
         Limits::new(lower, upper),
         error_bound,
-        rule,
-        &function,
         1000,
     )
     .unwrap();

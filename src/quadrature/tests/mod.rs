@@ -7,7 +7,7 @@ mod macros {
             name: $func_name:ident,
             function: $type:ty,
             alpha: $alphaty:ty => $alpha:expr,
-            rule: $rule:expr,
+            rule: $rule:ident,
             lower: $lower:expr,
             upper: $upper:expr,
             exp_result: $exp_result:expr,
@@ -20,7 +20,9 @@ mod macros {
         ) => {
             #[test]
             fn $func_name() -> Result<(), String> {
+                use crate::quadrature::rule::Rule;
                 use crate::quadrature::tests::util;
+                use crate::quadrature::GaussKronrodIntegrator;
                 let exp_result = $exp_result;
                 let exp_error = $exp_error;
                 let exp_result_abs = $exp_result_abs;
@@ -34,11 +36,12 @@ mod macros {
                 let upper = $upper;
 
                 let function = <$type>::new(alpha);
-                let rule = $rule;
+                let rule = Rule::$rule();
 
-                let integral = Basic::new(Limits::new(lower, upper), rule, &function);
+                let integral =
+                    GaussKronrodIntegrator::new(&function, &rule, Limits::new(lower, upper));
 
-                let integral_result = integral.integrate_internal();
+                let integral_result = integral.integrate();
                 let result = integral_result.result();
                 let error = integral_result.error();
                 let result_abs = integral_result.result_abs();
@@ -72,9 +75,10 @@ mod macros {
                 let lower = $upper;
                 let upper = $lower;
 
-                let integral = Basic::new(Limits::new(lower, upper), rule, &function);
+                let integral =
+                    GaussKronrodIntegrator::new(&function, &rule, Limits::new(lower, upper));
 
-                let integral_result = integral.integrate_internal();
+                let integral_result = integral.integrate();
                 let result = integral_result.result();
                 let error = integral_result.error();
                 let result_abs = integral_result.result_abs();
@@ -111,7 +115,7 @@ mod macros {
         (
             name: $func_name:ident,
             function: $type:ty,
-            rule: $rule:expr,
+            rule: $rule:ident,
             lower: $lower:expr,
             upper: $upper:expr,
             exp_result: $exp_result:expr,
@@ -123,6 +127,9 @@ mod macros {
         ) => {
             #[test]
             fn $func_name() -> Result<(), String> {
+                use crate::quadrature::rule::Rule;
+                use crate::quadrature::tests::util;
+                use crate::quadrature::GaussKronrodIntegrator;
                 let exp_result = $exp_result;
                 let exp_error = $exp_error;
                 let exp_result_abs = $exp_result_abs;
@@ -135,9 +142,10 @@ mod macros {
                 let upper = $upper;
 
                 let function = <$type>::new();
-                let rule = $rule;
+                let rule = Rule::$rule();
 
-                let integral = Basic::new(Limits::new(lower, upper), rule, &function);
+                let integral =
+                    GaussKronrodIntegrator::new(Limits::new(lower, upper), &rule, &function);
 
                 let integral_result = integral.integrate_internal();
                 let result = integral_result.result();
@@ -173,7 +181,8 @@ mod macros {
                 let lower = $upper;
                 let upper = $lower;
 
-                let integral = Basic::new(Limits::new(lower, upper), rule, &function);
+                let integral =
+                    GaussKronrodIntegrator::new(Limits::new(lower, upper), &rule, &function);
 
                 let integral_result = integral.integrate_internal();
                 let result = integral_result.result();

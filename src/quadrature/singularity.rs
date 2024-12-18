@@ -2,7 +2,9 @@ use std::collections::binary_heap::BinaryHeap;
 
 use crate::quadrature::basic::Region;
 use crate::quadrature::rule::Rule;
-use crate::quadrature::{subinterval_too_small, Basic, Error, ErrorBound, IntegralEstimate, Kind};
+use crate::quadrature::{
+    subinterval_too_small, Error, ErrorBound, GaussKronrodIntegrator, IntegralEstimate, Kind,
+};
 use crate::Integrand;
 use crate::Limits;
 
@@ -18,10 +20,10 @@ pub struct AdaptiveSingularity<I>
 where
     I: Integrand,
 {
+    function: I,
+    rule: Rule,
     limits: Limits,
     error_bound: ErrorBound,
-    rule: Rule,
-    function: I,
     max_iterations: usize,
     evaluations_multiplier: usize,
 }
@@ -42,23 +44,23 @@ where
     ///     - `ErrorBound::Relative(v) where v > 50.0 * f64::EPSILON`,
     ///     - `ErrorBound::Either { absolute, relative } where absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
     fn new(
+        function: I,
+        rule: Rule,
         limits: Limits,
         error_bound: ErrorBound,
-        rule: Rule,
-        function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
         let evaluations_multiplier = 1;
         match error_bound {
             ErrorBound::Absolute(v) => {
                 if v <= 0.0 {
-                    let kind = Kind::RelativeBoundNegativeOrZero;
+                    let kind = Kind::AbsoluteBoundNegativeOrZero;
                     return Err(Error::unevaluated(kind));
                 }
             }
             ErrorBound::Relative(v) => {
                 if v < 50.0 * f64::EPSILON {
-                    let kind = Kind::AbsoluteBoundTooSmall;
+                    let kind = Kind::RelativeBoundTooSmall;
                     return Err(Error::unevaluated(kind));
                 }
             }
@@ -70,24 +72,24 @@ where
             }
         }
         Ok(Self {
+            function,
+            rule,
             limits,
             error_bound,
-            rule,
-            function,
             max_iterations,
             evaluations_multiplier,
         })
     }
 
     fn new_with_evaluations_multiplier(
+        function: I,
+        rule: Rule,
         limits: Limits,
         error_bound: ErrorBound,
-        rule: Rule,
-        function: I,
         max_iterations: usize,
         evaluations_multiplier: usize,
     ) -> Result<Self, Error> {
-        let mut v = Self::new(limits, error_bound, rule, function, max_iterations)?;
+        let mut v = Self::new(function, rule, limits, error_bound, max_iterations)?;
         v.evaluations_multiplier = evaluations_multiplier;
         Ok(v)
     }
@@ -127,7 +129,8 @@ where
 
     /// # Errors
     pub fn integrate(&self) -> Result<IntegralEstimate, Error> {
-        let initial = Basic::new(self.limits, self.rule, &self.function).integrate_internal();
+        let initial =
+            GaussKronrodIntegrator::new(&self.function, &self.rule, self.limits).integrate();
 
         if let Some(output) = self.check_initial_integration(&initial)? {
             return Ok(output);
@@ -140,7 +143,7 @@ where
 
             let current_interval = previous.abs_interval_length();
 
-            let [lower, upper] = previous.bisect(&self.function, self.rule);
+            let [lower, upper] = previous.bisect(&self.function, &self.rule);
 
             let previous_error = previous.error();
             let iteration_error = lower.error() + upper.error();
@@ -282,13 +285,13 @@ where
 {
     /// # Errors
     pub fn general(
+        function: I,
         limits: Limits,
         error_bound: ErrorBound,
-        function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
-        let rule = Rule::GaussKronrod21;
-        Self::new(limits, error_bound, rule, function, max_iterations)
+        let rule = Rule::gk21();
+        Self::new(function, rule, limits, error_bound, max_iterations)
     }
 }
 
@@ -320,18 +323,18 @@ where
 {
     /// # Errors
     pub fn infinite(
-        error_bound: ErrorBound,
         function: I,
+        error_bound: ErrorBound,
         max_iterations: usize,
     ) -> Result<Self, Error> {
-        let rule = Rule::GaussKronrod15;
+        let rule = Rule::gk15();
         let transformed = InfiniteInterval::new(function);
         let evaluations_multiplier = 2;
         Self::new_with_evaluations_multiplier(
+            transformed,
+            rule,
             Limits::new(0.0, 1.0),
             error_bound,
-            rule,
-            transformed,
             max_iterations,
             evaluations_multiplier,
         )
@@ -339,8 +342,8 @@ where
 }
 
 pub struct SemiInfiniteIntervalPositive<I: Integrand> {
-    lower: f64,
     function: I,
+    lower: f64,
 }
 
 impl<I: Integrand> SemiInfiniteIntervalPositive<I> {
@@ -367,19 +370,19 @@ where
 {
     /// # Errors
     pub fn semi_infinite_positive(
+        function: I,
         lower: f64,
         error_bound: ErrorBound,
-        function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
-        let rule = Rule::GaussKronrod15;
+        let rule = Rule::gk15();
         let transformed = SemiInfiniteIntervalPositive::new(function, lower);
         let evaluations_multiplier = 2;
         Self::new_with_evaluations_multiplier(
+            transformed,
+            rule,
             Limits::new(0.0, 1.0),
             error_bound,
-            rule,
-            transformed,
             max_iterations,
             evaluations_multiplier,
         )
@@ -387,8 +390,8 @@ where
 }
 
 pub struct SemiInfiniteIntervalNegative<I: Integrand> {
-    upper: f64,
     function: I,
+    upper: f64,
 }
 
 impl<I: Integrand> SemiInfiniteIntervalNegative<I> {
@@ -415,19 +418,19 @@ where
 {
     /// # Errors
     pub fn semi_infinite_negative(
+        function: I,
         upper: f64,
         error_bound: ErrorBound,
-        function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
-        let rule = Rule::GaussKronrod15;
+        let rule = Rule::gk15();
         let transformed = SemiInfiniteIntervalNegative::new(function, upper);
         let evaluations_multiplier = 2;
         Self::new_with_evaluations_multiplier(
+            transformed,
+            rule,
             Limits::new(0.0, 1.0),
             error_bound,
-            rule,
-            transformed,
             max_iterations,
             evaluations_multiplier,
         )

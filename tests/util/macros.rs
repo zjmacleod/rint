@@ -1,211 +1,211 @@
-#[macro_export]
-macro_rules! basic_test {
-    (
-        name: $func_name:ident,
-        function: $type:ty,
-        alpha: $alphaty:ty => $alpha:expr,
-        rule: $rule:expr,
-        lower: $lower:expr,
-        upper: $upper:expr,
-        exp_result: $exp_result:expr,
-        exp_error: $exp_error:expr,
-        exp_result_abs: $exp_result_abs:expr,
-        exp_result_asc: $exp_result_asc:expr,
-        abs_error_bound: $abs_error_bound:expr,
-        rel_error_bound: $rel_error_bound:expr,
-        $description:literal
-    ) => {
-        #[test]
-        fn $func_name() -> Result<(), String> {
-            let exp_result = $exp_result;
-            let exp_error = $exp_error;
-            let exp_result_abs = $exp_result_abs;
-            let exp_result_asc = $exp_result_asc;
-
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
-            let alpha: $alphaty = $alpha;
-
-            let lower = $lower;
-            let upper = $upper;
-
-            let function = <$type>::new(alpha);
-            let rule = $rule;
-
-            let integral = Basic::new(Limits::new(lower, upper), rule, &function);
-
-            let integral_result = integral.integrate();
-            let result = integral_result.result();
-            let error = integral_result.error();
-            let result_abs = integral_result.result_abs();
-            let result_asc = integral_result.result_asc();
-
-            util::test_relative_error(
-                result,
-                exp_result,
-                abs_error_bound,
-                &format!("{} result", $description),
-            )?;
-            util::test_relative_error(
-                error,
-                exp_error,
-                rel_error_bound,
-                &format!("{} error", $description),
-            )?;
-            util::test_relative_error(
-                result_abs,
-                exp_result_abs,
-                abs_error_bound,
-                &format!("{} result_abs", $description),
-            )?;
-            util::test_relative_error(
-                result_asc,
-                exp_result_asc,
-                abs_error_bound,
-                &format!("{} result_asc", $description),
-            )?;
-
-            let lower = $upper;
-            let upper = $lower;
-
-            let integral = Basic::new(Limits::new(lower, upper), rule, &function);
-
-            let integral_result = integral.integrate();
-            let result = integral_result.result();
-            let error = integral_result.error();
-            let result_abs = integral_result.result_abs();
-            let result_asc = integral_result.result_asc();
-
-            util::test_relative_error(
-                result,
-                -exp_result,
-                abs_error_bound,
-                &format!("{} result reverse", $description),
-            )?;
-            util::test_relative_error(
-                error,
-                exp_error,
-                rel_error_bound,
-                &format!("{} error reverse", $description),
-            )?;
-            util::test_relative_error(
-                result_abs,
-                exp_result_abs,
-                abs_error_bound,
-                &format!("{} result_abs reverse", $description),
-            )?;
-            util::test_relative_error(
-                result_asc,
-                exp_result_asc,
-                abs_error_bound,
-                &format!("{} result_asc reverse", $description),
-            )?;
-
-            Ok(())
-        }
-    };
-    (
-        name: $func_name:ident,
-        function: $type:ty,
-        rule: $rule:expr,
-        lower: $lower:expr,
-        upper: $upper:expr,
-        exp_result: $exp_result:expr,
-        exp_error: $exp_error:expr,
-        exp_result_abs: $exp_result_abs:expr,
-        exp_result_asc: $exp_result_asc:expr,
-        abs_error_bound: $abs_error_bound:expr,
-        rel_error_bound: $rel_error_bound:expr
-    ) => {
-        #[test]
-        fn $func_name() -> Result<(), String> {
-            let exp_result = $exp_result;
-            let exp_error = $exp_error;
-            let exp_result_abs = $exp_result_abs;
-            let exp_result_asc = $exp_result_asc;
-
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
-
-            let lower = $lower;
-            let upper = $upper;
-
-            let function = <$type>::new();
-            let rule = $rule;
-
-            let integral = Basic::new(Limits::new(lower, upper), rule, &function);
-
-            let integral_result = integral.integrate();
-            let result = integral_result.result();
-            let error = integral_result.error();
-            let result_abs = integral_result.result_abs();
-            let result_asc = integral_result.result_asc();
-
-            util::test_relative_error(
-                result,
-                exp_result,
-                abs_error_bound,
-                &format!("{} result", $description),
-            )?;
-            util::test_relative_error(
-                error,
-                exp_error,
-                rel_error_bound,
-                &format!("{} error", $description),
-            )?;
-            util::test_relative_error(
-                result_abs,
-                exp_result_abs,
-                abs_error_bound,
-                &format!("{} result_abs", $description),
-            )?;
-            util::test_relative_error(
-                result_asc,
-                exp_result_asc,
-                abs_error_bound,
-                &format!("{} result_asc", $description),
-            )?;
-
-            let lower = $upper;
-            let upper = $lower;
-
-            let integral = Basic::new(Limits::new(lower, upper), rule, &function);
-
-            let integral_result = integral.integrate();
-            let result = integral_result.result();
-            let error = integral_result.error();
-            let result_abs = integral_result.result_abs();
-            let result_asc = integral_result.result_asc();
-
-            util::test_relative_error(
-                result,
-                -exp_result,
-                abs_error_bound,
-                &format!("{} result reverse", $description),
-            )?;
-            util::test_relative_error(
-                error,
-                exp_error,
-                rel_error_bound,
-                &format!("{} error reverse", $description),
-            )?;
-            util::test_relative_error(
-                result_abs,
-                exp_result_abs,
-                abs_error_bound,
-                &format!("{} result_abs reverse", $description),
-            )?;
-            util::test_relative_error(
-                result_asc,
-                exp_result_asc,
-                abs_error_bound,
-                &format!("{} result_asc reverse", $description),
-            )?;
-
-            Ok(())
-        }
-    };
-}
+//#[macro_export]
+//macro_rules! basic_test {
+//    (
+//        name: $func_name:ident,
+//        function: $type:ty,
+//        alpha: $alphaty:ty => $alpha:expr,
+//        rule: $rule:ident,
+//        lower: $lower:expr,
+//        upper: $upper:expr,
+//        exp_result: $exp_result:expr,
+//        exp_error: $exp_error:expr,
+//        exp_result_abs: $exp_result_abs:expr,
+//        exp_result_asc: $exp_result_asc:expr,
+//        abs_error_bound: $abs_error_bound:expr,
+//        rel_error_bound: $rel_error_bound:expr,
+//        $description:literal
+//    ) => {
+//        #[test]
+//        fn $func_name() -> Result<(), String> {
+//            let exp_result = $exp_result;
+//            let exp_error = $exp_error;
+//            let exp_result_abs = $exp_result_abs;
+//            let exp_result_asc = $exp_result_asc;
+//
+//            let abs_error_bound = $abs_error_bound;
+//            let rel_error_bound = $rel_error_bound;
+//            let alpha: $alphaty = $alpha;
+//
+//            let lower = $lower;
+//            let upper = $upper;
+//
+//            let function = <$type>::new(alpha);
+//            let rule = Rule::$rule();
+//
+//            let integral = Basic::new(Limits::new(lower, upper), rule, &function);
+//
+//            let integral_result = integral.integrate();
+//            let result = integral_result.result();
+//            let error = integral_result.error();
+//            let result_abs = integral_result.result_abs();
+//            let result_asc = integral_result.result_asc();
+//
+//            util::test_relative_error(
+//                result,
+//                exp_result,
+//                abs_error_bound,
+//                &format!("{} result", $description),
+//            )?;
+//            util::test_relative_error(
+//                error,
+//                exp_error,
+//                rel_error_bound,
+//                &format!("{} error", $description),
+//            )?;
+//            util::test_relative_error(
+//                result_abs,
+//                exp_result_abs,
+//                abs_error_bound,
+//                &format!("{} result_abs", $description),
+//            )?;
+//            util::test_relative_error(
+//                result_asc,
+//                exp_result_asc,
+//                abs_error_bound,
+//                &format!("{} result_asc", $description),
+//            )?;
+//
+//            let lower = $upper;
+//            let upper = $lower;
+//
+//            let integral = Basic::new(Limits::new(lower, upper), rule, &function);
+//
+//            let integral_result = integral.integrate();
+//            let result = integral_result.result();
+//            let error = integral_result.error();
+//            let result_abs = integral_result.result_abs();
+//            let result_asc = integral_result.result_asc();
+//
+//            util::test_relative_error(
+//                result,
+//                -exp_result,
+//                abs_error_bound,
+//                &format!("{} result reverse", $description),
+//            )?;
+//            util::test_relative_error(
+//                error,
+//                exp_error,
+//                rel_error_bound,
+//                &format!("{} error reverse", $description),
+//            )?;
+//            util::test_relative_error(
+//                result_abs,
+//                exp_result_abs,
+//                abs_error_bound,
+//                &format!("{} result_abs reverse", $description),
+//            )?;
+//            util::test_relative_error(
+//                result_asc,
+//                exp_result_asc,
+//                abs_error_bound,
+//                &format!("{} result_asc reverse", $description),
+//            )?;
+//
+//            Ok(())
+//        }
+//    };
+//    (
+//        name: $func_name:ident,
+//        function: $type:ty,
+//        rule: $rule:ident,
+//        lower: $lower:expr,
+//        upper: $upper:expr,
+//        exp_result: $exp_result:expr,
+//        exp_error: $exp_error:expr,
+//        exp_result_abs: $exp_result_abs:expr,
+//        exp_result_asc: $exp_result_asc:expr,
+//        abs_error_bound: $abs_error_bound:expr,
+//        rel_error_bound: $rel_error_bound:expr
+//    ) => {
+//        #[test]
+//        fn $func_name() -> Result<(), String> {
+//            let exp_result = $exp_result;
+//            let exp_error = $exp_error;
+//            let exp_result_abs = $exp_result_abs;
+//            let exp_result_asc = $exp_result_asc;
+//
+//            let abs_error_bound = $abs_error_bound;
+//            let rel_error_bound = $rel_error_bound;
+//
+//            let lower = $lower;
+//            let upper = $upper;
+//
+//            let function = <$type>::new();
+//            let rule = Rule::$rule();
+//
+//            let integral = Basic::new(Limits::new(lower, upper), rule, &function);
+//
+//            let integral_result = integral.integrate();
+//            let result = integral_result.result();
+//            let error = integral_result.error();
+//            let result_abs = integral_result.result_abs();
+//            let result_asc = integral_result.result_asc();
+//
+//            util::test_relative_error(
+//                result,
+//                exp_result,
+//                abs_error_bound,
+//                &format!("{} result", $description),
+//            )?;
+//            util::test_relative_error(
+//                error,
+//                exp_error,
+//                rel_error_bound,
+//                &format!("{} error", $description),
+//            )?;
+//            util::test_relative_error(
+//                result_abs,
+//                exp_result_abs,
+//                abs_error_bound,
+//                &format!("{} result_abs", $description),
+//            )?;
+//            util::test_relative_error(
+//                result_asc,
+//                exp_result_asc,
+//                abs_error_bound,
+//                &format!("{} result_asc", $description),
+//            )?;
+//
+//            let lower = $upper;
+//            let upper = $lower;
+//
+//            let integral = Basic::new(Limits::new(lower, upper), rule, &function);
+//
+//            let integral_result = integral.integrate();
+//            let result = integral_result.result();
+//            let error = integral_result.error();
+//            let result_abs = integral_result.result_abs();
+//            let result_asc = integral_result.result_asc();
+//
+//            util::test_relative_error(
+//                result,
+//                -exp_result,
+//                abs_error_bound,
+//                &format!("{} result reverse", $description),
+//            )?;
+//            util::test_relative_error(
+//                error,
+//                exp_error,
+//                rel_error_bound,
+//                &format!("{} error reverse", $description),
+//            )?;
+//            util::test_relative_error(
+//                result_abs,
+//                exp_result_abs,
+//                abs_error_bound,
+//                &format!("{} result_abs reverse", $description),
+//            )?;
+//            util::test_relative_error(
+//                result_asc,
+//                exp_result_asc,
+//                abs_error_bound,
+//                &format!("{} result_asc reverse", $description),
+//            )?;
+//
+//            Ok(())
+//        }
+//    };
+//}
 
 #[macro_export]
 macro_rules! adaptive_test_passing {
@@ -213,7 +213,7 @@ macro_rules! adaptive_test_passing {
         name: $func_name:ident,
         function: $type:ty,
         alpha: $alphaty:ty => $alpha:expr,
-        rule: $rule:expr,
+        rule: $rule:ident,
         lower: $lower:expr,
         upper: $upper:expr,
         exp_result:      $exp_result:expr,
@@ -234,7 +234,7 @@ macro_rules! adaptive_test_passing {
 
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
-            let rule = $rule;
+            let rule = Rule::$rule();
             let error_bound = ErrorBound::Relative($tolerance);
             let alpha: $alphaty = $alpha;
 
@@ -244,10 +244,10 @@ macro_rules! adaptive_test_passing {
             let function = <$type>::new(alpha);
 
             let integral = Adaptive::new(
+                &function,
+                rule,
                 Limits::new(lower, upper),
                 error_bound,
-                rule,
-                &function,
                 1000,
             )
             .unwrap();
@@ -281,15 +281,16 @@ macro_rules! adaptive_test_passing {
                 &format!("{} evaluations", $description),
             )?;
 
+            let rule = Rule::$rule();
             let error_bound = ErrorBound::Relative($tolerance);
             let lower = $upper;
             let upper = $lower;
 
             let integral = Adaptive::new(
+                &function,
+                rule,
                 Limits::new(lower, upper),
                 error_bound,
-                rule,
-                &function,
                 1000,
             )
             .unwrap();
@@ -330,7 +331,7 @@ macro_rules! adaptive_test_passing {
         name: $func_name:ident,
         function: $type:ty,
         alpha: $alphaty:ty => $alpha:expr,
-        rule: $rule:expr,
+        rule: $rule:ident,
         lower: $lower:expr,
         upper: $upper:expr,
         exp_result:      $exp_result:expr,
@@ -351,7 +352,7 @@ macro_rules! adaptive_test_passing {
 
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
-            let rule = $rule;
+            let rule = Rule::$rule();
             let error_bound = ErrorBound::Absolute($tolerance);
             let alpha: $alphaty = $alpha;
 
@@ -361,10 +362,10 @@ macro_rules! adaptive_test_passing {
             let function = <$type>::new(alpha);
 
             let integral = Adaptive::new(
+                &function,
+                rule,
                 Limits::new(lower, upper),
                 error_bound,
-                rule,
-                &function,
                 1000,
             )
             .unwrap();
@@ -398,15 +399,16 @@ macro_rules! adaptive_test_passing {
                 &format!("{} evaluations", $description),
             )?;
 
+            let rule = Rule::$rule();
             let error_bound = ErrorBound::Absolute($tolerance);
             let lower = $upper;
             let upper = $lower;
 
             let integral = Adaptive::new(
+                &function,
+                rule,
                 Limits::new(lower, upper),
                 error_bound,
-                rule,
-                &function,
                 1000,
             )
             .unwrap();
@@ -451,7 +453,7 @@ macro_rules! adaptive_test_error {
         name: $func_name:ident,
         function: $type:ty,
         alpha: $alphaty:ty => $alpha:expr,
-        rule: $rule:expr,
+        rule: $rule:ident,
         lower: $lower:expr,
         upper: $upper:expr,
         exp_result:      $exp_result:expr,
@@ -473,7 +475,7 @@ macro_rules! adaptive_test_error {
 
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
-            let rule = $rule;
+            let rule = Rule::$rule();
             let error_bound = ErrorBound::Absolute($tolerance);
             let alpha: $alphaty = $alpha;
 
@@ -483,10 +485,10 @@ macro_rules! adaptive_test_error {
             let function = <$type>::new(alpha);
 
             let integral = Adaptive::new(
+                &function,
+                rule,
                 Limits::new(lower, upper),
                 error_bound,
-                rule,
-                &function,
                 1000,
             )
             .unwrap();
@@ -535,15 +537,16 @@ macro_rules! adaptive_test_error {
                 ));
             }
 
+            let rule = Rule::$rule();
             let error_bound = ErrorBound::Absolute($tolerance);
             let lower = $upper;
             let upper = $lower;
 
             let integral = Adaptive::new(
+                &function,
+                rule,
                 Limits::new(lower, upper),
                 error_bound,
-                rule,
-                &function,
                 1000,
             )
             .unwrap();
@@ -599,7 +602,7 @@ macro_rules! adaptive_test_error {
         name: $func_name:ident,
         function: $type:ty,
         alpha: $alphaty:ty => $alpha:expr,
-        rule: $rule:expr,
+        rule: $rule:ident,
         lower: $lower:expr,
         upper: $upper:expr,
         exp_result:      $exp_result:expr,
@@ -621,7 +624,7 @@ macro_rules! adaptive_test_error {
 
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
-            let rule = $rule;
+            let rule = Rule::$rule();
             let error_bound = ErrorBound::Relative($tolerance);
             let alpha: $alphaty = $alpha;
 
@@ -631,10 +634,10 @@ macro_rules! adaptive_test_error {
             let function = <$type>::new(alpha);
 
             let integral = Adaptive::new(
+                &function,
+                rule,
                 Limits::new(lower, upper),
                 error_bound,
-                rule,
-                &function,
                 1000,
             )
             .unwrap();
@@ -688,10 +691,10 @@ macro_rules! adaptive_test_error {
             let upper = $lower;
 
             let integral = Adaptive::new(
+                &function,
+                rule,
                 Limits::new(lower, upper),
                 error_bound,
-                rule,
-                &function,
                 1000,
             )
             .unwrap();
@@ -747,7 +750,7 @@ macro_rules! adaptive_test_error {
         name: $func_name:ident,
         function: $type:ty,
         alpha: $alphaty:ty => $alpha:expr,
-        rule: $rule:expr,
+        rule: $rule:ident,
         lower: $lower:expr,
         upper: $upper:expr,
         iterations: $iter:expr,
@@ -770,7 +773,7 @@ macro_rules! adaptive_test_error {
 
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
-            let rule = $rule;
+            let rule = Rule::$rule();
             let error_bound = ErrorBound::Absolute($tolerance);
             let alpha: $alphaty = $alpha;
 
@@ -780,10 +783,10 @@ macro_rules! adaptive_test_error {
             let function = <$type>::new(alpha);
 
             let integral = Adaptive::new(
+                &function,
+                rule,
                 Limits::new(lower, upper),
                 error_bound,
-                rule,
-                &function,
                 $iter,
             )
             .unwrap();
@@ -832,15 +835,16 @@ macro_rules! adaptive_test_error {
                 ));
             }
 
+            let rule = Rule::$rule();
             let error_bound = ErrorBound::Absolute($tolerance);
             let lower = $upper;
             let upper = $lower;
 
             let integral = Adaptive::new(
+                &function,
+                rule,
                 Limits::new(lower, upper),
                 error_bound,
-                rule,
-                &function,
                 $iter,
             )
             .unwrap();
@@ -896,7 +900,7 @@ macro_rules! adaptive_test_error {
         name: $func_name:ident,
         function: $type:ty,
         alpha: $alphaty:ty => $alpha:expr,
-        rule: $rule:expr,
+        rule: $rule:ident,
         lower: $lower:expr,
         upper: $upper:expr,
         iterations: $iter:expr,
@@ -919,7 +923,7 @@ macro_rules! adaptive_test_error {
 
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
-            let rule = $rule;
+            let rule = Rule::$rule();
             let error_bound = ErrorBound::Relative($tolerance);
             let alpha: $alphaty = $alpha;
 
@@ -929,10 +933,10 @@ macro_rules! adaptive_test_error {
             let function = <$type>::new(alpha);
 
             let integral = Adaptive::new(
+                &function,
+                rule,
                 Limits::new(lower, upper),
                 error_bound,
-                rule,
-                &function,
                 $iter,
             )
             .unwrap();
@@ -986,10 +990,10 @@ macro_rules! adaptive_test_error {
             let upper = $lower;
 
             let integral = Adaptive::new(
+                &function,
+                rule,
                 Limits::new(lower, upper),
                 error_bound,
-                rule,
-                &function,
                 $iter,
             )
             .unwrap();
@@ -1078,9 +1082,9 @@ macro_rules! singularity_test {
             let function = <$type>::new(alpha);
 
             let integral = AdaptiveSingularity::general(
+                &function,
                 Limits::new(lower, upper),
                 error_bound,
-                &function,
                 1000,
             )
             .unwrap();
@@ -1119,9 +1123,9 @@ macro_rules! singularity_test {
             let error_bound = ErrorBound::Relative($tolerance);
 
             let integral = AdaptiveSingularity::general(
+                &function,
                 Limits::new(lower, upper),
                 error_bound,
-                &function,
                 1000,
             )
             .unwrap();
@@ -1191,9 +1195,9 @@ macro_rules! singularity_test {
             let function = <$type>::new(alpha);
 
             let integral = AdaptiveSingularity::general(
+                &function,
                 Limits::new(lower, upper),
                 error_bound,
-                &function,
                 1000,
             )
             .unwrap();
@@ -1232,9 +1236,9 @@ macro_rules! singularity_test {
             let error_bound = ErrorBound::Absolute($tolerance);
 
             let integral = AdaptiveSingularity::general(
+                &function,
                 Limits::new(lower, upper),
                 error_bound,
-                &function,
                 1000,
             )
             .unwrap();
@@ -1302,7 +1306,7 @@ macro_rules! singularity_test {
             let function = <$type>::new(alpha);
 
             let integral =
-                AdaptiveSingularity::semi_infinite_negative(upper, error_bound, &function, 1000)
+                AdaptiveSingularity::semi_infinite_negative(&function, upper, error_bound, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -1368,7 +1372,7 @@ macro_rules! singularity_test {
             let function = <$type>::new(alpha);
 
             let integral =
-                AdaptiveSingularity::semi_infinite_negative(upper, error_bound, &function, 1000)
+                AdaptiveSingularity::semi_infinite_negative(&function, upper, error_bound, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -1434,7 +1438,7 @@ macro_rules! singularity_test {
             let function = <$type>::new(alpha);
 
             let integral =
-                AdaptiveSingularity::semi_infinite_positive(lower, error_bound, &function, 1000)
+                AdaptiveSingularity::semi_infinite_positive(&function, lower, error_bound, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -1500,7 +1504,7 @@ macro_rules! singularity_test {
             let function = <$type>::new(alpha);
 
             let integral =
-                AdaptiveSingularity::semi_infinite_positive(lower, error_bound, &function, 1000)
+                AdaptiveSingularity::semi_infinite_positive(&function, lower, error_bound, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -1562,7 +1566,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new(alpha);
 
-            let integral = AdaptiveSingularity::infinite(error_bound, &function, 1000).unwrap();
+            let integral = AdaptiveSingularity::infinite(&function, error_bound, 1000).unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -1623,7 +1627,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new(alpha);
 
-            let integral = AdaptiveSingularity::infinite(error_bound, &function, 1000).unwrap();
+            let integral = AdaptiveSingularity::infinite(&function, error_bound, 1000).unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -1688,9 +1692,9 @@ macro_rules! singularity_test {
             let function = <$type>::new();
 
             let integral = AdaptiveSingularity::general(
+                &function,
                 Limits::new(lower, upper),
                 error_bound,
-                &function,
                 1000,
             )
             .unwrap();
@@ -1729,9 +1733,9 @@ macro_rules! singularity_test {
             let error_bound = ErrorBound::Relative(1e-10);
 
             let integral = AdaptiveSingularity::general(
+                &function,
                 Limits::new(lower, upper),
                 error_bound,
-                &function,
                 1000,
             )
             .unwrap();
@@ -1799,9 +1803,9 @@ macro_rules! singularity_test {
             let function = <$type>::new();
 
             let integral = AdaptiveSingularity::general(
+                &function,
                 Limits::new(lower, upper),
                 error_bound,
-                &function,
                 1000,
             )
             .unwrap();
@@ -1840,9 +1844,9 @@ macro_rules! singularity_test {
             let error_bound = ErrorBound::Absolute(1e-10);
 
             let integral = AdaptiveSingularity::general(
+                &function,
                 Limits::new(lower, upper),
                 error_bound,
-                &function,
                 1000,
             )
             .unwrap();
@@ -1908,7 +1912,7 @@ macro_rules! singularity_test {
             let function = <$type>::new();
 
             let integral =
-                AdaptiveSingularity::semi_infinite_negative(upper, error_bound, &function, 1000)
+                AdaptiveSingularity::semi_infinite_negative(&function, upper, error_bound, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -1972,7 +1976,7 @@ macro_rules! singularity_test {
             let function = <$type>::new();
 
             let integral =
-                AdaptiveSingularity::semi_infinite_negative(upper, error_bound, &function, 1000)
+                AdaptiveSingularity::semi_infinite_negative(&function, upper, error_bound, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -2036,7 +2040,7 @@ macro_rules! singularity_test {
             let function = <$type>::new();
 
             let integral =
-                AdaptiveSingularity::semi_infinite_positive(lower, error_bound, &function, 1000)
+                AdaptiveSingularity::semi_infinite_positive(&function, lower, error_bound, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -2100,7 +2104,7 @@ macro_rules! singularity_test {
             let function = <$type>::new();
 
             let integral =
-                AdaptiveSingularity::semi_infinite_positive(lower, error_bound, &function, 1000)
+                AdaptiveSingularity::semi_infinite_positive(&function, lower, error_bound, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -2160,7 +2164,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new();
 
-            let integral = AdaptiveSingularity::infinite(error_bound, &function, 1000).unwrap();
+            let integral = AdaptiveSingularity::infinite(&function, error_bound, 1000).unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -2219,7 +2223,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new();
 
-            let integral = AdaptiveSingularity::infinite(error_bound, &function, 1000).unwrap();
+            let integral = AdaptiveSingularity::infinite(&function, error_bound, 1000).unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();

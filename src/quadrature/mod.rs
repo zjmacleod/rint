@@ -7,11 +7,14 @@ mod singularity;
 #[cfg(test)]
 mod tests;
 
+pub(crate) use basic::GaussKronrodIntegrator;
+
 pub use adaptive::Adaptive;
 pub use basic::Basic;
+pub use singularity::AdaptiveSingularity;
+
 pub use estimate::IntegralEstimate;
 pub use rule::Rule;
-pub use singularity::AdaptiveSingularity;
 
 use crate::Limits;
 
@@ -49,8 +52,8 @@ pub enum Kind {
     DoesNotConverge,
     DivergentOrSlowlyConverging,
     UninitialisedWorkspace,
-    RelativeBoundNegativeOrZero,
-    AbsoluteBoundTooSmall,
+    AbsoluteBoundNegativeOrZero,
+    RelativeBoundTooSmall,
     InvalidTolerance,
 }
 
@@ -142,14 +145,14 @@ impl std::fmt::Display for Error {
                 write!(f, "The integration Workspace was not properly initialised. This error should not be possible. If this error is returned, contact the crate maintainers.")
             }
 
-            Kind::RelativeBoundNegativeOrZero => {
+            Kind::AbsoluteBoundNegativeOrZero => {
                 write!(
                     f,
                     "Invalid error bound: relative bound must be non-zero and positive."
                 )
             }
 
-            Kind::AbsoluteBoundTooSmall => {
+            Kind::RelativeBoundTooSmall => {
                 write!(
                     f,
                     "Invalid error bound: absolute bound must be larger than 50.0 * f64::EPSILON."

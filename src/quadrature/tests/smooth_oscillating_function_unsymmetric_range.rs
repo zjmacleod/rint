@@ -4,15 +4,13 @@
 //
 // Ported from gsl-2.6/integration/test.c
 
-use crate::quadrature::rule::Rule;
-use crate::quadrature::Basic;
 use crate::Limits;
 
 basic_test! {
         name: basic_gauss_kronrod_smooth_oscillating_function_unsymmetric_range_15_point,
         function: util::Function3,
         alpha: f64 => 1.3,
-        rule: Rule::GaussKronrod15,
+        rule: gk15,
         lower: 0.3,
         upper: 2.71,
         exp_result: -7.238969575483799046E-01,
@@ -28,7 +26,7 @@ basic_test! {
         name: basic_gauss_kronrod_smooth_oscillating_function_unsymmetric_range_21_point,
         function: util::Function3,
         alpha: f64 => 1.3,
-        rule: Rule::GaussKronrod21,
+        rule: gk21,
         lower: 0.3,
         upper: 2.71,
         exp_result: -7.238969575482959717E-01,
@@ -44,7 +42,7 @@ basic_test! {
         name: basic_gauss_kronrod_smooth_oscillating_function_unsymmetric_range_31_point,
         function: util::Function3,
         alpha: f64 => 1.3,
-        rule: Rule::GaussKronrod31,
+        rule: gk31,
         lower: 0.3,
         upper: 2.71,
         exp_result: -7.238969575482959717E-01,
@@ -60,7 +58,7 @@ basic_test! {
         name: basic_gauss_kronrod_smooth_oscillating_function_unsymmetric_range_41_point,
         function: util::Function3,
         alpha: f64 => 1.3,
-        rule: Rule::GaussKronrod41,
+        rule: gk41,
         lower: 0.3,
         upper: 2.71,
         exp_result: -7.238969575482959717E-01,
@@ -76,7 +74,7 @@ basic_test! {
         name: basic_gauss_kronrod_smooth_oscillating_function_unsymmetric_range_51_point,
         function: util::Function3,
         alpha: f64 => 1.3,
-        rule: Rule::GaussKronrod51,
+        rule: gk51,
         lower: 0.3,
         upper: 2.71,
         exp_result: -7.238969575482961938E-01,
@@ -92,7 +90,7 @@ basic_test! {
         name: basic_gauss_kronrod_smooth_oscillating_function_unsymmetric_range_61_point,
         function: util::Function3,
         alpha: f64 => 1.3,
-        rule: Rule::GaussKronrod61,
+        rule: gk61,
         lower: 0.3,
         upper: 2.71,
         exp_result: -7.238969575482959717E-01,

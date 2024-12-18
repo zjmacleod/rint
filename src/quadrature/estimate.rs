@@ -1,5 +1,6 @@
 use crate::quadrature::basic::Region;
-use crate::quadrature::{Adaptive, AdaptiveSingularity, Basic, Error, ErrorBound, Rule};
+use crate::quadrature::rule::Rule;
+use crate::quadrature::{Adaptive, AdaptiveSingularity, Basic, Error, ErrorBound};
 use crate::{Integrand, Limits};
 
 /// The value of a function evaluated with Gauss-Kronrod integration and associated error
@@ -42,7 +43,7 @@ impl IntegralEstimate {
 impl IntegralEstimate {
     /// Integrate a function using a basic (non-adaptive) Gauss-Kronrod integration rule.
     pub fn basic<I: Integrand>(limits: Limits, rule: Rule, function: I) -> Self {
-        Basic::new(limits, rule, function).integrate()
+        Basic::new(function, rule, limits).integrate()
     }
 
     /// Integrate a function using an adaptive Gauss-Kronrod integration routine.
@@ -53,7 +54,7 @@ impl IntegralEstimate {
         function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
-        Adaptive::new(limits, error_bound, rule, function, max_iterations)?.integrate()
+        Adaptive::new(function, rule, limits, error_bound, max_iterations)?.integrate()
     }
 
     /// Integrate a function with possible singularities in the integration region using an adaptive
@@ -64,7 +65,7 @@ impl IntegralEstimate {
         function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
-        AdaptiveSingularity::general(limits, error_bound, function, max_iterations)?.integrate()
+        AdaptiveSingularity::general(function, limits, error_bound, max_iterations)?.integrate()
     }
 
     pub fn infinite<I: Integrand>(
@@ -72,7 +73,7 @@ impl IntegralEstimate {
         function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
-        AdaptiveSingularity::infinite(error_bound, function, max_iterations)?.integrate()
+        AdaptiveSingularity::infinite(function, error_bound, max_iterations)?.integrate()
     }
 
     pub fn semi_infinite_positive<I: Integrand>(
@@ -81,7 +82,7 @@ impl IntegralEstimate {
         function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
-        AdaptiveSingularity::semi_infinite_positive(lower, error_bound, function, max_iterations)?
+        AdaptiveSingularity::semi_infinite_positive(function, lower, error_bound, max_iterations)?
             .integrate()
     }
 
@@ -91,7 +92,7 @@ impl IntegralEstimate {
         function: I,
         max_iterations: usize,
     ) -> Result<Self, Error> {
-        AdaptiveSingularity::semi_infinite_negative(upper, error_bound, function, max_iterations)?
+        AdaptiveSingularity::semi_infinite_negative(function, upper, error_bound, max_iterations)?
             .integrate()
     }
 }
