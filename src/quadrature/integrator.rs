@@ -19,9 +19,9 @@ where
 {
     pub(crate) const fn new(function: &'a I, rule: &'a Rule, limits: Limits) -> Self {
         Self {
-            limits,
-            rule,
             function,
+            rule,
+            limits,
         }
     }
 

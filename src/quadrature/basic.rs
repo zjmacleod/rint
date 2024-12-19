@@ -2,7 +2,7 @@ use crate::quadrature::{IntegralEstimate, Integrator, Rule};
 use crate::Integrand;
 use crate::Limits;
 
-/// A basic Gauss-Kronrod integration routine.
+/// A non-adaptive Gauss-Kronrod integrator.
 ///
 /// This is the most basic integration routine provided by this library. It applies an n-point
 /// Gauss-Kronrod integration [`Rule`] to a user supplied function, which is a struct implementing
@@ -83,9 +83,9 @@ where
     /// `limits`.
     pub const fn new(function: I, rule: Rule, limits: Limits) -> Self {
         Self {
-            limits,
-            rule,
             function,
+            rule,
+            limits,
         }
     }
 

@@ -1,5 +1,5 @@
 use rint::quadrature::Rule;
-use rint::quadrature::{Adaptive, ErrorBound, Kind};
+use rint::quadrature::{Adaptive, Kind, Tolerance};
 use rint::Limits;
 
 mod util;
@@ -90,7 +90,7 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
     let exp_iterations = 51;
     let exp_evaluations = 5151;
 
-    let error_bound = ErrorBound::Absolute(1e-14);
+    let error_bound = Tolerance::Absolute(1e-14);
 
     let rule = Rule::gk51();
     let alpha = 2;
@@ -137,7 +137,7 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
     }
 
     let rule = Rule::gk51();
-    let error_bound = ErrorBound::Absolute(1e-14);
+    let error_bound = Tolerance::Absolute(1e-14);
     let lower = 1.0;
     let upper = -1.0;
 

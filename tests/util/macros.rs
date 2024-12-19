@@ -235,7 +235,7 @@ macro_rules! adaptive_test_passing {
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
             let rule = Rule::$rule();
-            let error_bound = ErrorBound::Relative($tolerance);
+            let error_bound = Tolerance::Relative($tolerance);
             let alpha: $alphaty = $alpha;
 
             let lower = $lower;
@@ -282,7 +282,7 @@ macro_rules! adaptive_test_passing {
             )?;
 
             let rule = Rule::$rule();
-            let error_bound = ErrorBound::Relative($tolerance);
+            let error_bound = Tolerance::Relative($tolerance);
             let lower = $upper;
             let upper = $lower;
 
@@ -353,7 +353,7 @@ macro_rules! adaptive_test_passing {
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
             let rule = Rule::$rule();
-            let error_bound = ErrorBound::Absolute($tolerance);
+            let error_bound = Tolerance::Absolute($tolerance);
             let alpha: $alphaty = $alpha;
 
             let lower = $lower;
@@ -400,7 +400,7 @@ macro_rules! adaptive_test_passing {
             )?;
 
             let rule = Rule::$rule();
-            let error_bound = ErrorBound::Absolute($tolerance);
+            let error_bound = Tolerance::Absolute($tolerance);
             let lower = $upper;
             let upper = $lower;
 
@@ -476,7 +476,7 @@ macro_rules! adaptive_test_error {
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
             let rule = Rule::$rule();
-            let error_bound = ErrorBound::Absolute($tolerance);
+            let error_bound = Tolerance::Absolute($tolerance);
             let alpha: $alphaty = $alpha;
 
             let lower = $lower;
@@ -538,7 +538,7 @@ macro_rules! adaptive_test_error {
             }
 
             let rule = Rule::$rule();
-            let error_bound = ErrorBound::Absolute($tolerance);
+            let error_bound = Tolerance::Absolute($tolerance);
             let lower = $upper;
             let upper = $lower;
 
@@ -625,7 +625,7 @@ macro_rules! adaptive_test_error {
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
             let rule = Rule::$rule();
-            let error_bound = ErrorBound::Relative($tolerance);
+            let error_bound = Tolerance::Relative($tolerance);
             let alpha: $alphaty = $alpha;
 
             let lower = $lower;
@@ -686,7 +686,7 @@ macro_rules! adaptive_test_error {
                 ));
             }
 
-            let error_bound = ErrorBound::Relative($tolerance);
+            let error_bound = Tolerance::Relative($tolerance);
             let lower = $upper;
             let upper = $lower;
 
@@ -774,7 +774,7 @@ macro_rules! adaptive_test_error {
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
             let rule = Rule::$rule();
-            let error_bound = ErrorBound::Absolute($tolerance);
+            let error_bound = Tolerance::Absolute($tolerance);
             let alpha: $alphaty = $alpha;
 
             let lower = $lower;
@@ -836,7 +836,7 @@ macro_rules! adaptive_test_error {
             }
 
             let rule = Rule::$rule();
-            let error_bound = ErrorBound::Absolute($tolerance);
+            let error_bound = Tolerance::Absolute($tolerance);
             let lower = $upper;
             let upper = $lower;
 
@@ -924,7 +924,7 @@ macro_rules! adaptive_test_error {
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
             let rule = Rule::$rule();
-            let error_bound = ErrorBound::Relative($tolerance);
+            let error_bound = Tolerance::Relative($tolerance);
             let alpha: $alphaty = $alpha;
 
             let lower = $lower;
@@ -985,7 +985,7 @@ macro_rules! adaptive_test_error {
                 ));
             }
 
-            let error_bound = ErrorBound::Relative($tolerance);
+            let error_bound = Tolerance::Relative($tolerance);
             let lower = $upper;
             let upper = $lower;
 
@@ -1073,7 +1073,7 @@ macro_rules! singularity_test {
 
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
-            let error_bound = ErrorBound::Relative($tolerance);
+            let error_bound = Tolerance::Relative($tolerance);
             let alpha: $alphaty = $alpha;
 
             let lower = $lower;
@@ -1081,7 +1081,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new(alpha);
 
-            let integral = AdaptiveSingularity::general(
+            let integral = AdaptiveSingularity::finite(
                 &function,
                 Limits::new(lower, upper),
                 error_bound,
@@ -1120,9 +1120,9 @@ macro_rules! singularity_test {
 
             let lower = $upper;
             let upper = $lower;
-            let error_bound = ErrorBound::Relative($tolerance);
+            let error_bound = Tolerance::Relative($tolerance);
 
-            let integral = AdaptiveSingularity::general(
+            let integral = AdaptiveSingularity::finite(
                 &function,
                 Limits::new(lower, upper),
                 error_bound,
@@ -1186,7 +1186,7 @@ macro_rules! singularity_test {
 
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
-            let error_bound = ErrorBound::Absolute($tolerance);
+            let error_bound = Tolerance::Absolute($tolerance);
             let alpha: $alphaty = $alpha;
 
             let lower = $lower;
@@ -1194,7 +1194,7 @@ macro_rules! singularity_test {
 
             let function = <$type>::new(alpha);
 
-            let integral = AdaptiveSingularity::general(
+            let integral = AdaptiveSingularity::finite(
                 &function,
                 Limits::new(lower, upper),
                 error_bound,
@@ -1233,9 +1233,9 @@ macro_rules! singularity_test {
 
             let lower = $upper;
             let upper = $lower;
-            let error_bound = ErrorBound::Absolute($tolerance);
+            let error_bound = Tolerance::Absolute($tolerance);
 
-            let integral = AdaptiveSingularity::general(
+            let integral = AdaptiveSingularity::finite(
                 &function,
                 Limits::new(lower, upper),
                 error_bound,
@@ -1299,14 +1299,14 @@ macro_rules! singularity_test {
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
             let alpha: $alphaty = $alpha;
-            let error_bound = ErrorBound::Relative($tolerance);
+            let error_bound = Tolerance::Relative($tolerance);
 
             let upper = $upper;
 
             let function = <$type>::new(alpha);
 
             let integral =
-                AdaptiveSingularity::semi_infinite_negative(&function, upper, error_bound, 1000)
+                AdaptiveSingularity::semi_infinite_lower(&function, upper, error_bound, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -1365,14 +1365,14 @@ macro_rules! singularity_test {
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
             let alpha: $alphaty = $alpha;
-            let error_bound = ErrorBound::Absolute($tolerance);
+            let error_bound = Tolerance::Absolute($tolerance);
 
             let upper = $upper;
 
             let function = <$type>::new(alpha);
 
             let integral =
-                AdaptiveSingularity::semi_infinite_negative(&function, upper, error_bound, 1000)
+                AdaptiveSingularity::semi_infinite_lower(&function, upper, error_bound, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -1431,14 +1431,14 @@ macro_rules! singularity_test {
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
             let alpha: $alphaty = $alpha;
-            let error_bound = ErrorBound::Relative($tolerance);
+            let error_bound = Tolerance::Relative($tolerance);
 
             let lower = $lower;
 
             let function = <$type>::new(alpha);
 
             let integral =
-                AdaptiveSingularity::semi_infinite_positive(&function, lower, error_bound, 1000)
+                AdaptiveSingularity::semi_infinite_upper(&function, lower, error_bound, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -1497,14 +1497,14 @@ macro_rules! singularity_test {
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
             let alpha: $alphaty = $alpha;
-            let error_bound = ErrorBound::Absolute($tolerance);
+            let error_bound = Tolerance::Absolute($tolerance);
 
             let lower = $lower;
 
             let function = <$type>::new(alpha);
 
             let integral =
-                AdaptiveSingularity::semi_infinite_positive(&function, lower, error_bound, 1000)
+                AdaptiveSingularity::semi_infinite_upper(&function, lower, error_bound, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -1562,7 +1562,7 @@ macro_rules! singularity_test {
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
             let alpha: $alphaty = $alpha;
-            let error_bound = ErrorBound::Relative($tolerance);
+            let error_bound = Tolerance::Relative($tolerance);
 
             let function = <$type>::new(alpha);
 
@@ -1623,7 +1623,7 @@ macro_rules! singularity_test {
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
             let alpha: $alphaty = $alpha;
-            let error_bound = ErrorBound::Absolute($tolerance);
+            let error_bound = Tolerance::Absolute($tolerance);
 
             let function = <$type>::new(alpha);
 
@@ -1684,14 +1684,14 @@ macro_rules! singularity_test {
 
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
-            let error_bound = ErrorBound::Relative($tolerance);
+            let error_bound = Tolerance::Relative($tolerance);
 
             let lower = $lower;
             let upper = $upper;
 
             let function = <$type>::new();
 
-            let integral = AdaptiveSingularity::general(
+            let integral = AdaptiveSingularity::finite(
                 &function,
                 Limits::new(lower, upper),
                 error_bound,
@@ -1730,9 +1730,9 @@ macro_rules! singularity_test {
 
             let lower = $upper;
             let upper = $lower;
-            let error_bound = ErrorBound::Relative(1e-10);
+            let error_bound = Tolerance::Relative(1e-10);
 
-            let integral = AdaptiveSingularity::general(
+            let integral = AdaptiveSingularity::finite(
                 &function,
                 Limits::new(lower, upper),
                 error_bound,
@@ -1795,14 +1795,14 @@ macro_rules! singularity_test {
 
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
-            let error_bound = ErrorBound::Absolute($tolerance);
+            let error_bound = Tolerance::Absolute($tolerance);
 
             let lower = $lower;
             let upper = $upper;
 
             let function = <$type>::new();
 
-            let integral = AdaptiveSingularity::general(
+            let integral = AdaptiveSingularity::finite(
                 &function,
                 Limits::new(lower, upper),
                 error_bound,
@@ -1841,9 +1841,9 @@ macro_rules! singularity_test {
 
             let lower = $upper;
             let upper = $lower;
-            let error_bound = ErrorBound::Absolute(1e-10);
+            let error_bound = Tolerance::Absolute(1e-10);
 
-            let integral = AdaptiveSingularity::general(
+            let integral = AdaptiveSingularity::finite(
                 &function,
                 Limits::new(lower, upper),
                 error_bound,
@@ -1905,14 +1905,14 @@ macro_rules! singularity_test {
 
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
-            let error_bound = ErrorBound::Relative($tolerance);
+            let error_bound = Tolerance::Relative($tolerance);
 
             let upper = $upper;
 
             let function = <$type>::new();
 
             let integral =
-                AdaptiveSingularity::semi_infinite_negative(&function, upper, error_bound, 1000)
+                AdaptiveSingularity::semi_infinite_lower(&function, upper, error_bound, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -1969,14 +1969,14 @@ macro_rules! singularity_test {
 
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
-            let error_bound = ErrorBound::Absolute($tolerance);
+            let error_bound = Tolerance::Absolute($tolerance);
 
             let upper = $upper;
 
             let function = <$type>::new();
 
             let integral =
-                AdaptiveSingularity::semi_infinite_negative(&function, upper, error_bound, 1000)
+                AdaptiveSingularity::semi_infinite_lower(&function, upper, error_bound, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -2033,14 +2033,14 @@ macro_rules! singularity_test {
 
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
-            let error_bound = ErrorBound::Relative($tolerance);
+            let error_bound = Tolerance::Relative($tolerance);
 
             let lower = $lower;
 
             let function = <$type>::new();
 
             let integral =
-                AdaptiveSingularity::semi_infinite_positive(&function, lower, error_bound, 1000)
+                AdaptiveSingularity::semi_infinite_upper(&function, lower, error_bound, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -2097,14 +2097,14 @@ macro_rules! singularity_test {
 
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
-            let error_bound = ErrorBound::Absolute($tolerance);
+            let error_bound = Tolerance::Absolute($tolerance);
 
             let lower = $lower;
 
             let function = <$type>::new();
 
             let integral =
-                AdaptiveSingularity::semi_infinite_positive(&function, lower, error_bound, 1000)
+                AdaptiveSingularity::semi_infinite_upper(&function, lower, error_bound, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -2160,7 +2160,7 @@ macro_rules! singularity_test {
 
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
-            let error_bound = ErrorBound::Relative($tolerance);
+            let error_bound = Tolerance::Relative($tolerance);
 
             let function = <$type>::new();
 
@@ -2219,7 +2219,7 @@ macro_rules! singularity_test {
 
             let abs_error_bound = $abs_error_bound;
             let rel_error_bound = $rel_error_bound;
-            let error_bound = ErrorBound::Absolute($tolerance);
+            let error_bound = Tolerance::Absolute($tolerance);
 
             let function = <$type>::new();
 

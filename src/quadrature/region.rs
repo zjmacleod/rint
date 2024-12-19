@@ -107,6 +107,7 @@ impl Region {
         inverse_length.total_cmp(&other_inverse_length)
     }
 
+    #[allow(clippy::needless_borrow)]
     pub(crate) fn bisect<I: Integrand>(&self, function: &I, rule: &Rule) -> [Region; 2] {
         let [lower, upper] = self.limits.bisect();
         let lower_integral = Integrator::new(&function, &rule, lower).integrate();

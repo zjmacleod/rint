@@ -1,19 +1,101 @@
 use std::collections::binary_heap::BinaryHeap;
 
 use crate::quadrature::{
-    subinterval_too_small, Error, ErrorBound, IntegralEstimate, Integrator, Kind, Region, Rule,
+    subinterval_too_small, Error, IntegralEstimate, Integrator, Kind, Region, Rule, Tolerance,
 };
 use crate::Integrand;
 use crate::Limits;
 
-/// An integral with singularities to be evaluated with an adaptive Gauss-Kronrod quadrature.
+/// An adaptive Gauss-Kronrod quadrature integrator for functions of a single variable with
+/// integrable singularities.
 ///
-/// The user constructs a `function` implementing [`Integrand`], provides `upper`
-/// and `lower` integration limits, and provides an `error_bound`, which can be
-/// [`ErrorBound::Absolute`] to work to a specified absolute error,
-/// [`ErrorBound::Relative`] to work to a specified relative error,
-/// or [`ErrorBound::Either`] to return a result as soon as _either_ the relative
-/// or absolute error bound has been satisfied.
+/// The user constructs a `function` implementing [`Integrand`] to be integrated and provides
+/// integration [`Limits`], [`Tolerance`], and `max_iterations` count.
+/// The adaptive routine works by bisecting the integration region with the largest error estimate
+/// and iteratively applying an integration [`Rule`] until the constraints
+/// imposed by the user provided [`Tolerance`] are satisfied, or until an [`Error`] is
+/// encountered.
+/// To deal with integrable singularities in the integration region the [`AdaptiveSingularity`]
+/// integrator combines the adaptive routine with an extrapolation proceedure, specifically the
+/// Wynn epsilon-algorithm.
+/// This can be applied to integrals with finite integration limits as well as integrals with
+/// infinite and semi-infinite integration limits.
+/// Each of these has a dedicated constructor:
+/// - [`AdaptiveSingularity::finite()`]: finite interval (b, a)
+/// - [`AdaptiveSingularity::infinite()`]: infinite interval (-Inf, Inf)
+/// - [`AdaptiveSingularity::semi_infinite_lower()`]: infinite lower limit, (-Inf, a)
+/// - [`AdaptiveSingularity::semi_infinite_upper()`]: infinite upper limit, (b, Inf)
+///
+/// The integrations over (semi-)infinite intervals are managed by transforming to a finite
+/// interval. This can introduce integrable singularities even to smooth functions, which is why
+/// the additional extrapolation provided by [`AdaptiveSingularity`] should be used for these.
+///
+/// Unlike the [`Adaptive`] integrator, a choice of Gauss-Kronrod integration rule is not required
+/// for the [`AdaptiveSingularity`] integrator. Instead, for general functions on finite intervals
+/// the 21-point rule [`Rule::gk21()`] is used, while for (semi-)infinite intervals the lower
+/// 15-point rule [`Rule::gk15()`] is used.
+///
+/// The adaptive routine will return the first approximation, `result`, to the integral which has an
+/// absolute `error` smaller than the tolerance set by the choice of [`Tolerance`], where
+/// * [`Tolerance::Absolute(abserr)`] specifies an absolute error and returns final [`IntegralEstimate`] when `error <= abserr`,
+/// * [`Tolerance::Relative(relerr)`] specifies a relative error and returns final [`IntegralEstimate`] when `error <= relerr * abs(result)`,  
+/// * [`Tolerance::Either{ abserr, relerr }`] to return a result as soon as _either_ the relative or absolute error bound has been satisfied.
+///
+/// The total number of function evaluations when using an n-point rule is:
+/// - Finite integration interval: `T = (2 n - 1) * i`
+/// - (Semi-)Infinite interval: `T = 2 * (2 n - 1) * i`
+/// where `i` is the number of iterations used by the adaptive algorithm to reach the desired
+/// tolerance.
+///
+/// [`Basic`]: crate::quadrature::Basic
+/// [`Adaptive`]: crate::quadrature::Adaptive
+/// [`Tolerance::Absolute(abserr)`]: crate::quadrature::Tolerance#variant.Absolute
+/// [`Tolerance::Relative(relerr)`]: crate::quadrature::Tolerance#variant.Relative
+/// [`Tolerance::Either{ abserr, relerr }`]: crate::quadrature::Tolerance#variant.Either
+///
+///```rust
+/// use rint::{Limits, Integrand};
+/// use rint::quadrature::AdaptiveSingularity;
+/// use rint::quadrature::Tolerance;
+///
+/// /* f455(x) = log(x)/(1+100*x^2) */
+/// /* integ(f455,x,0,inf) = -log(10)/20 */
+/// struct Function455;
+///
+/// impl Integrand for Function455 {
+///     fn evaluate(&self, x: f64) -> f64 {
+///         x.ln() / (1.0 + 100.0 * x.powi(2))
+///     }
+/// }
+///
+/// let lower = 0.0;
+/// let exp_result =     -3.616892186127022568E-01;
+/// let exp_error =       3.016716913328831851E-06;
+///
+/// let error_bound = Tolerance::Relative(1.0e-3);
+///
+/// let function = Function455;
+///
+/// // Integrate with the adaptive algorithm
+/// let integral = AdaptiveSingularity::semi_infinite_upper(
+///     &function,
+///     lower,
+///     error_bound,
+///     1000,
+/// ).unwrap();
+///
+/// let integral_result = integral.integrate().unwrap();
+/// let result = integral_result.result();
+/// let error = integral_result.error();
+/// let iterations = integral_result.iterations();
+/// let function_evaluations = integral_result.function_evaluations();
+///
+/// let tol = 1.0e-9;
+/// assert!((exp_result - result).abs() / exp_result.abs() < tol);
+/// assert!((exp_error - error).abs() / exp_error.abs() < tol);
+/// assert_eq!(iterations, 10);
+/// assert_eq!(function_evaluations, 2*15*(2*iterations - 1));
+///```
 pub struct AdaptiveSingularity<I>
 where
     I: Integrand,
@@ -21,7 +103,7 @@ where
     function: I,
     rule: Rule,
     limits: Limits,
-    error_bound: ErrorBound,
+    error_bound: Tolerance,
     max_iterations: usize,
     evaluations_multiplier: usize,
 }
@@ -30,16 +112,60 @@ impl<I> AdaptiveSingularity<I>
 where
     I: Integrand,
 {
-    pub fn general(
+    /// Generate a new [`AdaptiveSingularity`] integrator for functions with integrable singularities on finite intervals.
+    ///
+    /// Arguments:
+    /// - `function`: A user supplied function to be integrated, which is a struct implementing the
+    /// [`Integrand`] trait.
+    /// - `limits`: The interval over which the `function` should be integrated, [`Limits`].
+    /// - `error_bound`: The tolerance requested by the user. Can be either an absolute tolerance
+    /// or relative tolerance. Determines the exit condition of the integration routine, see
+    /// [`Tolerance`].
+    /// - `max_iterations`: The maximum number of iterations that the adaptive routine should use
+    /// to try to satisfy the requested tolerance.
+    ///
+    /// # Errors
+    /// Function will return an error if the user provided `Tolerance` does not satisfy the
+    /// following constraints:
+    /// - `Tolerance::Absolute(v)` where `v > 0.0`,
+    /// - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON`,
+    /// - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
+    pub fn finite(
         function: I,
         limits: Limits,
-        error_bound: ErrorBound,
+        error_bound: Tolerance,
         max_iterations: usize,
     ) -> Result<Self, Error> {
         let rule = Rule::gk21();
         Self::new(function, rule, limits, error_bound, max_iterations)
     }
 
+    /// Integrate the function and return a [`IntegralEstimate`] integration result.
+    ///
+    /// Applies adaptive Gauss-Kronrod integration with extrapolation via the Wynn epsilon-algorithm
+    /// to the user supplied function implementing the [`Integrand`] trait to generate an
+    /// [`IntegralEstimate`] upon successful completion.
+    ///
+    /// # Errors
+    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
+    /// obtained before an error was encountered.
+    /// The integration routine has several ways of failing:
+    /// - The user supplied [`Tolerance`] could not be satisfied within the maximum number of
+    /// iterations (kind = [`Kind::MaximumIterationsReached`]).
+    /// - A roundoff error was detected. Can occur when the calculated numerical error from an
+    /// internal integration is smaller than the estimated roundoff, but larger than the tolerance
+    /// requested by the user, or when too many successive iterations do not reasonably improve the
+    /// integral value and error estimate (kind = [`Kind::RoundoffErrorDetected`]).
+    /// - Bisection of the highest error region into two subregions results in subregions with
+    /// integraion limits that are too small (kind = [`Kind::BadIntegrandBehaviour`]).
+    /// - The integral does not converge. Occurs if at least 5 bisections with extrapolation have
+    /// failed to improve the integral value and error estimates (kind = [`Kind::DoesNotConverge`])
+    /// - The integral is divergent or slowly convergent. Occurs if the ratio of the extrapolation
+    /// improved integral estimate and the non-extrapolated estimate is too large or small, or if
+    /// the calculated error is larger than the calculated value of the integral (kind =
+    /// [`Kind::DivergentOrSlowlyConverging`])
+    /// - An error is encountered when initialising the integration workspace. This is an internal
+    /// error, which should not occur downstream (kind = [`Kind::UninitialisedWorkspace`]).
     pub fn integrate(&self) -> Result<IntegralEstimate, Error> {
         let initial = Integrator::new(&self.function, &self.rule, self.limits).integrate();
 
@@ -154,39 +280,28 @@ impl<I> AdaptiveSingularity<I>
 where
     I: Integrand,
 {
-    /// Create a new [`AdaptiveSingularity`].
-    ///
-    /// The user defines a `function` which is a `struct` implementing the
-    /// [`Integrand`] trait, and integration [`Limits`].
-    ///
-    /// # Errors
-    /// Function will return an error if the user provided `ErrorBound` does not satisfy the
-    /// following constraints:
-    ///     - `ErrorBound::Absolute(v) where v > 0.0`,
-    ///     - `ErrorBound::Relative(v) where v > 50.0 * f64::EPSILON`,
-    ///     - `ErrorBound::Either { absolute, relative } where absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
     fn new(
         function: I,
         rule: Rule,
         limits: Limits,
-        error_bound: ErrorBound,
+        error_bound: Tolerance,
         max_iterations: usize,
     ) -> Result<Self, Error> {
         let evaluations_multiplier = 1;
         match error_bound {
-            ErrorBound::Absolute(v) => {
+            Tolerance::Absolute(v) => {
                 if v <= 0.0 {
                     let kind = Kind::AbsoluteBoundNegativeOrZero;
                     return Err(Error::unevaluated(kind));
                 }
             }
-            ErrorBound::Relative(v) => {
+            Tolerance::Relative(v) => {
                 if v < 50.0 * f64::EPSILON {
                     let kind = Kind::RelativeBoundTooSmall;
                     return Err(Error::unevaluated(kind));
                 }
             }
-            ErrorBound::Either { absolute, relative } => {
+            Tolerance::Either { absolute, relative } => {
                 if absolute <= 0.0 && relative < 50.0 * f64::EPSILON {
                     let kind = Kind::InvalidTolerance;
                     return Err(Error::unevaluated(kind));
@@ -207,7 +322,7 @@ where
         function: I,
         rule: Rule,
         limits: Limits,
-        error_bound: ErrorBound,
+        error_bound: Tolerance,
         max_iterations: usize,
         evaluations_multiplier: usize,
     ) -> Result<Self, Error> {
@@ -290,6 +405,11 @@ where
     }
 }
 
+/// A function defined over an infinite integration interval (-Inf, Inf).
+///
+/// This is a wrapper around a user supplied function implementing the [`Integrand`] trait, which
+/// is to be integrated between the interval (-Inf, Inf).
+/// This is achieved by transforming the integrand to be defined on the interval (0,1).
 pub struct InfiniteInterval<I: Integrand> {
     function: I,
 }
@@ -316,9 +436,26 @@ impl<I> AdaptiveSingularity<InfiniteInterval<I>>
 where
     I: Integrand,
 {
+    /// Generate a new [`AdaptiveSingularity`] integrator for functions with integrable singularities on infinite intervals.
+    ///
+    /// Arguments:
+    /// - `function`: A user supplied function to be integrated, which is a struct implementing the
+    /// [`Integrand`] trait.
+    /// - `error_bound`: The tolerance requested by the user. Can be either an absolute tolerance
+    /// or relative tolerance. Determines the exit condition of the integration routine, see
+    /// [`Tolerance`].
+    /// - `max_iterations`: The maximum number of iterations that the adaptive routine should use
+    /// to try to satisfy the requested tolerance.
+    ///
+    /// # Errors
+    /// Function will return an error if the user provided `Tolerance` does not satisfy the
+    /// following constraints:
+    /// - `Tolerance::Absolute(v)` where `v > 0.0`,
+    /// - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON`,
+    /// - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
     pub fn infinite(
         function: I,
-        error_bound: ErrorBound,
+        error_bound: Tolerance,
         max_iterations: usize,
     ) -> Result<Self, Error> {
         let rule = Rule::gk15();
@@ -335,6 +472,11 @@ where
     }
 }
 
+/// A function defined over a semi-infinite integration interval (b, Inf).
+///
+/// This is a wrapper around a user supplied function implementing the [`Integrand`] trait, which
+/// is to be integrated between the interval (b, Inf).
+/// This is achieved by transforming the integrand to be defined on the interval (0,1).
 pub struct SemiInfiniteIntervalPositive<I: Integrand> {
     function: I,
     lower: f64,
@@ -342,7 +484,7 @@ pub struct SemiInfiniteIntervalPositive<I: Integrand> {
 
 impl<I: Integrand> SemiInfiniteIntervalPositive<I> {
     fn new(function: I, lower: f64) -> Self {
-        Self { lower, function }
+        Self { function, lower }
     }
 
     fn transform_evaluate(&self, t: f64) -> f64 {
@@ -362,10 +504,28 @@ impl<I> AdaptiveSingularity<SemiInfiniteIntervalPositive<I>>
 where
     I: Integrand,
 {
-    pub fn semi_infinite_positive(
+    /// Generate a new [`AdaptiveSingularity`] integrator for functions with integrable singularities on semi-infinite intervals (b, Inf).
+    ///
+    /// Arguments:
+    /// - `function`: A user supplied function to be integrated, which is a struct implementing the
+    /// [`Integrand`] trait.
+    /// - `lower`: The lower integration limit.
+    /// - `error_bound`: The tolerance requested by the user. Can be either an absolute tolerance
+    /// or relative tolerance. Determines the exit condition of the integration routine, see
+    /// [`Tolerance`].
+    /// - `max_iterations`: The maximum number of iterations that the adaptive routine should use
+    /// to try to satisfy the requested tolerance.
+    ///
+    /// # Errors
+    /// Function will return an error if the user provided `Tolerance` does not satisfy the
+    /// following constraints:
+    /// - `Tolerance::Absolute(v)` where `v > 0.0`,
+    /// - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON`,
+    /// - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
+    pub fn semi_infinite_upper(
         function: I,
         lower: f64,
-        error_bound: ErrorBound,
+        error_bound: Tolerance,
         max_iterations: usize,
     ) -> Result<Self, Error> {
         let rule = Rule::gk15();
@@ -382,6 +542,11 @@ where
     }
 }
 
+/// A function defined over a semi-infinite integration interval (-Inf, a).
+///
+/// This is a wrapper around a user supplied function implementing the [`Integrand`] trait, which
+/// is to be integrated between the interval (-Inf, a).
+/// This is achieved by transforming the integrand to be defined on the interval (0,1).
 pub struct SemiInfiniteIntervalNegative<I: Integrand> {
     function: I,
     upper: f64,
@@ -389,7 +554,7 @@ pub struct SemiInfiniteIntervalNegative<I: Integrand> {
 
 impl<I: Integrand> SemiInfiniteIntervalNegative<I> {
     fn new(function: I, upper: f64) -> Self {
-        Self { upper, function }
+        Self { function, upper }
     }
 
     fn transform_evaluate(&self, t: f64) -> f64 {
@@ -409,10 +574,28 @@ impl<I> AdaptiveSingularity<SemiInfiniteIntervalNegative<I>>
 where
     I: Integrand,
 {
-    pub fn semi_infinite_negative(
+    /// Generate a new [`AdaptiveSingularity`] integrator for functions with integrable singularities on semi-infinite intervals (-Inf, a).
+    ///
+    /// Arguments:
+    /// - `function`: A user supplied function to be integrated, which is a struct implementing the
+    /// [`Integrand`] trait.
+    /// - `upper`: The upper integration limit.
+    /// - `error_bound`: The tolerance requested by the user. Can be either an absolute tolerance
+    /// or relative tolerance. Determines the exit condition of the integration routine, see
+    /// [`Tolerance`].
+    /// - `max_iterations`: The maximum number of iterations that the adaptive routine should use
+    /// to try to satisfy the requested tolerance.
+    ///
+    /// # Errors
+    /// Function will return an error if the user provided `Tolerance` does not satisfy the
+    /// following constraints:
+    /// - `Tolerance::Absolute(v)` where `v > 0.0`,
+    /// - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON`,
+    /// - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
+    pub fn semi_infinite_lower(
         function: I,
         upper: f64,
-        error_bound: ErrorBound,
+        error_bound: Tolerance,
         max_iterations: usize,
     ) -> Result<Self, Error> {
         let rule = Rule::gk15();

@@ -8,6 +8,11 @@
 /// Gaussian rule with a `(2n - 1)`-rule such that the resulting combination is of order `3n + 1`.
 /// The difference between the lower-order `n`-point rule and the Kronrod extension are used to
 /// estimate the approximate error of the numerical integration.
+///
+/// The rules are efficient as function evaluations used for the Gaussian n-point rule are reused
+/// for the (2n - 1)-point Kronrod rule, meaning that the total number of function evaluations
+/// required is (2n - 1).
+///
 /// The [`Rule`] struct defines a Gauss-Kronrod quadrature rule, containing the sets of points `x_i`
 /// and weights `w_i` for the `n`-point Gauss rule and the corresponding `(2n - 1)`-point Kronrod
 /// extension.

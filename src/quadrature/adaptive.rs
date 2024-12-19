@@ -1,18 +1,19 @@
 use std::collections::binary_heap::BinaryHeap;
 
 use crate::quadrature::{
-    subinterval_too_small, Error, ErrorBound, IntegralEstimate, Integrator, Kind, Region, Rule,
+    subinterval_too_small, Error, IntegralEstimate, Integrator, Kind, Region, Rule, Tolerance,
 };
 use crate::Integrand;
 use crate::Limits;
 
-/// An integral to be evaluated with adaptive Gauss-Kronrod quadrature.
+/// An adaptive Gauss-Kronrod quadrature integrator for (relatively) smooth general functions of a
+/// single variable over a finite integration interval.
 ///
 /// The user constructs a `function` implementing [`Integrand`] to be integrated and provides an
-/// integration [`Rule`], integration [`Limits`], [`ErrorBound`], and `max_iterations` count.
+/// integration [`Rule`], integration [`Limits`], [`Tolerance`], and `max_iterations` count.
 /// The adaptive routine works by bisecting the integration region with the largest error estimate
 /// and iteratively applying the n-point Gauss-Kronrod integration [`Rule`] until the constraints
-/// imposed by the user provided [`ErrorBound`] are satisfied, or until an [`Error`] is
+/// imposed by the user provided [`Tolerance`] are satisfied, or until an [`Error`] is
 /// encountered.
 ///
 /// The routine applies an n-point Gauss-Kronrod integration [`Rule`] using the same integration
@@ -26,27 +27,27 @@ use crate::Limits;
 /// * 61-point: 30-point Gauss, 61-point Kronrod ([`Rule::gk61()`])
 ///
 /// The adaptive routine will return the first approximation, `result`, to the integral which has an
-/// absolute `error` smaller than the tolerance set by the choice of [`ErrorBound`], where
-/// * [`ErrorBound::Absolute(abserr)`] specifies an absolute error and returns final [`IntegralEstimate`] when `error <= abserr`,
-/// * [`ErrorBound::Relative(relerr)`] specifies a relative error and returns final [`IntegralEstimate`] when `error <= relerr * abs(result)`,  
-/// * [`ErrorBound::Either{ abserr, relerr }`] to return a result as soon as _either_ the relative or absolute error bound has been satisfied.
+/// absolute `error` smaller than the tolerance set by the choice of [`Tolerance`], where
+/// * [`Tolerance::Absolute(abserr)`] specifies an absolute error and returns final [`IntegralEstimate`] when `error <= abserr`,
+/// * [`Tolerance::Relative(relerr)`] specifies a relative error and returns final [`IntegralEstimate`] when `error <= relerr * abs(result)`,  
+/// * [`Tolerance::Either{ abserr, relerr }`] to return a result as soon as _either_ the relative or absolute error bound has been satisfied.
 ///
 ///
 /// The total number of function evaluations when using an n-point rule is `T = (2 n - 1) * i`
 /// where `i` is the number of iterations used by the adaptive algorithm to reach the desired
 /// tolerance.
 ///
-/// [`Basic`]: struct.Basic.html
-/// [`ErrorBound::Absolute(abserr)`]: crate::quadrature::ErrorBound#variant.Absolute
-/// [`ErrorBound::Relative(relerr)`]: crate::quadrature::ErrorBound#variant.Relative
-/// [`ErrorBound::Either{ abserr, relerr }`]: crate::quadrature::ErrorBound#variant.Either
+/// [`Basic`]: crate::quadrature::Basic
+/// [`Tolerance::Absolute(abserr)`]: crate::quadrature::Tolerance#variant.Absolute
+/// [`Tolerance::Relative(relerr)`]: crate::quadrature::Tolerance#variant.Relative
+/// [`Tolerance::Either{ abserr, relerr }`]: crate::quadrature::Tolerance#variant.Either
 ///
 ///```rust
 /// use rint::{Limits, Integrand};
 /// use rint::quadrature::Adaptive;
 /// use rint::quadrature::Basic;
 /// use rint::quadrature::Rule;
-/// use rint::quadrature::ErrorBound;
+/// use rint::quadrature::Tolerance;
 ///
 /// /* f1(x) = x^alpha * log(1/x) */
 /// /* integ(f1,x,0,1) = 1/(alpha + 1)^2 */
@@ -64,7 +65,7 @@ use crate::Limits;
 /// let exp_result = 7.716049382716050342E-02;
 /// let exp_error = 2.227969521869139532E-15;
 ///
-/// let error_bound = ErrorBound::Absolute(1.0e-14);
+/// let error_bound = Tolerance::Absolute(1.0e-14);
 /// let alpha = 2.6;
 /// let limits = Limits::new(0.0, 1.0);
 ///
@@ -97,7 +98,7 @@ use crate::Limits;
 /// # use rint::quadrature::Adaptive;
 /// # use rint::quadrature::Basic;
 /// # use rint::quadrature::Rule;
-/// # use rint::quadrature::ErrorBound;
+/// # use rint::quadrature::Tolerance;
 /// # /* f1(x) = x^alpha * log(1/x) */
 /// # /* integ(f1,x,0,1) = 1/(alpha + 1)^2 */
 /// # struct Function1 {
@@ -111,7 +112,7 @@ use crate::Limits;
 /// # }
 /// # let exp_result = 7.716049382716050342E-02;
 /// # let exp_error = 2.227969521869139532E-15;
-/// # let error_bound = ErrorBound::Absolute(1.0e-14);
+/// # let error_bound = Tolerance::Absolute(1.0e-14);
 /// # let alpha = 2.6;
 /// # let limits = Limits::new(0.0, 1.0);
 /// # let function = Function1 { alpha };
@@ -139,7 +140,7 @@ where
     function: I,
     rule: Rule,
     limits: Limits,
-    error_bound: ErrorBound,
+    error_bound: Tolerance,
     max_iterations: usize,
 }
 
@@ -149,36 +150,45 @@ where
 {
     /// Generate a new [`Adaptive`] integrator.
     ///
-    /// Requires:
-    /// *
+    /// Initialise an adaptive Gauss-Kronrod integrator. Arguments:
+    /// - `function`: A user supplied function to be integrated, which is a struct implementing the
+    /// [`Integrand`] trait.
+    /// - `rule`: An n-point Gauss-Kronrod integration [`Rule`], generated using one of the
+    /// generator methods e.g. [`Rule::gk15()`], [`Rule::gk21()`], etc.
+    /// - `limits`: The interval over which the `function` should be integrated, [`Limits`].
+    /// - `error_bound`: The tolerance requested by the user. Can be either an absolute tolerance
+    /// or relative tolerance. Determines the exit condition of the integration routine, see
+    /// [`Tolerance`].
+    /// - `max_iterations`: The maximum number of iterations that the adaptive routine should use
+    /// to try to satisfy the requested tolerance.
     ///
     /// # Errors
-    /// Function will return an error if the user provided `ErrorBound` does not satisfy the
+    /// Function will return an error if the user provided `Tolerance` does not satisfy the
     /// following constraints:
-    ///     - `ErrorBound::Absolute(v) where v > 0.0`,
-    ///     - `ErrorBound::Relative(v) where v > 50.0 * f64::EPSILON`,
-    ///     - `ErrorBound::Either { absolute, relative } where absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
+    /// - `Tolerance::Absolute(v)` where `v > 0.0`,
+    /// - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON`,
+    /// - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
     pub fn new(
         function: I,
         rule: Rule,
         limits: Limits,
-        error_bound: ErrorBound,
+        error_bound: Tolerance,
         max_iterations: usize,
     ) -> Result<Self, Error> {
         match error_bound {
-            ErrorBound::Absolute(v) => {
+            Tolerance::Absolute(v) => {
                 if v <= 0.0 {
                     let kind = Kind::AbsoluteBoundNegativeOrZero;
                     return Err(Error::unevaluated(kind));
                 }
             }
-            ErrorBound::Relative(v) => {
+            Tolerance::Relative(v) => {
                 if v < 50.0 * f64::EPSILON {
                     let kind = Kind::RelativeBoundTooSmall;
                     return Err(Error::unevaluated(kind));
                 }
             }
-            ErrorBound::Either { absolute, relative } => {
+            Tolerance::Either { absolute, relative } => {
                 if absolute <= 0.0 && relative < 50.0 * f64::EPSILON {
                     let kind = Kind::InvalidTolerance;
                     return Err(Error::unevaluated(kind));
@@ -186,19 +196,34 @@ where
             }
         }
         Ok(Self {
+            function,
+            rule,
             limits,
             error_bound,
-            rule,
-            function,
             max_iterations,
         })
     }
 
     /// Integrate the function and return a [`IntegralEstimate`] integration result.
     ///
+    /// Adaptively applies the n-point Gauss-Kronrod integration [`Rule`] to the user supplied
+    /// function implementing the [`Integrand`] trait to generate an [`IntegralEstimate`] upon
+    /// successful completion.
+    ///
     /// # Errors
-    /// Integration can fail if user suplied tolerance cannot be achieved within the maximum number
-    /// of iterations.
+    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
+    /// obtained before an error was encountered.
+    /// The integration routine has several ways of failing:
+    /// - The user supplied [`Tolerance`] could not be satisfied within the maximum number of
+    /// iterations (kind = [`Kind::MaximumIterationsReached`]).
+    /// - A roundoff error was detected. Can occur when the calculated numerical error from an
+    /// internal integration is smaller than the estimated roundoff, but larger than the tolerance
+    /// requested by the user, or when too many successive iterations do not reasonably improve the
+    /// integral value and error estimate (kind = [`Kind::RoundoffErrorDetected`]).
+    /// - Bisection of the highest error region into two subregions results in subregions with
+    /// integraion limits that are too small (kind = [`Kind::BadIntegrandBehaviour`]).
+    /// - An error is encountered when initialising the integration workspace. This is an internal
+    /// error, which should not occur downstream (kind = [`Kind::UninitialisedWorkspace`]).
     pub fn integrate(&self) -> Result<IntegralEstimate, Error> {
         let initial = Integrator::new(&self.function, &self.rule, self.limits).integrate();
 
