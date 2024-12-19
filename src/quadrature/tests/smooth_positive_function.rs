@@ -1,15 +1,13 @@
 // Test the basic Gauss-Kronrod integration rules with a smooth positive function.
 // Ported from gsl-2.6/integration/test.c
 
-use crate::quadrature::rule::Rule;
-use crate::quadrature::Basic;
 use crate::Limits;
 
 basic_test! {
         name: basic_gauss_kronrod_smooth_function_15_point,
         function: util::Function1,
         alpha: f64 => 2.6,
-        rule: Rule::GaussKronrod15,
+        rule: gk15,
         lower: 0.0,
         upper: 1.0,
         exp_result: 7.716049357767090777E-02,
@@ -25,7 +23,7 @@ basic_test! {
         name: basic_gauss_kronrod_smooth_function_21_point,
         function: util::Function1,
         alpha: f64 => 2.6,
-        rule: Rule::GaussKronrod21,
+        rule: gk21,
         lower: 0.0,
         upper: 1.0,
         exp_result: 7.716049379303084599E-02,
@@ -41,7 +39,7 @@ basic_test! {
         name: basic_gauss_kronrod_smooth_function_31_point,
         function: util::Function1,
         alpha: f64 => 2.6,
-        rule: Rule::GaussKronrod31,
+        rule: gk31,
         lower: 0.0,
         upper: 1.0,
         exp_result: 7.716049382494900855E-02,
@@ -57,7 +55,7 @@ basic_test! {
         name: basic_gauss_kronrod_smooth_function_41_point,
         function: util::Function1,
         alpha: f64 => 2.6,
-        rule: Rule::GaussKronrod41,
+        rule: gk41,
         lower: 0.0,
         upper: 1.0,
         exp_result: 7.716049382681375302E-02,
@@ -73,7 +71,7 @@ basic_test! {
         name: basic_gauss_kronrod_smooth_function_51_point,
         function: util::Function1,
         alpha: f64 => 2.6,
-        rule: Rule::GaussKronrod51,
+        rule: gk51,
         lower: 0.0,
         upper: 1.0,
         exp_result: 7.716049382708510540E-02,
@@ -89,7 +87,7 @@ basic_test! {
         name: basic_gauss_kronrod_smooth_function_61_point,
         function: util::Function1,
         alpha: f64 => 2.6,
-        rule: Rule::GaussKronrod61,
+        rule: gk61,
         lower: 0.0,
         upper: 1.0,
         exp_result: 7.716049382713800753E-02,

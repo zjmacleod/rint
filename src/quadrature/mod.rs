@@ -1,34 +1,53 @@
 mod adaptive;
-pub(crate) mod basic;
+mod basic;
 mod estimate;
+mod integrator;
+mod region;
 mod rule;
 mod singularity;
 
 #[cfg(test)]
 mod tests;
 
+pub(crate) use integrator::Integrator;
+pub(crate) use region::Region;
+
 pub use adaptive::Adaptive;
 pub use basic::Basic;
+pub use singularity::AdaptiveSingularity;
+
 pub use estimate::IntegralEstimate;
 pub use rule::Rule;
-pub use singularity::AdaptiveSingularity;
 
 use crate::Limits;
 
-/// User selected error bound type.
-pub enum ErrorBound {
+/// User selected tolerance type.
+///
+/// The adaptive routines will return the first approximation, `result`, to the integral which has an
+/// absolute `error` smaller than the tolerance set by the choice of [`Tolerance`], where
+/// * [`Tolerance::Absolute(abserr)`] specifies an absolute error and returns final [`IntegralEstimate`] when `error <= abserr`,
+/// * [`Tolerance::Relative(relerr)`] specifies a relative error and returns final [`IntegralEstimate`] when `error <= relerr * abs(result)`,  
+/// * [`Tolerance::Either{ abserr, relerr }`] to return a result as soon as _either_ the relative or absolute error bound has been satisfied.
+///
+/// [`Tolerance::Absolute(abserr)`]: crate::quadrature::Tolerance#variant.Absolute
+/// [`Tolerance::Relative(relerr)`]: crate::quadrature::Tolerance#variant.Relative
+/// [`Tolerance::Either{ abserr, relerr }`]: crate::quadrature::Tolerance#variant.Either
+pub enum Tolerance {
+    /// Specify an absolute error and returns final [`IntegralEstimate`] when `error <= abserr`.
     Absolute(f64),
+    /// Specify a relative error and return final [`IntegralEstimate`] when `error <= relerr * abs(result)`.
     Relative(f64),
+    /// Specify _both_ an absolute and relative error and return final [`IntegralEstimate`] as soon as _either_ the relative or absolute error bound has been satisfied.
     Either { absolute: f64, relative: f64 },
 }
 
-impl ErrorBound {
+impl Tolerance {
     #[must_use]
-    pub fn tolerance(&self, integral_value: f64) -> f64 {
+    pub(crate) fn tolerance(&self, integral_value: f64) -> f64 {
         match *self {
-            ErrorBound::Absolute(v) => v,
-            ErrorBound::Relative(v) => v * integral_value.abs(),
-            ErrorBound::Either { absolute, relative } => {
+            Tolerance::Absolute(v) => v,
+            Tolerance::Relative(v) => v * integral_value.abs(),
+            Tolerance::Either { absolute, relative } => {
                 f64::max(absolute, relative * integral_value.abs())
             }
         }
@@ -49,8 +68,8 @@ pub enum Kind {
     DoesNotConverge,
     DivergentOrSlowlyConverging,
     UninitialisedWorkspace,
-    RelativeBoundNegativeOrZero,
-    AbsoluteBoundTooSmall,
+    AbsoluteBoundNegativeOrZero,
+    RelativeBoundTooSmall,
     InvalidTolerance,
 }
 
@@ -64,31 +83,38 @@ impl Error {
         Error::new(kind, output)
     }
 
+    /// Return the error [`Kind`] which was encountered.
     #[must_use]
     pub fn kind(&self) -> Kind {
         self.kind
     }
 
+    /// Return a reference to the best [`IntegralEstimate`] which was calculated before an error
+    /// occurred.
     #[must_use]
     pub fn estimate(&self) -> &IntegralEstimate {
         &self.integral
     }
 
+    /// Return the best estimate of the integral value which was calculated before an error occurred.
     #[must_use]
     pub fn result(&self) -> f64 {
         self.integral.result()
     }
 
+    /// Return the best estimate of the integral error which was calculated before an error occurred.
     #[must_use]
     pub fn error(&self) -> f64 {
         self.integral.error()
     }
 
+    /// Return the number of iterations used by the integrator before an error occurred.
     #[must_use]
     pub fn iterations(&self) -> usize {
         self.integral.iterations()
     }
 
+    /// Return the number of function evaluations used by the integrator before an error occurred.
     #[must_use]
     pub fn function_evaluations(&self) -> usize {
         self.integral.function_evaluations()
@@ -142,14 +168,14 @@ impl std::fmt::Display for Error {
                 write!(f, "The integration Workspace was not properly initialised. This error should not be possible. If this error is returned, contact the crate maintainers.")
             }
 
-            Kind::RelativeBoundNegativeOrZero => {
+            Kind::AbsoluteBoundNegativeOrZero => {
                 write!(
                     f,
                     "Invalid error bound: relative bound must be non-zero and positive."
                 )
             }
 
-            Kind::AbsoluteBoundTooSmall => {
+            Kind::RelativeBoundTooSmall => {
                 write!(
                     f,
                     "Invalid error bound: absolute bound must be larger than 50.0 * f64::EPSILON."
