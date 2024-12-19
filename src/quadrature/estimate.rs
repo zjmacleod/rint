@@ -1,4 +1,4 @@
-use crate::quadrature::basic::Region;
+use crate::quadrature::region::Region;
 use crate::quadrature::rule::Rule;
 use crate::quadrature::{Adaptive, AdaptiveSingularity, Basic, Error, ErrorBound};
 use crate::{Integrand, Limits};

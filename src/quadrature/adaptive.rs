@@ -1,9 +1,8 @@
 use std::collections::binary_heap::BinaryHeap;
 
-use crate::quadrature::basic::Region;
-use crate::quadrature::rule::Rule;
-use crate::quadrature::subinterval_too_small;
-use crate::quadrature::{Error, ErrorBound, GaussKronrodIntegrator, IntegralEstimate, Kind};
+use crate::quadrature::{
+    subinterval_too_small, Error, ErrorBound, IntegralEstimate, Integrator, Kind, Region, Rule,
+};
 use crate::Integrand;
 use crate::Limits;
 
@@ -195,47 +194,13 @@ where
         })
     }
 
-    fn roundoff(result_abs: f64) -> f64 {
-        50.0 * f64::EPSILON * result_abs
-    }
-
-    pub(crate) fn check_initial_integration(
-        &self,
-        initial: &Region,
-    ) -> Result<Option<IntegralEstimate>, Error> {
-        let tolerance = self.error_bound.tolerance(initial.result());
-        let roundoff = Self::roundoff(initial.result_abs());
-
-        if initial.error() <= roundoff && initial.error() > tolerance {
-            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
-            let kind = Kind::RoundoffErrorDetected;
-
-            Err(Error::new(kind, output))
-        } else if (initial.error() <= tolerance
-            && initial.error().to_bits() != initial.result_asc().to_bits())
-            || initial.error() == 0.0
-        {
-            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
-
-            Ok(Some(output))
-        } else if self.max_iterations == 1 {
-            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
-            let kind = Kind::MaximumIterationsReached;
-
-            Err(Error::new(kind, output))
-        } else {
-            Ok(None)
-        }
-    }
-
     /// Integrate the function and return a [`IntegralEstimate`] integration result.
     ///
     /// # Errors
     /// Integration can fail if user suplied tolerance cannot be achieved within the maximum number
     /// of iterations.
     pub fn integrate(&self) -> Result<IntegralEstimate, Error> {
-        let initial =
-            GaussKronrodIntegrator::new(&self.function, &self.rule, self.limits).integrate();
+        let initial = Integrator::new(&self.function, &self.rule, self.limits).integrate();
 
         if let Some(output) = self.check_initial_integration(&initial)? {
             return Ok(output);
@@ -278,7 +243,9 @@ where
     pub fn limits(&self) -> Limits {
         self.limits
     }
+}
 
+impl<I: Integrand> Adaptive<I> {
     fn initialise_workspace(&self, initial: Region) -> Workspace {
         let mut heap = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
 
@@ -301,6 +268,39 @@ where
             roundoff_count,
             roundoff_on_high_iteration_count,
             function_evaluations_per_integration,
+        }
+    }
+
+    fn roundoff(result_abs: f64) -> f64 {
+        50.0 * f64::EPSILON * result_abs
+    }
+
+    pub(crate) fn check_initial_integration(
+        &self,
+        initial: &Region,
+    ) -> Result<Option<IntegralEstimate>, Error> {
+        let tolerance = self.error_bound.tolerance(initial.result());
+        let roundoff = Self::roundoff(initial.result_abs());
+
+        if initial.error() <= roundoff && initial.error() > tolerance {
+            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
+            let kind = Kind::RoundoffErrorDetected;
+
+            Err(Error::new(kind, output))
+        } else if (initial.error() <= tolerance
+            && initial.error().to_bits() != initial.result_asc().to_bits())
+            || initial.error() == 0.0
+        {
+            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
+
+            Ok(Some(output))
+        } else if self.max_iterations == 1 {
+            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
+            let kind = Kind::MaximumIterationsReached;
+
+            Err(Error::new(kind, output))
+        } else {
+            Ok(None)
         }
     }
 }

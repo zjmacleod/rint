@@ -1,9 +1,7 @@
 use std::collections::binary_heap::BinaryHeap;
 
-use crate::quadrature::basic::Region;
-use crate::quadrature::rule::Rule;
 use crate::quadrature::{
-    subinterval_too_small, Error, ErrorBound, GaussKronrodIntegrator, IntegralEstimate, Kind,
+    subinterval_too_small, Error, ErrorBound, IntegralEstimate, Integrator, Kind, Region, Rule,
 };
 use crate::Integrand;
 use crate::Limits;
@@ -32,105 +30,18 @@ impl<I> AdaptiveSingularity<I>
 where
     I: Integrand,
 {
-    /// Create a new [`AdaptiveSingularity`].
-    ///
-    /// The user defines a `function` which is a `struct` implementing the
-    /// [`Integrand`] trait, and integration [`Limits`].
-    ///
-    /// # Errors
-    /// Function will return an error if the user provided `ErrorBound` does not satisfy the
-    /// following constraints:
-    ///     - `ErrorBound::Absolute(v) where v > 0.0`,
-    ///     - `ErrorBound::Relative(v) where v > 50.0 * f64::EPSILON`,
-    ///     - `ErrorBound::Either { absolute, relative } where absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
-    fn new(
+    pub fn general(
         function: I,
-        rule: Rule,
         limits: Limits,
         error_bound: ErrorBound,
         max_iterations: usize,
     ) -> Result<Self, Error> {
-        let evaluations_multiplier = 1;
-        match error_bound {
-            ErrorBound::Absolute(v) => {
-                if v <= 0.0 {
-                    let kind = Kind::AbsoluteBoundNegativeOrZero;
-                    return Err(Error::unevaluated(kind));
-                }
-            }
-            ErrorBound::Relative(v) => {
-                if v < 50.0 * f64::EPSILON {
-                    let kind = Kind::RelativeBoundTooSmall;
-                    return Err(Error::unevaluated(kind));
-                }
-            }
-            ErrorBound::Either { absolute, relative } => {
-                if absolute <= 0.0 && relative < 50.0 * f64::EPSILON {
-                    let kind = Kind::InvalidTolerance;
-                    return Err(Error::unevaluated(kind));
-                }
-            }
-        }
-        Ok(Self {
-            function,
-            rule,
-            limits,
-            error_bound,
-            max_iterations,
-            evaluations_multiplier,
-        })
+        let rule = Rule::gk21();
+        Self::new(function, rule, limits, error_bound, max_iterations)
     }
 
-    fn new_with_evaluations_multiplier(
-        function: I,
-        rule: Rule,
-        limits: Limits,
-        error_bound: ErrorBound,
-        max_iterations: usize,
-        evaluations_multiplier: usize,
-    ) -> Result<Self, Error> {
-        let mut v = Self::new(function, rule, limits, error_bound, max_iterations)?;
-        v.evaluations_multiplier = evaluations_multiplier;
-        Ok(v)
-    }
-
-    fn roundoff(result_abs: f64) -> f64 {
-        100.0 * f64::EPSILON * result_abs
-    }
-
-    fn check_initial_integration(
-        &self,
-        initial: &Region,
-    ) -> Result<Option<IntegralEstimate>, Error> {
-        let tolerance = self.error_bound.tolerance(initial.result());
-        let roundoff = Self::roundoff(initial.result_abs());
-
-        if initial.error() <= roundoff && initial.error() > tolerance {
-            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
-            let kind = Kind::RoundoffErrorDetected;
-
-            Err(Error::new(kind, output))
-        } else if (initial.error() <= tolerance
-            && initial.error().to_bits() != initial.result_asc().to_bits())
-            || initial.error() == 0.0
-        {
-            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
-
-            Ok(Some(output))
-        } else if self.max_iterations == 1 {
-            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
-            let kind = Kind::MaximumIterationsReached;
-
-            Err(Error::new(kind, output))
-        } else {
-            Ok(None)
-        }
-    }
-
-    /// # Errors
     pub fn integrate(&self) -> Result<IntegralEstimate, Error> {
-        let initial =
-            GaussKronrodIntegrator::new(&self.function, &self.rule, self.limits).integrate();
+        let initial = Integrator::new(&self.function, &self.rule, self.limits).integrate();
 
         if let Some(output) = self.check_initial_integration(&initial)? {
             return Ok(output);
@@ -237,6 +148,106 @@ where
     pub fn limits(&self) -> Limits {
         self.limits
     }
+}
+
+impl<I> AdaptiveSingularity<I>
+where
+    I: Integrand,
+{
+    /// Create a new [`AdaptiveSingularity`].
+    ///
+    /// The user defines a `function` which is a `struct` implementing the
+    /// [`Integrand`] trait, and integration [`Limits`].
+    ///
+    /// # Errors
+    /// Function will return an error if the user provided `ErrorBound` does not satisfy the
+    /// following constraints:
+    ///     - `ErrorBound::Absolute(v) where v > 0.0`,
+    ///     - `ErrorBound::Relative(v) where v > 50.0 * f64::EPSILON`,
+    ///     - `ErrorBound::Either { absolute, relative } where absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
+    fn new(
+        function: I,
+        rule: Rule,
+        limits: Limits,
+        error_bound: ErrorBound,
+        max_iterations: usize,
+    ) -> Result<Self, Error> {
+        let evaluations_multiplier = 1;
+        match error_bound {
+            ErrorBound::Absolute(v) => {
+                if v <= 0.0 {
+                    let kind = Kind::AbsoluteBoundNegativeOrZero;
+                    return Err(Error::unevaluated(kind));
+                }
+            }
+            ErrorBound::Relative(v) => {
+                if v < 50.0 * f64::EPSILON {
+                    let kind = Kind::RelativeBoundTooSmall;
+                    return Err(Error::unevaluated(kind));
+                }
+            }
+            ErrorBound::Either { absolute, relative } => {
+                if absolute <= 0.0 && relative < 50.0 * f64::EPSILON {
+                    let kind = Kind::InvalidTolerance;
+                    return Err(Error::unevaluated(kind));
+                }
+            }
+        }
+        Ok(Self {
+            function,
+            rule,
+            limits,
+            error_bound,
+            max_iterations,
+            evaluations_multiplier,
+        })
+    }
+
+    fn new_with_evaluations_multiplier(
+        function: I,
+        rule: Rule,
+        limits: Limits,
+        error_bound: ErrorBound,
+        max_iterations: usize,
+        evaluations_multiplier: usize,
+    ) -> Result<Self, Error> {
+        let mut v = Self::new(function, rule, limits, error_bound, max_iterations)?;
+        v.evaluations_multiplier = evaluations_multiplier;
+        Ok(v)
+    }
+
+    fn roundoff(result_abs: f64) -> f64 {
+        100.0 * f64::EPSILON * result_abs
+    }
+
+    fn check_initial_integration(
+        &self,
+        initial: &Region,
+    ) -> Result<Option<IntegralEstimate>, Error> {
+        let tolerance = self.error_bound.tolerance(initial.result());
+        let roundoff = Self::roundoff(initial.result_abs());
+
+        if initial.error() <= roundoff && initial.error() > tolerance {
+            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
+            let kind = Kind::RoundoffErrorDetected;
+
+            Err(Error::new(kind, output))
+        } else if (initial.error() <= tolerance
+            && initial.error().to_bits() != initial.result_asc().to_bits())
+            || initial.error() == 0.0
+        {
+            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
+
+            Ok(Some(output))
+        } else if self.max_iterations == 1 {
+            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
+            let kind = Kind::MaximumIterationsReached;
+
+            Err(Error::new(kind, output))
+        } else {
+            Ok(None)
+        }
+    }
 
     fn initialise_workspace(&self, initial: Region) -> Workspace {
         let mut heap = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
@@ -279,22 +290,6 @@ where
     }
 }
 
-impl<I> AdaptiveSingularity<I>
-where
-    I: Integrand,
-{
-    /// # Errors
-    pub fn general(
-        function: I,
-        limits: Limits,
-        error_bound: ErrorBound,
-        max_iterations: usize,
-    ) -> Result<Self, Error> {
-        let rule = Rule::gk21();
-        Self::new(function, rule, limits, error_bound, max_iterations)
-    }
-}
-
 pub struct InfiniteInterval<I: Integrand> {
     function: I,
 }
@@ -321,7 +316,6 @@ impl<I> AdaptiveSingularity<InfiniteInterval<I>>
 where
     I: Integrand,
 {
-    /// # Errors
     pub fn infinite(
         function: I,
         error_bound: ErrorBound,
@@ -368,7 +362,6 @@ impl<I> AdaptiveSingularity<SemiInfiniteIntervalPositive<I>>
 where
     I: Integrand,
 {
-    /// # Errors
     pub fn semi_infinite_positive(
         function: I,
         lower: f64,
@@ -416,7 +409,6 @@ impl<I> AdaptiveSingularity<SemiInfiniteIntervalNegative<I>>
 where
     I: Integrand,
 {
-    /// # Errors
     pub fn semi_infinite_negative(
         function: I,
         upper: f64,

@@ -1,13 +1,16 @@
 mod adaptive;
-pub(crate) mod basic;
+mod basic;
 mod estimate;
+mod integrator;
+mod region;
 mod rule;
 mod singularity;
 
 #[cfg(test)]
 mod tests;
 
-pub(crate) use basic::GaussKronrodIntegrator;
+pub(crate) use integrator::Integrator;
+pub(crate) use region::Region;
 
 pub use adaptive::Adaptive;
 pub use basic::Basic;
