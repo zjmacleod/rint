@@ -4,7 +4,7 @@ mod estimate;
 mod integrator;
 mod region;
 mod rule;
-//mod singularity;
+mod singularity;
 
 #[cfg(test)]
 mod tests;
@@ -14,7 +14,7 @@ pub(crate) use region::Region;
 
 pub use adaptive::Adaptive;
 pub use basic::Basic;
-//pub use singularity::AdaptiveSingularity;
+pub use singularity::AdaptiveSingularity;
 
 pub use estimate::IntegralEstimate;
 pub use rule::Rule;

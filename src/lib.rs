@@ -8,7 +8,7 @@
 use num_complex::{Complex, ComplexFloat};
 use num_traits::Zero;
 use std::fmt::Debug;
-use std::ops::{AddAssign, Div, Mul, Neg};
+use std::ops::{AddAssign, Div, Mul};
 
 mod limits;
 //pub mod multi;
@@ -52,11 +52,24 @@ pub(crate) mod sealed {
         + Div<f64, Output = Self>
         + AddAssign<Self>
         + Debug
+        + Max
     {
     }
 
     impl ScalarF64 for f64 {}
     impl ScalarF64 for Complex<f64> {}
+
+    pub trait Max {
+        const MAX: Self;
+    }
+
+    impl Max for f64 {
+        const MAX: Self = f64::MAX;
+    }
+
+    impl Max for Complex<f64> {
+        const MAX: Self = Complex::new(f64::MAX, f64::MAX);
+    }
 }
 
 impl<I: Integrand> Integrand for &I {

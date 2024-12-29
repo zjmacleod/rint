@@ -1,8 +1,10 @@
+use num_traits::Zero;
 use std::collections::binary_heap::BinaryHeap;
 
 use crate::quadrature::{
     subinterval_too_small, Error, IntegralEstimate, Integrator, Kind, Region, Rule, Tolerance,
 };
+use crate::sealed::{Max, ScalarF64};
 use crate::Integrand;
 use crate::Limits;
 
@@ -136,7 +138,7 @@ where
         limits: Limits,
         error_bound: Tolerance,
         max_iterations: usize,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, Error<I::Scalar>> {
         let rule = Rule::gk21();
         Self::new(function, rule, limits, error_bound, max_iterations)
     }
@@ -167,7 +169,7 @@ where
     /// [`Kind::DivergentOrSlowlyConverging`])
     /// - An error is encountered when initialising the integration workspace. This is an internal
     /// error, which should not occur downstream (kind = [`Kind::UninitialisedWorkspace`]).
-    pub fn integrate(&self) -> Result<IntegralEstimate, Error> {
+    pub fn integrate(&self) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
         let initial = Integrator::new(&self.function, &self.rule, self.limits).integrate();
 
         if let Some(output) = self.check_initial_integration(&initial)? {
@@ -186,7 +188,7 @@ where
             let previous_error = previous.error();
             let iteration_error = lower.error() + upper.error();
 
-            let [result, error] = workspace.improved_result_error(&previous, &lower, &upper);
+            let (result, error) = workspace.improved_result_error(&previous, &lower, &upper);
 
             let iteration_tolerance = self.error_bound.tolerance(result);
 
@@ -249,7 +251,7 @@ where
                 std::mem::swap(&mut workspace.heap, &mut workspace.store);
             }
 
-            let [ext_result, ext_error] = workspace.table.extrapolate(result);
+            let (ext_result, ext_error) = workspace.table.extrapolate(result);
 
             workspace.check_convergence();
 
@@ -287,7 +289,7 @@ where
         limits: Limits,
         error_bound: Tolerance,
         max_iterations: usize,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, Error<I::Scalar>> {
         let evaluations_multiplier = 1;
         match error_bound {
             Tolerance::Absolute(v) => {
@@ -326,7 +328,7 @@ where
         error_bound: Tolerance,
         max_iterations: usize,
         evaluations_multiplier: usize,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, Error<I::Scalar>> {
         let mut v = Self::new(function, rule, limits, error_bound, max_iterations)?;
         v.evaluations_multiplier = evaluations_multiplier;
         Ok(v)
@@ -338,8 +340,8 @@ where
 
     fn check_initial_integration(
         &self,
-        initial: &Region,
-    ) -> Result<Option<IntegralEstimate>, Error> {
+        initial: &Region<I::Scalar>,
+    ) -> Result<Option<IntegralEstimate<I::Scalar>>, Error<I::Scalar>> {
         let tolerance = self.error_bound.tolerance(initial.result());
         let roundoff = Self::roundoff(initial.result_abs());
 
@@ -365,7 +367,7 @@ where
         }
     }
 
-    fn initialise_workspace(&self, initial: Region) -> Workspace {
+    fn initialise_workspace(&self, initial: Region<I::Scalar>) -> Workspace<I::Scalar> {
         let mut heap = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
 
         let iteration = 1;
@@ -420,7 +422,7 @@ impl<I: Integrand> InfiniteInterval<I> {
         Self { function }
     }
 
-    fn transform_evaluate(&self, t: f64) -> f64 {
+    fn transform_evaluate(&self, t: f64) -> I::Scalar {
         let x = (1.0 - t) / t;
         let y = self.function.evaluate(x) + self.function.evaluate(-x);
         (y / t) / t
@@ -459,7 +461,7 @@ where
         function: I,
         error_bound: Tolerance,
         max_iterations: usize,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, Error<I::Scalar>> {
         let rule = Rule::gk15();
         let transformed = InfiniteInterval::new(function);
         let evaluations_multiplier = 2;
@@ -489,7 +491,7 @@ impl<I: Integrand> SemiInfiniteIntervalPositive<I> {
         Self { function, lower }
     }
 
-    fn transform_evaluate(&self, t: f64) -> f64 {
+    fn transform_evaluate(&self, t: f64) -> I::Scalar {
         let x = self.lower + (1.0 - t) / t;
         let y = self.function.evaluate(x);
         y / (t.powi(2))
@@ -530,7 +532,7 @@ where
         lower: f64,
         error_bound: Tolerance,
         max_iterations: usize,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, Error<I::Scalar>> {
         let rule = Rule::gk15();
         let transformed = SemiInfiniteIntervalPositive::new(function, lower);
         let evaluations_multiplier = 2;
@@ -560,7 +562,7 @@ impl<I: Integrand> SemiInfiniteIntervalNegative<I> {
         Self { function, upper }
     }
 
-    fn transform_evaluate(&self, t: f64) -> f64 {
+    fn transform_evaluate(&self, t: f64) -> I::Scalar {
         let x = self.upper - (1.0 - t) / t;
         let y = self.function.evaluate(x);
         y / (t.powi(2))
@@ -601,7 +603,7 @@ where
         upper: f64,
         error_bound: Tolerance,
         max_iterations: usize,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, Error<I::Scalar>> {
         let rule = Rule::gk15();
         let transformed = SemiInfiniteIntervalNegative::new(function, upper);
         let evaluations_multiplier = 2;
@@ -616,16 +618,16 @@ where
     }
 }
 
-struct Workspace {
-    heap: BinaryHeap<Region>,
+struct Workspace<T: ScalarF64> {
+    heap: BinaryHeap<Region<T>>,
     iteration: usize,
-    result: f64,
+    result: T,
     error: f64,
     large_interval_error: f64,
-    table: ExtrapolationTable,
+    table: ExtrapolationTable<T>,
     smallest_interval: f64,
     extrapolate: bool,
-    store: BinaryHeap<Region>,
+    store: BinaryHeap<Region<T>>,
     error_kind: Option<Kind>,
     initial_absolute_result: f64,
     positive_integrand: bool,
@@ -634,8 +636,8 @@ struct Workspace {
     function_evaluations_per_integration: usize,
 }
 
-impl Workspace {
-    fn retrieve_largest_error(&mut self) -> Result<Region, Error> {
+impl<T: ScalarF64> Workspace<T> {
+    fn retrieve_largest_error(&mut self) -> Result<Region<T>, Error<T>> {
         self.iteration += 1;
         if let Some(previous) = self.pop() {
             Ok(previous)
@@ -645,34 +647,35 @@ impl Workspace {
         }
     }
 
-    fn pop(&mut self) -> Option<Region> {
+    fn pop(&mut self) -> Option<Region<T>> {
         self.heap.pop()
     }
 
-    fn push(&mut self, integral: Region) {
+    fn push(&mut self, integral: Region<T>) {
         self.heap.push(integral);
     }
 
-    fn peek(&self) -> Option<&Region> {
+    fn peek(&self) -> Option<&Region<T>> {
         self.heap.peek()
     }
 
-    fn store(&mut self, integral: Region) {
+    fn store(&mut self, integral: Region<T>) {
         self.store.push(integral);
     }
 
-    fn sum_results(&self) -> f64 {
-        let store = self.store.iter().fold(0.0f64, |a, v| a + v.result());
-        let heap = self.heap.iter().fold(0.0f64, |a, v| a + v.result());
+    fn sum_results(&self) -> T {
+        let initial = <T as Zero>::zero();
+        let store = self.store.iter().fold(initial, |a, v| a + v.result());
+        let heap = self.heap.iter().fold(initial, |a, v| a + v.result());
         store + heap
     }
 
     fn improved_result_error(
         &mut self,
-        previous: &Region,
-        lower: &Region,
-        upper: &Region,
-    ) -> [f64; 2] {
+        previous: &Region<T>,
+        lower: &Region<T>,
+        upper: &Region<T>,
+    ) -> (T, f64) {
         let prev_result = previous.result();
         let prev_error = previous.error();
         let new_result = lower.result() + upper.result();
@@ -697,10 +700,10 @@ impl Workspace {
         self.result = (self.result + new_result) - prev_result;
         self.error = (self.error + new_error) - prev_error;
 
-        [self.result, self.error]
+        (self.result, self.error)
     }
 
-    fn integral_estimate(&self) -> IntegralEstimate {
+    fn integral_estimate(&self) -> IntegralEstimate<T> {
         let result = self.sum_results();
         let error = self.error;
         let iterations = self.iteration;
@@ -719,7 +722,7 @@ impl Workspace {
         self.smallest_interval *= 0.5;
     }
 
-    fn compute_result(self) -> Result<IntegralEstimate, Error> {
+    fn compute_result(self) -> Result<IntegralEstimate<T>, Error<T>> {
         let output = self.integral_estimate();
 
         if let Some(kind) = self.error_kind {
@@ -729,7 +732,7 @@ impl Workspace {
         }
     }
 
-    fn compute_extrapolated_result(self) -> Result<IntegralEstimate, Error> {
+    fn compute_extrapolated_result(self) -> Result<IntegralEstimate<T>, Error<T>> {
         let function_evaluations =
             (2 * self.iteration - 1) * self.function_evaluations_per_integration;
         let output = self
@@ -743,7 +746,7 @@ impl Workspace {
         }
     }
 
-    fn check_error_and_compute(mut self) -> Result<IntegralEstimate, Error> {
+    fn check_error_and_compute(mut self) -> Result<IntegralEstimate<T>, Error<T>> {
         if self.table.error == f64::MAX {
             return self.compute_result();
         }
@@ -757,13 +760,15 @@ impl Workspace {
                 self.set_error_kind(Kind::DoesNotConverge);
             }
 
-            if self.table.result != 0.0 && self.result != 0.0 {
+            let zero = <T as Zero>::zero();
+
+            if self.table.result != zero && self.result != zero {
                 if self.table.error / self.table.result.abs() > self.error / self.result.abs() {
                     return self.compute_result();
                 }
             } else if self.table.error > self.error {
                 return self.compute_result();
-            } else if self.result == 0.0 {
+            } else if self.result == zero {
                 return self.compute_extrapolated_result();
             }
         }
@@ -774,7 +779,7 @@ impl Workspace {
             return self.compute_extrapolated_result();
         }
 
-        let ratio = self.table.result / self.result;
+        let ratio = self.table.result.abs() / self.result.abs();
 
         if !(0.01..=100.0).contains(&ratio) || self.error > self.result.abs() {
             self.set_error_kind(Kind::DivergentOrSlowlyConverging);
@@ -821,7 +826,7 @@ impl Workspace {
         self.error_kind = Some(kind);
     }
 
-    fn update(&mut self, lower: Region, upper: Region) {
+    fn update(&mut self, lower: Region<T>, upper: Region<T>) {
         let lower_limit = lower.limits().lower();
         let upper_limit = upper.limits().upper();
         let limits = Limits::new(lower_limit, upper_limit);
@@ -850,7 +855,7 @@ impl Workspace {
         }
     }
 
-    fn update_table_values(&mut self, ext_result: f64, ext_error: f64, tolerance: f64) {
+    fn update_table_values(&mut self, ext_result: T, ext_error: f64, tolerance: f64) {
         self.table.ktmin = 0;
         self.table.error = ext_error;
         self.table.result = ext_result;
@@ -859,12 +864,12 @@ impl Workspace {
     }
 }
 
-struct ExtrapolationTable {
+struct ExtrapolationTable<T> {
     count: usize,
-    results: [f64; 52],
-    cached: Cached,
+    results: [T; 52],
+    cached: Cached<T>,
     error_detected: bool,
-    result: f64,
+    result: T,
     error: f64,
     tolerance: f64,
     ktmin: usize,
@@ -873,20 +878,21 @@ struct ExtrapolationTable {
 }
 
 #[derive(Debug, PartialEq)]
-enum Cached {
+enum Cached<T> {
     Empty,
-    One(f64),
-    Two(f64, f64),
-    Full(f64, f64, f64),
+    One(T),
+    Two(T, T),
+    Full(T, T, T),
 }
 
-impl ExtrapolationTable {
+impl<T: ScalarF64> ExtrapolationTable<T> {
     fn new() -> Self {
+        let zero = <T as Zero>::zero();
         let count = 0;
-        let results = [0.0; 52];
-        let cached = Cached::Empty;
+        let results = [zero; 52];
+        let cached: Cached<T> = Cached::Empty;
         let error_detected = false;
-        let result = 0.0;
+        let result = zero;
         let error = f64::MAX;
         let tolerance = f64::MAX;
         let ktmin = 0;
@@ -907,7 +913,7 @@ impl ExtrapolationTable {
         }
     }
 
-    fn initialise(initial: &Region) -> Self {
+    fn initialise(initial: &Region<T>) -> Self {
         let mut table = Self::new();
         table.result = initial.result();
         table.append_table(initial.result());
@@ -918,7 +924,7 @@ impl ExtrapolationTable {
         self.error_detected
     }
 
-    fn cache(&mut self, value: f64) -> &mut Self {
+    fn cache(&mut self, value: T) -> &mut Self {
         match self.cached {
             Cached::Full(_, a, b) | Cached::Two(a, b) => {
                 self.cached = Cached::Full(a, b, value);
@@ -933,7 +939,7 @@ impl ExtrapolationTable {
         self
     }
 
-    fn append_table(&mut self, result: f64) -> &mut Self {
+    fn append_table(&mut self, result: T) -> &mut Self {
         self.results[self.count] = result;
         self.count += 1;
         self
@@ -941,14 +947,14 @@ impl ExtrapolationTable {
 
     // Adapted directly from GSL
     #[must_use]
-    fn extrapolate(&mut self, value: f64) -> [f64; 2] {
+    fn extrapolate(&mut self, value: T) -> (T, f64) {
         self.append_table(value);
         let n_current = self.count - 1;
 
         let current = self.results[n_current];
 
         let mut absolute = f64::MAX;
-        let mut relative = 5.0 * f64::EPSILON * f64::abs(current);
+        let mut relative = 5.0 * f64::EPSILON * current.abs();
 
         let new_element = n_current / 2;
         let n_original = n_current;
@@ -960,11 +966,11 @@ impl ExtrapolationTable {
         if n_current < 2 {
             result = current;
             abserr = f64::max(absolute, relative);
-            return [result, abserr];
+            return (result, abserr);
         }
 
         self.results[n_current + 2] = self.results[n_current];
-        self.results[n_current] = f64::MAX;
+        self.results[n_current] = <T as Max>::MAX;
 
         for i in 0..new_element {
             let mut res = self.results[n_current - 2 * i + 2];
@@ -972,29 +978,29 @@ impl ExtrapolationTable {
             let e1 = self.results[n_current - 2 * i - 1];
             let e2 = res;
 
-            let e1abs = f64::abs(e1);
+            let e1abs = e1.abs();
             let delta2 = e2 - e1;
-            let err2 = f64::abs(delta2);
-            let tol2 = f64::max(f64::abs(e2), e1abs) * f64::EPSILON;
+            let err2 = delta2.abs();
+            let tol2 = f64::max(e2.abs(), e1abs) * f64::EPSILON;
             let delta3 = e1 - e0;
-            let err3 = f64::abs(delta3);
-            let tol3 = f64::max(e1abs, f64::abs(e0)) * f64::EPSILON;
+            let err3 = delta3.abs();
+            let tol3 = f64::max(e1abs, e0.abs()) * f64::EPSILON;
 
             if err2 <= tol2 && err3 <= tol3 {
                 // If e0, e1 and e2 are equal to within machine accuracy,
                 // convergence is assumed.
                 result = res;
                 absolute = err2 + err3;
-                relative = 5.0 * f64::EPSILON * f64::abs(res);
+                relative = 5.0 * f64::EPSILON * res.abs();
                 abserr = f64::max(absolute, relative);
-                return [result, abserr];
+                return (result, abserr);
             }
 
             let e3 = self.results[n_current - 2 * i];
             self.results[n_current - 2 * i] = e1;
             let delta1 = e1 - e3;
-            let err1 = f64::abs(delta1);
-            let tol1 = f64::max(e1abs, f64::abs(e3)) * f64::EPSILON;
+            let err1 = delta1.abs();
+            let tol1 = f64::max(e1abs, e3.abs()) * f64::EPSILON;
 
             // If two elements are very close to each other, omit a part
             // of the table by adjusting the value of n.
@@ -1003,20 +1009,31 @@ impl ExtrapolationTable {
                 break;
             }
 
-            let ss = ((1.0 / delta1) + (1.0 / delta2)) - (1.0 / delta3);
+            let delta1c = delta1.conj();
+            let delta2c = delta2.conj();
+            let delta3c = delta3.conj();
+
+            let delta1modsq = delta1 * delta1c;
+            let delta2modsq = delta2 * delta2c;
+            let delta3modsq = delta3 * delta3c;
+
+            let ss = ((delta1c / delta1modsq) + (delta2c / delta2modsq)) - (delta3c / delta3modsq);
 
             // Test to detect irregular behaviour in the table, and eventually
             // omit a part of the table by adjusting the value of n.
-            if f64::abs(ss * e1) <= 0.0001 {
+            if (e1 * ss).abs() <= 0.0001 {
                 n_final = 2 * i;
                 break;
             }
 
+            let ssc = ss.conj();
+            let ssmodsq = ss * ssc;
+
             // Compute a new element and eventually adjust the value of result.
-            res = e1 + (1.0 / ss);
+            res = e1 + (ssc / ssmodsq);
             self.results[n_current - 2 * i] = res;
 
-            let error = err2 + f64::abs(res - e2) + err3;
+            let error = err2 + (res - e2).abs() + err3;
 
             if error <= abserr {
                 abserr = error;
@@ -1033,17 +1050,17 @@ impl ExtrapolationTable {
         self.count = n_final + 1;
 
         if let Cached::Full(a, b, c) = self.cached {
-            abserr = f64::abs(result - c) + f64::abs(result - b) + f64::abs(result - a);
+            abserr = (result - c).abs() + (result - b).abs() + (result - a).abs();
         } else {
             abserr = f64::MAX;
         }
 
         self.cache(result);
-        abserr = f64::max(abserr, 5.0 * f64::EPSILON * f64::abs(result));
+        abserr = f64::max(abserr, 5.0 * f64::EPSILON * result.abs());
 
         self.ktmin += 1;
 
-        [result, abserr]
+        (result, abserr)
     }
 
     fn shift_table(&mut self, n_original: usize, n_final: usize, new_element: usize) -> &mut Self {
@@ -1069,7 +1086,7 @@ impl ExtrapolationTable {
         &self,
         iterations: usize,
         function_evaluations: usize,
-    ) -> IntegralEstimate {
+    ) -> IntegralEstimate<T> {
         let result = self.result;
         let error = self.error;
         IntegralEstimate::new()
