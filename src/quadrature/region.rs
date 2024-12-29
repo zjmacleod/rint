@@ -5,19 +5,20 @@ use std::cmp::Ordering;
 use crate::quadrature::integrator::Integrator;
 use crate::quadrature::rule::Rule;
 use crate::quadrature::IntegralEstimate;
+use crate::sealed::ScalarF64;
 use crate::Integrand;
 use crate::Limits;
 
 #[derive(Debug)]
-pub(crate) struct Region<I: Integrand> {
-    pub(crate) result: I::Scalar,
+pub(crate) struct Region<T: ScalarF64> {
+    pub(crate) result: T,
     pub(crate) error: f64,
     pub(crate) result_abs: f64,
     pub(crate) result_asc: f64,
     pub(crate) limits: Limits,
 }
 
-impl<I: Integrand> PartialEq for Region<I> {
+impl<T: ScalarF64> PartialEq for Region<T> {
     fn eq(&self, other: &Self) -> bool {
         (self.result == other.result)
             && (self.error == other.error)
@@ -27,15 +28,15 @@ impl<I: Integrand> PartialEq for Region<I> {
     }
 }
 
-impl<I: Integrand> Eq for Region<I> {}
+impl<T: ScalarF64> Eq for Region<T> {}
 
-impl<I: Integrand> PartialOrd for Region<I> {
+impl<T: ScalarF64> PartialOrd for Region<T> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<I: Integrand> Ord for Region<I> {
+impl<T: ScalarF64> Ord for Region<T> {
     fn cmp(&self, other: &Self) -> Ordering {
         let mut ordering = self.total_cmp_error(other);
         if let Ordering::Equal = ordering {
@@ -45,9 +46,9 @@ impl<I: Integrand> Ord for Region<I> {
     }
 }
 
-impl<I: Integrand> Region<I> {
+impl<T: ScalarF64> Region<T> {
     pub(crate) fn unevaluated() -> Self {
-        let result = <I::Scalar as Zero>::zero();
+        let result = <T as Zero>::zero();
 
         Self {
             error: 0.0,
@@ -58,7 +59,7 @@ impl<I: Integrand> Region<I> {
         }
     }
 
-    pub(crate) fn with_result(mut self, result: I::Scalar) -> Self {
+    pub(crate) fn with_result(mut self, result: T) -> Self {
         self.result = result;
         self
     }
@@ -85,7 +86,7 @@ impl<I: Integrand> Region<I> {
 
     #[must_use]
     #[inline]
-    pub(crate) fn result(&self) -> I::Scalar {
+    pub(crate) fn result(&self) -> T {
         self.result
     }
 
@@ -123,7 +124,11 @@ impl<I: Integrand> Region<I> {
     }
 
     #[allow(clippy::needless_borrow)]
-    pub(crate) fn bisect<'a>(&self, function: &'a I, rule: &Rule) -> [Region<&'a I>; 2] {
+    pub(crate) fn bisect<'a, I: Integrand>(
+        &self,
+        function: &'a I,
+        rule: &Rule,
+    ) -> [Region<I::Scalar>; 2] {
         let [lower, upper] = self.limits.bisect();
         let lower_integral = Integrator::new(&function, &rule, lower).integrate();
 
@@ -144,7 +149,7 @@ impl<I: Integrand> Region<I> {
         &self,
         iterations: usize,
         function_evaluations: usize,
-    ) -> IntegralEstimate<I::Scalar> {
+    ) -> IntegralEstimate<T> {
         let result = self.result();
         let error = self.error();
         IntegralEstimate::new()
@@ -163,37 +168,28 @@ mod tests {
     fn test_ordering_of_basic_internal() {
         use std::collections::BinaryHeap;
 
-        #[derive(Debug)]
-        struct F;
-        impl Integrand for F {
-            type Scalar = f64;
-            fn evaluate(&self, x: f64) -> Self::Scalar {
-                x
-            }
-        }
-
-        let a: Region<F> = Region {
+        let a: Region<f64> = Region {
             error: 2.0,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
             limits: Limits::new(0.0, 1.0),
         };
-        let b: Region<F> = Region {
+        let b: Region<f64> = Region {
             error: 1.533,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
             limits: Limits::new(0.0, 1.0),
         };
-        let c: Region<F> = Region {
+        let c: Region<f64> = Region {
             error: 1.533,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
             limits: Limits::new(0.5, 1.0),
         };
-        let d: Region<F> = Region {
+        let d: Region<f64> = Region {
             error: 1.60,
             result: 1.0,
             result_abs: 1.0,

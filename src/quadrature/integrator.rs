@@ -28,7 +28,7 @@ where
         }
     }
 
-    pub(crate) fn integrate(&self) -> Region<I> {
+    pub(crate) fn integrate(&self) -> Region<I::Scalar> {
         let centre = self.limits.centre();
         let half_length = self.limits.half_width();
         let abs_half_length = half_length.abs();

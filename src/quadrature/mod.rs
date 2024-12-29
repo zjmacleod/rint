@@ -10,7 +10,7 @@ mod rule;
 mod tests;
 
 pub(crate) use integrator::Integrator;
-//pub(crate) use region::Region;
+pub(crate) use region::Region;
 
 //pub use adaptive::Adaptive;
 pub use basic::Basic;
@@ -44,7 +44,7 @@ pub enum Tolerance {
 
 impl Tolerance {
     #[must_use]
-    pub(crate) fn tolerance(&self, integral_value: f64) -> f64 {
+    pub(crate) fn tolerance<T: ScalarF64>(&self, integral_value: T) -> f64 {
         match *self {
             Tolerance::Absolute(v) => v,
             Tolerance::Relative(v) => v * integral_value.abs(),

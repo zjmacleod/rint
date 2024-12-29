@@ -8,7 +8,7 @@
 use num_complex::{Complex, ComplexFloat};
 use num_traits::Zero;
 use std::fmt::Debug;
-use std::ops::{Div, Mul, Neg};
+use std::ops::{AddAssign, Div, Mul, Neg};
 
 mod limits;
 //pub mod multi;
@@ -50,6 +50,7 @@ pub(crate) mod sealed {
         + Copy
         + Mul<f64, Output = Self>
         + Div<f64, Output = Self>
+        + AddAssign<Self>
         + Debug
     {
     }
