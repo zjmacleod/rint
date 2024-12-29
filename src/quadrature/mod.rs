@@ -1,4 +1,4 @@
-//mod adaptive;
+mod adaptive;
 mod basic;
 mod estimate;
 mod integrator;
@@ -12,7 +12,7 @@ mod tests;
 pub(crate) use integrator::Integrator;
 pub(crate) use region::Region;
 
-//pub use adaptive::Adaptive;
+pub use adaptive::Adaptive;
 pub use basic::Basic;
 //pub use singularity::AdaptiveSingularity;
 
