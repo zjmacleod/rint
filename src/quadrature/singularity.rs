@@ -346,7 +346,7 @@ where
         let roundoff = Self::roundoff(initial.result_abs());
 
         if initial.error() <= roundoff && initial.error() > tolerance {
-            let output = initial.into_estimate(1, self.rule.evaluations());
+            let output = initial.estimate(1, self.rule.evaluations());
             let kind = Kind::RoundoffErrorDetected;
 
             Err(Error::new(kind, output))
@@ -354,11 +354,11 @@ where
             && initial.error().to_bits() != initial.result_asc().to_bits())
             || initial.error() == 0.0
         {
-            let output = initial.into_estimate(1, self.rule.evaluations());
+            let output = initial.estimate(1, self.rule.evaluations());
 
             Ok(Some(output))
         } else if self.max_iterations == 1 {
-            let output = initial.into_estimate(1, self.rule.evaluations());
+            let output = initial.estimate(1, self.rule.evaluations());
             let kind = Kind::MaximumIterationsReached;
 
             Err(Error::new(kind, output))

@@ -1,4 +1,3 @@
-use num_complex::ComplexFloat;
 use num_traits::Zero;
 use std::cmp::Ordering;
 
@@ -124,11 +123,7 @@ impl<T: ScalarF64> Region<T> {
     }
 
     #[allow(clippy::needless_borrow)]
-    pub(crate) fn bisect<'a, I: Integrand>(
-        &self,
-        function: &'a I,
-        rule: &Rule,
-    ) -> [Region<I::Scalar>; 2] {
+    pub(crate) fn bisect<I: Integrand>(&self, function: &I, rule: &Rule) -> [Region<I::Scalar>; 2] {
         let [lower, upper] = self.limits.bisect();
         let lower_integral = Integrator::new(&function, &rule, lower).integrate();
 
@@ -145,7 +140,7 @@ impl<T: ScalarF64> Region<T> {
         self.limits.width().abs()
     }
 
-    pub(crate) fn into_estimate(
+    pub(crate) fn estimate(
         &self,
         iterations: usize,
         function_evaluations: usize,

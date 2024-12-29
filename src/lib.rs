@@ -42,7 +42,7 @@ pub trait Integrand {
 }
 
 pub(crate) mod sealed {
-    use super::*;
+    use super::{AddAssign, Complex, ComplexFloat, Debug, Div, Mul, Zero};
     pub trait ScalarF64:
         PartialEq
         + ComplexFloat<Real = f64>
@@ -76,7 +76,7 @@ impl<I: Integrand> Integrand for &I {
     type Scalar = I::Scalar;
 
     fn evaluate(&self, x: f64) -> Self::Scalar {
-        I::evaluate(self, x).clone()
+        I::evaluate(self, x)
     }
 }
 
