@@ -6,7 +6,7 @@
 #![deny(clippy::pedantic)]
 #![allow(clippy::excessive_precision, clippy::module_name_repetitions)]
 mod limits;
-pub mod multi;
+//pub mod multi;
 pub mod quadrature;
 
 pub use limits::Limits;
