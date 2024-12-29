@@ -19,8 +19,8 @@ pub use singularity::AdaptiveSingularity;
 pub use estimate::IntegralEstimate;
 pub use rule::Rule;
 
-use crate::sealed::ScalarF64;
 use crate::Limits;
+use crate::ScalarF64;
 
 /// User selected tolerance type.
 ///

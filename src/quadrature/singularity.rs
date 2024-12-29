@@ -4,9 +4,7 @@ use std::collections::binary_heap::BinaryHeap;
 use crate::quadrature::{
     subinterval_too_small, Error, IntegralEstimate, Integrator, Kind, Region, Rule, Tolerance,
 };
-use crate::sealed::{Max, ScalarF64};
-use crate::Integrand;
-use crate::Limits;
+use crate::{sealed::Max, Integrand, Limits, ScalarF64};
 
 /// An adaptive Gauss-Kronrod quadrature integrator for functions of a single variable with
 /// integrable singularities.
@@ -970,7 +968,7 @@ impl<T: ScalarF64> ExtrapolationTable<T> {
         }
 
         self.results[n_current + 2] = self.results[n_current];
-        self.results[n_current] = <T as Max>::MAX;
+        self.results[n_current] = <T as Max>::max_value();
 
         for i in 0..new_element {
             let mut res = self.results[n_current - 2 * i + 2];

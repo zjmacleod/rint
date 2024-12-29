@@ -36,41 +36,56 @@ pub use limits::Limits;
 /// }
 ///```
 pub trait Integrand {
-    type Scalar: sealed::ScalarF64;
+    type Scalar: ScalarF64;
 
     fn evaluate(&self, x: f64) -> Self::Scalar;
 }
 
 pub(crate) mod sealed {
-    use super::{AddAssign, Complex, ComplexFloat, Debug, Div, Mul, Zero};
-    pub trait ScalarF64:
-        PartialEq
-        + ComplexFloat<Real = f64>
-        + Zero
-        + Copy
-        + Mul<f64, Output = Self>
-        + Div<f64, Output = Self>
-        + AddAssign<Self>
-        + Debug
-        + Max
-    {
-    }
+    use super::Complex;
+    pub trait Sealed {}
 
-    impl ScalarF64 for f64 {}
-    impl ScalarF64 for Complex<f64> {}
+    impl Sealed for f64 {}
+    impl Sealed for Complex<f64> {}
 
     pub trait Max {
-        const MAX: Self;
+        fn max_value() -> Self;
     }
 
     impl Max for f64 {
-        const MAX: Self = f64::MAX;
+        fn max_value() -> Self {
+            f64::MAX
+        }
     }
 
     impl Max for Complex<f64> {
-        const MAX: Self = Complex::new(f64::MAX, f64::MAX);
+        fn max_value() -> Self {
+            Complex::new(f64::MAX / 2f64.sqrt(), f64::MAX / 2f64.sqrt())
+        }
     }
 }
+
+/// A numerical scalar
+///
+/// The [`Integrand`] trait is implemented for both real and complex valued functions of a real
+/// variable. The sealed trait [`ScalarF64`] is implemented for both `std::f64` and
+/// `num_complex::Complex`.
+pub trait ScalarF64:
+    PartialEq
+    + ComplexFloat<Real = f64>
+    + Zero
+    + Copy
+    + Mul<f64, Output = Self>
+    + Div<f64, Output = Self>
+    + AddAssign<Self>
+    + Debug
+    + sealed::Max
+    + sealed::Sealed
+{
+}
+
+impl ScalarF64 for f64 {}
+impl ScalarF64 for Complex<f64> {}
 
 impl<I: Integrand> Integrand for &I {
     type Scalar = I::Scalar;

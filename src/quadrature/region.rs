@@ -4,9 +4,9 @@ use std::cmp::Ordering;
 use crate::quadrature::integrator::Integrator;
 use crate::quadrature::rule::Rule;
 use crate::quadrature::IntegralEstimate;
-use crate::sealed::ScalarF64;
 use crate::Integrand;
 use crate::Limits;
+use crate::ScalarF64;
 
 #[derive(Debug)]
 pub(crate) struct Region<T: ScalarF64> {

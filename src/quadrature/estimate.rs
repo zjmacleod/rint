@@ -2,7 +2,7 @@ use num_traits::Zero;
 
 use crate::quadrature::rule::Rule;
 use crate::quadrature::{Adaptive, AdaptiveSingularity, Basic, Error, Tolerance};
-use crate::sealed::ScalarF64;
+use crate::ScalarF64;
 use crate::{Integrand, Limits};
 
 /// The value of a function evaluated with Gauss-Kronrod integration and associated error
