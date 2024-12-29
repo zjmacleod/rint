@@ -34,7 +34,8 @@ use crate::Limits;
 /// }
 ///
 /// impl Integrand for Function1 {
-///     fn evaluate(&self, x: f64) -> f64 {
+///     type Scalar = f64;
+///     fn evaluate(&self, x: f64) -> Self::Scalar {
 ///         let alpha = self.alpha;
 ///         x.powf(alpha) * (1.0 / x).ln()
 ///     }
@@ -96,7 +97,7 @@ where
     /// function evaluations and integration routine iterations.
     /// Note: for the [`Basic`] integrator the number of iterations is `1`, and the number of
     /// function evaluations for an `n`-point integration rule is `n`.
-    pub fn integrate(&self) -> IntegralEstimate {
+    pub fn integrate(&self) -> IntegralEstimate<I::Scalar> {
         let integral = self.integrator().integrate();
         IntegralEstimate::new()
             .with_result(integral.result())

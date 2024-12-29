@@ -63,7 +63,8 @@ use crate::Limits;
 /// struct Function455;
 ///
 /// impl Integrand for Function455 {
-///     fn evaluate(&self, x: f64) -> f64 {
+///     type Scalar = f64;
+///     fn evaluate(&self, x: f64) -> Self::Scalar {
 ///         x.ln() / (1.0 + 100.0 * x.powi(2))
 ///     }
 /// }
@@ -343,7 +344,7 @@ where
         let roundoff = Self::roundoff(initial.result_abs());
 
         if initial.error() <= roundoff && initial.error() > tolerance {
-            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
+            let output = initial.into_estimate(1, self.rule.evaluations());
             let kind = Kind::RoundoffErrorDetected;
 
             Err(Error::new(kind, output))
@@ -351,11 +352,11 @@ where
             && initial.error().to_bits() != initial.result_asc().to_bits())
             || initial.error() == 0.0
         {
-            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
+            let output = initial.into_estimate(1, self.rule.evaluations());
 
             Ok(Some(output))
         } else if self.max_iterations == 1 {
-            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
+            let output = initial.into_estimate(1, self.rule.evaluations());
             let kind = Kind::MaximumIterationsReached;
 
             Err(Error::new(kind, output))
@@ -427,7 +428,8 @@ impl<I: Integrand> InfiniteInterval<I> {
 }
 
 impl<I: Integrand> Integrand for InfiniteInterval<I> {
-    fn evaluate(&self, x: f64) -> f64 {
+    type Scalar = I::Scalar;
+    fn evaluate(&self, x: f64) -> Self::Scalar {
         self.transform_evaluate(x)
     }
 }
@@ -495,7 +497,8 @@ impl<I: Integrand> SemiInfiniteIntervalPositive<I> {
 }
 
 impl<I: Integrand> Integrand for SemiInfiniteIntervalPositive<I> {
-    fn evaluate(&self, x: f64) -> f64 {
+    type Scalar = I::Scalar;
+    fn evaluate(&self, x: f64) -> Self::Scalar {
         self.transform_evaluate(x)
     }
 }
@@ -565,7 +568,8 @@ impl<I: Integrand> SemiInfiniteIntervalNegative<I> {
 }
 
 impl<I: Integrand> Integrand for SemiInfiniteIntervalNegative<I> {
-    fn evaluate(&self, x: f64) -> f64 {
+    type Scalar = I::Scalar;
+    fn evaluate(&self, x: f64) -> Self::Scalar {
         self.transform_evaluate(x)
     }
 }

@@ -22,6 +22,7 @@ impl Function1 {
 }
 
 impl Integrand for Function1 {
+    type Scalar = f64;
     fn evaluate(&self, x: f64) -> f64 {
         let alpha = self.alpha;
         x.powf(alpha) * (1.0 / x).ln()
@@ -41,6 +42,7 @@ impl Function2 {
 }
 
 impl Integrand for Function2 {
+    type Scalar = f64;
     fn evaluate(&self, x: f64) -> f64 {
         let alpha = self.alpha;
         4.0_f64.powf(-alpha) / ((x - PI / 4.0).powi(2) + 16.0_f64.powf(-alpha))
@@ -60,6 +62,7 @@ impl Function3 {
 }
 
 impl Integrand for Function3 {
+    type Scalar = f64;
     fn evaluate(&self, x: f64) -> f64 {
         let alpha = self.alpha;
         (2.0_f64.powf(alpha) * x.sin()).cos()
@@ -79,6 +82,7 @@ impl Function11 {
 }
 
 impl Integrand for Function11 {
+    type Scalar = f64;
     fn evaluate(&self, x: f64) -> f64 {
         let alpha = self.alpha;
         f64::ln(1.0 / x).powf(alpha - 1.0)
@@ -96,6 +100,7 @@ impl Function15 {
 }
 
 impl Integrand for Function15 {
+    type Scalar = f64;
     fn evaluate(&self, x: f64) -> f64 {
         let alpha = self.alpha;
         x.powi(2) * f64::exp(-2.0f64.powi(-alpha) * x)
@@ -114,6 +119,7 @@ impl Function16 {
 }
 
 impl Integrand for Function16 {
+    type Scalar = f64;
     fn evaluate(&self, x: f64) -> f64 {
         let alpha = self.alpha;
         if x.to_bits() == 0f64.to_bits() && alpha == 1 {
@@ -138,6 +144,7 @@ impl MyFunciton1 {
 }
 
 impl Integrand for MyFunciton1 {
+    type Scalar = f64;
     fn evaluate(&self, x: f64) -> f64 {
         f64::exp(-x - x.powi(2))
     }
@@ -154,6 +161,7 @@ impl MyFunciton2 {
 }
 
 impl Integrand for MyFunciton2 {
+    type Scalar = f64;
     fn evaluate(&self, x: f64) -> f64 {
         let alpha = self.alpha;
         f64::exp(alpha * x)
@@ -165,6 +173,7 @@ impl Integrand for MyFunciton2 {
 pub(crate) struct Function455;
 
 impl Integrand for Function455 {
+    type Scalar = f64;
     fn evaluate(&self, x: f64) -> f64 {
         x.ln() / (1.0 + 100.0 * x.powi(2))
     }

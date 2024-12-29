@@ -1,3 +1,6 @@
+use num_complex::ComplexFloat;
+use num_traits::Zero;
+
 use crate::quadrature::region::Region;
 use crate::quadrature::rescale_error;
 use crate::quadrature::rule::Rule;
@@ -25,23 +28,23 @@ where
         }
     }
 
-    pub(crate) fn integrate(&self) -> Region {
+    pub(crate) fn integrate(&self) -> Region<I> {
         let centre = self.limits.centre();
         let half_length = self.limits.half_width();
         let abs_half_length = half_length.abs();
         let f_centre = self.function.evaluate(centre);
 
-        let initial_kronrod = self.rule.kronrod_centre() * f_centre;
+        let initial_kronrod = f_centre * self.rule.kronrod_centre();
         let initial_gauss = if let Some(v) = self.rule.gauss_centre() {
-            v * f_centre
+            f_centre * v
         } else {
-            0.0
+            <I::Scalar as Zero>::zero()
         };
         let initial_abs = initial_kronrod.abs();
 
         // XXX Can we get rid of this additional allocation?
         // Vec<(kronrod_weight, (rate_plus, rate_minus))>
-        let mut function_values: Vec<(f64, (f64, f64))> = Vec::with_capacity(61);
+        let mut function_values = Vec::with_capacity(61);
 
         let (gauss_result, kronrod_shared, abs_shared) = self
             .rule
@@ -57,7 +60,7 @@ where
                 let rate = rate_plus + rate_minus;
                 let rate_abs = rate_plus.abs() + rate_minus.abs();
                 function_values.push((kronrod, (rate_plus, rate_minus)));
-                (gauss * rate, kronrod * rate, kronrod * rate_abs)
+                (rate * gauss, rate * kronrod, kronrod * rate_abs)
             })
             .fold((initial_gauss, initial_kronrod, initial_abs), |a, v| {
                 (a.0 + v.0, a.1 + v.1, a.2 + v.2)
@@ -76,7 +79,7 @@ where
                 let rate = rate_plus + rate_minus;
                 let rate_abs = rate_plus.abs() + rate_minus.abs();
                 function_values.push((kronrod, (rate_plus, rate_minus)));
-                (kronrod * rate, kronrod * rate_abs)
+                (rate * kronrod, kronrod * rate_abs)
             })
             .fold((kronrod_shared, abs_shared), |a, v| (a.0 + v.0, a.1 + v.1));
 
@@ -86,10 +89,10 @@ where
 
         let asc_result = function_values
             .iter()
-            .map(|(k, (rp, rm))| k * ((rp - mean).abs() + (rm - mean).abs()))
+            .map(|(k, (rp, rm))| k * ((*rp - mean).abs() + (*rm - mean).abs()))
             .fold(initial_asc, |a, v| a + v);
 
-        let error = (kronrod_result - gauss_result) * half_length;
+        let error = (kronrod_result - gauss_result).abs() * abs_half_length;
 
         let result = kronrod_result * half_length;
         let result_abs = abs_result * abs_half_length;

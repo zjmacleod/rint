@@ -56,7 +56,7 @@ use crate::Limits;
 /// }
 ///
 /// impl Integrand for Function1 {
-///     fn evaluate(&self, x: f64) -> f64 {
+///     fn evaluate(&self, x: f64) -> Self::Scalar {
 ///         let alpha = self.alpha;
 ///         x.powf(alpha) * (1.0 / x).ln()
 ///     }
@@ -105,7 +105,8 @@ use crate::Limits;
 /// #     alpha: f64,
 /// # }
 /// # impl Integrand for Function1 {
-/// #     fn evaluate(&self, x: f64) -> f64 {
+/// #     type Scalar = f64;
+/// #     fn evaluate(&self, x: f64) -> Self::Scalar {
 /// #         let alpha = self.alpha;
 /// #         x.powf(alpha) * (1.0 / x).ln()
 /// #     }
@@ -308,7 +309,7 @@ impl<I: Integrand> Adaptive<I> {
         let roundoff = Self::roundoff(initial.result_abs());
 
         if initial.error() <= roundoff && initial.error() > tolerance {
-            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
+            let output = initial.into_estimate(1, self.rule.evaluations());
             let kind = Kind::RoundoffErrorDetected;
 
             Err(Error::new(kind, output))
@@ -316,11 +317,11 @@ impl<I: Integrand> Adaptive<I> {
             && initial.error().to_bits() != initial.result_asc().to_bits())
             || initial.error() == 0.0
         {
-            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
+            let output = initial.into_estimate(1, self.rule.evaluations());
 
             Ok(Some(output))
         } else if self.max_iterations == 1 {
-            let output = IntegralEstimate::from_region(initial, 1, self.rule.evaluations());
+            let output = initial.into_estimate(1, self.rule.evaluations());
             let kind = Kind::MaximumIterationsReached;
 
             Err(Error::new(kind, output))

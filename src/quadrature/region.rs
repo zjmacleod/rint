@@ -1,28 +1,41 @@
+use num_complex::ComplexFloat;
+use num_traits::Zero;
 use std::cmp::Ordering;
 
 use crate::quadrature::integrator::Integrator;
 use crate::quadrature::rule::Rule;
+use crate::quadrature::IntegralEstimate;
 use crate::Integrand;
 use crate::Limits;
 
-#[derive(Debug, PartialEq)]
-pub(crate) struct Region {
-    pub(crate) result: f64,
+#[derive(Debug)]
+pub(crate) struct Region<I: Integrand> {
+    pub(crate) result: I::Scalar,
     pub(crate) error: f64,
     pub(crate) result_abs: f64,
     pub(crate) result_asc: f64,
     pub(crate) limits: Limits,
 }
 
-impl Eq for Region {}
+impl<I: Integrand> PartialEq for Region<I> {
+    fn eq(&self, other: &Self) -> bool {
+        (self.result == other.result)
+            && (self.error == other.error)
+            && (self.result_abs == other.result_abs)
+            && (self.result_asc == other.result_asc)
+            && (self.limits == other.limits)
+    }
+}
 
-impl PartialOrd for Region {
+impl<I: Integrand> Eq for Region<I> {}
+
+impl<I: Integrand> PartialOrd for Region<I> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for Region {
+impl<I: Integrand> Ord for Region<I> {
     fn cmp(&self, other: &Self) -> Ordering {
         let mut ordering = self.total_cmp_error(other);
         if let Ordering::Equal = ordering {
@@ -32,18 +45,20 @@ impl Ord for Region {
     }
 }
 
-impl Region {
+impl<I: Integrand> Region<I> {
     pub(crate) fn unevaluated() -> Self {
+        let result = <I::Scalar as Zero>::zero();
+
         Self {
             error: 0.0,
-            result: 0.0,
+            result,
             result_abs: 0.0,
             result_asc: 0.0,
             limits: Limits::new(0.0, 0.0),
         }
     }
 
-    pub(crate) fn with_result(mut self, result: f64) -> Self {
+    pub(crate) fn with_result(mut self, result: I::Scalar) -> Self {
         self.result = result;
         self
     }
@@ -70,7 +85,7 @@ impl Region {
 
     #[must_use]
     #[inline]
-    pub(crate) fn result(&self) -> f64 {
+    pub(crate) fn result(&self) -> I::Scalar {
         self.result
     }
 
@@ -108,7 +123,7 @@ impl Region {
     }
 
     #[allow(clippy::needless_borrow)]
-    pub(crate) fn bisect<I: Integrand>(&self, function: &I, rule: &Rule) -> [Region; 2] {
+    pub(crate) fn bisect<'a>(&self, function: &'a I, rule: &Rule) -> [Region<&'a I>; 2] {
         let [lower, upper] = self.limits.bisect();
         let lower_integral = Integrator::new(&function, &rule, lower).integrate();
 
@@ -124,6 +139,20 @@ impl Region {
     pub(crate) fn abs_interval_length(&self) -> f64 {
         self.limits.width().abs()
     }
+
+    pub(crate) fn into_estimate(
+        &self,
+        iterations: usize,
+        function_evaluations: usize,
+    ) -> IntegralEstimate<I::Scalar> {
+        let result = self.result();
+        let error = self.error();
+        IntegralEstimate::new()
+            .with_result(result)
+            .with_error(error)
+            .with_iterations(iterations)
+            .with_function_evaluations(function_evaluations)
+    }
 }
 
 #[cfg(test)]
@@ -134,28 +163,37 @@ mod tests {
     fn test_ordering_of_basic_internal() {
         use std::collections::BinaryHeap;
 
-        let a = Region {
+        #[derive(Debug)]
+        struct F;
+        impl Integrand for F {
+            type Scalar = f64;
+            fn evaluate(&self, x: f64) -> Self::Scalar {
+                x
+            }
+        }
+
+        let a: Region<F> = Region {
             error: 2.0,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
             limits: Limits::new(0.0, 1.0),
         };
-        let b = Region {
+        let b: Region<F> = Region {
             error: 1.533,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
             limits: Limits::new(0.0, 1.0),
         };
-        let c = Region {
+        let c: Region<F> = Region {
             error: 1.533,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
             limits: Limits::new(0.5, 1.0),
         };
-        let d = Region {
+        let d: Region<F> = Region {
             error: 1.60,
             result: 1.0,
             result_abs: 1.0,

@@ -1,24 +1,25 @@
-mod adaptive;
+//mod adaptive;
 mod basic;
 mod estimate;
 mod integrator;
 mod region;
 mod rule;
-mod singularity;
+//mod singularity;
 
 #[cfg(test)]
 mod tests;
 
 pub(crate) use integrator::Integrator;
-pub(crate) use region::Region;
+//pub(crate) use region::Region;
 
-pub use adaptive::Adaptive;
+//pub use adaptive::Adaptive;
 pub use basic::Basic;
-pub use singularity::AdaptiveSingularity;
+//pub use singularity::AdaptiveSingularity;
 
 pub use estimate::IntegralEstimate;
 pub use rule::Rule;
 
+use crate::sealed::ScalarF64;
 use crate::Limits;
 
 /// User selected tolerance type.
@@ -55,9 +56,9 @@ impl Tolerance {
 }
 
 #[derive(Debug)]
-pub struct Error {
+pub struct Error<T: ScalarF64> {
     kind: Kind,
-    integral: IntegralEstimate,
+    integral: IntegralEstimate<T>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
@@ -73,8 +74,8 @@ pub enum Kind {
     InvalidTolerance,
 }
 
-impl Error {
-    pub(crate) fn new(kind: Kind, integral: IntegralEstimate) -> Self {
+impl<T: ScalarF64> Error<T> {
+    pub(crate) fn new(kind: Kind, integral: IntegralEstimate<T>) -> Self {
         Self { kind, integral }
     }
 
@@ -92,13 +93,13 @@ impl Error {
     /// Return a reference to the best [`IntegralEstimate`] which was calculated before an error
     /// occurred.
     #[must_use]
-    pub fn estimate(&self) -> &IntegralEstimate {
+    pub fn estimate(&self) -> &IntegralEstimate<T> {
         &self.integral
     }
 
     /// Return the best estimate of the integral value which was calculated before an error occurred.
     #[must_use]
-    pub fn result(&self) -> f64 {
+    pub fn result(&self) -> T {
         self.integral.result()
     }
 
@@ -121,7 +122,7 @@ impl Error {
     }
 }
 
-impl std::fmt::Display for Error {
+impl<T: ScalarF64> std::fmt::Display for Error<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let result = self.result();
         let error = self.error();
@@ -130,14 +131,14 @@ impl std::fmt::Display for Error {
             Kind::MaximumIterationsReached => {
                 write!(
                     f,
-                    "Maximum number of iterations/subdivisions reached. Try increasing max_iterations. If this yields no improvement it is advised to analyse the integrand to determine integration difficulties. If the position of a local difficulty can be determined, one may gain from splitting the total integration interval and calling the integrator on each sub-interval.\nresult:\t{result:.10e}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                    "Maximum number of iterations/subdivisions reached. Try increasing max_iterations. If this yields no improvement it is advised to analyse the integrand to determine integration difficulties. If the position of a local difficulty can be determined, one may gain from splitting the total integration interval and calling the integrator on each sub-interval.\nresult:\t{result:?}\nerror\t{error:.10e}\niterations:\t{iterations}."
                 )
             }
 
             Kind::RoundoffErrorDetected => {
                 write!(
                     f,
-                    "Roundoff error detected. This prevents the requested tolerance from being achieved and the returned error may be under-estimated.\nresult:\t{result:.10e}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                    "Roundoff error detected. This prevents the requested tolerance from being achieved and the returned error may be under-estimated.\nresult:\t{result:?}\nerror\t{error:.10e}\niterations:\t{iterations}."
                 )
             }
 
@@ -146,21 +147,21 @@ impl std::fmt::Display for Error {
                 let upper = limits.upper();
                 write!(
                     f,
-                    "Extremely bad integrand behaviour. Possible non-integrable singularity, divergence, or discontinuity detected between ({lower},{upper}).\nresult:\t{result:.10e}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                    "Extremely bad integrand behaviour. Possible non-integrable singularity, divergence, or discontinuity detected between ({lower},{upper}).\nresult:\t{result:?}\nerror\t{error:.10e}\niterations:\t{iterations}."
                 )
             }
 
             Kind::DoesNotConverge => {
                 write!(
                     f,
-                    "The algorithm does not converge. Roundoff error is detected in the extrapolation table. It is assumed that the requested tolerance cannot be achieved and the returned result is the best which can be obtained.\nresult:\t{result:.10e}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                    "The algorithm does not converge. Roundoff error is detected in the extrapolation table. It is assumed that the requested tolerance cannot be achieved and the returned result is the best which can be obtained.\nresult:\t{result:?}\nerror\t{error:.10e}\niterations:\t{iterations}."
                 )
             }
 
             Kind::DivergentOrSlowlyConverging => {
                 write!(
                     f,
-                    "The integral is probably divergent or slowly convergent. NOTE: divergence can also occur with any other error kind.\nresult:\t{result:.10e}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                    "The integral is probably divergent or slowly convergent. NOTE: divergence can also occur with any other error kind.\nresult:\t{result:?}\nerror\t{error:.10e}\niterations:\t{iterations}."
                 )
             }
 
@@ -189,10 +190,10 @@ impl std::fmt::Display for Error {
     }
 }
 
-impl std::error::Error for Error {}
+impl<T: ScalarF64> std::error::Error for Error<T> {}
 
 pub(crate) fn rescale_error(error: f64, result_abs: f64, result_asc: f64) -> f64 {
-    let mut error = error.abs();
+    let mut error = error;
 
     if result_asc != 0.0 && error != 0.0 {
         let scale = (200.0 * error / result_asc).powf(1.5);

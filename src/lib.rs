@@ -5,6 +5,11 @@
 //!
 #![deny(clippy::pedantic)]
 #![allow(clippy::excessive_precision, clippy::module_name_repetitions)]
+use num_complex::{Complex, ComplexFloat};
+use num_traits::Zero;
+use std::fmt::Debug;
+use std::ops::{Div, Mul, Neg};
+
 mod limits;
 //pub mod multi;
 pub mod quadrature;
@@ -24,18 +29,40 @@ pub use limits::Limits;
 ///     std_dev: f64,
 /// }
 /// impl Integrand for GaussianExponential {
-///     fn evaluate(&self, x: f64) -> f64 {
+///     type Scalar = f64;
+///     fn evaluate(&self, x: f64) -> Self::Scalar {
 ///         self.amplitude * f64::exp(-(x - self.mean).powi(2) / (2.0 * self.std_dev.powi(2)))
 ///     }
 /// }
 ///```
 pub trait Integrand {
-    fn evaluate(&self, x: f64) -> f64;
+    type Scalar: sealed::ScalarF64;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar;
+}
+
+pub(crate) mod sealed {
+    use super::*;
+    pub trait ScalarF64:
+        PartialEq
+        + ComplexFloat<Real = f64>
+        + Zero
+        + Copy
+        + Mul<f64, Output = Self>
+        + Div<f64, Output = Self>
+        + Debug
+    {
+    }
+
+    impl ScalarF64 for f64 {}
+    impl ScalarF64 for Complex<f64> {}
 }
 
 impl<I: Integrand> Integrand for &I {
-    fn evaluate(&self, x: f64) -> f64 {
-        I::evaluate(self, x)
+    type Scalar = I::Scalar;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        I::evaluate(self, x).clone()
     }
 }
 
