@@ -58,57 +58,57 @@ impl<T: ScalarF64> Region<T> {
         }
     }
 
-    pub(crate) fn with_result(mut self, result: T) -> Self {
+    pub(crate) const fn with_result(mut self, result: T) -> Self {
         self.result = result;
         self
     }
 
-    pub(crate) fn with_result_asc(mut self, result_asc: f64) -> Self {
+    pub(crate) const fn with_result_asc(mut self, result_asc: f64) -> Self {
         self.result_asc = result_asc;
         self
     }
 
-    pub(crate) fn with_result_abs(mut self, result_abs: f64) -> Self {
+    pub(crate) const fn with_result_abs(mut self, result_abs: f64) -> Self {
         self.result_abs = result_abs;
         self
     }
 
-    pub(crate) fn with_error(mut self, error: f64) -> Self {
+    pub(crate) const fn with_error(mut self, error: f64) -> Self {
         self.error = error;
         self
     }
 
-    pub(crate) fn with_limits(mut self, limits: Limits) -> Self {
+    pub(crate) const fn with_limits(mut self, limits: Limits) -> Self {
         self.limits = limits;
         self
     }
 
     #[must_use]
     #[inline]
-    pub(crate) fn result(&self) -> T {
+    pub(crate) const fn result(&self) -> T {
         self.result
     }
 
     #[must_use]
     #[inline]
-    pub(crate) fn result_asc(&self) -> f64 {
+    pub(crate) const fn result_asc(&self) -> f64 {
         self.result_asc
     }
 
     #[must_use]
     #[inline]
-    pub(crate) fn result_abs(&self) -> f64 {
+    pub(crate) const fn result_abs(&self) -> f64 {
         self.result_abs
     }
 
     #[must_use]
     #[inline]
-    pub(crate) fn error(&self) -> f64 {
+    pub(crate) const fn error(&self) -> f64 {
         self.error
     }
 
     #[must_use]
-    pub(crate) fn limits(&self) -> Limits {
+    pub(crate) const fn limits(&self) -> Limits {
         self.limits
     }
 

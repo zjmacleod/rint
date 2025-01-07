@@ -6,33 +6,33 @@ pub struct Limits {
 
 impl Limits {
     #[must_use]
-    pub fn new(lower: f64, upper: f64) -> Self {
+    pub const fn new(lower: f64, upper: f64) -> Self {
         Self { lower, upper }
     }
 
     #[must_use]
-    pub fn lower(&self) -> f64 {
+    pub const fn lower(&self) -> f64 {
         self.lower
     }
 
     #[must_use]
-    pub fn upper(&self) -> f64 {
+    pub const fn upper(&self) -> f64 {
         self.upper
     }
 
-    pub(crate) fn centre(&self) -> f64 {
+    pub(crate) const fn centre(&self) -> f64 {
         (self.upper + self.lower) * 0.5
     }
 
-    pub(crate) fn width(&self) -> f64 {
+    pub(crate) const fn width(&self) -> f64 {
         self.upper - self.lower
     }
 
-    pub(crate) fn half_width(&self) -> f64 {
+    pub(crate) const fn half_width(&self) -> f64 {
         self.width() * 0.5
     }
 
-    pub(crate) fn bisect(&self) -> [Self; 2] {
+    pub(crate) const fn bisect(&self) -> [Self; 2] {
         let upper = self.upper();
         let lower = self.lower();
         let midpoint = (upper + lower) * 0.5;

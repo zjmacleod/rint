@@ -75,7 +75,7 @@ pub enum Kind {
 }
 
 impl<T: ScalarF64> Error<T> {
-    pub(crate) fn new(kind: Kind, integral: IntegralEstimate<T>) -> Self {
+    pub(crate) const fn new(kind: Kind, integral: IntegralEstimate<T>) -> Self {
         Self { kind, integral }
     }
 
@@ -86,38 +86,38 @@ impl<T: ScalarF64> Error<T> {
 
     /// Return the error [`Kind`] which was encountered.
     #[must_use]
-    pub fn kind(&self) -> Kind {
+    pub const fn kind(&self) -> Kind {
         self.kind
     }
 
     /// Return a reference to the best [`IntegralEstimate`] which was calculated before an error
     /// occurred.
     #[must_use]
-    pub fn estimate(&self) -> &IntegralEstimate<T> {
+    pub const fn estimate(&self) -> &IntegralEstimate<T> {
         &self.integral
     }
 
     /// Return the best estimate of the integral value which was calculated before an error occurred.
     #[must_use]
-    pub fn result(&self) -> T {
+    pub const fn result(&self) -> T {
         self.integral.result()
     }
 
     /// Return the best estimate of the integral error which was calculated before an error occurred.
     #[must_use]
-    pub fn error(&self) -> f64 {
+    pub const fn error(&self) -> f64 {
         self.integral.error()
     }
 
     /// Return the number of iterations used by the integrator before an error occurred.
     #[must_use]
-    pub fn iterations(&self) -> usize {
+    pub const fn iterations(&self) -> usize {
         self.integral.iterations()
     }
 
     /// Return the number of function evaluations used by the integrator before an error occurred.
     #[must_use]
-    pub fn function_evaluations(&self) -> usize {
+    pub const fn function_evaluations(&self) -> usize {
         self.integral.function_evaluations()
     }
 }

@@ -269,7 +269,7 @@ where
     }
 
     /// Return the integration [`Limits`]
-    pub fn limits(&self) -> Limits {
+    pub const fn limits(&self) -> Limits {
         self.limits
     }
 }
@@ -300,7 +300,7 @@ impl<I: Integrand> Adaptive<I> {
         }
     }
 
-    fn roundoff(result_abs: f64) -> f64 {
+    const fn roundoff(result_abs: f64) -> f64 {
         50.0 * f64::EPSILON * result_abs
     }
 

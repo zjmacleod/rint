@@ -19,25 +19,25 @@ pub struct IntegralEstimate<T: ScalarF64> {
 impl<T: ScalarF64> IntegralEstimate<T> {
     /// Return the numerically approximated value of the integral.
     #[must_use]
-    pub fn result(&self) -> T {
+    pub const fn result(&self) -> T {
         self.result
     }
 
     /// Return the numerically approximated error.
     #[must_use]
-    pub fn error(&self) -> f64 {
+    pub const fn error(&self) -> f64 {
         self.error
     }
 
     /// Return the number of iterations used in integration.
     #[must_use]
-    pub fn iterations(&self) -> usize {
+    pub const fn iterations(&self) -> usize {
         self.iterations
     }
 
     /// Return the number of function evaluations used in the integration.
     #[must_use]
-    pub fn function_evaluations(&self) -> usize {
+    pub const fn function_evaluations(&self) -> usize {
         self.function_evaluations
     }
 }

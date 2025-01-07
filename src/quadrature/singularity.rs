@@ -272,7 +272,7 @@ where
     }
 
     /// Return the integration [`Limits`].
-    pub fn limits(&self) -> Limits {
+    pub const fn limits(&self) -> Limits {
         self.limits
     }
 }
@@ -332,7 +332,7 @@ where
         Ok(v)
     }
 
-    fn roundoff(result_abs: f64) -> f64 {
+    const fn roundoff(result_abs: f64) -> f64 {
         100.0 * f64::EPSILON * result_abs
     }
 
@@ -786,7 +786,7 @@ impl<T: ScalarF64> Workspace<T> {
         self.compute_extrapolated_result()
     }
 
-    fn check_roundoff(&mut self) {
+    const fn check_roundoff(&mut self) {
         if self.roundoff_count + self.table.roundoff_count >= 10
             || self.roundoff_on_high_iteration_count >= 20
         {
@@ -798,7 +798,7 @@ impl<T: ScalarF64> Workspace<T> {
         }
     }
 
-    fn check_convergence(&mut self) {
+    const fn check_convergence(&mut self) {
         if self.table.ktmin > 5 && self.table.error < 0.001 * self.error {
             self.set_error_kind(Kind::DoesNotConverge);
         }
@@ -816,11 +816,11 @@ impl<T: ScalarF64> Workspace<T> {
         false
     }
 
-    fn is_err(&self) -> bool {
+    const fn is_err(&self) -> bool {
         self.error_kind.is_some()
     }
 
-    fn set_error_kind(&mut self, kind: Kind) {
+    const fn set_error_kind(&mut self, kind: Kind) {
         self.error_kind = Some(kind);
     }
 
@@ -839,7 +839,7 @@ impl<T: ScalarF64> Workspace<T> {
         self.push(upper);
     }
 
-    fn update_large_interval_error(
+    const fn update_large_interval_error(
         &mut self,
         iteration_interval: f64,
         previous_error: f64,
@@ -853,7 +853,7 @@ impl<T: ScalarF64> Workspace<T> {
         }
     }
 
-    fn update_table_values(&mut self, ext_result: T, ext_error: f64, tolerance: f64) {
+    const fn update_table_values(&mut self, ext_result: T, ext_error: f64, tolerance: f64) {
         self.table.ktmin = 0;
         self.table.error = ext_error;
         self.table.result = ext_result;
@@ -918,11 +918,11 @@ impl<T: ScalarF64> ExtrapolationTable<T> {
         table
     }
 
-    fn is_err(&self) -> bool {
+    const fn is_err(&self) -> bool {
         self.error_detected
     }
 
-    fn cache(&mut self, value: T) -> &mut Self {
+    const fn cache(&mut self, value: T) -> &mut Self {
         match self.cached {
             Cached::Full(_, a, b) | Cached::Two(a, b) => {
                 self.cached = Cached::Full(a, b, value);
@@ -937,7 +937,7 @@ impl<T: ScalarF64> ExtrapolationTable<T> {
         self
     }
 
-    fn append_table(&mut self, result: T) -> &mut Self {
+    const fn append_table(&mut self, result: T) -> &mut Self {
         self.results[self.count] = result;
         self.count += 1;
         self
