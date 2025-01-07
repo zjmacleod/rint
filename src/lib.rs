@@ -19,8 +19,10 @@ pub use limits::Limits;
 /// The integrand of a one-dimensional integral.
 ///
 /// The [`Integrand`] trait is the main entry point of this library. It defines how the integrand,
-/// i.e. function `f(x)` should be evaluated at a specified variable `x`. The trait should be
-/// implemented on a struct containing all of the constant parameters required by the function.
+/// `f(x)`, should be evaluated at the real point `x`. The trait should be implemented on a
+/// struct containing all of the constant parameters required by the function.
+/// The integrand can be either real valued, with return type [`f64`], or complex valued, with
+/// return type [`Complex<f64>`].
 ///```rust
 /// use rint::Integrand;
 /// struct GaussianExponential {
@@ -36,8 +38,13 @@ pub use limits::Limits;
 /// }
 ///```
 pub trait Integrand {
+    /// The output type of the integrand.
+    ///
+    /// The integrand can be either real valued or complex valued, evaluating to [`f64`] or
+    /// [`Complex<f64>`], respectively.
     type Scalar: ScalarF64;
 
+    /// Evaluate the integrand at a real point `x`.
     fn evaluate(&self, x: f64) -> Self::Scalar;
 }
 
@@ -68,8 +75,8 @@ pub(crate) mod sealed {
 /// A numerical scalar
 ///
 /// The [`Integrand`] trait is implemented for both real and complex valued functions of a real
-/// variable. The sealed trait [`ScalarF64`] is implemented for both `std::f64` and
-/// `num_complex::Complex`.
+/// variable. The sealed trait [`ScalarF64`] is implemented for both [`f64`] and
+/// [`Complex`].
 pub trait ScalarF64:
     PartialEq
     + ComplexFloat<Real = f64>

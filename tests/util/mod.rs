@@ -3,9 +3,10 @@
 #[macro_use]
 pub(crate) mod macros;
 
+use num_complex::Complex;
 use std::f64::consts::PI;
 
-use rint::Integrand;
+use rint::{Integrand, Limits};
 
 /* These are the test functions from table 4.1 of the QUADPACK book */
 
@@ -185,6 +186,661 @@ impl Function455 {
     }
 }
 
+pub(crate) const CATALAN: f64 = 0.915_965_594_177_219_015_054_603_514_932_384_110_774;
+
+fn catalan1(x: f64) -> f64 {
+    -x.ln() / (1.0 + x.powi(2))
+}
+
+pub(crate) struct Catalan1 {
+    lower: f64,
+    upper: f64,
+}
+
+impl Catalan1 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for Catalan1 {
+    type Scalar = f64;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        catalan1(x)
+    }
+}
+
+fn catalan2(x: f64) -> f64 {
+    let x = x * std::f64::consts::FRAC_PI_2;
+    (0.5 * x / x.sin()) * std::f64::consts::FRAC_PI_2
+}
+
+pub(crate) struct Catalan2 {
+    lower: f64,
+    upper: f64,
+}
+
+impl Catalan2 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for Catalan2 {
+    type Scalar = f64;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        catalan2(x)
+    }
+}
+
+fn catalan3(x: f64) -> f64 {
+    let x = x * std::f64::consts::FRAC_PI_4;
+    (x.cos() / x.sin()).ln() * std::f64::consts::FRAC_PI_4
+}
+
+pub(crate) struct Catalan3 {
+    lower: f64,
+    upper: f64,
+}
+
+impl Catalan3 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for Catalan3 {
+    type Scalar = f64;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        catalan3(x)
+    }
+}
+
+fn catalan4(x: f64) -> f64 {
+    x.acos() / (1.0 + x.powi(2)).sqrt()
+}
+
+pub(crate) struct Catalan4 {
+    lower: f64,
+    upper: f64,
+}
+
+impl Catalan4 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for Catalan4 {
+    type Scalar = f64;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        catalan4(x)
+    }
+}
+
+fn catalan5(x: f64) -> f64 {
+    x.asinh() / (1.0 - x.powi(2)).sqrt()
+}
+
+pub(crate) struct Catalan5 {
+    lower: f64,
+    upper: f64,
+}
+
+impl Catalan5 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for Catalan5 {
+    type Scalar = f64;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        catalan5(x)
+    }
+}
+
+fn catalan6(x: f64) -> f64 {
+    (x.atanh() / (1.0 - x.powf(2.0)).sqrt()) * 0.5
+}
+
+pub(crate) struct Catalan6 {
+    lower: f64,
+    upper: f64,
+}
+
+impl Catalan6 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for Catalan6 {
+    type Scalar = f64;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        catalan6(x)
+    }
+}
+
+fn catalan7(x: f64) -> f64 {
+    x.ln() / (1.0 + x.powi(2))
+}
+
+pub(crate) struct Catalan7 {
+    pub(crate) lower: f64,
+}
+
+impl Catalan7 {
+    pub(crate) fn new() -> Self {
+        Self { lower: 1.0 }
+    }
+}
+
+impl Integrand for Catalan7 {
+    type Scalar = f64;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        catalan7(x)
+    }
+}
+
+fn catalan8(x: f64) -> f64 {
+    0.5 * x.atan() / x / (1.0 + x.powi(2)).sqrt()
+}
+
+pub(crate) struct Catalan8 {
+    pub(crate) lower: f64,
+}
+
+impl Catalan8 {
+    pub(crate) fn new() -> Self {
+        Self { lower: 0.0 }
+    }
+}
+
+impl Integrand for Catalan8 {
+    type Scalar = f64;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        catalan8(x)
+    }
+}
+
+fn catalan9(x: f64) -> f64 {
+    ((-x).exp()).atan()
+}
+
+pub(crate) struct Catalan9 {
+    pub(crate) lower: f64,
+}
+
+impl Catalan9 {
+    pub(crate) fn new() -> Self {
+        Self { lower: 0.0 }
+    }
+}
+
+impl Integrand for Catalan9 {
+    type Scalar = f64;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        catalan9(x)
+    }
+}
+
+fn catalan10(x: f64) -> f64 {
+    std::f64::consts::FRAC_PI_2 * (x.powi(4) - 6.0 * x.powi(2) + 1.0) * x.ln().ln()
+        / (1.0 + x.powi(2)).powi(3)
+}
+
+pub(crate) struct Catalan10 {
+    pub(crate) lower: f64,
+}
+
+impl Catalan10 {
+    pub(crate) fn new() -> Self {
+        Self { lower: 1.0 }
+    }
+}
+
+impl Integrand for Catalan10 {
+    type Scalar = f64;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        catalan10(x)
+    }
+}
+
+fn catalan11(x: f64) -> f64 {
+    0.5 * x / x.cosh()
+}
+
+pub(crate) struct Catalan11 {
+    pub(crate) lower: f64,
+}
+
+impl Catalan11 {
+    pub(crate) fn new() -> Self {
+        Self { lower: 0.0 }
+    }
+}
+
+impl Integrand for Catalan11 {
+    type Scalar = f64;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        catalan11(x)
+    }
+}
+
+pub(crate) struct ComplexCatalan12 {
+    lower: f64,
+    upper: f64,
+}
+
+impl ComplexCatalan12 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for ComplexCatalan12 {
+    type Scalar = Complex<f64>;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        let re = catalan1(x);
+        let im = catalan2(x);
+        Complex::new(re, im)
+    }
+}
+
+pub(crate) struct ComplexCatalan13 {
+    lower: f64,
+    upper: f64,
+}
+
+impl ComplexCatalan13 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for ComplexCatalan13 {
+    type Scalar = Complex<f64>;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        let re = catalan1(x);
+        let im = catalan3(x);
+        Complex::new(re, im)
+    }
+}
+
+pub(crate) struct ComplexCatalan14 {
+    lower: f64,
+    upper: f64,
+}
+
+impl ComplexCatalan14 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for ComplexCatalan14 {
+    type Scalar = Complex<f64>;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        let re = catalan1(x);
+        let im = catalan4(x);
+        Complex::new(re, im)
+    }
+}
+
+pub(crate) struct ComplexCatalan23 {
+    lower: f64,
+    upper: f64,
+}
+
+impl ComplexCatalan23 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for ComplexCatalan23 {
+    type Scalar = Complex<f64>;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        let re = catalan2(x);
+        let im = catalan3(x);
+        Complex::new(re, im)
+    }
+}
+
+pub(crate) struct ComplexCatalan24 {
+    lower: f64,
+    upper: f64,
+}
+
+impl ComplexCatalan24 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for ComplexCatalan24 {
+    type Scalar = Complex<f64>;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        let re = catalan2(x);
+        let im = catalan4(x);
+        Complex::new(re, im)
+    }
+}
+
+pub(crate) struct ComplexCatalan34 {
+    lower: f64,
+    upper: f64,
+}
+
+impl ComplexCatalan34 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for ComplexCatalan34 {
+    type Scalar = Complex<f64>;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        let re = catalan3(x);
+        let im = catalan4(x);
+        Complex::new(re, im)
+    }
+}
+
+pub(crate) struct ComplexCatalan15 {
+    lower: f64,
+    upper: f64,
+}
+
+impl ComplexCatalan15 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for ComplexCatalan15 {
+    type Scalar = Complex<f64>;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        let re = catalan1(x);
+        let im = catalan5(x);
+        Complex::new(re, im)
+    }
+}
+
+pub(crate) struct ComplexCatalan16 {
+    lower: f64,
+    upper: f64,
+}
+
+impl ComplexCatalan16 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for ComplexCatalan16 {
+    type Scalar = Complex<f64>;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        let re = catalan1(x);
+        let im = catalan6(x);
+        Complex::new(re, im)
+    }
+}
+
+pub(crate) struct ComplexCatalan45 {
+    lower: f64,
+    upper: f64,
+}
+
+impl ComplexCatalan45 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for ComplexCatalan45 {
+    type Scalar = Complex<f64>;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        let re = catalan4(x);
+        let im = catalan5(x);
+        Complex::new(re, im)
+    }
+}
+
+pub(crate) struct ComplexCatalan46 {
+    lower: f64,
+    upper: f64,
+}
+
+impl ComplexCatalan46 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for ComplexCatalan46 {
+    type Scalar = Complex<f64>;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        let re = catalan4(x);
+        let im = catalan6(x);
+        Complex::new(re, im)
+    }
+}
+
+pub(crate) struct ComplexCatalan56 {
+    lower: f64,
+    upper: f64,
+}
+
+impl ComplexCatalan56 {
+    pub(crate) fn new() -> Self {
+        Self {
+            lower: 0.0,
+            upper: 1.0,
+        }
+    }
+
+    pub(crate) fn limits(&self) -> Limits {
+        Limits::new(self.lower, self.upper)
+    }
+}
+
+impl Integrand for ComplexCatalan56 {
+    type Scalar = Complex<f64>;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        let re = catalan5(x);
+        let im = catalan6(x);
+        Complex::new(re, im)
+    }
+}
+
+pub(crate) struct ComplexF1F1 {
+    alpha1: f64,
+    alpha2: f64,
+}
+
+impl ComplexF1F1 {
+    pub(crate) fn new(alpha1: f64, alpha2: f64) -> Self {
+        Self { alpha1, alpha2 }
+    }
+}
+
+impl Integrand for ComplexF1F1 {
+    type Scalar = Complex<f64>;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        let re = x.powf(self.alpha1) * (1.0 / x).ln();
+        let im = x.powf(self.alpha2) * (1.0 / x).ln();
+        Complex::new(re, im)
+    }
+}
+
+pub(crate) struct ComplexF1F3 {
+    alpha1: f64,
+    alpha2: f64,
+}
+
+impl ComplexF1F3 {
+    pub(crate) fn new(alpha1: f64, alpha2: f64) -> Self {
+        Self { alpha1, alpha2 }
+    }
+}
+
+impl Integrand for ComplexF1F3 {
+    type Scalar = Complex<f64>;
+
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        let re = if (x > 0.0) && (x < 1.0) {
+            x.powf(self.alpha1) * (1.0 / x).ln()
+        } else {
+            0.0
+        };
+
+        let im = if (x > 0.3) && (x < 2.71) {
+            (2.0_f64.powf(self.alpha2) * x.sin()).cos()
+        } else {
+            0.0
+        };
+
+        Complex::new(re, im)
+    }
+}
+
 pub(crate) fn test_relative_error(
     calculated: f64,
     target: f64,
@@ -222,7 +878,7 @@ pub(crate) fn test_relative_error(
         }
     } else {
         if calculated.abs() > relative_error {
-            return Err(format!("Failed test {description}: calculated integral value is smaller than calculated relative error"));
+            return Err(format!("Failed test {description}: target integral value was zero, but calculated integral value is larger than target relative error"));
         }
     }
 

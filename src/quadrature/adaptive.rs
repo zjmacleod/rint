@@ -244,7 +244,7 @@ where
 
             let (result, error) = workspace.improved_result_error(&previous, &lower, &upper);
 
-            let iteration_tolerance = self.error_bound.tolerance(result);
+            let iteration_tolerance = self.error_bound.tolerance(&result);
 
             workspace.push(lower);
             workspace.push(upper);
@@ -308,7 +308,7 @@ impl<I: Integrand> Adaptive<I> {
         &self,
         initial: &Region<I::Scalar>,
     ) -> Result<Option<IntegralEstimate<I::Scalar>>, Error<I::Scalar>> {
-        let tolerance = self.error_bound.tolerance(initial.result());
+        let tolerance = self.error_bound.tolerance(&initial.result());
         let roundoff = Self::roundoff(initial.result_abs());
 
         if initial.error() <= roundoff && initial.error() > tolerance {

@@ -44,7 +44,7 @@ pub enum Tolerance {
 
 impl Tolerance {
     #[must_use]
-    pub(crate) fn tolerance<T: ScalarF64>(&self, integral_value: T) -> f64 {
+    pub fn tolerance<T: ScalarF64>(&self, integral_value: &T) -> f64 {
         match *self {
             Tolerance::Absolute(v) => v,
             Tolerance::Relative(v) => v * integral_value.abs(),
@@ -147,7 +147,7 @@ impl<T: ScalarF64> std::fmt::Display for Error<T> {
                 let upper = limits.upper();
                 write!(
                     f,
-                    "Extremely bad integrand behaviour. Possible non-integrable singularity, divergence, or discontinuity detected between ({lower},{upper}).\nresult:\t{result:?}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                    "Extremely bad integrand behaviour. Possible non-integrable singularity, divergence, or discontinuity detected between ({lower},{upper}).\nresult:\t{result:?}\nerror\t{error:.10e}\niterations:\t{iterations}.\nTry reducing the requested tolerance."
                 )
             }
 

@@ -188,7 +188,7 @@ where
 
             let (result, error) = workspace.improved_result_error(&previous, &lower, &upper);
 
-            let iteration_tolerance = self.error_bound.tolerance(result);
+            let iteration_tolerance = self.error_bound.tolerance(&result);
 
             workspace.update(lower, upper);
 
@@ -254,7 +254,7 @@ where
             workspace.check_convergence();
 
             if ext_error < workspace.table.error {
-                let ext_tolerance = self.error_bound.tolerance(ext_result);
+                let ext_tolerance = self.error_bound.tolerance(&ext_result);
                 workspace.update_table_values(ext_result, ext_error, ext_tolerance);
                 if workspace.table.error <= workspace.table.tolerance {
                     break;
@@ -340,7 +340,7 @@ where
         &self,
         initial: &Region<I::Scalar>,
     ) -> Result<Option<IntegralEstimate<I::Scalar>>, Error<I::Scalar>> {
-        let tolerance = self.error_bound.tolerance(initial.result());
+        let tolerance = self.error_bound.tolerance(&initial.result());
         let roundoff = Self::roundoff(initial.result_abs());
 
         if initial.error() <= roundoff && initial.error() > tolerance {
