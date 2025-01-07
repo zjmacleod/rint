@@ -1,8 +1,9 @@
 use crate::quadrature::IntegralEstimate;
+use crate::ScalarF64;
 
 mod adaptive;
 mod basic;
-mod rule;
+//mod rule;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub enum Kind {
@@ -12,53 +13,53 @@ pub enum Kind {
 }
 
 #[derive(Debug)]
-pub struct Error {
+pub struct Error<T: ScalarF64> {
     kind: Kind,
-    integral: IntegralEstimate,
+    integral: IntegralEstimate<T>,
 }
 
-impl Error {
-    pub(crate) const fn new(kind: Kind, integral: IntegralEstimate) -> Self {
+impl<T: ScalarF64> Error<T> {
+    pub(crate) const fn new(kind: Kind, integral: IntegralEstimate<T>) -> Self {
         Self { kind, integral }
     }
 
-    pub(crate) const fn unevaluated(kind: Kind) -> Self {
+    pub(crate) fn unevaluated(kind: Kind) -> Self {
         let output = IntegralEstimate::new();
         Error::new(kind, output)
     }
 
     #[must_use]
-    pub fn kind(&self) -> Kind {
+    pub const fn kind(&self) -> Kind {
         self.kind
     }
 
     #[must_use]
-    pub fn estimate(&self) -> &IntegralEstimate {
+    pub const fn estimate(&self) -> &IntegralEstimate<T> {
         &self.integral
     }
 
     #[must_use]
-    pub fn result(&self) -> f64 {
+    pub const fn result(&self) -> T {
         self.integral.result()
     }
 
     #[must_use]
-    pub fn error(&self) -> f64 {
+    pub const fn error(&self) -> f64 {
         self.integral.error()
     }
 
     #[must_use]
-    pub fn iterations(&self) -> usize {
+    pub const fn iterations(&self) -> usize {
         self.integral.iterations()
     }
 
     #[must_use]
-    pub fn function_evaluations(&self) -> usize {
+    pub const fn function_evaluations(&self) -> usize {
         self.integral.function_evaluations()
     }
 }
 
-impl std::fmt::Display for Error {
+impl<T: ScalarF64> std::fmt::Display for Error<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self.kind() {
             Kind::WrongDimensionality => {
@@ -85,4 +86,4 @@ impl std::fmt::Display for Error {
     }
 }
 
-impl std::error::Error for Error {}
+impl<T: ScalarF64> std::error::Error for Error<T> {}

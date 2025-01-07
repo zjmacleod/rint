@@ -2,10 +2,13 @@
 use crate::multi::{Error, Kind};
 use crate::Limits;
 use crate::MultiDimensionalIntegrand;
+use crate::ScalarF64;
+use num_complex::ComplexFloat;
+use num_traits::Zero;
 
-pub(crate) struct MultiDimensionalRegion<const NDIM: usize> {
+pub(crate) struct MultiDimensionalRegion<const NDIM: usize, T: ScalarF64> {
     pub(crate) error: f64,
-    pub(crate) result: f64,
+    pub(crate) result: T,
     pub(crate) result_abs: f64,
     pub(crate) error_abs: f64,
     pub(crate) limits: [Limits; NDIM],
@@ -13,11 +16,12 @@ pub(crate) struct MultiDimensionalRegion<const NDIM: usize> {
     pub(crate) function_evaluations: usize,
 }
 
-impl<const NDIM: usize> MultiDimensionalRegion<NDIM> {
+impl<const NDIM: usize, T: ScalarF64> MultiDimensionalRegion<NDIM, T> {
     fn unevaluated() -> Self {
+        let zero = <T as Zero>::zero();
         Self {
             error: 0.0,
-            result: 0.0,
+            result: zero,
             result_abs: 0.0,
             error_abs: 0.0,
             limits: [Limits::new(0.0, 0.0); NDIM],
@@ -31,7 +35,7 @@ impl<const NDIM: usize> MultiDimensionalRegion<NDIM> {
         self
     }
 
-    fn with_result(mut self, result: f64) -> Self {
+    fn with_result(mut self, result: T) -> Self {
         self.result = result;
         self
     }
@@ -65,7 +69,7 @@ impl<const NDIM: usize> MultiDimensionalRegion<NDIM> {
         self.error
     }
 
-    fn result(&self) -> f64 {
+    fn result(&self) -> T {
         self.result
     }
 
@@ -92,7 +96,7 @@ impl<const NDIM: usize> MultiDimensionalRegion<NDIM> {
     fn bisect<I: MultiDimensionalIntegrand<NDIM>>(
         &self,
         function: &I,
-    ) -> [MultiDimensionalRegion<NDIM>; 2] {
+    ) -> [MultiDimensionalRegion<NDIM, I::Scalar>; 2] {
         let axis_to_bisect = self.largest_error_axis;
         let previous_limits = self.limits();
 
@@ -128,7 +132,7 @@ where
     /// # Errors
     /// TODO
     #[allow(clippy::cast_possible_truncation)]
-    pub fn new(limits: [Limits; NDIM], function: I) -> Result<Self, Error> {
+    pub fn new(limits: [Limits; NDIM], function: I) -> Result<Self, Error<I::Scalar>> {
         if NDIM < 2 || NDIM > 15 {
             Err(Error::unevaluated(Kind::WrongDimensionality))
         } else {
@@ -164,7 +168,7 @@ where
     }
 
     #[allow(clippy::too_many_lines)]
-    fn integrate_internal(&self) -> MultiDimensionalRegion<NDIM> {
+    fn integrate_internal(&self) -> MultiDimensionalRegion<NDIM, I::Scalar> {
         let Geometry {
             centres,
             widths,
@@ -174,9 +178,11 @@ where
         let sum1 = self.function.evaluate(&centres);
         let sum1_abs = sum1.abs();
 
-        let mut difmax = 0.0;
-        let mut sum2 = 0.0;
-        let mut sum3 = 0.0;
+        let zero = <I::Scalar as Zero>::zero();
+
+        let mut difmax = zero;
+        let mut sum2 = zero;
+        let mut sum3 = zero;
 
         let mut sum2_abs = 0.0;
         let mut sum3_abs = 0.0;
@@ -209,9 +215,10 @@ where
             sum3 += fval_3 + fval_4;
             sum3_abs += fval_3.abs() + fval_4.abs();
 
-            let dif = 7.0 * (fval_1 + fval_2) - (fval_3 + fval_4) - 12.0 * sum1;
+            let dif = (fval_1 + fval_2) * 7.0 - (fval_3 + fval_4) - sum1 * 12.0;
 
-            if dif >= difmax {
+            // added .abs() for testing
+            if dif.abs() >= difmax.abs() {
                 difmax = dif;
                 // adaptive_integrator_multidin.cpp has j + 1;
                 largest_error_axis = j;
@@ -220,7 +227,7 @@ where
             coordinate[j] = centres[j];
         }
 
-        let mut sum4 = 0.0;
+        let mut sum4 = zero;
         let mut sum4_abs = 0.0;
         for j in 1..NDIM {
             let j1 = j - 1;
@@ -241,7 +248,7 @@ where
             coordinate[j1] = centres[j1];
         }
 
-        let mut sum5 = 0.0;
+        let mut sum5 = zero;
         let mut sum5_abs = 0.0;
 
         for j in 0..NDIM {
@@ -264,18 +271,18 @@ where
             continue_loop = false;
         }
 
-        let compare = volume
-            * (Self::prime_weight_1() * sum1
-                + Self::prime_weight_2() * sum2
-                + Self::prime_weight_3() * sum3
-                + Self::prime_weight_4() * sum4);
+        let compare = (sum1 * Self::prime_weight_1()
+            + sum2 * Self::prime_weight_2()
+            + sum3 * Self::prime_weight_3()
+            + sum4 * Self::prime_weight_4())
+            * volume;
 
-        let result = volume
-            * (Self::weight_1() * sum1
-                + Self::weight_2() * sum2
-                + Self::weight_3() * sum3
-                + Self::weight_4() * sum4
-                + Self::weight_5() * sum5);
+        let result = (sum1 * Self::weight_1()
+            + sum2 * Self::weight_2()
+            + sum3 * Self::weight_3()
+            + sum4 * Self::weight_4()
+            + sum5 * Self::weight_5())
+            * volume;
 
         let compare_abs = volume
             * (Self::prime_weight_1() * sum1_abs
@@ -290,8 +297,8 @@ where
                 + Self::weight_4() * sum4_abs
                 + Self::weight_5() * sum5_abs);
 
-        let error = f64::abs(result - compare);
-        let error_abs = f64::abs(result_abs - compare_abs);
+        let error = (result - compare).abs();
+        let error_abs = (result_abs - compare_abs).abs();
 
         let function_evaluations = Self::minimum_function_calls();
 
@@ -510,7 +517,8 @@ mod tests {
         }
 
         impl MultiDimensionalIntegrand<3> for Foo {
-            fn evaluate(&self, coordinates: &[f64; 3]) -> f64 {
+            type Scalar = f64;
+            fn evaluate(&self, coordinates: &[f64; 3]) -> Self::Scalar {
                 let x = coordinates[0];
                 let y = coordinates[1];
                 let z = coordinates[2];
@@ -549,7 +557,8 @@ mod tests {
             }
 
             impl MultiDimensionalIntegrand<1> for Foo {
-                fn evaluate(&self, coordinates: &[f64; 1]) -> f64 {
+                type Scalar = f64;
+                fn evaluate(&self, coordinates: &[f64; 1]) -> Self::Scalar {
                     let x = coordinates[0];
                     self.alpha * x.powi(2)
                 }
@@ -572,7 +581,8 @@ mod tests {
             }
 
             impl MultiDimensionalIntegrand<16> for Bar {
-                fn evaluate(&self, coordinates: &[f64; 16]) -> f64 {
+                type Scalar = f64;
+                fn evaluate(&self, coordinates: &[f64; 16]) -> Self::Scalar {
                     let x = coordinates[0];
                     self.alpha * x.powi(2)
                 }
@@ -592,7 +602,8 @@ mod tests {
             struct Simple;
 
             impl MultiDimensionalIntegrand<2> for Simple {
-                fn evaluate(&self, coordinates: &[f64; 2]) -> f64 {
+                type Scalar = f64;
+                fn evaluate(&self, coordinates: &[f64; 2]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     x * x + y * y + 2.0 * x * y
@@ -617,7 +628,8 @@ mod tests {
             struct Simple;
 
             impl MultiDimensionalIntegrand<2> for Simple {
-                fn evaluate(&self, coordinates: &[f64; 2]) -> f64 {
+                type Scalar = f64;
+                fn evaluate(&self, coordinates: &[f64; 2]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     x * x + y * y + x * y
@@ -642,7 +654,8 @@ mod tests {
             struct Simple;
 
             impl MultiDimensionalIntegrand<2> for Simple {
-                fn evaluate(&self, coordinates: &[f64; 2]) -> f64 {
+                type Scalar = f64;
+                fn evaluate(&self, coordinates: &[f64; 2]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     x.powi(4) + y.powi(2) + x.powi(2) * y.powi(2)
@@ -669,7 +682,8 @@ mod tests {
             struct Simple;
 
             impl MultiDimensionalIntegrand<2> for Simple {
-                fn evaluate(&self, coordinates: &[f64; 2]) -> f64 {
+                type Scalar = f64;
+                fn evaluate(&self, coordinates: &[f64; 2]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     x * f64::exp(-x * y)
@@ -708,7 +722,8 @@ mod tests {
             struct Simple;
 
             impl MultiDimensionalIntegrand<3> for Simple {
-                fn evaluate(&self, coordinates: &[f64; 3]) -> f64 {
+                type Scalar = f64;
+                fn evaluate(&self, coordinates: &[f64; 3]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -739,7 +754,8 @@ mod tests {
             struct Simple;
 
             impl MultiDimensionalIntegrand<3> for Simple {
-                fn evaluate(&self, coordinates: &[f64; 3]) -> f64 {
+                type Scalar = f64;
+                fn evaluate(&self, coordinates: &[f64; 3]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -769,7 +785,8 @@ mod tests {
             struct Simple;
 
             impl MultiDimensionalIntegrand<3> for Simple {
-                fn evaluate(&self, coordinates: &[f64; 3]) -> f64 {
+                type Scalar = f64;
+                fn evaluate(&self, coordinates: &[f64; 3]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];

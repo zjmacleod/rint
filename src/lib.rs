@@ -11,7 +11,7 @@ use std::fmt::Debug;
 use std::ops::{AddAssign, Div, Mul};
 
 mod limits;
-//pub mod multi;
+pub mod multi;
 pub mod quadrature;
 
 pub use limits::Limits;
@@ -48,27 +48,25 @@ pub trait Integrand {
     fn evaluate(&self, x: f64) -> Self::Scalar;
 }
 
-pub(crate) mod sealed {
-    use super::Complex;
-    pub trait Sealed {}
+impl<I: Integrand> Integrand for &I {
+    type Scalar = I::Scalar;
 
-    impl Sealed for f64 {}
-    impl Sealed for Complex<f64> {}
-
-    pub trait Max {
-        fn max_value() -> Self;
+    fn evaluate(&self, x: f64) -> Self::Scalar {
+        I::evaluate(self, x)
     }
+}
 
-    impl Max for f64 {
-        fn max_value() -> Self {
-            f64::MAX
-        }
-    }
+pub trait MultiDimensionalIntegrand<const N: usize> {
+    type Scalar: ScalarF64;
 
-    impl Max for Complex<f64> {
-        fn max_value() -> Self {
-            Complex::new(f64::MAX / 2f64.sqrt(), f64::MAX / 2f64.sqrt())
-        }
+    fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar;
+}
+
+impl<I: MultiDimensionalIntegrand<N>, const N: usize> MultiDimensionalIntegrand<N> for &I {
+    type Scalar = I::Scalar;
+
+    fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
+        I::evaluate(self, coordinates)
     }
 }
 
@@ -94,20 +92,26 @@ pub trait ScalarF64:
 impl ScalarF64 for f64 {}
 impl ScalarF64 for Complex<f64> {}
 
-impl<I: Integrand> Integrand for &I {
-    type Scalar = I::Scalar;
+pub(crate) mod sealed {
+    use super::Complex;
+    pub trait Sealed {}
 
-    fn evaluate(&self, x: f64) -> Self::Scalar {
-        I::evaluate(self, x)
+    impl Sealed for f64 {}
+    impl Sealed for Complex<f64> {}
+
+    pub trait Max {
+        fn max_value() -> Self;
     }
-}
 
-pub trait MultiDimensionalIntegrand<const N: usize> {
-    fn evaluate(&self, coordinates: &[f64; N]) -> f64;
-}
+    impl Max for f64 {
+        fn max_value() -> Self {
+            f64::MAX
+        }
+    }
 
-impl<I: MultiDimensionalIntegrand<N>, const N: usize> MultiDimensionalIntegrand<N> for &I {
-    fn evaluate(&self, coordinates: &[f64; N]) -> f64 {
-        I::evaluate(self, coordinates)
+    impl Max for Complex<f64> {
+        fn max_value() -> Self {
+            Complex::new(f64::MAX / 2f64.sqrt(), f64::MAX / 2f64.sqrt())
+        }
     }
 }
