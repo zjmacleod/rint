@@ -3,7 +3,8 @@ use crate::ScalarF64;
 
 mod adaptive;
 mod basic;
-//mod rule;
+mod generator;
+mod rule;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub enum Kind {
