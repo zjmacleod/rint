@@ -149,7 +149,6 @@ mod tests {
                 assert_eq!(a[1], b[1]);
             }
 
-            println!("{count}");
             assert_eq!(count, 2 * ndim);
         }
     }
