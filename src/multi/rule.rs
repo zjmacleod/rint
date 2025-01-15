@@ -1,4 +1,3 @@
-#![allow(unused)]
 mod fully_symmetric_07;
 
 use crate::multi::generator::Generator;
