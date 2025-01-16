@@ -1,7 +1,7 @@
 use num_traits::Zero;
 
 use crate::quadrature::rule::Rule;
-use crate::quadrature::{Adaptive, AdaptiveSingularity, Basic, Error, Tolerance};
+use crate::quadrature::{Adaptive, AdaptiveSingularity, Basic, QuadratureError, Tolerance};
 use crate::ScalarF64;
 use crate::{Integrand, Limits};
 
@@ -42,6 +42,38 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     }
 }
 
+impl<T: ScalarF64> IntegralEstimate<T> {
+    pub(crate) fn new() -> Self {
+        let result = <T as Zero>::zero();
+        Self {
+            result,
+            error: 0.0,
+            iterations: 0,
+            function_evaluations: 0,
+        }
+    }
+
+    pub(crate) fn with_result(mut self, result: T) -> Self {
+        self.result = result;
+        self
+    }
+
+    pub(crate) fn with_error(mut self, error: f64) -> Self {
+        self.error = error;
+        self
+    }
+
+    pub(crate) fn with_iterations(mut self, iterations: usize) -> Self {
+        self.iterations = iterations;
+        self
+    }
+
+    pub(crate) fn with_function_evaluations(mut self, function_evaluations: usize) -> Self {
+        self.function_evaluations = function_evaluations;
+        self
+    }
+}
+
 /// # Integrators
 impl<T: ScalarF64> IntegralEstimate<T> {
     /// Integrate a function using a basic (non-adaptive) Gauss-Kronrod integration rule, see
@@ -61,7 +93,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// for details.
     ///
     /// # Errors
-    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
+    /// The error type [`QuadratureError`] will return both the error [`Kind`] and the [`IntegralEstimate`]
     /// obtained before an error was encountered.
     /// The integration routine has several ways of failing:
     /// - Function will return an error if the user provided `Tolerance` does not satisfy the
@@ -96,7 +128,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
         rule: Rule,
         function: I,
         max_iterations: usize,
-    ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
+    ) -> Result<IntegralEstimate<I::Scalar>, QuadratureError<I::Scalar>> {
         Adaptive::new(function, rule, limits, error_bound, max_iterations)?.integrate()
     }
 
@@ -104,7 +136,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// interval, see [`AdaptiveSingularity`] for details.
     ///
     /// # Errors
-    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
+    /// The error type [`QuadratureError`] will return both the error [`Kind`] and the [`IntegralEstimate`]
     /// obtained before an error was encountered.
     /// The integration routine has several ways of failing:
     /// - Function will return an error if the user provided `Tolerance` does not satisfy the
@@ -144,7 +176,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
         error_bound: Tolerance,
         function: I,
         max_iterations: usize,
-    ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
+    ) -> Result<IntegralEstimate<I::Scalar>, QuadratureError<I::Scalar>> {
         AdaptiveSingularity::finite(function, limits, error_bound, max_iterations)?.integrate()
     }
 
@@ -152,7 +184,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// interval, see [`AdaptiveSingularity`] for details.
     ///
     /// # Errors
-    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
+    /// The error type [`QuadratureError`] will return both the error [`Kind`] and the [`IntegralEstimate`]
     /// obtained before an error was encountered.
     /// The integration routine has several ways of failing:
     /// - Function will return an error if the user provided `Tolerance` does not satisfy the
@@ -191,7 +223,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
         error_bound: Tolerance,
         function: I,
         max_iterations: usize,
-    ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
+    ) -> Result<IntegralEstimate<I::Scalar>, QuadratureError<I::Scalar>> {
         AdaptiveSingularity::infinite(function, error_bound, max_iterations)?.integrate()
     }
 
@@ -199,7 +231,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// interval (b, Inf), see [`AdaptiveSingularity`] for details.
     ///
     /// # Errors
-    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
+    /// The error type [`QuadratureError`] will return both the error [`Kind`] and the [`IntegralEstimate`]
     /// obtained before an error was encountered.
     /// The integration routine has several ways of failing:
     /// - Function will return an error if the user provided `Tolerance` does not satisfy the
@@ -239,7 +271,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
         error_bound: Tolerance,
         function: I,
         max_iterations: usize,
-    ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
+    ) -> Result<IntegralEstimate<I::Scalar>, QuadratureError<I::Scalar>> {
         AdaptiveSingularity::semi_infinite_upper(function, lower, error_bound, max_iterations)?
             .integrate()
     }
@@ -248,7 +280,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// interval (-Inf, a), see [`AdaptiveSingularity`] for details.
     ///
     /// # Errors
-    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
+    /// The error type [`QuadratureError`] will return both the error [`Kind`] and the [`IntegralEstimate`]
     /// obtained before an error was encountered.
     /// The integration routine has several ways of failing:
     /// - Function will return an error if the user provided `Tolerance` does not satisfy the
@@ -288,40 +320,8 @@ impl<T: ScalarF64> IntegralEstimate<T> {
         error_bound: Tolerance,
         function: I,
         max_iterations: usize,
-    ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
+    ) -> Result<IntegralEstimate<I::Scalar>, QuadratureError<I::Scalar>> {
         AdaptiveSingularity::semi_infinite_lower(function, upper, error_bound, max_iterations)?
             .integrate()
-    }
-}
-
-impl<T: ScalarF64> IntegralEstimate<T> {
-    pub(crate) fn new() -> Self {
-        let result = <T as Zero>::zero();
-        Self {
-            result,
-            error: 0.0,
-            iterations: 0,
-            function_evaluations: 0,
-        }
-    }
-
-    pub(crate) fn with_result(mut self, result: T) -> Self {
-        self.result = result;
-        self
-    }
-
-    pub(crate) fn with_error(mut self, error: f64) -> Self {
-        self.error = error;
-        self
-    }
-
-    pub(crate) fn with_iterations(mut self, iterations: usize) -> Self {
-        self.iterations = iterations;
-        self
-    }
-
-    pub(crate) fn with_function_evaluations(mut self, function_evaluations: usize) -> Self {
-        self.function_evaluations = function_evaluations;
-        self
     }
 }

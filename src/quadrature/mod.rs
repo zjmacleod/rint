@@ -1,9 +1,8 @@
 mod adaptive;
 mod basic;
-mod estimate;
 mod integrator;
 mod region;
-mod rule;
+pub(crate) mod rule;
 mod singularity;
 
 #[cfg(test)]
@@ -16,9 +15,9 @@ pub use adaptive::Adaptive;
 pub use basic::Basic;
 pub use singularity::AdaptiveSingularity;
 
-pub use estimate::IntegralEstimate;
 pub use rule::Rule;
 
+use crate::IntegralEstimate;
 use crate::Limits;
 use crate::ScalarF64;
 
@@ -56,7 +55,7 @@ impl Tolerance {
 }
 
 #[derive(Debug)]
-pub struct Error<T: ScalarF64> {
+pub struct QuadratureError<T: ScalarF64> {
     kind: Kind,
     integral: IntegralEstimate<T>,
 }
@@ -74,14 +73,14 @@ pub enum Kind {
     InvalidTolerance,
 }
 
-impl<T: ScalarF64> Error<T> {
+impl<T: ScalarF64> QuadratureError<T> {
     pub(crate) const fn new(kind: Kind, integral: IntegralEstimate<T>) -> Self {
         Self { kind, integral }
     }
 
     pub(crate) fn unevaluated(kind: Kind) -> Self {
         let output = IntegralEstimate::new();
-        Error::new(kind, output)
+        QuadratureError::new(kind, output)
     }
 
     /// Return the error [`Kind`] which was encountered.
@@ -122,7 +121,7 @@ impl<T: ScalarF64> Error<T> {
     }
 }
 
-impl<T: ScalarF64> std::fmt::Display for Error<T> {
+impl<T: ScalarF64> std::fmt::Display for QuadratureError<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let result = self.result();
         let error = self.error();
@@ -190,7 +189,7 @@ impl<T: ScalarF64> std::fmt::Display for Error<T> {
     }
 }
 
-impl<T: ScalarF64> std::error::Error for Error<T> {}
+impl<T: ScalarF64> std::error::Error for QuadratureError<T> {}
 
 pub(crate) fn rescale_error(error: f64, result_abs: f64, result_asc: f64) -> f64 {
     let mut error = error;

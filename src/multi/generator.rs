@@ -25,7 +25,6 @@ impl<const NDIM: usize> IntoIterator for &Generator<NDIM> {
 pub(crate) struct Permutations<const NDIM: usize> {
     initial: bool,
     current: [f64; NDIM],
-    ndim: usize,
     j_exchange: usize,
     i_exchange: usize,
     centre: [f64; NDIM],
@@ -37,7 +36,6 @@ impl<const NDIM: usize> Permutations<NDIM> {
         Self {
             initial: true,
             current: *first,
-            ndim: NDIM,
             j_exchange: 0,
             i_exchange: 0,
             centre: [0.0; NDIM],
@@ -75,14 +73,14 @@ impl<const NDIM: usize> Iterator for Permutations<NDIM> {
             return Some(self.point());
         };
 
-        for i in 0..self.ndim {
+        for i in 0..NDIM {
             self.current[i] = -self.current[i];
             if self.current[i] < 0.0 {
                 return Some(self.point());
             }
         }
 
-        for i in 1..self.ndim {
+        for i in 1..NDIM {
             if self.current[i - 1] > self.current[i] {
                 let value_i = self.current[i];
                 self.i_exchange = i - 1;
@@ -2414,6 +2412,206 @@ mod tests_with_centre_and_half_width {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
+            }
+
+            assert_eq!(count, 2 * NDIM);
+        }
+    }
+
+    #[test]
+    fn with_centre_hw_check_ndim_3_generators() {
+        const NDIM: usize = 3;
+
+        let centre = [CV; NDIM];
+        let half_width = [HWV; NDIM];
+
+        {
+            let vv = Generator::new([0.75f64, 0.75, 0.75]);
+
+            let should_be = [
+                [0.75, 0.75, 0.75],
+                [-0.75, 0.75, 0.75],
+                [0.75, -0.75, 0.75],
+                [-0.75, -0.75, 0.75],
+                [0.75, 0.75, -0.75],
+                [-0.75, 0.75, -0.75],
+                [0.75, -0.75, -0.75],
+                [-0.75, -0.75, -0.75],
+                [0.75, 0.75, 0.75],
+            ]
+            .map(|[a, b, c]| [CV + a * HWV, CV + b * HWV, CV + c * HWV]);
+
+            let mut count = 0;
+            for (a, b) in vv
+                .into_iter()
+                .with_centre(&centre)
+                .with_half_width(&half_width)
+                .zip(should_be)
+            {
+                count += 1;
+                assert_eq!(a[0], b[0]);
+                assert_eq!(a[1], b[1]);
+                assert_eq!(a[2], b[2]);
+            }
+
+            assert_eq!(count, two_pow_n(NDIM));
+        }
+
+        {
+            let vv = Generator::new([0.75f64, 0.75, 0.5]);
+
+            let should_be = [
+                [0.75, 0.75, 0.5],
+                [-0.75, 0.75, 0.5],
+                [0.75, -0.75, 0.5],
+                [-0.75, -0.75, 0.5],
+                [0.75, 0.75, -0.5],
+                [-0.75, 0.75, -0.5],
+                [0.75, -0.75, -0.5],
+                [-0.75, -0.75, -0.5],
+                [0.75, 0.5, 0.75],
+                [-0.75, 0.5, 0.75],
+                [0.75, -0.5, 0.75],
+                [-0.75, -0.5, 0.75],
+                [0.75, 0.5, -0.75],
+                [-0.75, 0.5, -0.75],
+                [0.75, -0.5, -0.75],
+                [-0.75, -0.5, -0.75],
+                [0.5, 0.75, 0.75],
+                [-0.5, 0.75, 0.75],
+                [0.5, -0.75, 0.75],
+                [-0.5, -0.75, 0.75],
+                [0.5, 0.75, -0.75],
+                [-0.5, 0.75, -0.75],
+                [0.5, -0.75, -0.75],
+                [-0.5, -0.75, -0.75],
+                [0.75, 0.75, 0.5],
+            ]
+            .map(|[a, b, c]| [CV + a * HWV, CV + b * HWV, CV + c * HWV]);
+
+            let mut count = 0;
+            for (a, b) in vv
+                .into_iter()
+                .with_centre(&centre)
+                .with_half_width(&half_width)
+                .zip(should_be)
+            {
+                count += 1;
+                assert_eq!(a[0], b[0]);
+                assert_eq!(a[1], b[1]);
+                assert_eq!(a[2], b[2]);
+            }
+
+            assert_eq!(count, 4 * NDIM * (NDIM - 1) * (NDIM - 2));
+        }
+
+        {
+            let vv = Generator::new([0.75f64, 0.5, 0.0]);
+
+            let should_be = [
+                [0.75f64, 0.5, 0.0],
+                [-0.75f64, 0.5, 0.0],
+                [0.75f64, -0.5, 0.0],
+                [-0.75f64, -0.5, 0.0],
+                [0.5, 0.75f64, 0.0],
+                [-0.5, 0.75f64, 0.0],
+                [0.5, -0.75f64, 0.0],
+                [-0.5, -0.75f64, 0.0],
+                [0.75f64, 0.0, 0.5],
+                [-0.75f64, 0.0, 0.5],
+                [0.75f64, 0.0, -0.5],
+                [-0.75f64, 0.0, -0.5],
+                [0.0, 0.75f64, 0.5],
+                [0.0, -0.75f64, 0.5],
+                [0.0, 0.75f64, -0.5],
+                [0.0, -0.75f64, -0.5],
+                [0.5, 0.0, 0.75f64],
+                [-0.5, 0.0, 0.75f64],
+                [0.5, 0.0, -0.75f64],
+                [-0.5, 0.0, -0.75f64],
+                [0.0, 0.5, 0.75f64],
+                [0.0, -0.5, 0.75f64],
+                [0.0, 0.5, -0.75f64],
+                [0.0, -0.5, -0.75f64],
+            ]
+            .map(|[a, b, c]| [CV + a * HWV, CV + b * HWV, CV + c * HWV]);
+
+            let mut count = 0;
+            for (a, b) in vv
+                .into_iter()
+                .with_centre(&centre)
+                .with_half_width(&half_width)
+                .zip(should_be)
+            {
+                count += 1;
+                assert_eq!(a[0], b[0]);
+                assert_eq!(a[1], b[1]);
+                assert_eq!(a[2], b[2]);
+            }
+
+            assert_eq!(count, 4 * NDIM * (NDIM - 1));
+        }
+
+        {
+            let vv = Generator::new([0.75f64, 0.75, 0.0]);
+
+            let should_be = [
+                [0.75f64, 0.75, 0.0],
+                [-0.75f64, 0.75, 0.0],
+                [0.75f64, -0.75, 0.0],
+                [-0.75f64, -0.75, 0.0],
+                [0.75f64, 0.0, 0.75],
+                [-0.75f64, 0.0, 0.75],
+                [0.75f64, 0.0, -0.75],
+                [-0.75f64, 0.0, -0.75],
+                [0.0, 0.75f64, 0.75],
+                [0.0, -0.75f64, 0.75],
+                [0.0, 0.75f64, -0.75],
+                [0.0, -0.75f64, -0.75],
+            ]
+            .map(|[a, b, c]| [CV + a * HWV, CV + b * HWV, CV + c * HWV]);
+
+            let mut count = 0;
+            for (a, b) in vv
+                .into_iter()
+                .with_centre(&centre)
+                .with_half_width(&half_width)
+                .zip(should_be)
+            {
+                count += 1;
+                assert_eq!(a[0], b[0]);
+                assert_eq!(a[1], b[1]);
+                assert_eq!(a[2], b[2]);
+            }
+
+            assert_eq!(count, 2 * NDIM * (NDIM - 1));
+        }
+
+        {
+            let vv = Generator::new([0.75f64, 0.0, 0.0]);
+
+            let should_be = [
+                [0.75f64, 0.0, 0.0],
+                [-0.75f64, 0.0, 0.0],
+                [0.0, 0.75f64, 0.0],
+                [0.0, -0.75f64, 0.0],
+                [0.0, 0.0, 0.75],
+                [0.0, -0.0, -0.75],
+            ]
+            .map(|[a, b, c]| [CV + a * HWV, CV + b * HWV, CV + c * HWV]);
+
+            let mut count = 0;
+            for (a, b) in vv
+                .into_iter()
+                .with_centre(&centre)
+                .with_half_width(&half_width)
+                .zip(should_be)
+            {
+                count += 1;
+                println!("{:?}", a);
+                assert_eq!(a[0], b[0]);
+                assert_eq!(a[1], b[1]);
+                assert_eq!(a[2], b[2]);
             }
 
             assert_eq!(count, 2 * NDIM);

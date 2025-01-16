@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 
 use crate::quadrature::integrator::Integrator;
 use crate::quadrature::rule::Rule;
-use crate::quadrature::IntegralEstimate;
+use crate::IntegralEstimate;
 use crate::Integrand;
 use crate::Limits;
 use crate::ScalarF64;

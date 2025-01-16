@@ -1,121 +1,10 @@
-#![allow(unused)]
-use crate::multi::{Error, Kind};
+use crate::multi::region::Region;
+use crate::multi::{two_pow_n, Kind, MultiDimensionalError};
 use crate::Limits;
 use crate::MultiDimensionalIntegrand;
 use crate::ScalarF64;
 use num_complex::ComplexFloat;
 use num_traits::Zero;
-
-pub(crate) struct MultiDimensionalRegion<const NDIM: usize, T: ScalarF64> {
-    pub(crate) error: f64,
-    pub(crate) result: T,
-    pub(crate) result_abs: f64,
-    pub(crate) error_abs: f64,
-    pub(crate) limits: [Limits; NDIM],
-    pub(crate) largest_error_axis: usize,
-    pub(crate) function_evaluations: usize,
-}
-
-impl<const NDIM: usize, T: ScalarF64> MultiDimensionalRegion<NDIM, T> {
-    fn unevaluated() -> Self {
-        let zero = <T as Zero>::zero();
-        Self {
-            error: 0.0,
-            result: zero,
-            result_abs: 0.0,
-            error_abs: 0.0,
-            limits: [Limits::new(0.0, 0.0); NDIM],
-            largest_error_axis: 0,
-            function_evaluations: 0,
-        }
-    }
-
-    fn with_error(mut self, error: f64) -> Self {
-        self.error = error;
-        self
-    }
-
-    fn with_result(mut self, result: T) -> Self {
-        self.result = result;
-        self
-    }
-
-    fn with_result_abs(mut self, abs: f64) -> Self {
-        self.result_abs = abs;
-        self
-    }
-
-    fn with_error_abs(mut self, error_abs: f64) -> Self {
-        self.error_abs = error_abs;
-        self
-    }
-
-    fn with_limits(mut self, limits: [Limits; NDIM]) -> Self {
-        self.limits = limits;
-        self
-    }
-
-    fn with_largest_error_axis(mut self, largest_error_axis: usize) -> Self {
-        self.largest_error_axis = largest_error_axis;
-        self
-    }
-
-    fn with_function_evaluations(mut self, function_evaluations: usize) -> Self {
-        self.function_evaluations = function_evaluations;
-        self
-    }
-
-    fn error(&self) -> f64 {
-        self.error
-    }
-
-    fn result(&self) -> T {
-        self.result
-    }
-
-    fn result_abs(&self) -> f64 {
-        self.result_abs
-    }
-
-    fn error_abs(&self) -> f64 {
-        self.error_abs
-    }
-
-    fn limits(&self) -> &[Limits; NDIM] {
-        &self.limits
-    }
-
-    fn largest_error_axis(&self) -> usize {
-        self.largest_error_axis
-    }
-
-    fn function_evaluations(&self) -> usize {
-        self.function_evaluations
-    }
-
-    fn bisect<I: MultiDimensionalIntegrand<NDIM>>(
-        &self,
-        function: &I,
-    ) -> [MultiDimensionalRegion<NDIM, I::Scalar>; 2] {
-        let axis_to_bisect = self.largest_error_axis;
-        let previous_limits = self.limits();
-
-        let [lower, upper] = previous_limits[axis_to_bisect].bisect();
-
-        let mut lower_limits = *previous_limits;
-        lower_limits[axis_to_bisect] = lower;
-
-        let mut upper_limits = *previous_limits;
-        upper_limits[axis_to_bisect] = upper;
-
-        let lower_integral =
-            MultiDimensionalBasic::new_unchecked(lower_limits, function).integrate_internal();
-        let upper_integral =
-            MultiDimensionalBasic::new_unchecked(upper_limits, function).integrate_internal();
-
-        [lower_integral, upper_integral]
-    }
-}
 
 pub struct MultiDimensionalBasic<I, const NDIM: usize>
 where
@@ -131,16 +20,20 @@ where
 {
     /// # Errors
     /// TODO
-    #[allow(clippy::cast_possible_truncation)]
-    pub fn new(limits: [Limits; NDIM], function: I) -> Result<Self, Error<I::Scalar>> {
+    pub fn new(
+        limits: [Limits; NDIM],
+        function: I,
+    ) -> Result<Self, MultiDimensionalError<I::Scalar>> {
         if NDIM < 2 || NDIM > 15 {
-            Err(Error::unevaluated(Kind::WrongDimensionality))
+            Err(MultiDimensionalError::unevaluated(
+                Kind::WrongDimensionality,
+            ))
         } else {
             Ok(Self { limits, function })
         }
     }
 
-    fn new_unchecked(limits: [Limits; NDIM], function: I) -> Self {
+    pub(crate) fn new_unchecked(limits: [Limits; NDIM], function: I) -> Self {
         Self { limits, function }
     }
 
@@ -168,7 +61,7 @@ where
     }
 
     #[allow(clippy::too_many_lines)]
-    fn integrate_internal(&self) -> MultiDimensionalRegion<NDIM, I::Scalar> {
+    pub(crate) fn integrate_internal(&self) -> Region<NDIM, I::Scalar> {
         let Geometry {
             centres,
             widths,
@@ -302,7 +195,7 @@ where
 
         let function_evaluations = Self::minimum_function_calls();
 
-        MultiDimensionalRegion::unevaluated()
+        Region::unevaluated()
             .with_error(error)
             .with_result(result)
             .with_result_abs(result_abs)

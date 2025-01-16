@@ -1,4 +1,5 @@
-use crate::quadrature::{IntegralEstimate, Integrator, Rule};
+use crate::quadrature::{Integrator, Rule};
+use crate::IntegralEstimate;
 use crate::Integrand;
 use crate::Limits;
 

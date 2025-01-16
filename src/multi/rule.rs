@@ -21,6 +21,41 @@ pub struct Rule<const NDIM: usize, const WEIGHTS_LENGTH: usize> {
     rule_points: [f64; WEIGHTS_LENGTH],
     evaluations: usize,
     error_coefficients: [f64; 6],
+    ratio: f64,
+}
+
+impl<const NDIM: usize, const WEIGHTS_LENGTH: usize> Rule<NDIM, WEIGHTS_LENGTH> {
+    pub(crate) const fn weights(&self) -> &Weights<WEIGHTS_LENGTH> {
+        &self.weights
+    }
+
+    pub(crate) const fn scales(&self) -> &Scales<WEIGHTS_LENGTH> {
+        &self.scales
+    }
+
+    pub(crate) const fn norms(&self) -> &Norms<WEIGHTS_LENGTH> {
+        &self.norms
+    }
+
+    pub(crate) const fn generators(&self) -> &[Generator<NDIM>; WEIGHTS_LENGTH] {
+        &self.generators
+    }
+
+    pub(crate) const fn rule_points(&self) -> &[f64; WEIGHTS_LENGTH] {
+        &self.rule_points
+    }
+
+    pub(crate) const fn evaluations(&self) -> usize {
+        self.evaluations
+    }
+
+    pub(crate) const fn error_coefficients(&self) -> &[f64; 6] {
+        &self.error_coefficients
+    }
+
+    pub(crate) const fn ratio(&self) -> f64 {
+        self.ratio
+    }
 }
 
 impl<const NDIM: usize> Rule<NDIM, { fully_symmetric_07::WEIGHTS_LENGTH }> {
@@ -32,6 +67,7 @@ impl<const NDIM: usize> Rule<NDIM, { fully_symmetric_07::WEIGHTS_LENGTH }> {
         let generators = fully_symmetric_07::generators::<NDIM>();
         let evaluations = fully_symmetric_07::evaluations::<NDIM>();
         let error_coefficients = fully_symmetric_07::error_coefficients();
+        let ratio = (LAMBDA2 / LAMBDA1) * (LAMBDA2 / LAMBDA1);
 
         Self {
             weights,
@@ -41,6 +77,7 @@ impl<const NDIM: usize> Rule<NDIM, { fully_symmetric_07::WEIGHTS_LENGTH }> {
             rule_points,
             evaluations,
             error_coefficients,
+            ratio,
         }
     }
 }

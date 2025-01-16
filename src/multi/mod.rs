@@ -1,9 +1,12 @@
-use crate::quadrature::IntegralEstimate;
+#![allow(unused)]
+use crate::IntegralEstimate;
 use crate::ScalarF64;
 
 mod adaptive;
 mod basic;
 mod generator;
+mod integrator;
+mod region;
 mod rule;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
@@ -14,19 +17,19 @@ pub enum Kind {
 }
 
 #[derive(Debug)]
-pub struct Error<T: ScalarF64> {
+pub struct MultiDimensionalError<T: ScalarF64> {
     kind: Kind,
     integral: IntegralEstimate<T>,
 }
 
-impl<T: ScalarF64> Error<T> {
+impl<T: ScalarF64> MultiDimensionalError<T> {
     pub(crate) const fn new(kind: Kind, integral: IntegralEstimate<T>) -> Self {
         Self { kind, integral }
     }
 
     pub(crate) fn unevaluated(kind: Kind) -> Self {
         let output = IntegralEstimate::new();
-        Error::new(kind, output)
+        MultiDimensionalError::new(kind, output)
     }
 
     #[must_use]
@@ -60,7 +63,7 @@ impl<T: ScalarF64> Error<T> {
     }
 }
 
-impl<T: ScalarF64> std::fmt::Display for Error<T> {
+impl<T: ScalarF64> std::fmt::Display for MultiDimensionalError<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self.kind() {
             Kind::WrongDimensionality => {
@@ -87,7 +90,7 @@ impl<T: ScalarF64> std::fmt::Display for Error<T> {
     }
 }
 
-impl<T: ScalarF64> std::error::Error for Error<T> {}
+impl<T: ScalarF64> std::error::Error for MultiDimensionalError<T> {}
 
 #[inline]
 pub(crate) const fn two_pow_n(n: usize) -> usize {

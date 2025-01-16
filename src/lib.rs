@@ -20,10 +20,12 @@ use num_traits::Zero;
 use std::fmt::Debug;
 use std::ops::{AddAssign, Div, Mul};
 
+mod estimate;
 mod limits;
 pub mod multi;
 pub mod quadrature;
 
+pub use estimate::IntegralEstimate;
 pub use limits::Limits;
 
 /// The integrand of a one-dimensional integral.
