@@ -477,25 +477,7 @@ struct Geometry<const NDIM: usize> {
 }
 
 const fn minimum_function_calls(n: usize) -> usize {
-    let two_pow_n = {
-        let mut exp = n;
-
-        if exp == 0 {
-            return 1;
-        }
-        let mut base = 2;
-        let mut acc = 1;
-
-        while exp > 1 {
-            if (exp & 1) == 1 {
-                acc *= base;
-            }
-            exp /= 2;
-            base = base * base;
-        }
-
-        acc * base
-    };
+    let two_pow_n = two_pow_n(n);
 
     two_pow_n + 2 * n * (n + 1) + 1
 }

@@ -1,3 +1,5 @@
+use crate::multi::{two_pow_n, two_pow_n_f64};
+
 #[derive(Debug)]
 pub(crate) struct Generator<const NDIM: usize>([f64; NDIM]);
 
@@ -6,7 +8,7 @@ impl<const NDIM: usize> Generator<NDIM> {
         Self(input)
     }
 
-    pub(crate) const fn generator(&self) -> &[f64] {
+    pub(crate) const fn generator(&self) -> &[f64; NDIM] {
         &self.0
     }
 }
@@ -2358,7 +2360,7 @@ mod tests_with_centre_and_half_width {
                 assert_eq!(a[1], b[1]);
             }
 
-            assert_eq!(count, 2usize.pow(NDIM as u32));
+            assert_eq!(count, two_pow_n(NDIM));
         }
 
         {
@@ -2521,7 +2523,7 @@ mod tests_with_centre_and_half_width {
                 assert_eq!(a[5], b[5]);
             }
 
-            assert_eq!(count, 2usize.pow(NDIM as u32));
+            assert_eq!(count, two_pow_n(NDIM));
         }
 
         {

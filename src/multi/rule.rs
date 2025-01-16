@@ -1,6 +1,7 @@
 mod fully_symmetric_07;
 
 use crate::multi::generator::Generator;
+use crate::multi::two_pow_n_f64;
 
 const LAMBDA0: f64 = 6.860_757_975_617_562_914_002_852e-1;
 const LAMBDA1: f64 = 9.559_073_158_045_390_123_857_208e-1;
@@ -53,7 +54,7 @@ impl<const WEIGHTS_LENGTH: usize> Weights<WEIGHTS_LENGTH> {
         &self,
         rule_points: &[f64; WEIGHTS_LENGTH],
     ) -> (Scales<WEIGHTS_LENGTH>, Norms<WEIGHTS_LENGTH>) {
-        let two_ndim = 2u16.pow(NDIM as u32) as f64;
+        let two_ndim = two_pow_n_f64(NDIM);
         let weights = self.0;
 
         let mut scales = [[0f64; 3]; WEIGHTS_LENGTH];

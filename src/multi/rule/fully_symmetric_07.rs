@@ -3,9 +3,10 @@ use crate::multi::rule::{
     Norms, Scales, Weights, LAMBDA0, LAMBDA0_SQ, LAMBDA1, LAMBDA1_SQ, LAMBDA2, LAMBDA2_SQ, LAMBDAP,
     LAMBDAP_SQ,
 };
+use crate::multi::{two_pow_n, two_pow_n_f64};
 
 pub(crate) const fn evaluations<const NDIM: usize>() -> usize {
-    1 + 6 * NDIM + 2 * NDIM * (NDIM - 1) + 2usize.pow(NDIM as u32)
+    1 + 6 * NDIM + 2 * NDIM * (NDIM - 1) + two_pow_n(NDIM)
 }
 
 pub(crate) const fn error_coefficients() -> [f64; 6] {
@@ -20,12 +21,12 @@ pub(crate) const fn rule_points<const NDIM: usize>() -> [f64; WEIGHTS_LENGTH] {
         2.0 * ndim,
         2.0 * ndim,
         2.0 * ndim * (ndim - 1.0),
-        2u32.pow(NDIM as u32) as f64,
+        two_pow_n_f64(NDIM),
     ]
 }
 
 const fn initial_weights_1<const NDIM: usize>() -> [f64; WEIGHTS_LENGTH] {
-    let two_ndim = 2usize.pow(NDIM as u32) as f64;
+    let two_ndim = two_pow_n_f64(NDIM);
 
     let f1 = 1f64 / ((3f64 * LAMBDA0_SQ) * (3f64 * LAMBDA0_SQ) * (3f64 * LAMBDA0_SQ)) / two_ndim;
 
@@ -51,7 +52,7 @@ const fn initial_weights_1<const NDIM: usize>() -> [f64; WEIGHTS_LENGTH] {
 }
 
 const fn initial_weights_2<const NDIM: usize>() -> [f64; WEIGHTS_LENGTH] {
-    let two_ndim = 2usize.pow(NDIM as u32) as f64;
+    let two_ndim = two_pow_n_f64(NDIM);
 
     let f2 = 1f64 / (36f64 * LAMBDA0_SQ * LAMBDA0_SQ * LAMBDA0_SQ) / two_ndim;
 
@@ -77,7 +78,7 @@ const fn initial_weights_2<const NDIM: usize>() -> [f64; WEIGHTS_LENGTH] {
 }
 
 const fn initial_weights_3<const NDIM: usize>() -> [f64; WEIGHTS_LENGTH] {
-    let two_ndim = 2usize.pow(NDIM as u32) as f64;
+    let two_ndim = two_pow_n_f64(NDIM);
 
     let f3 = 5f64 / (108f64 * LAMBDA0_SQ * LAMBDA0_SQ * LAMBDA0_SQ) / two_ndim;
 
@@ -103,7 +104,7 @@ const fn initial_weights_3<const NDIM: usize>() -> [f64; WEIGHTS_LENGTH] {
 }
 
 const fn initial_weights_4<const NDIM: usize>() -> [f64; WEIGHTS_LENGTH] {
-    let two_ndim = 2usize.pow(NDIM as u32) as f64;
+    let two_ndim = two_pow_n_f64(NDIM);
 
     let f4 = 1f64 / (54f64 * LAMBDA0_SQ * LAMBDA0_SQ * LAMBDA0_SQ) / two_ndim;
 
@@ -168,7 +169,7 @@ pub(crate) const fn weights<const NDIM: usize>() -> Weights<WEIGHTS_LENGTH> {
     let rule_points = rule_points::<NDIM>();
 
     let ndim = NDIM as f64;
-    let two_ndim = 2u16.pow(NDIM as u32) as f64;
+    let two_ndim = two_pow_n_f64(NDIM);
 
     weights[0][0] = two_ndim;
 
