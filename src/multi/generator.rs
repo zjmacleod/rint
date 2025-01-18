@@ -11,16 +11,44 @@ impl<const NDIM: usize> Generator<NDIM> {
     pub(crate) const fn generator(&self) -> &[f64; NDIM] {
         &self.0
     }
-}
 
-impl<const NDIM: usize> IntoIterator for &Generator<NDIM> {
-    type Item = [f64; NDIM];
-    type IntoIter = Permutations<NDIM>;
+    pub(crate) const fn point(
+        &self,
+        centre: &[f64; NDIM],
+        half_widths: &[f64; NDIM],
+    ) -> [f64; NDIM] {
+        let mut point = [0.0; NDIM];
+        let mut i = 0;
+        while i < NDIM {
+            point[i] = centre[i] + self.0[i] * half_widths[i];
+            i += 1;
+        }
+        point
+    }
 
-    fn into_iter(self) -> Self::IntoIter {
-        Permutations::new(&self.0)
+    pub(crate) const fn permutations(&self) -> Permutations<NDIM> {
+        Permutations::new(&self.generator())
+    }
+
+    pub(crate) const fn point_permutations(
+        &self,
+        centre: &[f64; NDIM],
+        half_widths: &[f64; NDIM],
+    ) -> Permutations<NDIM> {
+        Permutations::new(&self.generator())
+            .with_centre(&centre)
+            .with_half_widths(&half_widths)
     }
 }
+
+//impl<const NDIM: usize> IntoIterator for &Generator<NDIM> {
+//    type Item = [f64; NDIM];
+//    type IntoIter = Permutations<NDIM>;
+//
+//    fn into_iter(self) -> Self::IntoIter {
+//        Permutations::new(&self.0)
+//    }
+//}
 
 pub(crate) struct Permutations<const NDIM: usize> {
     initial: bool,
@@ -28,7 +56,7 @@ pub(crate) struct Permutations<const NDIM: usize> {
     j_exchange: usize,
     i_exchange: usize,
     centre: [f64; NDIM],
-    half_width: [f64; NDIM],
+    half_widths: [f64; NDIM],
 }
 
 impl<const NDIM: usize> Permutations<NDIM> {
@@ -39,7 +67,7 @@ impl<const NDIM: usize> Permutations<NDIM> {
             j_exchange: 0,
             i_exchange: 0,
             centre: [0.0; NDIM],
-            half_width: [1.0; NDIM],
+            half_widths: [1.0; NDIM],
         }
     }
 
@@ -48,8 +76,8 @@ impl<const NDIM: usize> Permutations<NDIM> {
         self
     }
 
-    pub(crate) const fn with_half_width(mut self, half_width: &[f64; NDIM]) -> Self {
-        self.half_width = *half_width;
+    pub(crate) const fn with_half_widths(mut self, half_widths: &[f64; NDIM]) -> Self {
+        self.half_widths = *half_widths;
         self
     }
 
@@ -57,7 +85,7 @@ impl<const NDIM: usize> Permutations<NDIM> {
         let mut output = [0.0; NDIM];
         let mut i = 0;
         while i < NDIM {
-            output[i] = self.centre[i] + self.current[i] * self.half_width[i];
+            output[i] = self.centre[i] + self.current[i] * self.half_widths[i];
             i += 1;
         }
         output
@@ -108,7 +136,7 @@ impl<const NDIM: usize> Iterator for Permutations<NDIM> {
 }
 
 #[cfg(test)]
-mod tests_no_centre_or_half_width {
+mod tests_no_centre_or_half_widths {
     use super::*;
 
     #[test]
@@ -121,7 +149,7 @@ mod tests_no_centre_or_half_width {
             let should_be = [[0.75, 0.75], [-0.75, 0.75], [0.75, -0.75], [-0.75, -0.75]].iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -146,7 +174,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -167,7 +195,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -198,7 +226,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -241,7 +269,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -283,7 +311,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -313,7 +341,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -337,7 +365,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -376,7 +404,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -427,7 +455,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -542,7 +570,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -609,7 +637,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -652,7 +680,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -679,7 +707,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -735,7 +763,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -835,7 +863,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -1095,7 +1123,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -1195,7 +1223,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -1255,7 +1283,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -1285,7 +1313,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -1374,7 +1402,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -1555,7 +1583,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -2056,7 +2084,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -2197,7 +2225,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -2278,7 +2306,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -2311,7 +2339,7 @@ mod tests_no_centre_or_half_width {
             .iter();
 
             let mut count = 0;
-            for (a, b) in vv.into_iter().zip(should_be) {
+            for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -2327,7 +2355,7 @@ mod tests_no_centre_or_half_width {
 }
 
 #[cfg(test)]
-mod tests_with_centre_and_half_width {
+mod tests_with_centre_and_half_widths {
     use super::*;
 
     const CV: f64 = 1.44e-4;
@@ -2338,7 +2366,7 @@ mod tests_with_centre_and_half_width {
         const NDIM: usize = 2;
 
         let centre = [CV; NDIM];
-        let half_width = [HWV; NDIM];
+        let half_widths = [HWV; NDIM];
 
         {
             let vv = Generator::new([0.75f64, 0.75]);
@@ -2347,12 +2375,7 @@ mod tests_with_centre_and_half_width {
                 .map(|[a, b]| [CV + a * HWV, CV + b * HWV]);
 
             let mut count = 0;
-            for (a, b) in vv
-                .into_iter()
-                .with_centre(&centre)
-                .with_half_width(&half_width)
-                .zip(should_be)
-            {
+            for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -2377,12 +2400,7 @@ mod tests_with_centre_and_half_width {
             .map(|[a, b]| [CV + a * HWV, CV + b * HWV]);
 
             let mut count = 0;
-            for (a, b) in vv
-                .into_iter()
-                .with_centre(&centre)
-                .with_half_width(&half_width)
-                .zip(should_be)
-            {
+            for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -2403,12 +2421,7 @@ mod tests_with_centre_and_half_width {
             .map(|[a, b]| [CV + a * HWV, CV + b * HWV]);
 
             let mut count = 0;
-            for (a, b) in vv
-                .into_iter()
-                .with_centre(&centre)
-                .with_half_width(&half_width)
-                .zip(should_be)
-            {
+            for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -2423,7 +2436,7 @@ mod tests_with_centre_and_half_width {
         const NDIM: usize = 3;
 
         let centre = [CV; NDIM];
-        let half_width = [HWV; NDIM];
+        let half_widths = [HWV; NDIM];
 
         {
             let vv = Generator::new([0.75f64, 0.75, 0.75]);
@@ -2442,12 +2455,7 @@ mod tests_with_centre_and_half_width {
             .map(|[a, b, c]| [CV + a * HWV, CV + b * HWV, CV + c * HWV]);
 
             let mut count = 0;
-            for (a, b) in vv
-                .into_iter()
-                .with_centre(&centre)
-                .with_half_width(&half_width)
-                .zip(should_be)
-            {
+            for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -2490,12 +2498,7 @@ mod tests_with_centre_and_half_width {
             .map(|[a, b, c]| [CV + a * HWV, CV + b * HWV, CV + c * HWV]);
 
             let mut count = 0;
-            for (a, b) in vv
-                .into_iter()
-                .with_centre(&centre)
-                .with_half_width(&half_width)
-                .zip(should_be)
-            {
+            for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -2537,12 +2540,7 @@ mod tests_with_centre_and_half_width {
             .map(|[a, b, c]| [CV + a * HWV, CV + b * HWV, CV + c * HWV]);
 
             let mut count = 0;
-            for (a, b) in vv
-                .into_iter()
-                .with_centre(&centre)
-                .with_half_width(&half_width)
-                .zip(should_be)
-            {
+            for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -2572,12 +2570,7 @@ mod tests_with_centre_and_half_width {
             .map(|[a, b, c]| [CV + a * HWV, CV + b * HWV, CV + c * HWV]);
 
             let mut count = 0;
-            for (a, b) in vv
-                .into_iter()
-                .with_centre(&centre)
-                .with_half_width(&half_width)
-                .zip(should_be)
-            {
+            for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -2601,12 +2594,7 @@ mod tests_with_centre_and_half_width {
             .map(|[a, b, c]| [CV + a * HWV, CV + b * HWV, CV + c * HWV]);
 
             let mut count = 0;
-            for (a, b) in vv
-                .into_iter()
-                .with_centre(&centre)
-                .with_half_width(&half_width)
-                .zip(should_be)
-            {
+            for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
                 println!("{:?}", a);
                 assert_eq!(a[0], b[0]);
@@ -2623,7 +2611,7 @@ mod tests_with_centre_and_half_width {
         const NDIM: usize = 6;
 
         let centre = [CV; NDIM];
-        let half_width = [HWV; NDIM];
+        let half_widths = [HWV; NDIM];
 
         {
             let vv = Generator::new([0.75f64, 0.75, 0.75, 0.75, 0.75, 0.75]);
@@ -2706,12 +2694,7 @@ mod tests_with_centre_and_half_width {
             });
 
             let mut count = 0;
-            for (a, b) in vv
-                .into_iter()
-                .with_centre(&centre)
-                .with_half_width(&half_width)
-                .zip(should_be)
-            {
+            for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -2901,12 +2884,7 @@ mod tests_with_centre_and_half_width {
             });
 
             let mut count = 0;
-            for (a, b) in vv
-                .into_iter()
-                .with_centre(&centre)
-                .with_half_width(&half_width)
-                .zip(should_be)
-            {
+            for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -3416,12 +3394,7 @@ mod tests_with_centre_and_half_width {
             });
 
             let mut count = 0;
-            for (a, b) in vv
-                .into_iter()
-                .with_centre(&centre)
-                .with_half_width(&half_width)
-                .zip(should_be)
-            {
+            for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -3571,12 +3544,7 @@ mod tests_with_centre_and_half_width {
             });
 
             let mut count = 0;
-            for (a, b) in vv
-                .into_iter()
-                .with_centre(&centre)
-                .with_half_width(&half_width)
-                .zip(should_be)
-            {
+            for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -3666,12 +3634,7 @@ mod tests_with_centre_and_half_width {
             });
 
             let mut count = 0;
-            for (a, b) in vv
-                .into_iter()
-                .with_centre(&centre)
-                .with_half_width(&half_width)
-                .zip(should_be)
-            {
+            for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
@@ -3713,12 +3676,7 @@ mod tests_with_centre_and_half_width {
             });
 
             let mut count = 0;
-            for (a, b) in vv
-                .into_iter()
-                .with_centre(&centre)
-                .with_half_width(&half_width)
-                .zip(should_be)
-            {
+            for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
