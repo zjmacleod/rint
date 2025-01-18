@@ -127,8 +127,8 @@ impl<const NDIM: usize> Data<NDIM> {
     }
 }
 
-pub(crate) struct Scales<const TOTAL: usize>([[f64; 3]; TOTAL]);
-pub(crate) struct Norms<const TOTAL: usize>([[f64; 3]; TOTAL]);
+pub(crate) struct Scales<const TOTAL: usize>([[f64; TOTAL]; 3]);
+pub(crate) struct Norms<const TOTAL: usize>([[f64; TOTAL]; 3]);
 
 pub(crate) const fn scales_norms<const NDIM: usize, const TOTAL: usize>(
     weights: &[[f64; 5]; TOTAL],
@@ -174,7 +174,21 @@ pub(crate) const fn scales_norms<const NDIM: usize, const TOTAL: usize>(
         i += 1;
     }
 
-    (Scales(scales), Norms(norms))
+    let mut scales_swap = [[0f64; TOTAL]; 3];
+    let mut norms_swap = [[0f64; TOTAL]; 3];
+
+    let mut i = 0;
+    while i < TOTAL {
+        let mut j = 0;
+        while j < 3 {
+            scales_swap[j][i] = scales[i][j];
+            norms_swap[j][i] = norms[i][j];
+            j += 1;
+        }
+        i += 1;
+    }
+
+    (Scales(scales_swap), Norms(norms_swap))
 }
 
 pub(crate) struct BasicErrorCoeff {
