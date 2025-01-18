@@ -18,7 +18,7 @@
 use num_complex::{Complex, ComplexFloat};
 use num_traits::Zero;
 use std::fmt::Debug;
-use std::ops::{AddAssign, Div, Mul};
+use std::ops::{Add, AddAssign, Div, Mul, Sub};
 
 mod estimate;
 mod limits;
@@ -95,6 +95,8 @@ pub trait ScalarF64:
     + Mul<f64, Output = Self>
     + Div<f64, Output = Self>
     + AddAssign<Self>
+    + Add<Self>
+    + Sub<Self>
     + Debug
     + sealed::Max
     + sealed::Sealed
