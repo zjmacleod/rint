@@ -5,6 +5,7 @@ use crate::ScalarF64;
 mod adaptive;
 mod basic;
 mod generator;
+mod geometry;
 mod integrator;
 mod region;
 mod rule;

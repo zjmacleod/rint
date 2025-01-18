@@ -1,5 +1,6 @@
+use crate::multi::geometry::Geometry;
 use crate::multi::region::Region;
-use crate::multi::{two_pow_n, Kind, MultiDimensionalError};
+use crate::multi::{two_pow_n, two_pow_n_f64, Kind, MultiDimensionalError};
 use crate::Limits;
 use crate::MultiDimensionalIntegrand;
 use crate::ScalarF64;
@@ -38,22 +39,7 @@ where
     }
 
     fn geometry(&self) -> Geometry<NDIM> {
-        let mut centres = [0.0; NDIM];
-        let mut widths = [0.0; NDIM];
-
-        let mut volume = 1.0;
-
-        for j in 0..NDIM {
-            centres[j] = self.limits[j].centre();
-            widths[j] = self.limits[j].half_width();
-            volume *= 2.0 * widths[j];
-        }
-
-        Geometry {
-            centres,
-            widths,
-            volume,
-        }
+        Geometry::new(&self.limits)
     }
 
     const fn minimum_function_calls() -> usize {
@@ -63,12 +49,15 @@ where
     #[allow(clippy::too_many_lines)]
     pub(crate) fn integrate_internal(&self) -> Region<NDIM, I::Scalar> {
         let Geometry {
-            centres,
-            widths,
+            centre,
+            half_widths,
             volume,
+            largest_axis,
         } = self.geometry();
 
-        let sum1 = self.function.evaluate(&centres);
+        let volume = volume * two_pow_n_f64(NDIM);
+
+        let sum1 = self.function.evaluate(&centre);
         let sum1_abs = sum1.abs();
 
         let zero = <I::Scalar as Zero>::zero();
@@ -80,29 +69,29 @@ where
         let mut sum2_abs = 0.0;
         let mut sum3_abs = 0.0;
 
-        let mut coordinate = centres;
+        let mut coordinate = centre;
         let mut abscissa = [0.0; NDIM];
 
-        let mut largest_error_axis = 0;
+        let mut largest_error_axis = largest_axis;
 
         for j in 0..NDIM {
-            abscissa[j] = Self::lambda_2() * widths[j];
+            abscissa[j] = Self::lambda_2() * half_widths[j];
 
-            coordinate[j] = centres[j] - abscissa[j];
+            coordinate[j] = centre[j] - abscissa[j];
             let fval_1 = self.function.evaluate(&coordinate);
 
-            coordinate[j] = centres[j] + abscissa[j];
+            coordinate[j] = centre[j] + abscissa[j];
             let fval_2 = self.function.evaluate(&coordinate);
 
             sum2 += fval_1 + fval_2;
             sum2_abs += fval_1.abs() + fval_2.abs();
 
-            abscissa[j] = Self::lambda_4() * widths[j];
+            abscissa[j] = Self::lambda_4() * half_widths[j];
 
-            coordinate[j] = centres[j] - abscissa[j];
+            coordinate[j] = centre[j] - abscissa[j];
             let fval_3 = self.function.evaluate(&coordinate);
 
-            coordinate[j] = centres[j] + abscissa[j];
+            coordinate[j] = centre[j] + abscissa[j];
             let fval_4 = self.function.evaluate(&coordinate);
 
             sum3 += fval_3 + fval_4;
@@ -117,7 +106,7 @@ where
                 largest_error_axis = j;
             }
 
-            coordinate[j] = centres[j];
+            coordinate[j] = centre[j];
         }
 
         let mut sum4 = zero;
@@ -127,26 +116,26 @@ where
             for k in j..NDIM {
                 for _l in 0..2 {
                     abscissa[j1] = -abscissa[j1];
-                    coordinate[j1] = centres[j1] + abscissa[j1];
+                    coordinate[j1] = centre[j1] + abscissa[j1];
                     for _m in 0..2 {
                         abscissa[k] = -abscissa[k];
-                        coordinate[k] = centres[k] + abscissa[k];
+                        coordinate[k] = centre[k] + abscissa[k];
                         let fval_4 = self.function.evaluate(&coordinate);
                         sum4 += fval_4;
                         sum4_abs += fval_4.abs();
                     }
                 }
-                coordinate[k] = centres[k];
+                coordinate[k] = centre[k];
             }
-            coordinate[j1] = centres[j1];
+            coordinate[j1] = centre[j1];
         }
 
         let mut sum5 = zero;
         let mut sum5_abs = 0.0;
 
         for j in 0..NDIM {
-            abscissa[j] = -Self::lambda_5() * widths[j];
-            coordinate[j] = centres[j] + abscissa[j];
+            abscissa[j] = -Self::lambda_5() * half_widths[j];
+            coordinate[j] = centre[j] + abscissa[j];
         }
 
         let mut continue_loop = true;
@@ -156,7 +145,7 @@ where
             sum5_abs += fval_5.abs();
             for j in 0..NDIM {
                 abscissa[j] = -abscissa[j];
-                coordinate[j] = centres[j] + abscissa[j];
+                coordinate[j] = centre[j] + abscissa[j];
                 if abscissa[j].is_sign_positive() {
                     continue 'outer;
                 }
@@ -363,12 +352,6 @@ where
     const PRIME_WEIGHT_4: f64 = 25.0 / 729.0;
 }
 
-struct Geometry<const NDIM: usize> {
-    centres: [f64; NDIM],
-    widths: [f64; NDIM],
-    volume: f64,
-}
-
 const fn minimum_function_calls(n: usize) -> usize {
     let two_pow_n = two_pow_n(n);
 
@@ -391,7 +374,9 @@ mod tests {
             alpha: f64,
         }
 
-        impl MultiDimensionalIntegrand<3> for Foo {
+        const NDIM: usize = 3;
+
+        impl MultiDimensionalIntegrand<NDIM> for Foo {
             type Scalar = f64;
             fn evaluate(&self, coordinates: &[f64; 3]) -> Self::Scalar {
                 let x = coordinates[0];
@@ -406,17 +391,20 @@ mod tests {
         let integral = MultiDimensionalBasic::new(limits, &foo).unwrap();
 
         let Geometry {
-            centres,
-            widths,
+            centre,
+            half_widths,
             volume,
+            largest_axis,
         } = integral.geometry();
+
+        let volume = volume * two_pow_n_f64(NDIM);
 
         let centres_should_be = [0.5, 1.0, 1.5];
         let widths_should_be = [0.5, 1.0, 0.5];
         let volume_should_be = 2.0;
 
-        assert_eq!(centres, centres_should_be);
-        assert_eq!(widths, widths_should_be);
+        assert_eq!(centre, centres_should_be);
+        assert_eq!(half_widths, widths_should_be);
         assert_eq!(volume, volume_should_be);
     }
 
