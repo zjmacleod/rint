@@ -27,7 +27,7 @@ impl<const NDIM: usize> Generator<NDIM> {
     }
 
     pub(crate) const fn permutations(&self) -> Permutations<NDIM> {
-        Permutations::new(&self.generator())
+        Permutations::new(self.generator())
     }
 
     pub(crate) const fn point_permutations(
@@ -35,20 +35,11 @@ impl<const NDIM: usize> Generator<NDIM> {
         centre: &[f64; NDIM],
         half_widths: &[f64; NDIM],
     ) -> Permutations<NDIM> {
-        Permutations::new(&self.generator())
-            .with_centre(&centre)
-            .with_half_widths(&half_widths)
+        Permutations::new(self.generator())
+            .with_centre(centre)
+            .with_half_widths(half_widths)
     }
 }
-
-//impl<const NDIM: usize> IntoIterator for &Generator<NDIM> {
-//    type Item = [f64; NDIM];
-//    type IntoIter = Permutations<NDIM>;
-//
-//    fn into_iter(self) -> Self::IntoIter {
-//        Permutations::new(&self.0)
-//    }
-//}
 
 pub(crate) struct Permutations<const NDIM: usize> {
     initial: bool,

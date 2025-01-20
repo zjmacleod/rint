@@ -21,7 +21,7 @@ impl<const NDIM: usize> Geometry<NDIM> {
             half_widths[j] = limits[j].half_width();
             volume *= half_widths[j];
             if half_widths[j] > half_widths[largest_axis] {
-                largest_axis = j
+                largest_axis = j;
             };
             j += 1;
         }

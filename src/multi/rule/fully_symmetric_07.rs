@@ -256,7 +256,7 @@ const fn generators<const NDIM: usize>() -> [Generator<NDIM>; TOTAL] {
 
 const TOTAL: usize = 6;
 const FINAL: usize = TOTAL - 3;
-const RATIO: f64 = (LAMBDA2 / LAMBDA1) * (LAMBDA2 / LAMBDA1);
+const RATIO: f64 = (LAMBDA1 / LAMBDA2) * (LAMBDA1 / LAMBDA2);
 
 const BASIC_ERROR_COEFF: BasicErrorCoeff = BasicErrorCoeff::new(5.0, 5.0, 1.0, 5.0);
 
@@ -732,6 +732,9 @@ mod tests {
                     0.40539107822219189,
                 ],
             ]);
+            println!("{:?}", weights);
+            println!("{:?}", scales.0);
+            println!("{:?}", norms.0);
             assert_check_vec_tol(&weights, &weights_should_be, tol);
             assert_check_vec_tol(&scales.0, &scales_should_be.0, tol);
             assert_check_vec_tol(&norms.0, &norms_should_be.0, tol);

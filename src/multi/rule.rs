@@ -31,6 +31,10 @@ pub struct Rule<const NDIM: usize, const FINAL: usize, const TOTAL: usize> {
 }
 
 impl<const NDIM: usize, const FINAL: usize, const TOTAL: usize> Rule<NDIM, FINAL, TOTAL> {
+    pub(crate) const fn total() -> usize {
+        TOTAL
+    }
+
     pub(crate) const fn initial_data(&self) -> &[Data<NDIM>; 3] {
         &self.initial_data
     }
@@ -64,7 +68,9 @@ impl<const NDIM: usize, const FINAL: usize, const TOTAL: usize> Rule<NDIM, FINAL
     }
 }
 
-impl<const NDIM: usize> Rule<NDIM, 3, 6> {
+pub type Rule07<const NDIM: usize> = Rule<NDIM, 3, 6>;
+
+impl<const NDIM: usize> Rule07<NDIM> {
     /// Generate a fully-symmetric 7-point integration rule.
     pub const fn fs07() -> Self {
         fully_symmetric_07::generate_rule::<NDIM>()
@@ -98,12 +104,12 @@ impl<const NDIM: usize> Data<NDIM> {
     }
 
     pub(crate) const fn generator_inner(&self) -> &[f64; NDIM] {
-        &self.generator.generator()
+        self.generator.generator()
     }
 
     pub(crate) fn get_first_value(&self) -> f64 {
         // unwrap is fine as generators are never empty
-        *self.generator.generator().get(0).unwrap()
+        *self.generator.generator().first().unwrap()
     }
 
     pub(crate) const fn weight(&self) -> f64 {
@@ -127,8 +133,8 @@ impl<const NDIM: usize> Data<NDIM> {
     }
 }
 
-pub(crate) struct Scales<const TOTAL: usize>([[f64; TOTAL]; 3]);
-pub(crate) struct Norms<const TOTAL: usize>([[f64; TOTAL]; 3]);
+pub(crate) struct Scales<const TOTAL: usize>(pub(crate) [[f64; TOTAL]; 3]);
+pub(crate) struct Norms<const TOTAL: usize>(pub(crate) [[f64; TOTAL]; 3]);
 
 pub(crate) const fn scales_norms<const NDIM: usize, const TOTAL: usize>(
     weights: &[[f64; 5]; TOTAL],
