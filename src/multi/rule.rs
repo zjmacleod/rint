@@ -1,4 +1,5 @@
 mod fully_symmetric_07;
+mod fully_symmetric_13_2d;
 
 use num_traits::Zero;
 
@@ -18,6 +19,8 @@ const LAMBDA0_SQ: f64 = LAMBDA0 * LAMBDA0;
 const LAMBDA1_SQ: f64 = LAMBDA1 * LAMBDA1;
 const LAMBDA2_SQ: f64 = LAMBDA2 * LAMBDA2;
 const LAMBDAP_SQ: f64 = LAMBDAP * LAMBDAP;
+
+const ADAPTIVE_ERROR_COEFF: AdaptiveErrorCoeff = AdaptiveErrorCoeff::new(0.5, 0.25);
 
 pub struct Rule<const NDIM: usize, const FINAL: usize, const TOTAL: usize> {
     initial_data: [Data<NDIM>; 3],
@@ -74,6 +77,15 @@ impl<const NDIM: usize> Rule07<NDIM> {
     /// Generate a fully-symmetric 7-point integration rule.
     pub const fn fs07() -> Self {
         fully_symmetric_07::generate_rule::<NDIM>()
+    }
+}
+
+pub type Rule13 = Rule<2, 11, 14>;
+
+impl Rule13 {
+    /// Generate a fully-symmetric 13-point integration rule for NDIM = 2 dimensional integration.
+    pub const fn fs13() -> Self {
+        fully_symmetric_13_2d::generate_rule()
     }
 }
 

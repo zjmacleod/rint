@@ -1,7 +1,8 @@
 use crate::multi::generator::Generator;
 use crate::multi::rule::{
-    scales_norms, AdaptiveErrorCoeff, BasicErrorCoeff, Data, Norms, Rule, Scales, LAMBDA0,
-    LAMBDA0_SQ, LAMBDA1, LAMBDA1_SQ, LAMBDA2, LAMBDA2_SQ, LAMBDAP, LAMBDAP_SQ,
+    scales_norms, AdaptiveErrorCoeff, BasicErrorCoeff, Data, Norms, Rule, Scales,
+    ADAPTIVE_ERROR_COEFF, LAMBDA0, LAMBDA0_SQ, LAMBDA1, LAMBDA1_SQ, LAMBDA2, LAMBDA2_SQ, LAMBDAP,
+    LAMBDAP_SQ,
 };
 use crate::multi::{two_pow_n, two_pow_n_f64};
 
@@ -259,8 +260,6 @@ const FINAL: usize = TOTAL - 3;
 const RATIO: f64 = (LAMBDA1 / LAMBDA2) * (LAMBDA1 / LAMBDA2);
 
 const BASIC_ERROR_COEFF: BasicErrorCoeff = BasicErrorCoeff::new(5.0, 5.0, 1.0, 5.0);
-
-const ADAPTIVE_ERROR_COEFF: AdaptiveErrorCoeff = AdaptiveErrorCoeff::new(0.5, 0.25);
 
 #[cfg(test)]
 mod tests {
