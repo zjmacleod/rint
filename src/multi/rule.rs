@@ -1,4 +1,5 @@
 mod fully_symmetric_07;
+mod fully_symmetric_11_3d;
 mod fully_symmetric_13_2d;
 
 use num_traits::Zero;
@@ -86,6 +87,15 @@ impl Rule13 {
     /// Generate a fully-symmetric 13-point integration rule for NDIM = 2 dimensional integration.
     pub const fn fs13() -> Self {
         fully_symmetric_13_2d::generate_rule()
+    }
+}
+
+pub type Rule11 = Rule<3, 10, 13>;
+
+impl Rule11 {
+    /// Generate a fully-symmetric 11-point integration rule for NDIM = 3 dimensional integration.
+    pub const fn fs11() -> Self {
+        fully_symmetric_11_3d::generate_rule()
     }
 }
 

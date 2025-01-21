@@ -6,6 +6,10 @@ use crate::multi::rule::{
 };
 use crate::multi::{two_pow_n, two_pow_n_f64};
 
+const NDIM: usize = 2;
+const TOTAL: usize = 14;
+const FINAL: usize = TOTAL - 3;
+
 pub(crate) const fn generate_rule() -> Rule<NDIM, FINAL, TOTAL> {
     let evaluations = EVALUATIONS;
     let basic_error_coeff = BASIC_ERROR_COEFF;
@@ -29,9 +33,6 @@ pub(crate) const fn generate_rule() -> Rule<NDIM, FINAL, TOTAL> {
     }
 }
 
-const NDIM: usize = 2;
-const TOTAL: usize = 14;
-const FINAL: usize = TOTAL - 3;
 const EVALUATIONS: usize = 65;
 
 const WEIGHTS: [[f64; 5]; TOTAL] = [
