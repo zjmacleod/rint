@@ -1,4 +1,5 @@
 mod fully_symmetric_07;
+mod fully_symmetric_09;
 mod fully_symmetric_11_3d;
 mod fully_symmetric_13_2d;
 
@@ -10,16 +11,6 @@ use crate::multi::two_pow_n_f64;
 use crate::Limits;
 use crate::MultiDimensionalIntegrand;
 use crate::ScalarF64;
-
-const LAMBDA0: f64 = 6.860_757_975_617_562_914_002_852e-1;
-const LAMBDA1: f64 = 9.559_073_158_045_390_123_857_208e-1;
-const LAMBDA2: f64 = 4.060_571_747_382_397_355_996_069e-1;
-const LAMBDAP: f64 = 7.500_000_000_000_000_000_000_000e-1;
-
-const LAMBDA0_SQ: f64 = LAMBDA0 * LAMBDA0;
-const LAMBDA1_SQ: f64 = LAMBDA1 * LAMBDA1;
-const LAMBDA2_SQ: f64 = LAMBDA2 * LAMBDA2;
-const LAMBDAP_SQ: f64 = LAMBDAP * LAMBDAP;
 
 const ADAPTIVE_ERROR_COEFF: AdaptiveErrorCoeff = AdaptiveErrorCoeff::new(0.5, 0.25);
 
@@ -81,12 +72,12 @@ impl<const NDIM: usize> Rule07<NDIM> {
     }
 }
 
-pub type Rule13 = Rule<2, 11, 14>;
+pub type Rule09<const NDIM: usize> = Rule<NDIM, 6, 9>;
 
-impl Rule13 {
-    /// Generate a fully-symmetric 13-point integration rule for NDIM = 2 dimensional integration.
-    pub const fn fs13() -> Self {
-        fully_symmetric_13_2d::generate_rule()
+impl<const NDIM: usize> Rule09<NDIM> {
+    /// Generate a fully-symmetric 9-point integration rule for NDIM > 3 dimensional integration.
+    pub const fn fs09() -> Self {
+        fully_symmetric_09::generate_rule::<NDIM>()
     }
 }
 
@@ -96,6 +87,15 @@ impl Rule11 {
     /// Generate a fully-symmetric 11-point integration rule for NDIM = 3 dimensional integration.
     pub const fn fs11() -> Self {
         fully_symmetric_11_3d::generate_rule()
+    }
+}
+
+pub type Rule13 = Rule<2, 11, 14>;
+
+impl Rule13 {
+    /// Generate a fully-symmetric 13-point integration rule for NDIM = 2 dimensional integration.
+    pub const fn fs13() -> Self {
+        fully_symmetric_13_2d::generate_rule()
     }
 }
 

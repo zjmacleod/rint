@@ -1,8 +1,7 @@
 use crate::multi::generator::Generator;
 use crate::multi::rule::{
     scales_norms, AdaptiveErrorCoeff, BasicErrorCoeff, Data, Norms, Rule, Scales,
-    ADAPTIVE_ERROR_COEFF, LAMBDA0, LAMBDA0_SQ, LAMBDA1, LAMBDA1_SQ, LAMBDA2, LAMBDA2_SQ, LAMBDAP,
-    LAMBDAP_SQ,
+    ADAPTIVE_ERROR_COEFF,
 };
 use crate::multi::{two_pow_n, two_pow_n_f64};
 

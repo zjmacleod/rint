@@ -1,10 +1,23 @@
 use crate::multi::generator::Generator;
 use crate::multi::rule::{
     scales_norms, AdaptiveErrorCoeff, BasicErrorCoeff, Data, Norms, Rule, Scales,
-    ADAPTIVE_ERROR_COEFF, LAMBDA0, LAMBDA0_SQ, LAMBDA1, LAMBDA1_SQ, LAMBDA2, LAMBDA2_SQ, LAMBDAP,
-    LAMBDAP_SQ,
+    ADAPTIVE_ERROR_COEFF,
 };
 use crate::multi::{two_pow_n, two_pow_n_f64};
+
+const LAMBDA0: f64 = 6.860_757_975_617_562_914_002_852e-1;
+const LAMBDA1: f64 = 9.559_073_158_045_390_123_857_208e-1;
+const LAMBDA2: f64 = 4.060_571_747_382_397_355_996_069e-1;
+const LAMBDAP: f64 = 7.500_000_000_000_000_000_000_000e-1;
+
+const LAMBDA0_SQ: f64 = LAMBDA0 * LAMBDA0;
+const LAMBDA1_SQ: f64 = LAMBDA1 * LAMBDA1;
+const LAMBDA2_SQ: f64 = LAMBDA2 * LAMBDA2;
+const LAMBDAP_SQ: f64 = LAMBDAP * LAMBDAP;
+
+const TOTAL: usize = 6;
+const FINAL: usize = TOTAL - 3;
+const RATIO: f64 = (LAMBDA1 / LAMBDA2) * (LAMBDA1 / LAMBDA2);
 
 pub(crate) const fn generate_rule<const NDIM: usize>() -> Rule<NDIM, FINAL, TOTAL> {
     let evaluations = evaluations::<NDIM>();
@@ -254,10 +267,6 @@ const fn generators<const NDIM: usize>() -> [Generator<NDIM>; TOTAL] {
 
     [gen_1, gen_2, gen_3, gen_4, gen_5, gen_6]
 }
-
-const TOTAL: usize = 6;
-const FINAL: usize = TOTAL - 3;
-const RATIO: f64 = (LAMBDA1 / LAMBDA2) * (LAMBDA1 / LAMBDA2);
 
 const BASIC_ERROR_COEFF: BasicErrorCoeff = BasicErrorCoeff::new(5.0, 5.0, 1.0, 5.0);
 
