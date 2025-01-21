@@ -1,9 +1,10 @@
 #![allow(unused)]
 use crate::IntegralEstimate;
 use crate::ScalarF64;
+use num_traits::Zero;
 
-mod adaptive;
-mod basic;
+//mod adaptive;
+//mod basic;
 mod generator;
 mod geometry;
 mod integrator;
@@ -20,47 +21,71 @@ pub enum Kind {
 #[derive(Debug)]
 pub struct MultiDimensionalError<T: ScalarF64> {
     kind: Kind,
-    integral: IntegralEstimate<T>,
+    integral: Option<IntegralEstimate<T>>,
 }
 
 impl<T: ScalarF64> MultiDimensionalError<T> {
     pub(crate) const fn new(kind: Kind, integral: IntegralEstimate<T>) -> Self {
+        let integral = Some(integral);
         Self { kind, integral }
     }
 
-    pub(crate) fn unevaluated(kind: Kind) -> Self {
-        let output = IntegralEstimate::new();
-        MultiDimensionalError::new(kind, output)
+    pub(crate) const fn unevaluated(kind: Kind) -> Self {
+        let integral = None;
+        Self { kind, integral }
     }
 
+    /// Return the error [`Kind`] which was encountered.
     #[must_use]
     pub const fn kind(&self) -> Kind {
         self.kind
     }
 
+    /// Return a reference to the best [`IntegralEstimate`] which was calculated before an error
+    /// occurred.
     #[must_use]
-    pub const fn estimate(&self) -> &IntegralEstimate<T> {
+    pub fn estimate(&self) -> &Option<IntegralEstimate<T>> {
         &self.integral
     }
 
+    /// Return the best estimate of the integral value which was calculated before an error occurred.
     #[must_use]
-    pub const fn result(&self) -> T {
-        self.integral.result()
+    pub fn result(&self) -> T {
+        if let Some(ref estimate) = self.integral {
+            estimate.result()
+        } else {
+            <T as Zero>::zero()
+        }
     }
 
+    /// Return the best estimate of the integral error which was calculated before an error occurred.
     #[must_use]
-    pub const fn error(&self) -> f64 {
-        self.integral.error()
+    pub fn error(&self) -> f64 {
+        if let Some(ref estimate) = self.integral {
+            estimate.error()
+        } else {
+            0.0
+        }
     }
 
+    /// Return the number of iterations used by the integrator before an error occurred.
     #[must_use]
-    pub const fn iterations(&self) -> usize {
-        self.integral.iterations()
+    pub fn iterations(&self) -> usize {
+        if let Some(ref estimate) = self.integral {
+            estimate.iterations()
+        } else {
+            0
+        }
     }
 
+    /// Return the number of function evaluations used by the integrator before an error occurred.
     #[must_use]
-    pub const fn function_evaluations(&self) -> usize {
-        self.integral.function_evaluations()
+    pub fn function_evaluations(&self) -> usize {
+        if let Some(ref estimate) = self.integral {
+            estimate.function_evaluations()
+        } else {
+            0
+        }
     }
 }
 

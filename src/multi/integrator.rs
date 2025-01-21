@@ -2,76 +2,11 @@ use num_complex::ComplexFloat;
 use num_traits::Zero;
 
 use crate::multi::geometry::Geometry;
+use crate::multi::region::Region;
 use crate::multi::rule::Rule;
 use crate::Limits;
 use crate::MultiDimensionalIntegrand;
 use crate::ScalarF64;
-
-pub(crate) struct Region<const NDIM: usize, T: ScalarF64> {
-    pub(crate) error: f64,
-    pub(crate) result: T,
-    pub(crate) limits: [Limits; NDIM],
-    pub(crate) largest_error_axis: usize,
-    pub(crate) function_evaluations: usize,
-}
-
-impl<const NDIM: usize, T: ScalarF64> Region<NDIM, T> {
-    pub(crate) fn unevaluated() -> Self {
-        let zero = <T as Zero>::zero();
-        Self {
-            error: 0.0,
-            result: zero,
-            limits: [Limits::new(0.0, 0.0); NDIM],
-            largest_error_axis: 0,
-            function_evaluations: 0,
-        }
-    }
-
-    pub(crate) fn with_error(mut self, error: f64) -> Self {
-        self.error = error;
-        self
-    }
-
-    pub(crate) fn with_result(mut self, result: T) -> Self {
-        self.result = result;
-        self
-    }
-
-    pub(crate) fn with_limits(mut self, limits: [Limits; NDIM]) -> Self {
-        self.limits = limits;
-        self
-    }
-
-    pub(crate) fn with_largest_error_axis(mut self, largest_error_axis: usize) -> Self {
-        self.largest_error_axis = largest_error_axis;
-        self
-    }
-
-    pub(crate) fn with_function_evaluations(mut self, function_evaluations: usize) -> Self {
-        self.function_evaluations = function_evaluations;
-        self
-    }
-
-    pub fn error(&self) -> f64 {
-        self.error
-    }
-
-    pub fn result(&self) -> T {
-        self.result
-    }
-
-    pub fn limits(&self) -> &[Limits; NDIM] {
-        &self.limits
-    }
-
-    pub fn largest_error_axis(&self) -> usize {
-        self.largest_error_axis
-    }
-
-    pub fn function_evaluations(&self) -> usize {
-        self.function_evaluations
-    }
-}
 
 pub(crate) struct Integrator<'a, I, const NDIM: usize, const FINAL: usize, const TOTAL: usize>
 where
