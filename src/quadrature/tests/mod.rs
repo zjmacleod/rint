@@ -217,6 +217,7 @@ mod macros {
     }
 }
 
+mod adaptive_error_tests;
 mod positive_function_with_singularity;
 mod smooth_oscillating_function_unsymmetric_range;
 mod smooth_positive_function;

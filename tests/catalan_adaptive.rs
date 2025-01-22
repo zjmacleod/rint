@@ -1,7 +1,7 @@
 use num_complex::ComplexFloat;
 use rint::quadrature::Adaptive;
 use rint::quadrature::Rule;
-use rint::quadrature::Tolerance;
+use rint::Tolerance;
 
 mod util;
 

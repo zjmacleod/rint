@@ -1,13 +1,12 @@
 use num_traits::Zero;
 
 use crate::quadrature::rule::Rule;
-use crate::quadrature::{Adaptive, AdaptiveSingularity, Basic, QuadratureError, Tolerance};
-use crate::ScalarF64;
-use crate::{Integrand, Limits};
+use crate::quadrature::{Adaptive, AdaptiveSingularity, Basic};
+use crate::{Error, Integrand, Limits, ScalarF64, Tolerance};
 
 /// The value of a function evaluated with Gauss-Kronrod integration and associated error
 /// estimation.
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct IntegralEstimate<T: ScalarF64> {
     result: T,
     error: f64,
@@ -93,7 +92,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// for details.
     ///
     /// # Errors
-    /// The error type [`QuadratureError`] will return both the error [`Kind`] and the [`IntegralEstimate`]
+    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
     /// obtained before an error was encountered.
     /// The integration routine has several ways of failing:
     /// - Function will return an error if the user provided `Tolerance` does not satisfy the
@@ -128,15 +127,17 @@ impl<T: ScalarF64> IntegralEstimate<T> {
         rule: Rule,
         function: I,
         max_iterations: usize,
-    ) -> Result<IntegralEstimate<I::Scalar>, QuadratureError<I::Scalar>> {
-        Adaptive::new(function, rule, limits, error_bound, max_iterations)?.integrate()
+    ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
+        let res =
+            Adaptive::new(function, rule, limits, error_bound, max_iterations)?.integrate()?;
+        Ok(res)
     }
 
     /// Integrate the function with possible integrable singularities and a finite integration
     /// interval, see [`AdaptiveSingularity`] for details.
     ///
     /// # Errors
-    /// The error type [`QuadratureError`] will return both the error [`Kind`] and the [`IntegralEstimate`]
+    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
     /// obtained before an error was encountered.
     /// The integration routine has several ways of failing:
     /// - Function will return an error if the user provided `Tolerance` does not satisfy the
@@ -176,15 +177,17 @@ impl<T: ScalarF64> IntegralEstimate<T> {
         error_bound: Tolerance,
         function: I,
         max_iterations: usize,
-    ) -> Result<IntegralEstimate<I::Scalar>, QuadratureError<I::Scalar>> {
-        AdaptiveSingularity::finite(function, limits, error_bound, max_iterations)?.integrate()
+    ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
+        let res = AdaptiveSingularity::finite(function, limits, error_bound, max_iterations)?
+            .integrate()?;
+        Ok(res)
     }
 
     /// Integrate the function with possible integrable singularities and an infinite integration
     /// interval, see [`AdaptiveSingularity`] for details.
     ///
     /// # Errors
-    /// The error type [`QuadratureError`] will return both the error [`Kind`] and the [`IntegralEstimate`]
+    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
     /// obtained before an error was encountered.
     /// The integration routine has several ways of failing:
     /// - Function will return an error if the user provided `Tolerance` does not satisfy the
@@ -223,15 +226,17 @@ impl<T: ScalarF64> IntegralEstimate<T> {
         error_bound: Tolerance,
         function: I,
         max_iterations: usize,
-    ) -> Result<IntegralEstimate<I::Scalar>, QuadratureError<I::Scalar>> {
-        AdaptiveSingularity::infinite(function, error_bound, max_iterations)?.integrate()
+    ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
+        let res =
+            AdaptiveSingularity::infinite(function, error_bound, max_iterations)?.integrate()?;
+        Ok(res)
     }
 
     /// Integrate the function with possible integrable singularities and semi-infinite integration
     /// interval (b, Inf), see [`AdaptiveSingularity`] for details.
     ///
     /// # Errors
-    /// The error type [`QuadratureError`] will return both the error [`Kind`] and the [`IntegralEstimate`]
+    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
     /// obtained before an error was encountered.
     /// The integration routine has several ways of failing:
     /// - Function will return an error if the user provided `Tolerance` does not satisfy the
@@ -271,16 +276,18 @@ impl<T: ScalarF64> IntegralEstimate<T> {
         error_bound: Tolerance,
         function: I,
         max_iterations: usize,
-    ) -> Result<IntegralEstimate<I::Scalar>, QuadratureError<I::Scalar>> {
-        AdaptiveSingularity::semi_infinite_upper(function, lower, error_bound, max_iterations)?
-            .integrate()
+    ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
+        let res =
+            AdaptiveSingularity::semi_infinite_upper(function, lower, error_bound, max_iterations)?
+                .integrate()?;
+        Ok(res)
     }
 
     /// Integrate the function with possible integrable singularities and semi-infinite integration
     /// interval (-Inf, a), see [`AdaptiveSingularity`] for details.
     ///
     /// # Errors
-    /// The error type [`QuadratureError`] will return both the error [`Kind`] and the [`IntegralEstimate`]
+    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
     /// obtained before an error was encountered.
     /// The integration routine has several ways of failing:
     /// - Function will return an error if the user provided `Tolerance` does not satisfy the
@@ -320,8 +327,10 @@ impl<T: ScalarF64> IntegralEstimate<T> {
         error_bound: Tolerance,
         function: I,
         max_iterations: usize,
-    ) -> Result<IntegralEstimate<I::Scalar>, QuadratureError<I::Scalar>> {
-        AdaptiveSingularity::semi_infinite_lower(function, upper, error_bound, max_iterations)?
-            .integrate()
+    ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
+        let res =
+            AdaptiveSingularity::semi_infinite_lower(function, upper, error_bound, max_iterations)?
+                .integrate()?;
+        Ok(res)
     }
 }

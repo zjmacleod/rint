@@ -1,6 +1,6 @@
 use num_complex::ComplexFloat;
 use rint::quadrature::AdaptiveSingularity;
-use rint::quadrature::Tolerance;
+use rint::Tolerance;
 
 mod util;
 

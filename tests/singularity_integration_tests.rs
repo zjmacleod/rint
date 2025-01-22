@@ -1,6 +1,6 @@
 //use rint::quadrature::adaptive::Kind;
-use rint::quadrature::{AdaptiveSingularity, Tolerance};
-use rint::Limits;
+use rint::quadrature::AdaptiveSingularity;
+use rint::{Limits, Tolerance};
 
 mod util;
 

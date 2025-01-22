@@ -1,10 +1,11 @@
 use num_traits::Zero;
 use std::collections::binary_heap::BinaryHeap;
 
-use crate::quadrature::{
-    subinterval_too_small, Integrator, Kind, QuadratureError, Region, Rule, Tolerance,
+use crate::quadrature::{subinterval_too_small, Integrator, Region, Rule};
+use crate::{
+    sealed::Max, InitialisationError, InitialisationErrorKind, IntegralEstimate, Integrand,
+    IntegrationError, IntegrationErrorKind, Limits, ScalarF64, Tolerance,
 };
-use crate::{sealed::Max, IntegralEstimate, Integrand, Limits, ScalarF64};
 
 /// An adaptive Gauss-Kronrod quadrature integrator for functions of a single variable with
 /// integrable singularities.
@@ -13,7 +14,7 @@ use crate::{sealed::Max, IntegralEstimate, Integrand, Limits, ScalarF64};
 /// integration [`Limits`], [`Tolerance`], and `max_iterations` count.
 /// The adaptive routine works by bisecting the integration region with the largest error estimate
 /// and iteratively applying an integration [`Rule`] until the constraints
-/// imposed by the user provided [`Tolerance`] are satisfied, or until an [`QuadratureError`] is
+/// imposed by the user provided [`Tolerance`] are satisfied, or until an [`IntegrationError`] is
 /// encountered.
 /// To deal with integrable singularities in the integration region the [`AdaptiveSingularity`]
 /// integrator combines the adaptive routine with an extrapolation proceedure, specifically the
@@ -49,14 +50,14 @@ use crate::{sealed::Max, IntegralEstimate, Integrand, Limits, ScalarF64};
 ///
 /// [`Basic`]: crate::quadrature::Basic
 /// [`Adaptive`]: crate::quadrature::Adaptive
-/// [`Tolerance::Absolute(abserr)`]: crate::quadrature::Tolerance#variant.Absolute
-/// [`Tolerance::Relative(relerr)`]: crate::quadrature::Tolerance#variant.Relative
-/// [`Tolerance::Either{ abserr, relerr }`]: crate::quadrature::Tolerance#variant.Either
+/// [`Tolerance::Absolute(abserr)`]: crate::Tolerance#variant.Absolute
+/// [`Tolerance::Relative(relerr)`]: crate::Tolerance#variant.Relative
+/// [`Tolerance::Either{ abserr, relerr }`]: crate::Tolerance#variant.Either
 ///
 ///```rust
 /// use rint::{Limits, Integrand};
 /// use rint::quadrature::AdaptiveSingularity;
-/// use rint::quadrature::Tolerance;
+/// use rint::Tolerance;
 ///
 /// /* f455(x) = log(x)/(1+100*x^2) */
 /// /* integ(f455,x,0,inf) = -log(10)/20 */
@@ -136,7 +137,7 @@ where
         limits: Limits,
         error_bound: Tolerance,
         max_iterations: usize,
-    ) -> Result<Self, QuadratureError<I::Scalar>> {
+    ) -> Result<Self, InitialisationError> {
         let rule = Rule::gk21();
         Self::new(function, rule, limits, error_bound, max_iterations)
     }
@@ -148,7 +149,7 @@ where
     /// [`IntegralEstimate`] upon successful completion.
     ///
     /// # Errors
-    /// The error type [`QuadratureError`] will return both the error [`Kind`] and the [`IntegralEstimate`]
+    /// The error type [`IntegrationError`] will return both the error [`Kind`] and the [`IntegralEstimate`]
     /// obtained before an error was encountered.
     /// The integration routine has several ways of failing:
     /// - The user supplied [`Tolerance`] could not be satisfied within the maximum number of
@@ -167,7 +168,7 @@ where
     /// [`Kind::DivergentOrSlowlyConverging`])
     /// - An error is encountered when initialising the integration workspace. This is an internal
     /// error, which should not occur downstream (kind = [`Kind::UninitialisedWorkspace`]).
-    pub fn integrate(&self) -> Result<IntegralEstimate<I::Scalar>, QuadratureError<I::Scalar>> {
+    pub fn integrate(&self) -> Result<IntegralEstimate<I::Scalar>, IntegrationError<I::Scalar>> {
         let initial = Integrator::new(&self.function, &self.rule, self.limits).integrate();
 
         if let Some(output) = self.check_initial_integration(&initial)? {
@@ -201,7 +202,9 @@ where
             }
 
             if workspace.iteration >= self.max_iterations - 1 {
-                workspace.set_error_kind(Kind::MaximumIterationsReached);
+                workspace.set_error_kind(IntegrationErrorKind::MaximumIterationsReached(
+                    self.max_iterations,
+                ));
                 break;
             }
 
@@ -261,7 +264,7 @@ where
                 }
             }
 
-            if let Some(Kind::DoesNotConverge) = workspace.error_kind {
+            if let Some(IntegrationErrorKind::DoesNotConverge) = workspace.error_kind {
                 break;
             }
 
@@ -287,25 +290,25 @@ where
         limits: Limits,
         error_bound: Tolerance,
         max_iterations: usize,
-    ) -> Result<Self, QuadratureError<I::Scalar>> {
+    ) -> Result<Self, InitialisationError> {
         let evaluations_multiplier = 1;
         match error_bound {
             Tolerance::Absolute(v) => {
                 if v <= 0.0 {
-                    let kind = Kind::AbsoluteBoundNegativeOrZero;
-                    return Err(QuadratureError::unevaluated(kind));
+                    let kind = InitialisationErrorKind::AbsoluteBoundNegativeOrZero(v);
+                    return Err(InitialisationError::new(kind));
                 }
             }
             Tolerance::Relative(v) => {
                 if v < 50.0 * f64::EPSILON {
-                    let kind = Kind::RelativeBoundTooSmall;
-                    return Err(QuadratureError::unevaluated(kind));
+                    let kind = InitialisationErrorKind::RelativeBoundTooSmall(v);
+                    return Err(InitialisationError::new(kind));
                 }
             }
             Tolerance::Either { absolute, relative } => {
                 if absolute <= 0.0 && relative < 50.0 * f64::EPSILON {
-                    let kind = Kind::InvalidTolerance;
-                    return Err(QuadratureError::unevaluated(kind));
+                    let kind = InitialisationErrorKind::InvalidTolerance { absolute, relative };
+                    return Err(InitialisationError::new(kind));
                 }
             }
         }
@@ -326,7 +329,7 @@ where
         error_bound: Tolerance,
         max_iterations: usize,
         evaluations_multiplier: usize,
-    ) -> Result<Self, QuadratureError<I::Scalar>> {
+    ) -> Result<Self, InitialisationError> {
         let mut v = Self::new(function, rule, limits, error_bound, max_iterations)?;
         v.evaluations_multiplier = evaluations_multiplier;
         Ok(v)
@@ -339,15 +342,15 @@ where
     fn check_initial_integration(
         &self,
         initial: &Region<I::Scalar>,
-    ) -> Result<Option<IntegralEstimate<I::Scalar>>, QuadratureError<I::Scalar>> {
+    ) -> Result<Option<IntegralEstimate<I::Scalar>>, IntegrationError<I::Scalar>> {
         let tolerance = self.error_bound.tolerance(&initial.result());
         let roundoff = Self::roundoff(initial.result_abs());
 
         if initial.error() <= roundoff && initial.error() > tolerance {
             let output = initial.estimate(1, self.rule.evaluations());
-            let kind = Kind::RoundoffErrorDetected;
+            let kind = IntegrationErrorKind::RoundoffErrorDetected;
 
-            Err(QuadratureError::new(kind, output))
+            Err(IntegrationError::new(output, kind))
         } else if (initial.error() <= tolerance
             && initial.error().to_bits() != initial.result_asc().to_bits())
             || initial.error() == 0.0
@@ -357,9 +360,9 @@ where
             Ok(Some(output))
         } else if self.max_iterations == 1 {
             let output = initial.estimate(1, self.rule.evaluations());
-            let kind = Kind::MaximumIterationsReached;
+            let kind = IntegrationErrorKind::MaximumIterationsReached(self.max_iterations);
 
-            Err(QuadratureError::new(kind, output))
+            Err(IntegrationError::new(output, kind))
         } else {
             Ok(None)
         }
@@ -459,7 +462,7 @@ where
         function: I,
         error_bound: Tolerance,
         max_iterations: usize,
-    ) -> Result<Self, QuadratureError<I::Scalar>> {
+    ) -> Result<Self, InitialisationError> {
         let rule = Rule::gk15();
         let transformed = InfiniteInterval::new(function);
         let evaluations_multiplier = 2;
@@ -530,7 +533,7 @@ where
         lower: f64,
         error_bound: Tolerance,
         max_iterations: usize,
-    ) -> Result<Self, QuadratureError<I::Scalar>> {
+    ) -> Result<Self, InitialisationError> {
         let rule = Rule::gk15();
         let transformed = SemiInfiniteIntervalPositive::new(function, lower);
         let evaluations_multiplier = 2;
@@ -601,7 +604,7 @@ where
         upper: f64,
         error_bound: Tolerance,
         max_iterations: usize,
-    ) -> Result<Self, QuadratureError<I::Scalar>> {
+    ) -> Result<Self, InitialisationError> {
         let rule = Rule::gk15();
         let transformed = SemiInfiniteIntervalNegative::new(function, upper);
         let evaluations_multiplier = 2;
@@ -626,7 +629,7 @@ struct Workspace<T: ScalarF64> {
     smallest_interval: f64,
     extrapolate: bool,
     store: BinaryHeap<Region<T>>,
-    error_kind: Option<Kind>,
+    error_kind: Option<IntegrationErrorKind>,
     initial_absolute_result: f64,
     positive_integrand: bool,
     roundoff_count: usize,
@@ -635,13 +638,14 @@ struct Workspace<T: ScalarF64> {
 }
 
 impl<T: ScalarF64> Workspace<T> {
-    fn retrieve_largest_error(&mut self) -> Result<Region<T>, QuadratureError<T>> {
+    fn retrieve_largest_error(&mut self) -> Result<Region<T>, IntegrationError<T>> {
         self.iteration += 1;
         if let Some(previous) = self.pop() {
             Ok(previous)
         } else {
-            let kind = Kind::UninitialisedWorkspace;
-            Err(QuadratureError::unevaluated(kind))
+            let kind = IntegrationErrorKind::UninitialisedWorkspace;
+            let output = IntegralEstimate::new();
+            Err(IntegrationError::new(output, kind))
         }
     }
 
@@ -720,17 +724,17 @@ impl<T: ScalarF64> Workspace<T> {
         self.smallest_interval *= 0.5;
     }
 
-    fn compute_result(self) -> Result<IntegralEstimate<T>, QuadratureError<T>> {
+    fn compute_result(self) -> Result<IntegralEstimate<T>, IntegrationError<T>> {
         let output = self.integral_estimate();
 
         if let Some(kind) = self.error_kind {
-            Err(QuadratureError::new(kind, output))
+            Err(IntegrationError::new(output, kind))
         } else {
             Ok(output)
         }
     }
 
-    fn compute_extrapolated_result(self) -> Result<IntegralEstimate<T>, QuadratureError<T>> {
+    fn compute_extrapolated_result(self) -> Result<IntegralEstimate<T>, IntegrationError<T>> {
         let function_evaluations =
             (2 * self.iteration - 1) * self.function_evaluations_per_integration;
         let output = self
@@ -738,13 +742,13 @@ impl<T: ScalarF64> Workspace<T> {
             .integral_estimate(self.iteration, function_evaluations);
 
         if let Some(kind) = self.error_kind {
-            Err(QuadratureError::new(kind, output))
+            Err(IntegrationError::new(output, kind))
         } else {
             Ok(output)
         }
     }
 
-    fn check_error_and_compute(mut self) -> Result<IntegralEstimate<T>, QuadratureError<T>> {
+    fn check_error_and_compute(mut self) -> Result<IntegralEstimate<T>, IntegrationError<T>> {
         if self.table.error == f64::MAX {
             return self.compute_result();
         }
@@ -755,7 +759,7 @@ impl<T: ScalarF64> Workspace<T> {
             }
 
             if !self.is_err() {
-                self.set_error_kind(Kind::DoesNotConverge);
+                self.set_error_kind(IntegrationErrorKind::DoesNotConverge);
             }
 
             let zero = <T as Zero>::zero();
@@ -780,7 +784,7 @@ impl<T: ScalarF64> Workspace<T> {
         let ratio = self.table.result.abs() / self.result.abs();
 
         if !(0.01..=100.0).contains(&ratio) || self.error > self.result.abs() {
-            self.set_error_kind(Kind::DivergentOrSlowlyConverging);
+            self.set_error_kind(IntegrationErrorKind::DivergentOrSlowlyConverging);
         }
 
         self.compute_extrapolated_result()
@@ -790,7 +794,7 @@ impl<T: ScalarF64> Workspace<T> {
         if self.roundoff_count + self.table.roundoff_count >= 10
             || self.roundoff_on_high_iteration_count >= 20
         {
-            self.set_error_kind(Kind::RoundoffErrorDetected);
+            self.set_error_kind(IntegrationErrorKind::RoundoffErrorDetected);
         }
 
         if self.table.roundoff_count >= 5 {
@@ -800,7 +804,7 @@ impl<T: ScalarF64> Workspace<T> {
 
     const fn check_convergence(&mut self) {
         if self.table.ktmin > 5 && self.table.error < 0.001 * self.error {
-            self.set_error_kind(Kind::DoesNotConverge);
+            self.set_error_kind(IntegrationErrorKind::DoesNotConverge);
         }
     }
 
@@ -820,7 +824,7 @@ impl<T: ScalarF64> Workspace<T> {
         self.error_kind.is_some()
     }
 
-    const fn set_error_kind(&mut self, kind: Kind) {
+    const fn set_error_kind(&mut self, kind: IntegrationErrorKind) {
         self.error_kind = Some(kind);
     }
 
@@ -832,7 +836,7 @@ impl<T: ScalarF64> Workspace<T> {
         self.check_roundoff();
 
         if subinterval_too_small(limits) {
-            self.set_error_kind(Kind::BadIntegrandBehaviour { limits });
+            self.set_error_kind(IntegrationErrorKind::BadIntegrandBehaviour(limits));
         }
 
         self.push(lower);
