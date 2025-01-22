@@ -2,18 +2,12 @@ use crate::multi::generator::Generator;
 use crate::multi::rule::{
     scales_norms, BasicErrorCoeff, Data, Norms, Rule, Scales, ADAPTIVE_ERROR_COEFF,
 };
-use crate::{InitialisationError, InitialisationErrorKind};
 
 const NDIM: usize = 2;
 const TOTAL: usize = 14;
 const FINAL: usize = TOTAL - 3;
 
-pub(crate) const fn generate_rule() -> Result<Rule<NDIM, FINAL, TOTAL>, InitialisationError> {
-    if NDIM != 2 {
-        return Err(InitialisationError::new(
-            InitialisationErrorKind::InvalidDimensionForRule13(NDIM),
-        ));
-    };
+pub(crate) const fn generate_rule() -> Rule<NDIM, FINAL, TOTAL> {
     let evaluations = EVALUATIONS;
     let basic_error_coeff = BASIC_ERROR_COEFF;
     let adaptive_error_coeff = ADAPTIVE_ERROR_COEFF;
@@ -24,7 +18,7 @@ pub(crate) const fn generate_rule() -> Result<Rule<NDIM, FINAL, TOTAL>, Initiali
     let initial_data = INITIAL_DATA;
     let final_data = FINAL_DATA;
 
-    Ok(Rule {
+    Rule {
         initial_data,
         final_data,
         scales,
@@ -33,7 +27,7 @@ pub(crate) const fn generate_rule() -> Result<Rule<NDIM, FINAL, TOTAL>, Initiali
         adaptive_error_coeff,
         evaluations,
         ratio,
-    })
+    }
 }
 
 const EVALUATIONS: usize = 65;

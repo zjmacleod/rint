@@ -66,7 +66,7 @@ impl<const NDIM: usize> Rule07<NDIM> {
     ///
     /// # Errors
     /// Will fail if `NDIM < 2` or `NDIM > 15`.
-    pub const fn fs07() -> Result<Self, InitialisationError> {
+    pub const fn generate() -> Result<Self, InitialisationError> {
         fully_symmetric_07::generate_rule::<NDIM>()
     }
 }
@@ -79,7 +79,7 @@ impl<const NDIM: usize> Rule09<NDIM> {
     ///
     /// # Errors
     /// Will fail if `NDIM < 3` or `NDIM > 15`.
-    pub const fn fs09() -> Result<Self, InitialisationError> {
+    pub const fn generate() -> Result<Self, InitialisationError> {
         fully_symmetric_09::generate_rule::<NDIM>()
     }
 }
@@ -89,10 +89,8 @@ pub type Rule11 = Rule<3, 10, 13>;
 
 impl Rule11 {
     /// Generate a fully-symmetric 11-point integration rule for `NDIM = 3` dimensional integration.
-    ///
-    /// # Errors
-    /// Will fail if `NDIM != 3`.
-    pub const fn fs11() -> Result<Self, InitialisationError> {
+    #[must_use]
+    pub const fn generate() -> Self {
         fully_symmetric_11_3d::generate_rule()
     }
 }
@@ -102,10 +100,8 @@ pub type Rule13 = Rule<2, 11, 14>;
 
 impl Rule13 {
     /// Generate a fully-symmetric 13-point integration rule for `NDIM = 2` dimensional integration.
-    ///
-    /// # Errors
-    /// Will fail if `NDIM != 2`.
-    pub const fn fs13() -> Result<Self, InitialisationError> {
+    #[must_use]
+    pub const fn generate() -> Self {
         fully_symmetric_13_2d::generate_rule()
     }
 }
@@ -278,5 +274,65 @@ impl AdaptiveErrorCoeff {
     #[inline]
     pub(crate) const fn c6(&self) -> f64 {
         self.c6
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn error_when_wrong_dimension() {
+        {
+            const NDIM: usize = 1;
+            let err = Rule07::<NDIM>::generate();
+            assert!(err.is_err());
+        }
+        {
+            const NDIM: usize = 2;
+            let err = Rule07::<NDIM>::generate();
+            assert!(err.is_ok());
+        }
+        {
+            const NDIM: usize = 8;
+            let err = Rule07::<NDIM>::generate();
+            assert!(err.is_ok());
+        }
+        {
+            const NDIM: usize = 15;
+            let err = Rule07::<NDIM>::generate();
+            assert!(err.is_ok());
+        }
+        {
+            const NDIM: usize = 16;
+            let err = Rule07::<NDIM>::generate();
+            assert!(err.is_err());
+        }
+
+        {
+            const NDIM: usize = 1;
+            let err = Rule09::<NDIM>::generate();
+            assert!(err.is_err());
+        }
+        {
+            const NDIM: usize = 2;
+            let err = Rule09::<NDIM>::generate();
+            assert!(err.is_err());
+        }
+        {
+            const NDIM: usize = 8;
+            let err = Rule09::<NDIM>::generate();
+            assert!(err.is_ok());
+        }
+        {
+            const NDIM: usize = 15;
+            let err = Rule09::<NDIM>::generate();
+            assert!(err.is_ok());
+        }
+        {
+            const NDIM: usize = 16;
+            let err = Rule09::<NDIM>::generate();
+            assert!(err.is_err());
+        }
     }
 }

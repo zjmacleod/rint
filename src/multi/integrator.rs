@@ -229,6 +229,7 @@ impl<T: ScalarF64> IntermediateResult<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::multi::{Rule07, Rule09, Rule11, Rule13};
 
     #[test]
     fn compare_basic_7point_with_dcuhre_output_ndim_2() {
@@ -248,7 +249,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07().unwrap();
+            let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -279,7 +280,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07().unwrap();
+            let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -310,7 +311,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07().unwrap();
+            let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -340,7 +341,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07().unwrap();
+            let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -370,7 +371,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07().unwrap();
+            let rule = Rule07::generate().unwrap();
             let limits = [Limits::new(-2.0, 3.0), Limits::new(1.0, 10.0)];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -406,7 +407,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07().unwrap();
+            let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -438,7 +439,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07().unwrap();
+            let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -471,7 +472,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07().unwrap();
+            let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -502,7 +503,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07().unwrap();
+            let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -535,7 +536,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07().unwrap();
+            let rule = Rule07::generate().unwrap();
             let limits = [
                 Limits::new(-2.0, 3.0),
                 Limits::new(1.0, 10.0),
@@ -575,7 +576,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs09().unwrap();
+            let rule = Rule09::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -607,7 +608,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs09().unwrap();
+            let rule = Rule09::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -640,7 +641,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs09().unwrap();
+            let rule = Rule09::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -671,7 +672,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs09().unwrap();
+            let rule = Rule09::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -704,7 +705,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs09().unwrap();
+            let rule = Rule09::generate().unwrap();
             let limits = [
                 Limits::new(-2.0, 3.0),
                 Limits::new(1.0, 10.0),
@@ -744,7 +745,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs11().unwrap();
+            let rule = Rule11::generate();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -776,7 +777,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs11().unwrap();
+            let rule = Rule11::generate();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -809,7 +810,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs11().unwrap();
+            let rule = Rule11::generate();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -840,7 +841,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs11().unwrap();
+            let rule = Rule11::generate();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -873,7 +874,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs11().unwrap();
+            let rule = Rule11::generate();
             let limits = [
                 Limits::new(-2.0, 3.0),
                 Limits::new(1.0, 10.0),
@@ -912,7 +913,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs13().unwrap();
+            let rule = Rule13::generate();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -943,7 +944,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs13().unwrap();
+            let rule = Rule13::generate();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -974,7 +975,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs13().unwrap();
+            let rule = Rule13::generate();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -1004,7 +1005,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs13().unwrap();
+            let rule = Rule13::generate();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -1034,7 +1035,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs13().unwrap();
+            let rule = Rule13::generate();
             let limits = [Limits::new(-2.0, 3.0), Limits::new(1.0, 10.0)];
 
             let integral = Integrator::new(&function, &rule, limits);
