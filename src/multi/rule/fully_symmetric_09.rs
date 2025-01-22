@@ -327,9 +327,6 @@ const fn initial_weights_4<const NDIM: usize>() -> [f64; TOTAL] {
 }
 
 const fn initial_weights_5<const NDIM: usize>() -> [f64; TOTAL] {
-    let two_ndim = two_pow_n_f64(NDIM);
-    let ndim = NDIM as f64;
-
     let mut weights = [0.0; TOTAL];
     weights[1] = 1.0 / (6.0 * LAMBDA1_SQ);
 
@@ -365,7 +362,6 @@ const fn weights_scales_norms<const NDIM: usize>(
     let mut weights = initial_weights::<NDIM>();
     let rule_points = rule_points::<NDIM>();
 
-    let ndim = NDIM as f64;
     let two_ndim = two_pow_n_f64(NDIM);
 
     weights[0][0] = two_ndim;
@@ -443,11 +439,6 @@ const fn generators<const NDIM: usize>() -> [Generator<NDIM>; TOTAL] {
 const BASIC_ERROR_COEFF: BasicErrorCoeff = BasicErrorCoeff::new(5.0, 5.0, 1.0, 5.0);
 
 #[cfg(test)]
-mod wtest {
-    use super::*;
-}
-
-#[cfg(test)]
 fn rel_or_abs_diff(a: f64, b: f64) -> f64 {
     if a == 0.0 {
         (a - b).abs()
@@ -478,8 +469,8 @@ fn assert_check_vec_data_tol<const WL: usize, const TY: usize>(
     tol: f64,
 ) {
     for (x, y) in calc.iter().zip(should_be.iter()) {
-        let genx = x.generator_inner();
-        let geny = y.generator_inner();
+        let genx = x.generator().generator();
+        let geny = y.generator().generator();
         for (gx, gy) in genx.iter().zip(geny.iter()) {
             let val = rel_or_abs_diff(*gx, *gy);
             assert!(val < tol);

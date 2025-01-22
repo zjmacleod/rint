@@ -59,15 +59,13 @@ mod tests {
             largest_axis,
         } = Geometry::new(&limits);
 
-        centre
-            .iter()
-            .zip(centre_should_be.iter())
-            .map(|(a, b)| assert_eq!(a, b));
+        for (a, b) in centre.iter().zip(centre_should_be.iter()) {
+            assert_eq!(a, b);
+        }
 
-        half_widths
-            .iter()
-            .zip(half_widths_should_be.iter())
-            .map(|(a, b)| assert_eq!(a, b));
+        for (a, b) in half_widths.iter().zip(half_widths_should_be.iter()) {
+            assert_eq!(a, b);
+        }
 
         assert_eq!(volume, volume_should_be);
         assert_eq!(largest_axis, largest_axis_should_be);

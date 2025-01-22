@@ -47,23 +47,23 @@ impl<const NDIM: usize, T: ScalarF64> Region<NDIM, T> {
         self
     }
 
-    pub fn error(&self) -> f64 {
+    pub(crate) fn error(&self) -> f64 {
         self.error
     }
 
-    pub fn result(&self) -> T {
+    pub(crate) fn result(&self) -> T {
         self.result
     }
 
-    pub fn limits(&self) -> &[Limits; NDIM] {
+    pub(crate) fn limits(&self) -> &[Limits; NDIM] {
         &self.limits
     }
 
-    pub fn largest_error_axis(&self) -> usize {
+    pub(crate) fn largest_error_axis(&self) -> usize {
         self.largest_error_axis
     }
 
-    pub fn function_evaluations(&self) -> usize {
+    pub(crate) fn function_evaluations(&self) -> usize {
         self.function_evaluations
     }
 }

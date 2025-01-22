@@ -1,5 +1,3 @@
-use crate::multi::{two_pow_n, two_pow_n_f64};
-
 #[derive(Debug)]
 pub(crate) struct Generator<const NDIM: usize>([f64; NDIM]);
 
@@ -26,6 +24,7 @@ impl<const NDIM: usize> Generator<NDIM> {
         point
     }
 
+    #[cfg(test)]
     pub(crate) const fn permutations(&self) -> Permutations<NDIM> {
         Permutations::new(self.generator())
     }
@@ -2348,6 +2347,7 @@ mod tests_no_centre_or_half_widths {
 #[cfg(test)]
 mod tests_with_centre_and_half_widths {
     use super::*;
+    use crate::multi::two_pow_n;
 
     const CV: f64 = 1.44e-4;
     const HWV: f64 = 2.2e-4;

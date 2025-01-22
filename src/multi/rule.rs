@@ -3,16 +3,9 @@ mod fully_symmetric_09;
 mod fully_symmetric_11_3d;
 mod fully_symmetric_13_2d;
 
-use num_traits::Zero;
-
 use crate::multi::generator::Generator;
-use crate::multi::geometry::Geometry;
 use crate::multi::two_pow_n_f64;
-use crate::Limits;
-use crate::MultiDimensionalIntegrand;
-use crate::ScalarF64;
-
-const ADAPTIVE_ERROR_COEFF: AdaptiveErrorCoeff = AdaptiveErrorCoeff::new(0.5, 0.25);
+use crate::InitialisationError;
 
 pub struct Rule<const NDIM: usize, const FINAL: usize, const TOTAL: usize> {
     initial_data: [Data<NDIM>; 3],
@@ -143,10 +136,6 @@ impl<const NDIM: usize> Data<NDIM> {
 
     pub(crate) const fn generator(&self) -> &Generator<NDIM> {
         &self.generator
-    }
-
-    pub(crate) const fn generator_inner(&self) -> &[f64; NDIM] {
-        self.generator.generator()
     }
 
     pub(crate) fn get_first_value(&self) -> f64 {

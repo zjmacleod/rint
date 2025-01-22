@@ -219,7 +219,6 @@ const fn weights_scales_norms<const NDIM: usize>(
     let mut weights = initial_weights::<NDIM>();
     let rule_points = rule_points::<NDIM>();
 
-    let ndim = NDIM as f64;
     let two_ndim = two_pow_n_f64(NDIM);
 
     weights[0][0] = two_ndim;
@@ -308,8 +307,8 @@ mod tests {
         tol: f64,
     ) {
         for (x, y) in calc.iter().zip(should_be.iter()) {
-            let genx = x.generator_inner();
-            let geny = y.generator_inner();
+            let genx = x.generator().generator();
+            let geny = y.generator().generator();
             for (gx, gy) in genx.iter().zip(geny.iter()) {
                 let val = rel_or_abs_diff(*gx, *gy);
                 assert!(val < tol);
@@ -370,7 +369,6 @@ mod tests {
             const NDIM: usize = 3;
             let rule_points = rule_points::<NDIM>();
             let should_be = [1.0, 6.0, 6.0, 6.0, 12.0, 8.0];
-            let tol = 1e-15;
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
                 assert_eq!(x, y);
             }
@@ -650,7 +648,7 @@ mod tests {
             let tol = 1e-14;
             const NDIM: usize = 2;
             let (weights, scales, norms) = weights_scales_norms::<NDIM>();
-            let weights_should_be = ([
+            let weights_should_be = [
                 [
                     -0.34070799859740308,
                     -0.22492123910230477,
@@ -693,7 +691,7 @@ mod tests {
                     -4.4392914040667496E-002,
                     -8.8785828081335019E-002,
                 ],
-            ]);
+            ];
             let scales_should_be = Scales([
                 [
                     1.5008744041523381,
@@ -758,7 +756,7 @@ mod tests {
             let tol = 1e-14;
             const NDIM: usize = 3;
             let (weights, scales, norms) = weights_scales_norms::<NDIM>();
-            let weights_should_be = ([
+            let weights_should_be = [
                 [
                     -3.1355219462968886,
                     -0.34643529197085043,
@@ -801,7 +799,7 @@ mod tests {
                     -2.2196457020333748E-002,
                     -4.4392914040667510E-002,
                 ],
-            ]);
+            ];
             let scales_should_be = Scales([
                 [
                     1.4877849957592586,
@@ -863,7 +861,7 @@ mod tests {
             let tol = 1e-14;
             const NDIM: usize = 6;
             let (weights, scales, norms) = weights_scales_norms::<NDIM>();
-            let weights_should_be = ([
+            let weights_should_be = [
                 [
                     -69.069796742618294,
                     -0.56961952768339064,
@@ -906,7 +904,7 @@ mod tests {
                     -2.7745571275417185E-003,
                     -5.5491142550834387E-003,
                 ],
-            ]);
+            ];
             let scales_should_be = Scales([
                 [
                     1.5933291581913094,
@@ -968,7 +966,7 @@ mod tests {
             let tol = 1e-13;
             const NDIM: usize = 15;
             let (weights, scales, norms) = weights_scales_norms::<NDIM>();
-            let weights_should_be = ([
+            let weights_should_be = [
                 [
                     -34206.907291385309,
                     3.3049071216860737E-002,
@@ -1011,7 +1009,7 @@ mod tests {
                     -5.4190568897299189E-006,
                     -1.0838113779459841E-005,
                 ],
-            ]);
+            ];
             let scales_should_be = Scales([
                 [
                     -24.565913231874259,
