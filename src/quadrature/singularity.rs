@@ -98,10 +98,7 @@ use crate::{
 /// assert_eq!(iterations, 10);
 /// assert_eq!(function_evaluations, 2*15*(2*iterations - 1));
 ///```
-pub struct AdaptiveSingularity<I>
-where
-    I: Integrand,
-{
+pub struct AdaptiveSingularity<I> {
     function: I,
     rule: Rule,
     limits: Limits,
@@ -414,7 +411,7 @@ where
 /// This is a wrapper around a user supplied function implementing the [`Integrand`] trait, which
 /// is to be integrated between the interval (-Inf, Inf).
 /// This is achieved by transforming the integrand to be defined on the interval (0,1).
-pub struct InfiniteInterval<I: Integrand> {
+pub struct InfiniteInterval<I> {
     function: I,
 }
 
@@ -482,7 +479,7 @@ where
 /// This is a wrapper around a user supplied function implementing the [`Integrand`] trait, which
 /// is to be integrated between the interval (b, Inf).
 /// This is achieved by transforming the integrand to be defined on the interval (0,1).
-pub struct SemiInfiniteIntervalPositive<I: Integrand> {
+pub struct SemiInfiniteIntervalPositive<I> {
     function: I,
     lower: f64,
 }
@@ -553,7 +550,7 @@ where
 /// This is a wrapper around a user supplied function implementing the [`Integrand`] trait, which
 /// is to be integrated between the interval (-Inf, a).
 /// This is achieved by transforming the integrand to be defined on the interval (0,1).
-pub struct SemiInfiniteIntervalNegative<I: Integrand> {
+pub struct SemiInfiniteIntervalNegative<I> {
     function: I,
     upper: f64,
 }
@@ -619,7 +616,7 @@ where
     }
 }
 
-struct Workspace<T: ScalarF64> {
+struct Workspace<T> {
     heap: BinaryHeap<Region<T>>,
     iteration: usize,
     result: T,

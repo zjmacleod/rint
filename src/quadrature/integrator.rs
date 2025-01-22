@@ -7,10 +7,7 @@ use crate::quadrature::rule::Rule;
 use crate::Integrand;
 use crate::Limits;
 
-pub(crate) struct Integrator<'a, I>
-where
-    I: Integrand,
-{
+pub(crate) struct Integrator<'a, I> {
     function: &'a I,
     rule: &'a Rule,
     limits: Limits,

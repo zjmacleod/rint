@@ -64,10 +64,7 @@ use crate::Limits;
 /// assert!((exp_result - result).abs() / exp_result.abs() < rel_error_bound);
 /// assert!((exp_abserr - abserr).abs() / exp_abserr.abs() < rel_error_bound);
 ///```
-pub struct Basic<I>
-where
-    I: Integrand,
-{
+pub struct Basic<I> {
     function: I,
     rule: Rule,
     limits: Limits,

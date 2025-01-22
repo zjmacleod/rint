@@ -2,7 +2,7 @@ use crate::Limits;
 use crate::ScalarF64;
 use num_traits::Zero;
 
-pub(crate) struct Region<const NDIM: usize, T: ScalarF64> {
+pub(crate) struct Region<const NDIM: usize, T> {
     pub(crate) error: f64,
     pub(crate) result: T,
     pub(crate) limits: [Limits; NDIM],

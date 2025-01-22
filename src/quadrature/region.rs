@@ -9,7 +9,7 @@ use crate::Limits;
 use crate::ScalarF64;
 
 #[derive(Debug)]
-pub(crate) struct Region<T: ScalarF64> {
+pub(crate) struct Region<T> {
     pub(crate) result: T,
     pub(crate) error: f64,
     pub(crate) result_abs: f64,

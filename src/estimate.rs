@@ -7,7 +7,7 @@ use crate::{Error, Integrand, Limits, ScalarF64, Tolerance};
 /// The value of a function evaluated with Gauss-Kronrod integration and associated error
 /// estimation.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
-pub struct IntegralEstimate<T: ScalarF64> {
+pub struct IntegralEstimate<T> {
     result: T,
     error: f64,
     iterations: usize,

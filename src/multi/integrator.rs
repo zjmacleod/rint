@@ -197,7 +197,7 @@ where
     }
 }
 
-struct IntermediateResult<T: ScalarF64> {
+struct IntermediateResult<T> {
     result: T,
     null1: T,
     null2: T,

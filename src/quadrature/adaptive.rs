@@ -137,10 +137,7 @@ use crate::{
 /// assert!((exp_result - result_basic).abs() / exp_result.abs() < tol);
 /// assert!((exp_error - error_basic).abs() / exp_error.abs() < tol);
 ///```
-pub struct Adaptive<I>
-where
-    I: Integrand,
-{
+pub struct Adaptive<I> {
     function: I,
     rule: Rule,
     limits: Limits,
