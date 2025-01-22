@@ -63,41 +63,61 @@ impl<const NDIM: usize, const FINAL: usize, const TOTAL: usize> Rule<NDIM, FINAL
     }
 }
 
+/// A 7-point fully-symmetric integration rule valid for `2 <= NDIM <= 15`.
+///
+/// This is the recommended rule to use when a significant amount of adaptivity is required.
 pub type Rule07<const NDIM: usize> = Rule<NDIM, 3, 6>;
 
 impl<const NDIM: usize> Rule07<NDIM> {
     /// Generate a fully-symmetric 7-point integration rule.
-    pub const fn fs07() -> Self {
+    ///
+    /// # Errors
+    /// Will fail if `NDIM < 2` or `NDIM > 15`.
+    pub const fn fs07() -> Result<Self, InitialisationError> {
         fully_symmetric_07::generate_rule::<NDIM>()
     }
 }
 
+/// A 9-point fully-symmetric integration rule valid for `3 <= NDIM <= 15`.
 pub type Rule09<const NDIM: usize> = Rule<NDIM, 6, 9>;
 
 impl<const NDIM: usize> Rule09<NDIM> {
     /// Generate a fully-symmetric 9-point integration rule for NDIM > 3 dimensional integration.
-    pub const fn fs09() -> Self {
+    ///
+    /// # Errors
+    /// Will fail if `NDIM < 3` or `NDIM > 15`.
+    pub const fn fs09() -> Result<Self, InitialisationError> {
         fully_symmetric_09::generate_rule::<NDIM>()
     }
 }
 
+/// A 11-point fully-symmetric integration rule valid for `NDIM == 3`.
 pub type Rule11 = Rule<3, 10, 13>;
 
 impl Rule11 {
-    /// Generate a fully-symmetric 11-point integration rule for NDIM = 3 dimensional integration.
-    pub const fn fs11() -> Self {
+    /// Generate a fully-symmetric 11-point integration rule for `NDIM = 3` dimensional integration.
+    ///
+    /// # Errors
+    /// Will fail if `NDIM != 3`.
+    pub const fn fs11() -> Result<Self, InitialisationError> {
         fully_symmetric_11_3d::generate_rule()
     }
 }
 
+/// A 13-point fully-symmetric integration rule valid for `NDIM == 2`.
 pub type Rule13 = Rule<2, 11, 14>;
 
 impl Rule13 {
-    /// Generate a fully-symmetric 13-point integration rule for NDIM = 2 dimensional integration.
-    pub const fn fs13() -> Self {
+    /// Generate a fully-symmetric 13-point integration rule for `NDIM = 2` dimensional integration.
+    ///
+    /// # Errors
+    /// Will fail if `NDIM != 2`.
+    pub const fn fs13() -> Result<Self, InitialisationError> {
         fully_symmetric_13_2d::generate_rule()
     }
 }
+
+const ADAPTIVE_ERROR_COEFF: AdaptiveErrorCoeff = AdaptiveErrorCoeff::new(0.5, 0.25);
 
 pub(crate) struct Data<const NDIM: usize> {
     generator: Generator<NDIM>,

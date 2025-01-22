@@ -248,7 +248,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07();
+            let rule = Rule::fs07().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -280,7 +280,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07();
+            let rule = Rule::fs07().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -312,7 +312,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07();
+            let rule = Rule::fs07().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -343,7 +343,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07();
+            let rule = Rule::fs07().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -374,7 +374,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07();
+            let rule = Rule::fs07().unwrap();
             let limits = [Limits::new(-2.0, 3.0), Limits::new(1.0, 10.0)];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -411,7 +411,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07();
+            let rule = Rule::fs07().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -444,7 +444,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07();
+            let rule = Rule::fs07().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -478,7 +478,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07();
+            let rule = Rule::fs07().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -510,7 +510,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07();
+            let rule = Rule::fs07().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -544,7 +544,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs07();
+            let rule = Rule::fs07().unwrap();
             let limits = [
                 Limits::new(-2.0, 3.0),
                 Limits::new(1.0, 10.0),
@@ -585,7 +585,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs09();
+            let rule = Rule::fs09().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -618,7 +618,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs09();
+            let rule = Rule::fs09().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -652,7 +652,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs09();
+            let rule = Rule::fs09().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -684,7 +684,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs09();
+            let rule = Rule::fs09().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -718,7 +718,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs09();
+            let rule = Rule::fs09().unwrap();
             let limits = [
                 Limits::new(-2.0, 3.0),
                 Limits::new(1.0, 10.0),
@@ -759,7 +759,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs11();
+            let rule = Rule::fs11().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -792,7 +792,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs11();
+            let rule = Rule::fs11().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -826,7 +826,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs11();
+            let rule = Rule::fs11().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -858,7 +858,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs11();
+            let rule = Rule::fs11().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -892,7 +892,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs11();
+            let rule = Rule::fs11().unwrap();
             let limits = [
                 Limits::new(-2.0, 3.0),
                 Limits::new(1.0, 10.0),
@@ -932,7 +932,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs13();
+            let rule = Rule::fs13().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -964,7 +964,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs13();
+            let rule = Rule::fs13().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -996,7 +996,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs13();
+            let rule = Rule::fs13().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -1027,7 +1027,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs13();
+            let rule = Rule::fs13().unwrap();
             let limit = Limits::new(0.0, 1.0);
             let limits = [limit; NDIM];
 
@@ -1058,7 +1058,7 @@ mod tests {
             }
 
             let function = Function;
-            let rule = Rule::fs13();
+            let rule = Rule::fs13().unwrap();
             let limits = [Limits::new(-2.0, 3.0), Limits::new(1.0, 10.0)];
 
             let integral = Integrator::new(&function, &rule, limits);

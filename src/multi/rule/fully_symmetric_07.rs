@@ -1,9 +1,9 @@
 use crate::multi::generator::Generator;
 use crate::multi::rule::{
-    scales_norms, AdaptiveErrorCoeff, BasicErrorCoeff, Data, Norms, Rule, Scales,
-    ADAPTIVE_ERROR_COEFF,
+    scales_norms, BasicErrorCoeff, Data, Norms, Rule, Scales, ADAPTIVE_ERROR_COEFF,
 };
 use crate::multi::{two_pow_n, two_pow_n_f64};
+use crate::{InitialisationError, InitialisationErrorKind};
 
 const LAMBDA0: f64 = 6.860_757_975_617_562_914_002_852e-1;
 const LAMBDA1: f64 = 9.559_073_158_045_390_123_857_208e-1;
@@ -19,7 +19,13 @@ const TOTAL: usize = 6;
 const FINAL: usize = TOTAL - 3;
 const RATIO: f64 = (LAMBDA1 / LAMBDA2) * (LAMBDA1 / LAMBDA2);
 
-pub(crate) const fn generate_rule<const NDIM: usize>() -> Rule<NDIM, FINAL, TOTAL> {
+pub(crate) const fn generate_rule<const NDIM: usize>(
+) -> Result<Rule<NDIM, FINAL, TOTAL>, InitialisationError> {
+    if NDIM < 2 || NDIM > 15 {
+        return Err(InitialisationError::new(
+            InitialisationErrorKind::InvalidDimensionForRule07(NDIM),
+        ));
+    };
     let evaluations = evaluations::<NDIM>();
     let basic_error_coeff = BASIC_ERROR_COEFF;
     let adaptive_error_coeff = ADAPTIVE_ERROR_COEFF;
@@ -41,7 +47,7 @@ pub(crate) const fn generate_rule<const NDIM: usize>() -> Rule<NDIM, FINAL, TOTA
     let initial_data = [data0, data1, data2];
     let final_data = [data3, data4, data5];
 
-    Rule {
+    Ok(Rule {
         initial_data,
         final_data,
         scales,
@@ -50,7 +56,7 @@ pub(crate) const fn generate_rule<const NDIM: usize>() -> Rule<NDIM, FINAL, TOTA
         adaptive_error_coeff,
         evaluations,
         ratio,
-    }
+    })
 }
 
 const fn evaluations<const NDIM: usize>() -> usize {
@@ -1069,7 +1075,7 @@ mod tests {
         {
             let tol = 1e-14;
             const NDIM: usize = 2;
-            let rule = generate_rule::<NDIM>();
+            let rule = generate_rule::<NDIM>().unwrap();
 
             let initial_data = rule.initial_data();
             let final_data = rule.final_data();
@@ -1146,7 +1152,7 @@ mod tests {
         {
             let tol = 1e-14;
             const NDIM: usize = 3;
-            let rule = generate_rule::<NDIM>();
+            let rule = generate_rule::<NDIM>().unwrap();
 
             let initial_data = rule.initial_data();
             let final_data = rule.final_data();
@@ -1226,7 +1232,7 @@ mod tests {
         {
             let tol = 1e-14;
             const NDIM: usize = 6;
-            let rule = generate_rule::<NDIM>();
+            let rule = generate_rule::<NDIM>().unwrap();
 
             let initial_data = rule.initial_data();
             let final_data = rule.final_data();
@@ -1344,7 +1350,7 @@ mod tests {
         {
             let tol = 1e-13;
             const NDIM: usize = 15;
-            let rule = generate_rule::<NDIM>();
+            let rule = generate_rule::<NDIM>().unwrap();
 
             let initial_data = rule.initial_data();
             let final_data = rule.final_data();
