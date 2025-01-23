@@ -6,7 +6,7 @@ pub(crate) struct Region<const NDIM: usize, T> {
     pub(crate) error: f64,
     pub(crate) result: T,
     pub(crate) limits: [Limits; NDIM],
-    pub(crate) largest_error_axis: usize,
+    pub(crate) bisect_axis: usize,
     pub(crate) function_evaluations: usize,
 }
 
@@ -17,7 +17,7 @@ impl<const NDIM: usize, T: ScalarF64> Region<NDIM, T> {
             error: 0.0,
             result: zero,
             limits: [Limits::new(0.0, 0.0); NDIM],
-            largest_error_axis: 0,
+            bisect_axis: 0,
             function_evaluations: 0,
         }
     }
@@ -37,8 +37,8 @@ impl<const NDIM: usize, T: ScalarF64> Region<NDIM, T> {
         self
     }
 
-    pub(crate) fn with_largest_error_axis(mut self, largest_error_axis: usize) -> Self {
-        self.largest_error_axis = largest_error_axis;
+    pub(crate) fn with_bisect_axis(mut self, bisect_axis: usize) -> Self {
+        self.bisect_axis = bisect_axis;
         self
     }
 
@@ -59,8 +59,8 @@ impl<const NDIM: usize, T: ScalarF64> Region<NDIM, T> {
         &self.limits
     }
 
-    pub(crate) fn largest_error_axis(&self) -> usize {
-        self.largest_error_axis
+    pub(crate) fn bisect_axis(&self) -> usize {
+        self.bisect_axis
     }
 
     pub(crate) fn function_evaluations(&self) -> usize {
@@ -74,7 +74,7 @@ impl<const NDIM: usize, T: ScalarF64> Region<NDIM, T> {
 //        &self,
 //        function: &I,
 //    ) -> [Region<NDIM, I::Scalar>; 2] {
-//        let axis_to_bisect = self.largest_error_axis;
+//        let axis_to_bisect = self.bisect_axis;
 //        let previous_limits = self.limits();
 //
 //        let [lower, upper] = previous_limits[axis_to_bisect].bisect();
