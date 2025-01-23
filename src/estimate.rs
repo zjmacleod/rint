@@ -123,13 +123,12 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// [`Kind::AbsoluteBoundNegativeOrZero`]: crate::quadrature::Kind#variant.AbsoluteBoundNegativeOrZero
     pub fn adaptive<I: Integrand>(
         limits: Limits,
-        error_bound: Tolerance,
+        tolerance: Tolerance,
         rule: Rule,
         function: I,
         max_iterations: usize,
     ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
-        let res =
-            Adaptive::new(function, rule, limits, error_bound, max_iterations)?.integrate()?;
+        let res = Adaptive::new(function, rule, limits, tolerance, max_iterations)?.integrate()?;
         Ok(res)
     }
 
@@ -174,11 +173,11 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// [`Kind::AbsoluteBoundNegativeOrZero`]: crate::quadrature::Kind#variant.AbsoluteBoundNegativeOrZero
     pub fn adaptive_singularity_finite<I: Integrand>(
         limits: Limits,
-        error_bound: Tolerance,
+        tolerance: Tolerance,
         function: I,
         max_iterations: usize,
     ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
-        let res = AdaptiveSingularity::finite(function, limits, error_bound, max_iterations)?
+        let res = AdaptiveSingularity::finite(function, limits, tolerance, max_iterations)?
             .integrate()?;
         Ok(res)
     }
@@ -223,12 +222,12 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// [`Kind::RelativeBoundTooSmall`]: crate::quadrature::Kind#variant.RelativeBoundTooSmall
     /// [`Kind::AbsoluteBoundNegativeOrZero`]: crate::quadrature::Kind#variant.AbsoluteBoundNegativeOrZero
     pub fn adaptive_singularity_infinite<I: Integrand>(
-        error_bound: Tolerance,
+        tolerance: Tolerance,
         function: I,
         max_iterations: usize,
     ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
         let res =
-            AdaptiveSingularity::infinite(function, error_bound, max_iterations)?.integrate()?;
+            AdaptiveSingularity::infinite(function, tolerance, max_iterations)?.integrate()?;
         Ok(res)
     }
 
@@ -273,12 +272,12 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// [`Kind::AbsoluteBoundNegativeOrZero`]: crate::quadrature::Kind#variant.AbsoluteBoundNegativeOrZero
     pub fn adaptive_singularity_semi_infinite_upper<I: Integrand>(
         lower: f64,
-        error_bound: Tolerance,
+        tolerance: Tolerance,
         function: I,
         max_iterations: usize,
     ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
         let res =
-            AdaptiveSingularity::semi_infinite_upper(function, lower, error_bound, max_iterations)?
+            AdaptiveSingularity::semi_infinite_upper(function, lower, tolerance, max_iterations)?
                 .integrate()?;
         Ok(res)
     }
@@ -324,12 +323,12 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// [`Kind::AbsoluteBoundNegativeOrZero`]: crate::quadrature::Kind#variant.AbsoluteBoundNegativeOrZero
     pub fn adaptive_singularity_semi_infinite_lower<I: Integrand>(
         upper: f64,
-        error_bound: Tolerance,
+        tolerance: Tolerance,
         function: I,
         max_iterations: usize,
     ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
         let res =
-            AdaptiveSingularity::semi_infinite_lower(function, upper, error_bound, max_iterations)?
+            AdaptiveSingularity::semi_infinite_lower(function, upper, tolerance, max_iterations)?
                 .integrate()?;
         Ok(res)
     }

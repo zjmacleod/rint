@@ -4,8 +4,7 @@ use std::collections::binary_heap::BinaryHeap;
 
 use crate::quadrature::{subinterval_too_small, IntegralEstimate, Integrator, Region, Rule};
 use crate::{
-    InitialisationError, InitialisationErrorKind, Integrand, IntegrationError,
-    IntegrationErrorKind, Limits, Tolerance,
+    InitialisationError, Integrand, IntegrationError, IntegrationErrorKind, Limits, Tolerance,
 };
 
 /// An adaptive Gauss-Kronrod quadrature integrator for (relatively) smooth general functions of a
@@ -68,7 +67,7 @@ use crate::{
 /// let exp_result = 7.716049382716050342E-02;
 /// let exp_error = 2.227969521869139532E-15;
 ///
-/// let error_bound = Tolerance::Absolute(1.0e-14);
+/// let tolerance = Tolerance::Absolute(1.0e-14);
 /// let alpha = 2.6;
 /// let limits = Limits::new(0.0, 1.0);
 ///
@@ -80,7 +79,7 @@ use crate::{
 ///     &function,
 ///     rule,
 ///     limits,
-///     error_bound,
+///     tolerance,
 ///     1000,
 /// ).unwrap();
 ///
@@ -116,7 +115,7 @@ use crate::{
 /// # }
 /// # let exp_result = 7.716049382716050342E-02;
 /// # let exp_error = 2.227969521869139532E-15;
-/// # let error_bound = Tolerance::Absolute(1.0e-14);
+/// # let tolerance = Tolerance::Absolute(1.0e-14);
 /// # let alpha = 2.6;
 /// # let limits = Limits::new(0.0, 1.0);
 /// # let function = Function1 { alpha };
@@ -141,7 +140,7 @@ pub struct Adaptive<I> {
     function: I,
     rule: Rule,
     limits: Limits,
-    error_bound: Tolerance,
+    tolerance: Tolerance,
     max_iterations: usize,
 }
 
@@ -157,7 +156,7 @@ where
     /// - `rule`: An n-point Gauss-Kronrod integration [`Rule`], generated using one of the
     /// generator methods e.g. [`Rule::gk15()`], [`Rule::gk21()`], etc.
     /// - `limits`: The interval over which the `function` should be integrated, [`Limits`].
-    /// - `error_bound`: The tolerance requested by the user. Can be either an absolute tolerance
+    /// - `tolerance`: The tolerance requested by the user. Can be either an absolute tolerance
     /// or relative tolerance. Determines the exit condition of the integration routine, see
     /// [`Tolerance`].
     /// - `max_iterations`: The maximum number of iterations that the adaptive routine should use
@@ -173,34 +172,16 @@ where
         function: I,
         rule: Rule,
         limits: Limits,
-        error_bound: Tolerance,
+        tolerance: Tolerance,
         max_iterations: usize,
     ) -> Result<Self, InitialisationError> {
-        match error_bound {
-            Tolerance::Absolute(v) => {
-                if v <= 0.0 {
-                    let kind = InitialisationErrorKind::AbsoluteBoundNegativeOrZero(v);
-                    return Err(InitialisationError::new(kind));
-                }
-            }
-            Tolerance::Relative(v) => {
-                if v < 50.0 * f64::EPSILON {
-                    let kind = InitialisationErrorKind::RelativeBoundTooSmall(v);
-                    return Err(InitialisationError::new(kind));
-                }
-            }
-            Tolerance::Either { absolute, relative } => {
-                if absolute <= 0.0 && relative < 50.0 * f64::EPSILON {
-                    let kind = InitialisationErrorKind::InvalidTolerance { absolute, relative };
-                    return Err(InitialisationError::new(kind));
-                }
-            }
-        }
+        tolerance.check()?;
+
         Ok(Self {
             function,
             rule,
             limits,
-            error_bound,
+            tolerance,
             max_iterations,
         })
     }
@@ -241,7 +222,7 @@ where
 
             let (result, error) = workspace.improved_result_error(&previous, &lower, &upper);
 
-            let iteration_tolerance = self.error_bound.tolerance(&result);
+            let iteration_tolerance = self.tolerance.tolerance(&result);
 
             workspace.push(lower);
             workspace.push(upper);
@@ -305,7 +286,7 @@ impl<I: Integrand> Adaptive<I> {
         &self,
         initial: &Region<I::Scalar>,
     ) -> Result<Option<IntegralEstimate<I::Scalar>>, IntegrationError<I::Scalar>> {
-        let tolerance = self.error_bound.tolerance(&initial.result());
+        let tolerance = self.tolerance.tolerance(&initial.result());
         let roundoff = Self::roundoff(initial.result_abs());
 
         if initial.error() <= roundoff && initial.error() > tolerance {

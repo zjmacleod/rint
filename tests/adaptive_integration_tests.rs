@@ -8,7 +8,7 @@ mod util;
 // Test the smooth Function1 with 15 point adaptive integration and relative error
 // bound.
 adaptive_test_passing! {
-        name: adaptive_gauss_kronrod_smooth_positive_function_relative_error_bound_15_point,
+        name: adaptive_gauss_kronrod_smooth_positive_function_relative_tolerance_15_point,
         function: util::Function1,
         alpha: f64 => 2.6,
         rule: gk15,
@@ -19,15 +19,15 @@ adaptive_test_passing! {
         exp_iterations:  6,
         exp_evaluations: 165,
         tolerance_rel: 1e-10,
-        test_abs_error_bound: 1e-15,
-        test_rel_error_bound: 1e-6,
+        test_abs_tolerance: 1e-15,
+        test_rel_tolerance: 1e-6,
         "Function1 Adaptive relative bound 15-point"
 }
 
 // Test the smooth Function1 with 21 point adaptive integration and absolute error
 // bound.
 adaptive_test_passing! {
-        name: adaptive_gauss_kronrod_smooth_positive_function_absolute_error_bound_21_point,
+        name: adaptive_gauss_kronrod_smooth_positive_function_absolute_tolerance_21_point,
         function: util::Function1,
         alpha: f64 => 2.6,
         rule: gk21,
@@ -38,7 +38,7 @@ adaptive_test_passing! {
         exp_iterations:  8,
         exp_evaluations: 315,
         tolerance_abs: 1e-14,
-        test_abs_error_bound: 1e-15,
-        test_rel_error_bound: 1e-6,
+        test_abs_tolerance: 1e-15,
+        test_rel_tolerance: 1e-6,
         "Function1 Adaptive absolute bound 21-point"
 }

@@ -45,7 +45,7 @@ use crate::Limits;
 /// let exp_result: f64 = 7.716049357767090777E-02;
 /// let exp_abserr: f64 = 2.990224871000550874E-06;
 ///
-/// let rel_error_bound = 1.0e-15;
+/// let rel_tolerance = 1.0e-15;
 /// let alpha = 2.6;
 ///
 /// let limits = Limits::new(0.0, 1.0);
@@ -61,8 +61,8 @@ use crate::Limits;
 /// println!("{}",(exp_result - result).abs() / exp_result.abs());
 /// println!("{}",(exp_abserr - abserr).abs() / exp_abserr.abs());
 ///
-/// assert!((exp_result - result).abs() / exp_result.abs() < rel_error_bound);
-/// assert!((exp_abserr - abserr).abs() / exp_abserr.abs() < rel_error_bound);
+/// assert!((exp_result - result).abs() / exp_result.abs() < rel_tolerance);
+/// assert!((exp_abserr - abserr).abs() / exp_abserr.abs() < rel_tolerance);
 ///```
 pub struct Basic<I> {
     function: I,

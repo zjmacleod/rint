@@ -16,8 +16,8 @@ basic_test! {
         upper: 1.0,
         exp_result: 7.716049357767090777E-02,
         exp_error: 2.990224871000550874E-06,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-7,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-7,
         "Function1 Basic 15-point"
 }
 
@@ -30,8 +30,8 @@ basic_test! {
         upper: 1.0,
         exp_result: 7.716049379303084599E-02,
         exp_error: 9.424302194248481445E-08,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-7,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-7,
         "Function1 Basic 21-point"
 }
 
@@ -44,8 +44,8 @@ basic_test! {
         upper: 1.0,
         exp_result: 7.716049382494900855E-02,
         exp_error: 1.713503193600029893E-09,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-7,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-7,
         "Function1 Basic 31-point"
 }
 
@@ -58,8 +58,8 @@ basic_test! {
         upper: 1.0,
         exp_result: 7.716049382681375302E-02,
         exp_error: 9.576386660975511224E-11,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-7,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-7,
         "Function1 Basic 41-point"
 }
 
@@ -72,8 +72,8 @@ basic_test! {
         upper: 1.0,
         exp_result: 7.716049382708510540E-02,
         exp_error: 1.002079980317363772E-11,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-5,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-5,
         "Function1 Basic 51-point"
 }
 
@@ -86,8 +86,8 @@ basic_test! {
         upper: 1.0,
         exp_result: 7.716049382713800753E-02,
         exp_error: 1.566060362296155616E-12,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-5,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-5,
         "Function1 Basic 61-point"
 }
 
@@ -106,8 +106,8 @@ basic_test! {
         upper: 2.71,
         exp_result: -7.238969575483799046E-01,
         exp_error:  8.760080200939757174E-06,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-7,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-7,
         "Function3 Basic 15-point"
 }
 
@@ -120,8 +120,8 @@ basic_test! {
         upper: 2.71,
         exp_result: -7.238969575482959717E-01,
         exp_error:  7.999213141433641888E-11,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-7,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-7,
         "Function3 Basic 21-point"
 }
 
@@ -134,8 +134,8 @@ basic_test! {
         upper: 2.71,
         exp_result: -7.238969575482959717E-01,
         exp_error:  1.285805464427459261E-14,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-7,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-7,
         "Function3 Basic 31-point"
 }
 
@@ -148,8 +148,8 @@ basic_test! {
         upper: 2.71,
         exp_result: -7.238969575482959717E-01,
         exp_error:  1.286535726271015626E-14,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-7,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-7,
         "Function3 Basic 41-point"
 }
 
@@ -162,8 +162,8 @@ basic_test! {
         upper: 2.71,
         exp_result: -7.238969575482961938E-01,
         exp_error:  1.285290995039385778E-14,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-7,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-7,
         "Function3 Basic 51-point"
 }
 
@@ -176,8 +176,8 @@ basic_test! {
         upper: 2.71,
         exp_result: -7.238969575482959717E-01,
         exp_error:  1.286438572027470736E-14,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-7,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-7,
         "Function3 Basic 61-point"
 }
 
@@ -196,8 +196,8 @@ basic_test! {
         upper: 1.0,
         exp_result:     1.555688196612745777E+01,
         exp_error:      2.350164577239293706E+01,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-7,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-7,
         "Function1 with singularity Basic 15-point"
 }
 
@@ -210,8 +210,8 @@ basic_test! {
         upper: 1.0,
         exp_result:     1.799045317938126232E+01,
         exp_error:      2.782360287710622515E+01,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-7,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-7,
         "Function1 with singularity Basic 21-point"
 }
 
@@ -224,8 +224,8 @@ basic_test! {
         upper: 1.0,
         exp_result:     2.081873305159121657E+01,
         exp_error:      3.296500137482590276E+01,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-7,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-7,
         "Function1 with singularity Basic 31-point"
 }
 
@@ -238,8 +238,8 @@ basic_test! {
         upper: 1.0,
         exp_result:     2.288677623903126701E+01,
         exp_error:      3.671538820274916048E+01,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-7,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-7,
         "Function1 with singularity Basic 41-point"
 }
 
@@ -252,8 +252,8 @@ basic_test! {
         upper: 1.0,
         exp_result:     2.449953612016972215E+01,
         exp_error:      3.967771249391228849E+01,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-7,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-7,
         "Function1 with singularity Basic 51-point"
 }
 
@@ -266,7 +266,7 @@ basic_test! {
         upper: 1.0,
         exp_result:     2.583030240976628988E+01,
         exp_error:      4.213750493076978643E+01,
-        abs_error_bound: 1.0e-15,
-        rel_error_bound: 1.0e-7,
+        abs_tolerance: 1.0e-15,
+        rel_tolerance: 1.0e-7,
         "Function1 with singularity Basic 61-point"
 }

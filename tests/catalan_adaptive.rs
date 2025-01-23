@@ -13,8 +13,8 @@ fn catalan_test_adaptive_relative_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -30,8 +30,8 @@ fn catalan_test_adaptive_relative_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -47,8 +47,8 @@ fn catalan_test_adaptive_relative_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -64,8 +64,8 @@ fn catalan_test_adaptive_relative_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -81,8 +81,8 @@ fn catalan_test_adaptive_relative_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -102,8 +102,8 @@ fn catalan_test_adaptive_relative_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -123,8 +123,8 @@ fn catalan_test_adaptive_relative_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -144,8 +144,8 @@ fn catalan_test_adaptive_relative_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -165,8 +165,8 @@ fn catalan_test_adaptive_relative_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -186,8 +186,8 @@ fn catalan_test_adaptive_relative_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -215,8 +215,8 @@ fn catalan_test_adaptive_absolute_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -232,8 +232,8 @@ fn catalan_test_adaptive_absolute_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -249,8 +249,8 @@ fn catalan_test_adaptive_absolute_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -266,8 +266,8 @@ fn catalan_test_adaptive_absolute_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -283,8 +283,8 @@ fn catalan_test_adaptive_absolute_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -304,8 +304,8 @@ fn catalan_test_adaptive_absolute_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -325,8 +325,8 @@ fn catalan_test_adaptive_absolute_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -346,8 +346,8 @@ fn catalan_test_adaptive_absolute_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -367,8 +367,8 @@ fn catalan_test_adaptive_absolute_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -388,8 +388,8 @@ fn catalan_test_adaptive_absolute_tol_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -417,8 +417,8 @@ fn catalan_test_adaptive_relative_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -434,8 +434,8 @@ fn catalan_test_adaptive_relative_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -451,8 +451,8 @@ fn catalan_test_adaptive_relative_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -468,8 +468,8 @@ fn catalan_test_adaptive_relative_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -485,8 +485,8 @@ fn catalan_test_adaptive_relative_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -506,8 +506,8 @@ fn catalan_test_adaptive_relative_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -527,8 +527,8 @@ fn catalan_test_adaptive_relative_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -548,8 +548,8 @@ fn catalan_test_adaptive_relative_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -569,8 +569,8 @@ fn catalan_test_adaptive_relative_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -590,8 +590,8 @@ fn catalan_test_adaptive_relative_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -619,8 +619,8 @@ fn catalan_test_adaptive_absolute_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -636,8 +636,8 @@ fn catalan_test_adaptive_absolute_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -653,8 +653,8 @@ fn catalan_test_adaptive_absolute_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -670,8 +670,8 @@ fn catalan_test_adaptive_absolute_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -687,8 +687,8 @@ fn catalan_test_adaptive_absolute_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -708,8 +708,8 @@ fn catalan_test_adaptive_absolute_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -729,8 +729,8 @@ fn catalan_test_adaptive_absolute_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -750,8 +750,8 @@ fn catalan_test_adaptive_absolute_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -771,8 +771,8 @@ fn catalan_test_adaptive_absolute_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -792,8 +792,8 @@ fn catalan_test_adaptive_absolute_tol_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -821,8 +821,8 @@ fn catalan_test_adaptive_relative_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -838,8 +838,8 @@ fn catalan_test_adaptive_relative_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -855,8 +855,8 @@ fn catalan_test_adaptive_relative_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -872,8 +872,8 @@ fn catalan_test_adaptive_relative_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -889,8 +889,8 @@ fn catalan_test_adaptive_relative_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -910,8 +910,8 @@ fn catalan_test_adaptive_relative_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -931,8 +931,8 @@ fn catalan_test_adaptive_relative_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -952,8 +952,8 @@ fn catalan_test_adaptive_relative_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -973,8 +973,8 @@ fn catalan_test_adaptive_relative_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -994,8 +994,8 @@ fn catalan_test_adaptive_relative_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1023,8 +1023,8 @@ fn catalan_test_adaptive_absolute_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1040,8 +1040,8 @@ fn catalan_test_adaptive_absolute_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1057,8 +1057,8 @@ fn catalan_test_adaptive_absolute_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1074,8 +1074,8 @@ fn catalan_test_adaptive_absolute_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1091,8 +1091,8 @@ fn catalan_test_adaptive_absolute_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1112,8 +1112,8 @@ fn catalan_test_adaptive_absolute_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1133,8 +1133,8 @@ fn catalan_test_adaptive_absolute_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1154,8 +1154,8 @@ fn catalan_test_adaptive_absolute_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1175,8 +1175,8 @@ fn catalan_test_adaptive_absolute_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1196,8 +1196,8 @@ fn catalan_test_adaptive_absolute_tol_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1225,8 +1225,8 @@ fn catalan_test_adaptive_relative_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1242,8 +1242,8 @@ fn catalan_test_adaptive_relative_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1259,8 +1259,8 @@ fn catalan_test_adaptive_relative_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1276,8 +1276,8 @@ fn catalan_test_adaptive_relative_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1293,8 +1293,8 @@ fn catalan_test_adaptive_relative_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1314,8 +1314,8 @@ fn catalan_test_adaptive_relative_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1335,8 +1335,8 @@ fn catalan_test_adaptive_relative_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1356,8 +1356,8 @@ fn catalan_test_adaptive_relative_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1377,8 +1377,8 @@ fn catalan_test_adaptive_relative_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1398,8 +1398,8 @@ fn catalan_test_adaptive_relative_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1427,8 +1427,8 @@ fn catalan_test_adaptive_absolute_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1444,8 +1444,8 @@ fn catalan_test_adaptive_absolute_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1461,8 +1461,8 @@ fn catalan_test_adaptive_absolute_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1478,8 +1478,8 @@ fn catalan_test_adaptive_absolute_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1495,8 +1495,8 @@ fn catalan_test_adaptive_absolute_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1516,8 +1516,8 @@ fn catalan_test_adaptive_absolute_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1537,8 +1537,8 @@ fn catalan_test_adaptive_absolute_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1558,8 +1558,8 @@ fn catalan_test_adaptive_absolute_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1579,8 +1579,8 @@ fn catalan_test_adaptive_absolute_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1600,8 +1600,8 @@ fn catalan_test_adaptive_absolute_tol_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1629,8 +1629,8 @@ fn catalan_test_adaptive_relative_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1646,8 +1646,8 @@ fn catalan_test_adaptive_relative_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1663,8 +1663,8 @@ fn catalan_test_adaptive_relative_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1680,8 +1680,8 @@ fn catalan_test_adaptive_relative_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1697,8 +1697,8 @@ fn catalan_test_adaptive_relative_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1718,8 +1718,8 @@ fn catalan_test_adaptive_relative_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1739,8 +1739,8 @@ fn catalan_test_adaptive_relative_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1760,8 +1760,8 @@ fn catalan_test_adaptive_relative_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1781,8 +1781,8 @@ fn catalan_test_adaptive_relative_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1802,8 +1802,8 @@ fn catalan_test_adaptive_relative_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1831,8 +1831,8 @@ fn catalan_test_adaptive_absolute_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1848,8 +1848,8 @@ fn catalan_test_adaptive_absolute_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1865,8 +1865,8 @@ fn catalan_test_adaptive_absolute_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1882,8 +1882,8 @@ fn catalan_test_adaptive_absolute_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1899,8 +1899,8 @@ fn catalan_test_adaptive_absolute_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1920,8 +1920,8 @@ fn catalan_test_adaptive_absolute_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1941,8 +1941,8 @@ fn catalan_test_adaptive_absolute_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1962,8 +1962,8 @@ fn catalan_test_adaptive_absolute_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -1983,8 +1983,8 @@ fn catalan_test_adaptive_absolute_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2004,8 +2004,8 @@ fn catalan_test_adaptive_absolute_tol_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2033,8 +2033,8 @@ fn catalan_test_adaptive_relative_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2050,8 +2050,8 @@ fn catalan_test_adaptive_relative_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2067,8 +2067,8 @@ fn catalan_test_adaptive_relative_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2084,8 +2084,8 @@ fn catalan_test_adaptive_relative_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2101,8 +2101,8 @@ fn catalan_test_adaptive_relative_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2122,8 +2122,8 @@ fn catalan_test_adaptive_relative_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2143,8 +2143,8 @@ fn catalan_test_adaptive_relative_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2164,8 +2164,8 @@ fn catalan_test_adaptive_relative_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2185,8 +2185,8 @@ fn catalan_test_adaptive_relative_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2206,8 +2206,8 @@ fn catalan_test_adaptive_relative_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2235,8 +2235,8 @@ fn catalan_test_adaptive_absolute_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2252,8 +2252,8 @@ fn catalan_test_adaptive_absolute_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2269,8 +2269,8 @@ fn catalan_test_adaptive_absolute_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2286,8 +2286,8 @@ fn catalan_test_adaptive_absolute_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2303,8 +2303,8 @@ fn catalan_test_adaptive_absolute_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2324,8 +2324,8 @@ fn catalan_test_adaptive_absolute_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2345,8 +2345,8 @@ fn catalan_test_adaptive_absolute_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2366,8 +2366,8 @@ fn catalan_test_adaptive_absolute_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2387,8 +2387,8 @@ fn catalan_test_adaptive_absolute_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -2408,8 +2408,8 @@ fn catalan_test_adaptive_absolute_tol_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = Adaptive::new(catalan, rule, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = Adaptive::new(catalan, rule, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();

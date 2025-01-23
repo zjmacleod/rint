@@ -4,13 +4,14 @@ use crate::Limits;
 use crate::MultiDimensionalIntegrand;
 use crate::{InitialisationError, InitialisationErrorKind};
 
-pub struct Basic<I, const NDIM: usize, const FINAL: usize, const TOTAL: usize> {
+pub struct Basic<I, R, const NDIM: usize> {
     function: I,
-    rule: Rule<NDIM, FINAL, TOTAL>,
+    rule: R,
     limits: [Limits; NDIM],
 }
 
-impl<I, const NDIM: usize, const FINAL: usize, const TOTAL: usize> Basic<I, NDIM, FINAL, TOTAL>
+impl<I, const NDIM: usize, const FINAL: usize, const TOTAL: usize>
+    Basic<I, Rule<NDIM, FINAL, TOTAL>, NDIM>
 where
     I: MultiDimensionalIntegrand<NDIM>,
 {

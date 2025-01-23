@@ -12,8 +12,8 @@ fn catalan_test_singularity_finite_relative_tol() -> Result<(), String> {
 
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -28,8 +28,8 @@ fn catalan_test_singularity_finite_relative_tol() -> Result<(), String> {
 
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -44,8 +44,8 @@ fn catalan_test_singularity_finite_relative_tol() -> Result<(), String> {
 
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -60,8 +60,8 @@ fn catalan_test_singularity_finite_relative_tol() -> Result<(), String> {
 
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -76,8 +76,8 @@ fn catalan_test_singularity_finite_relative_tol() -> Result<(), String> {
 
     let catalan = util::Catalan5::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL56);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL56);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -92,8 +92,8 @@ fn catalan_test_singularity_finite_relative_tol() -> Result<(), String> {
 
     let catalan = util::Catalan6::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL56);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL56);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -108,8 +108,8 @@ fn catalan_test_singularity_finite_relative_tol() -> Result<(), String> {
 
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -128,8 +128,8 @@ fn catalan_test_singularity_finite_relative_tol() -> Result<(), String> {
 
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -148,8 +148,8 @@ fn catalan_test_singularity_finite_relative_tol() -> Result<(), String> {
 
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -168,8 +168,8 @@ fn catalan_test_singularity_finite_relative_tol() -> Result<(), String> {
 
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -188,8 +188,8 @@ fn catalan_test_singularity_finite_relative_tol() -> Result<(), String> {
 
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -208,8 +208,8 @@ fn catalan_test_singularity_finite_relative_tol() -> Result<(), String> {
 
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -236,8 +236,8 @@ fn catalan_test_singularity_finite_absolute_tol() -> Result<(), String> {
 
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -252,8 +252,8 @@ fn catalan_test_singularity_finite_absolute_tol() -> Result<(), String> {
 
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -268,8 +268,8 @@ fn catalan_test_singularity_finite_absolute_tol() -> Result<(), String> {
 
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -284,8 +284,8 @@ fn catalan_test_singularity_finite_absolute_tol() -> Result<(), String> {
 
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -300,8 +300,8 @@ fn catalan_test_singularity_finite_absolute_tol() -> Result<(), String> {
 
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -320,8 +320,8 @@ fn catalan_test_singularity_finite_absolute_tol() -> Result<(), String> {
 
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -340,8 +340,8 @@ fn catalan_test_singularity_finite_absolute_tol() -> Result<(), String> {
 
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -360,8 +360,8 @@ fn catalan_test_singularity_finite_absolute_tol() -> Result<(), String> {
 
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -380,8 +380,8 @@ fn catalan_test_singularity_finite_absolute_tol() -> Result<(), String> {
 
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -400,8 +400,8 @@ fn catalan_test_singularity_finite_absolute_tol() -> Result<(), String> {
 
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -428,8 +428,8 @@ fn catalan_test_singularity_semi_infinite_relative_tol() -> Result<(), String> {
 
     let catalan = util::Catalan7::new();
     let limits = catalan.lower;
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -444,8 +444,8 @@ fn catalan_test_singularity_semi_infinite_relative_tol() -> Result<(), String> {
 
     let catalan = util::Catalan8::new();
     let limits = catalan.lower;
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -460,8 +460,8 @@ fn catalan_test_singularity_semi_infinite_relative_tol() -> Result<(), String> {
 
     let catalan = util::Catalan9::new();
     let limits = catalan.lower;
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -476,8 +476,8 @@ fn catalan_test_singularity_semi_infinite_relative_tol() -> Result<(), String> {
 
     let catalan = util::Catalan10::new();
     let limits = catalan.lower;
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -492,8 +492,8 @@ fn catalan_test_singularity_semi_infinite_relative_tol() -> Result<(), String> {
 
     let catalan = util::Catalan11::new();
     let limits = catalan.lower;
-    let error_bound = Tolerance::Relative(TOL);
-    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Relative(TOL);
+    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -508,8 +508,8 @@ fn catalan_test_singularity_semi_infinite_relative_tol() -> Result<(), String> {
 
     //let catalan = util::ComplexCatalan12::new();
     //let limits = catalan.limits();
-    //let error_bound = Tolerance::Relative(TOL);
-    //let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    //let tolerance = Tolerance::Relative(TOL);
+    //let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
     //    .unwrap()
     //    .integrate()
     //    .unwrap();
@@ -536,8 +536,8 @@ fn catalan_test_singularity_semi_infinite_absolute_tol() -> Result<(), String> {
 
     let catalan = util::Catalan7::new();
     let limits = catalan.lower;
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -552,8 +552,8 @@ fn catalan_test_singularity_semi_infinite_absolute_tol() -> Result<(), String> {
 
     let catalan = util::Catalan8::new();
     let limits = catalan.lower;
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -568,8 +568,8 @@ fn catalan_test_singularity_semi_infinite_absolute_tol() -> Result<(), String> {
 
     let catalan = util::Catalan9::new();
     let limits = catalan.lower;
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -584,8 +584,8 @@ fn catalan_test_singularity_semi_infinite_absolute_tol() -> Result<(), String> {
 
     let catalan = util::Catalan10::new();
     let limits = catalan.lower;
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -600,8 +600,8 @@ fn catalan_test_singularity_semi_infinite_absolute_tol() -> Result<(), String> {
 
     let catalan = util::Catalan11::new();
     let limits = catalan.lower;
-    let error_bound = Tolerance::Absolute(TOL);
-    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, error_bound, 1000)
+    let tolerance = Tolerance::Absolute(TOL);
+    let integral = AdaptiveSingularity::semi_infinite_upper(catalan, limits, tolerance, 1000)
         .unwrap()
         .integrate()
         .unwrap();
@@ -616,8 +616,8 @@ fn catalan_test_singularity_semi_infinite_absolute_tol() -> Result<(), String> {
 
     //let catalan = util::ComplexCatalan12::new();
     //let limits = catalan.limits();
-    //let error_bound = Tolerance::Absolute(TOL);
-    //let integral = AdaptiveSingularity::finite(catalan, limits, error_bound, 1000)
+    //let tolerance = Tolerance::Absolute(TOL);
+    //let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
     //    .unwrap()
     //    .integrate()
     //    .unwrap();

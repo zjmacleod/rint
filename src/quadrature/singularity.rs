@@ -3,8 +3,8 @@ use std::collections::binary_heap::BinaryHeap;
 
 use crate::quadrature::{subinterval_too_small, Integrator, Region, Rule};
 use crate::{
-    sealed::Max, InitialisationError, InitialisationErrorKind, IntegralEstimate, Integrand,
-    IntegrationError, IntegrationErrorKind, Limits, ScalarF64, Tolerance,
+    sealed::Max, InitialisationError, IntegralEstimate, Integrand, IntegrationError,
+    IntegrationErrorKind, Limits, ScalarF64, Tolerance,
 };
 
 /// An adaptive Gauss-Kronrod quadrature integrator for functions of a single variable with
@@ -74,7 +74,7 @@ use crate::{
 /// let exp_result =     -3.616892186127022568E-01;
 /// let exp_error =       3.016716913328831851E-06;
 ///
-/// let error_bound = Tolerance::Relative(1.0e-3);
+/// let tolerance = Tolerance::Relative(1.0e-3);
 ///
 /// let function = Function455;
 ///
@@ -82,7 +82,7 @@ use crate::{
 /// let integral = AdaptiveSingularity::semi_infinite_upper(
 ///     &function,
 ///     lower,
-///     error_bound,
+///     tolerance,
 ///     1000,
 /// ).unwrap();
 ///
@@ -102,7 +102,7 @@ pub struct AdaptiveSingularity<I> {
     function: I,
     rule: Rule,
     limits: Limits,
-    error_bound: Tolerance,
+    tolerance: Tolerance,
     max_iterations: usize,
     evaluations_multiplier: usize,
 }
@@ -117,7 +117,7 @@ where
     /// - `function`: A user supplied function to be integrated, which is a struct implementing the
     /// [`Integrand`] trait.
     /// - `limits`: The interval over which the `function` should be integrated, [`Limits`].
-    /// - `error_bound`: The tolerance requested by the user. Can be either an absolute tolerance
+    /// - `tolerance`: The tolerance requested by the user. Can be either an absolute tolerance
     /// or relative tolerance. Determines the exit condition of the integration routine, see
     /// [`Tolerance`].
     /// - `max_iterations`: The maximum number of iterations that the adaptive routine should use
@@ -132,11 +132,11 @@ where
     pub fn finite(
         function: I,
         limits: Limits,
-        error_bound: Tolerance,
+        tolerance: Tolerance,
         max_iterations: usize,
     ) -> Result<Self, InitialisationError> {
         let rule = Rule::gk21();
-        Self::new(function, rule, limits, error_bound, max_iterations)
+        Self::new(function, rule, limits, tolerance, max_iterations)
     }
 
     /// Integrate the function and return a [`IntegralEstimate`] integration result.
@@ -186,7 +186,7 @@ where
 
             let (result, error) = workspace.improved_result_error(&previous, &lower, &upper);
 
-            let iteration_tolerance = self.error_bound.tolerance(&result);
+            let iteration_tolerance = self.tolerance.tolerance(&result);
 
             workspace.update(lower, upper);
 
@@ -254,7 +254,7 @@ where
             workspace.check_convergence();
 
             if ext_error < workspace.table.error {
-                let ext_tolerance = self.error_bound.tolerance(&ext_result);
+                let ext_tolerance = self.tolerance.tolerance(&ext_result);
                 workspace.update_table_values(ext_result, ext_error, ext_tolerance);
                 if workspace.table.error <= workspace.table.tolerance {
                     break;
@@ -285,35 +285,16 @@ where
         function: I,
         rule: Rule,
         limits: Limits,
-        error_bound: Tolerance,
+        tolerance: Tolerance,
         max_iterations: usize,
     ) -> Result<Self, InitialisationError> {
         let evaluations_multiplier = 1;
-        match error_bound {
-            Tolerance::Absolute(v) => {
-                if v <= 0.0 {
-                    let kind = InitialisationErrorKind::AbsoluteBoundNegativeOrZero(v);
-                    return Err(InitialisationError::new(kind));
-                }
-            }
-            Tolerance::Relative(v) => {
-                if v < 50.0 * f64::EPSILON {
-                    let kind = InitialisationErrorKind::RelativeBoundTooSmall(v);
-                    return Err(InitialisationError::new(kind));
-                }
-            }
-            Tolerance::Either { absolute, relative } => {
-                if absolute <= 0.0 && relative < 50.0 * f64::EPSILON {
-                    let kind = InitialisationErrorKind::InvalidTolerance { absolute, relative };
-                    return Err(InitialisationError::new(kind));
-                }
-            }
-        }
+        tolerance.check()?;
         Ok(Self {
             function,
             rule,
             limits,
-            error_bound,
+            tolerance,
             max_iterations,
             evaluations_multiplier,
         })
@@ -323,11 +304,11 @@ where
         function: I,
         rule: Rule,
         limits: Limits,
-        error_bound: Tolerance,
+        tolerance: Tolerance,
         max_iterations: usize,
         evaluations_multiplier: usize,
     ) -> Result<Self, InitialisationError> {
-        let mut v = Self::new(function, rule, limits, error_bound, max_iterations)?;
+        let mut v = Self::new(function, rule, limits, tolerance, max_iterations)?;
         v.evaluations_multiplier = evaluations_multiplier;
         Ok(v)
     }
@@ -340,7 +321,7 @@ where
         &self,
         initial: &Region<I::Scalar>,
     ) -> Result<Option<IntegralEstimate<I::Scalar>>, IntegrationError<I::Scalar>> {
-        let tolerance = self.error_bound.tolerance(&initial.result());
+        let tolerance = self.tolerance.tolerance(&initial.result());
         let roundoff = Self::roundoff(initial.result_abs());
 
         if initial.error() <= roundoff && initial.error() > tolerance {
@@ -443,7 +424,7 @@ where
     /// Arguments:
     /// - `function`: A user supplied function to be integrated, which is a struct implementing the
     /// [`Integrand`] trait.
-    /// - `error_bound`: The tolerance requested by the user. Can be either an absolute tolerance
+    /// - `tolerance`: The tolerance requested by the user. Can be either an absolute tolerance
     /// or relative tolerance. Determines the exit condition of the integration routine, see
     /// [`Tolerance`].
     /// - `max_iterations`: The maximum number of iterations that the adaptive routine should use
@@ -457,7 +438,7 @@ where
     /// - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
     pub fn infinite(
         function: I,
-        error_bound: Tolerance,
+        tolerance: Tolerance,
         max_iterations: usize,
     ) -> Result<Self, InitialisationError> {
         let rule = Rule::gk15();
@@ -467,7 +448,7 @@ where
             transformed,
             rule,
             Limits::new(0.0, 1.0),
-            error_bound,
+            tolerance,
             max_iterations,
             evaluations_multiplier,
         )
@@ -513,7 +494,7 @@ where
     /// - `function`: A user supplied function to be integrated, which is a struct implementing the
     /// [`Integrand`] trait.
     /// - `lower`: The lower integration limit.
-    /// - `error_bound`: The tolerance requested by the user. Can be either an absolute tolerance
+    /// - `tolerance`: The tolerance requested by the user. Can be either an absolute tolerance
     /// or relative tolerance. Determines the exit condition of the integration routine, see
     /// [`Tolerance`].
     /// - `max_iterations`: The maximum number of iterations that the adaptive routine should use
@@ -528,7 +509,7 @@ where
     pub fn semi_infinite_upper(
         function: I,
         lower: f64,
-        error_bound: Tolerance,
+        tolerance: Tolerance,
         max_iterations: usize,
     ) -> Result<Self, InitialisationError> {
         let rule = Rule::gk15();
@@ -538,7 +519,7 @@ where
             transformed,
             rule,
             Limits::new(0.0, 1.0),
-            error_bound,
+            tolerance,
             max_iterations,
             evaluations_multiplier,
         )
@@ -584,7 +565,7 @@ where
     /// - `function`: A user supplied function to be integrated, which is a struct implementing the
     /// [`Integrand`] trait.
     /// - `upper`: The upper integration limit.
-    /// - `error_bound`: The tolerance requested by the user. Can be either an absolute tolerance
+    /// - `tolerance`: The tolerance requested by the user. Can be either an absolute tolerance
     /// or relative tolerance. Determines the exit condition of the integration routine, see
     /// [`Tolerance`].
     /// - `max_iterations`: The maximum number of iterations that the adaptive routine should use
@@ -599,7 +580,7 @@ where
     pub fn semi_infinite_lower(
         function: I,
         upper: f64,
-        error_bound: Tolerance,
+        tolerance: Tolerance,
         max_iterations: usize,
     ) -> Result<Self, InitialisationError> {
         let rule = Rule::gk15();
@@ -609,7 +590,7 @@ where
             transformed,
             rule,
             Limits::new(0.0, 1.0),
-            error_bound,
+            tolerance,
             max_iterations,
             evaluations_multiplier,
         )

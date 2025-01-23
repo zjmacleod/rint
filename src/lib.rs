@@ -162,6 +162,34 @@ impl Tolerance {
             }
         }
     }
+
+    pub(crate) fn check(&self) -> Result<(), InitialisationError> {
+        match self {
+            Tolerance::Absolute(v) => {
+                if *v <= 0.0 {
+                    let kind = InitialisationErrorKind::AbsoluteBoundNegativeOrZero(*v);
+                    return Err(InitialisationError::new(kind));
+                }
+            }
+            Tolerance::Relative(v) => {
+                if *v < 50.0 * f64::EPSILON {
+                    let kind = InitialisationErrorKind::RelativeBoundTooSmall(*v);
+                    return Err(InitialisationError::new(kind));
+                }
+            }
+            Tolerance::Either { absolute, relative } => {
+                if *absolute <= 0.0 && *relative < 50.0 * f64::EPSILON {
+                    let kind = InitialisationErrorKind::InvalidTolerance {
+                        absolute: *absolute,
+                        relative: *relative,
+                    };
+                    return Err(InitialisationError::new(kind));
+                }
+            }
+        }
+
+        Ok(())
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]

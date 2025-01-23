@@ -9,8 +9,8 @@ macro_rules! basic_test {
         upper: $upper:expr,
         exp_result: $exp_result:expr,
         exp_error: $exp_error:expr,
-        abs_error_bound: $abs_error_bound:expr,
-        rel_error_bound: $rel_error_bound:expr,
+        abs_tolerance: $abs_tolerance:expr,
+        rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -18,8 +18,8 @@ macro_rules! basic_test {
             let exp_result = $exp_result;
             let exp_error = $exp_error;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
             let alpha: $alphaty = $alpha;
 
             let lower = $lower;
@@ -36,13 +36,13 @@ macro_rules! basic_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
 
@@ -59,13 +59,13 @@ macro_rules! basic_test {
             util::test_relative_error(
                 result,
                 -exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result reverse", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error reverse", $description),
             )?;
 
@@ -80,16 +80,16 @@ macro_rules! basic_test {
         upper: $upper:expr,
         exp_result: $exp_result:expr,
         exp_error: $exp_error:expr,
-        abs_error_bound: $abs_error_bound:expr,
-        rel_error_bound: $rel_error_bound:expr
+        abs_tolerance: $abs_tolerance:expr,
+        rel_tolerance: $rel_tolerance:expr
     ) => {
         #[test]
         fn $func_name() -> Result<(), String> {
             let exp_result = $exp_result;
             let exp_error = $exp_error;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
 
             let lower = $lower;
             let upper = $upper;
@@ -105,13 +105,13 @@ macro_rules! basic_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
 
@@ -128,13 +128,13 @@ macro_rules! basic_test {
             util::test_relative_error(
                 result,
                 -exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result reverse", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error reverse", $description),
             )?;
 
@@ -157,8 +157,8 @@ macro_rules! adaptive_test_passing {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_rel: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -168,10 +168,10 @@ macro_rules! adaptive_test_passing {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
             let rule = Rule::$rule();
-            let error_bound = Tolerance::Relative($tolerance);
+            let tolerance = Tolerance::Relative($tolerance);
             let alpha: $alphaty = $alpha;
 
             let lower = $lower;
@@ -179,14 +179,8 @@ macro_rules! adaptive_test_passing {
 
             let function = <$type>::new(alpha);
 
-            let integral = Adaptive::new(
-                &function,
-                rule,
-                Limits::new(lower, upper),
-                error_bound,
-                1000,
-            )
-            .unwrap();
+            let integral =
+                Adaptive::new(&function, rule, Limits::new(lower, upper), tolerance, 1000).unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -197,13 +191,13 @@ macro_rules! adaptive_test_passing {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -218,18 +212,12 @@ macro_rules! adaptive_test_passing {
             )?;
 
             let rule = Rule::$rule();
-            let error_bound = Tolerance::Relative($tolerance);
+            let tolerance = Tolerance::Relative($tolerance);
             let lower = $upper;
             let upper = $lower;
 
-            let integral = Adaptive::new(
-                &function,
-                rule,
-                Limits::new(lower, upper),
-                error_bound,
-                1000,
-            )
-            .unwrap();
+            let integral =
+                Adaptive::new(&function, rule, Limits::new(lower, upper), tolerance, 1000).unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -240,13 +228,13 @@ macro_rules! adaptive_test_passing {
             util::test_relative_error(
                 result,
                 -exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result reverse", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error reverse", $description),
             )?;
             util::test_int(
@@ -275,8 +263,8 @@ macro_rules! adaptive_test_passing {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_abs: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -286,10 +274,10 @@ macro_rules! adaptive_test_passing {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
             let rule = Rule::$rule();
-            let error_bound = Tolerance::Absolute($tolerance);
+            let tolerance = Tolerance::Absolute($tolerance);
             let alpha: $alphaty = $alpha;
 
             let lower = $lower;
@@ -297,14 +285,8 @@ macro_rules! adaptive_test_passing {
 
             let function = <$type>::new(alpha);
 
-            let integral = Adaptive::new(
-                &function,
-                rule,
-                Limits::new(lower, upper),
-                error_bound,
-                1000,
-            )
-            .unwrap();
+            let integral =
+                Adaptive::new(&function, rule, Limits::new(lower, upper), tolerance, 1000).unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -315,13 +297,13 @@ macro_rules! adaptive_test_passing {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -336,18 +318,12 @@ macro_rules! adaptive_test_passing {
             )?;
 
             let rule = Rule::$rule();
-            let error_bound = Tolerance::Absolute($tolerance);
+            let tolerance = Tolerance::Absolute($tolerance);
             let lower = $upper;
             let upper = $lower;
 
-            let integral = Adaptive::new(
-                &function,
-                rule,
-                Limits::new(lower, upper),
-                error_bound,
-                1000,
-            )
-            .unwrap();
+            let integral =
+                Adaptive::new(&function, rule, Limits::new(lower, upper), tolerance, 1000).unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -358,13 +334,13 @@ macro_rules! adaptive_test_passing {
             util::test_relative_error(
                 result,
                 -exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result reverse", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error reverse", $description),
             )?;
             util::test_int(
@@ -396,8 +372,8 @@ macro_rules! singularity_test {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_rel: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -407,9 +383,9 @@ macro_rules! singularity_test {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
-            let error_bound = Tolerance::Relative($tolerance);
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
+            let tolerance = Tolerance::Relative($tolerance);
             let alpha: $alphaty = $alpha;
 
             let lower = $lower;
@@ -417,13 +393,9 @@ macro_rules! singularity_test {
 
             let function = <$type>::new(alpha);
 
-            let integral = AdaptiveSingularity::finite(
-                &function,
-                Limits::new(lower, upper),
-                error_bound,
-                1000,
-            )
-            .unwrap();
+            let integral =
+                AdaptiveSingularity::finite(&function, Limits::new(lower, upper), tolerance, 1000)
+                    .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -434,13 +406,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -456,15 +428,11 @@ macro_rules! singularity_test {
 
             let lower = $upper;
             let upper = $lower;
-            let error_bound = Tolerance::Relative($tolerance);
+            let tolerance = Tolerance::Relative($tolerance);
 
-            let integral = AdaptiveSingularity::finite(
-                &function,
-                Limits::new(lower, upper),
-                error_bound,
-                1000,
-            )
-            .unwrap();
+            let integral =
+                AdaptiveSingularity::finite(&function, Limits::new(lower, upper), tolerance, 1000)
+                    .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -475,13 +443,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 -exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result reverse", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error reverse", $description),
             )?;
             util::test_int(
@@ -509,8 +477,8 @@ macro_rules! singularity_test {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_abs: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -520,9 +488,9 @@ macro_rules! singularity_test {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
-            let error_bound = Tolerance::Absolute($tolerance);
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
+            let tolerance = Tolerance::Absolute($tolerance);
             let alpha: $alphaty = $alpha;
 
             let lower = $lower;
@@ -530,13 +498,9 @@ macro_rules! singularity_test {
 
             let function = <$type>::new(alpha);
 
-            let integral = AdaptiveSingularity::finite(
-                &function,
-                Limits::new(lower, upper),
-                error_bound,
-                1000,
-            )
-            .unwrap();
+            let integral =
+                AdaptiveSingularity::finite(&function, Limits::new(lower, upper), tolerance, 1000)
+                    .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -547,13 +511,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -569,15 +533,11 @@ macro_rules! singularity_test {
 
             let lower = $upper;
             let upper = $lower;
-            let error_bound = Tolerance::Absolute($tolerance);
+            let tolerance = Tolerance::Absolute($tolerance);
 
-            let integral = AdaptiveSingularity::finite(
-                &function,
-                Limits::new(lower, upper),
-                error_bound,
-                1000,
-            )
-            .unwrap();
+            let integral =
+                AdaptiveSingularity::finite(&function, Limits::new(lower, upper), tolerance, 1000)
+                    .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -588,13 +548,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 -exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result reverse", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error reverse", $description),
             )?;
             util::test_int(
@@ -621,8 +581,8 @@ macro_rules! singularity_test {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_rel: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -632,17 +592,17 @@ macro_rules! singularity_test {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
             let alpha: $alphaty = $alpha;
-            let error_bound = Tolerance::Relative($tolerance);
+            let tolerance = Tolerance::Relative($tolerance);
 
             let upper = $upper;
 
             let function = <$type>::new(alpha);
 
             let integral =
-                AdaptiveSingularity::semi_infinite_lower(&function, upper, error_bound, 1000)
+                AdaptiveSingularity::semi_infinite_lower(&function, upper, tolerance, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -654,13 +614,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -687,8 +647,8 @@ macro_rules! singularity_test {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_abs: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -698,17 +658,17 @@ macro_rules! singularity_test {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
             let alpha: $alphaty = $alpha;
-            let error_bound = Tolerance::Absolute($tolerance);
+            let tolerance = Tolerance::Absolute($tolerance);
 
             let upper = $upper;
 
             let function = <$type>::new(alpha);
 
             let integral =
-                AdaptiveSingularity::semi_infinite_lower(&function, upper, error_bound, 1000)
+                AdaptiveSingularity::semi_infinite_lower(&function, upper, tolerance, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -720,13 +680,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -753,8 +713,8 @@ macro_rules! singularity_test {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_rel: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -764,17 +724,17 @@ macro_rules! singularity_test {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
             let alpha: $alphaty = $alpha;
-            let error_bound = Tolerance::Relative($tolerance);
+            let tolerance = Tolerance::Relative($tolerance);
 
             let lower = $lower;
 
             let function = <$type>::new(alpha);
 
             let integral =
-                AdaptiveSingularity::semi_infinite_upper(&function, lower, error_bound, 1000)
+                AdaptiveSingularity::semi_infinite_upper(&function, lower, tolerance, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -786,13 +746,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -819,8 +779,8 @@ macro_rules! singularity_test {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_abs: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -830,17 +790,17 @@ macro_rules! singularity_test {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
             let alpha: $alphaty = $alpha;
-            let error_bound = Tolerance::Absolute($tolerance);
+            let tolerance = Tolerance::Absolute($tolerance);
 
             let lower = $lower;
 
             let function = <$type>::new(alpha);
 
             let integral =
-                AdaptiveSingularity::semi_infinite_upper(&function, lower, error_bound, 1000)
+                AdaptiveSingularity::semi_infinite_upper(&function, lower, tolerance, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -852,13 +812,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -884,8 +844,8 @@ macro_rules! singularity_test {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_rel: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -895,14 +855,14 @@ macro_rules! singularity_test {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
             let alpha: $alphaty = $alpha;
-            let error_bound = Tolerance::Relative($tolerance);
+            let tolerance = Tolerance::Relative($tolerance);
 
             let function = <$type>::new(alpha);
 
-            let integral = AdaptiveSingularity::infinite(&function, error_bound, 1000).unwrap();
+            let integral = AdaptiveSingularity::infinite(&function, tolerance, 1000).unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -913,13 +873,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -945,8 +905,8 @@ macro_rules! singularity_test {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_abs: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -956,14 +916,14 @@ macro_rules! singularity_test {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
             let alpha: $alphaty = $alpha;
-            let error_bound = Tolerance::Absolute($tolerance);
+            let tolerance = Tolerance::Absolute($tolerance);
 
             let function = <$type>::new(alpha);
 
-            let integral = AdaptiveSingularity::infinite(&function, error_bound, 1000).unwrap();
+            let integral = AdaptiveSingularity::infinite(&function, tolerance, 1000).unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -974,13 +934,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -1007,8 +967,8 @@ macro_rules! singularity_test {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_rel: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -1018,22 +978,18 @@ macro_rules! singularity_test {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
-            let error_bound = Tolerance::Relative($tolerance);
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
+            let tolerance = Tolerance::Relative($tolerance);
 
             let lower = $lower;
             let upper = $upper;
 
             let function = <$type>::new();
 
-            let integral = AdaptiveSingularity::finite(
-                &function,
-                Limits::new(lower, upper),
-                error_bound,
-                1000,
-            )
-            .unwrap();
+            let integral =
+                AdaptiveSingularity::finite(&function, Limits::new(lower, upper), tolerance, 1000)
+                    .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -1044,13 +1000,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -1066,15 +1022,11 @@ macro_rules! singularity_test {
 
             let lower = $upper;
             let upper = $lower;
-            let error_bound = Tolerance::Relative(1e-10);
+            let tolerance = Tolerance::Relative(1e-10);
 
-            let integral = AdaptiveSingularity::finite(
-                &function,
-                Limits::new(lower, upper),
-                error_bound,
-                1000,
-            )
-            .unwrap();
+            let integral =
+                AdaptiveSingularity::finite(&function, Limits::new(lower, upper), tolerance, 1000)
+                    .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -1085,13 +1037,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 -exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result reverse", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error reverse", $description),
             )?;
             util::test_int(
@@ -1118,8 +1070,8 @@ macro_rules! singularity_test {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_abs: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -1129,22 +1081,18 @@ macro_rules! singularity_test {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
-            let error_bound = Tolerance::Absolute($tolerance);
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
+            let tolerance = Tolerance::Absolute($tolerance);
 
             let lower = $lower;
             let upper = $upper;
 
             let function = <$type>::new();
 
-            let integral = AdaptiveSingularity::finite(
-                &function,
-                Limits::new(lower, upper),
-                error_bound,
-                1000,
-            )
-            .unwrap();
+            let integral =
+                AdaptiveSingularity::finite(&function, Limits::new(lower, upper), tolerance, 1000)
+                    .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -1155,13 +1103,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -1177,15 +1125,11 @@ macro_rules! singularity_test {
 
             let lower = $upper;
             let upper = $lower;
-            let error_bound = Tolerance::Absolute(1e-10);
+            let tolerance = Tolerance::Absolute(1e-10);
 
-            let integral = AdaptiveSingularity::finite(
-                &function,
-                Limits::new(lower, upper),
-                error_bound,
-                1000,
-            )
-            .unwrap();
+            let integral =
+                AdaptiveSingularity::finite(&function, Limits::new(lower, upper), tolerance, 1000)
+                    .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -1196,13 +1140,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 -exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result reverse", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error reverse", $description),
             )?;
             util::test_int(
@@ -1228,8 +1172,8 @@ macro_rules! singularity_test {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_rel: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -1239,16 +1183,16 @@ macro_rules! singularity_test {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
-            let error_bound = Tolerance::Relative($tolerance);
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
+            let tolerance = Tolerance::Relative($tolerance);
 
             let upper = $upper;
 
             let function = <$type>::new();
 
             let integral =
-                AdaptiveSingularity::semi_infinite_lower(&function, upper, error_bound, 1000)
+                AdaptiveSingularity::semi_infinite_lower(&function, upper, tolerance, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -1260,13 +1204,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -1292,8 +1236,8 @@ macro_rules! singularity_test {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_abs: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -1303,16 +1247,16 @@ macro_rules! singularity_test {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
-            let error_bound = Tolerance::Absolute($tolerance);
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
+            let tolerance = Tolerance::Absolute($tolerance);
 
             let upper = $upper;
 
             let function = <$type>::new();
 
             let integral =
-                AdaptiveSingularity::semi_infinite_lower(&function, upper, error_bound, 1000)
+                AdaptiveSingularity::semi_infinite_lower(&function, upper, tolerance, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -1324,13 +1268,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -1356,8 +1300,8 @@ macro_rules! singularity_test {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_rel: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -1367,16 +1311,16 @@ macro_rules! singularity_test {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
-            let error_bound = Tolerance::Relative($tolerance);
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
+            let tolerance = Tolerance::Relative($tolerance);
 
             let lower = $lower;
 
             let function = <$type>::new();
 
             let integral =
-                AdaptiveSingularity::semi_infinite_upper(&function, lower, error_bound, 1000)
+                AdaptiveSingularity::semi_infinite_upper(&function, lower, tolerance, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -1388,13 +1332,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -1420,8 +1364,8 @@ macro_rules! singularity_test {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_abs: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -1431,16 +1375,16 @@ macro_rules! singularity_test {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
-            let error_bound = Tolerance::Absolute($tolerance);
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
+            let tolerance = Tolerance::Absolute($tolerance);
 
             let lower = $lower;
 
             let function = <$type>::new();
 
             let integral =
-                AdaptiveSingularity::semi_infinite_upper(&function, lower, error_bound, 1000)
+                AdaptiveSingularity::semi_infinite_upper(&function, lower, tolerance, 1000)
                     .unwrap();
 
             let integral_result = integral.integrate().unwrap();
@@ -1452,13 +1396,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -1483,8 +1427,8 @@ macro_rules! singularity_test {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_rel: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -1494,13 +1438,13 @@ macro_rules! singularity_test {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
-            let error_bound = Tolerance::Relative($tolerance);
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
+            let tolerance = Tolerance::Relative($tolerance);
 
             let function = <$type>::new();
 
-            let integral = AdaptiveSingularity::infinite(&function, error_bound, 1000).unwrap();
+            let integral = AdaptiveSingularity::infinite(&function, tolerance, 1000).unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -1511,13 +1455,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -1542,8 +1486,8 @@ macro_rules! singularity_test {
         exp_iterations:  $exp_iterations:expr,
         exp_evaluations: $exp_evaluations:expr,
         tolerance_abs: $tolerance:expr,
-        test_abs_error_bound: $abs_error_bound:expr,
-        test_rel_error_bound: $rel_error_bound:expr,
+        test_abs_tolerance: $abs_tolerance:expr,
+        test_rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -1553,13 +1497,13 @@ macro_rules! singularity_test {
             let exp_iterations = $exp_iterations;
             let exp_evaluations = $exp_evaluations;
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
-            let error_bound = Tolerance::Absolute($tolerance);
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
+            let tolerance = Tolerance::Absolute($tolerance);
 
             let function = <$type>::new();
 
-            let integral = AdaptiveSingularity::infinite(&function, error_bound, 1000).unwrap();
+            let integral = AdaptiveSingularity::infinite(&function, tolerance, 1000).unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -1570,13 +1514,13 @@ macro_rules! singularity_test {
             util::test_relative_error(
                 result,
                 exp_result,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
             util::test_int(
@@ -1606,8 +1550,8 @@ macro_rules! basic_test_complex_equal {
         upper: $upper:expr,
         exp_result: $exp_result:expr,
         exp_error: $exp_error:expr,
-        abs_error_bound: $abs_error_bound:expr,
-        rel_error_bound: $rel_error_bound:expr,
+        abs_tolerance: $abs_tolerance:expr,
+        rel_tolerance: $rel_tolerance:expr,
         $description:literal
     ) => {
         #[test]
@@ -1620,8 +1564,8 @@ macro_rules! basic_test_complex_equal {
             let exp_error_complex = Complex::new(exp_error_re, exp_error_im);
             let exp_error = exp_error_complex.abs();
 
-            let abs_error_bound = $abs_error_bound;
-            let rel_error_bound = $rel_error_bound;
+            let abs_tolerance = $abs_tolerance;
+            let rel_tolerance = $rel_tolerance;
             let alpha1: $alphaty = $alpha;
             let alpha2: $alphaty = $alpha;
 
@@ -1641,19 +1585,19 @@ macro_rules! basic_test_complex_equal {
             util::test_relative_error(
                 result_re,
                 exp_result.re(),
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 result_im,
                 exp_result.im(),
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
 
@@ -1672,19 +1616,19 @@ macro_rules! basic_test_complex_equal {
             util::test_relative_error(
                 result_re,
                 -exp_result_re,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 result_im,
                 -exp_result_im,
-                abs_error_bound,
+                abs_tolerance,
                 &format!("{} result", $description),
             )?;
             util::test_relative_error(
                 error,
                 exp_error,
-                rel_error_bound,
+                rel_tolerance,
                 &format!("{} error", $description),
             )?;
 
