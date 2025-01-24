@@ -292,53 +292,53 @@ pub(crate) enum InitialisationErrorKind {
 
 impl fmt::Display for InitialisationError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.kind() {
-            InitialisationErrorKind::AbsoluteBoundNegativeOrZero(tol) => {
-                write!( f, "Invalid tolerance requested:\n`Absolute({tol})`\nThe absolute tolerance bound `tol` requested for the adaptive integration routines must satisfy `tol > 0.0`.")
+        write!(
+            f,
+            "{}",
+            match self.kind() {
+                InitialisationErrorKind::AbsoluteBoundNegativeOrZero(tol) => {
+                    "Invalid tolerance requested:\n`Absolute({tol})`\nThe absolute tolerance bound `tol` requested for the adaptive integration routines must satisfy `tol > 0.0`."
+                }
+
+                InitialisationErrorKind::RelativeBoundTooSmall(tol) => {
+                    "Invalid tolerance requested:\n`Relative({tol})`\nThe relative tolerance bound `tol` requested for the adaptive integration routines must satisfy `tol > 50.0 * f64::EPSILON`."
+                }
+
+                InitialisationErrorKind::InvalidTolerance { absolute, relative } => {
+                    "Invalid tolerance requested:\n`Either '{{' abs_tol: {absolute}, rel_tol: {relative} '}}'`\nThe absolute tolerance bound `abs_tol` requested for the adaptive integration routines must satisfy `abs_tol > 0.0`. The relative tolerance bound `rel_tol` requested for the adaptive integration routines must satisfy `rel_tol > 50.0 * f64::EPSILON`."
+                }
+
+                InitialisationErrorKind::InvalidDimension(ndim) => {
+                    "An invalid integration dimensionality `NDIM = {ndim}` was used in a multi-dimensional integration.  This library only provides multi-dimensional integration routines suitable for dimensions `2 <= NDIM <= 15`."
+                }
+
+                InitialisationErrorKind::InvalidDimensionForRule07(ndim) => {
+                    "An invalid integration dimensionality `NDIM = {ndim}` was used to construct the 7-point multi-dimensional integration rule [`Rule07`]. This rule is only suitable for dimensions `2 <= NDIM <= 15`.  "
+                }
+
+                InitialisationErrorKind::InvalidDimensionForRule09(ndim) => {
+                    "An invalid integration dimensionality `NDIM = {ndim}` was used to construct the 9-point multi-dimensional integration rule [`Rule09`]. This rule is only suitable for dimensions `3 <= NDIM <= 15`.  "
+                }
+
+                InitialisationErrorKind::InvalidDimensionForRule11(ndim) => {
+                    "An invalid integration dimensionality `NDIM = {ndim}` was used to construct the 11-point multi-dimensional integration rule [`Rule11`]. This rule is only suitable for dimensions `NDIM == 3`."
+                }
+
+                InitialisationErrorKind::InvalidDimensionForRule13(ndim) => {
+                    "An invalid integration dimensionality `NDIM = {ndim}` was used to construct the 13-point multi-dimensional integration rule [`Rule13`]. This rule is only suitable for dimensions `NDIM == 2`."
+                } //    InitialisationErrorKind::MinimumPointsLargerThanMaximum { min, max } => {
+                  //            "The minimum number of function evaluations, `min = {min}`, to be used in a multi-dimensional integration routine is larger than the supplied maximum number of function evaluations, `max = {max}`. The minimum number of function evaluations must satisfy `min < max`."
+                  //    }
+
+                  //    InitialisationErrorKind::MaximumPointsInsufficient {
+                  //        ndim,
+                  //        max,
+                  //        minimum_max,
+                  //    } => {
+                  //     "The maximum number of function evaluations, `max = {max}`, to be used in a multi-dimensional integration routine was less than the required minimum, `minimum_max = {minimum_max}`, for the given integral dimensionality `NDIM = {ndim}` and integration rule.\n- [`Rule07`] requires a `max > minimum_max = 1 + 6 NDIM + 2 NDIM (NDIM - 1) + 2^NDIM`.\n- [`Rule09`] requires a `max > minimum_max = 1 + 8 NDIM + 6 NDIM (NDIM - 1) + 4 NDIM (NDIM - 1) (NDIM - 1) / 3 + 2^NDIM`.\n- [`Rule11`] requires a `max > minimum_max = 127`.\n- [`Rule07`] requires a `max > minimum_max = 65`."
+                  //    }
             }
-
-            InitialisationErrorKind::RelativeBoundTooSmall(tol) => {
-                write!( f, "Invalid tolerance requested:\n`Relative({tol})`\nThe relative tolerance bound `tol` requested for the adaptive integration routines must satisfy `tol > 50.0 * f64::EPSILON`."
-                )
-            }
-
-            InitialisationErrorKind::InvalidTolerance { absolute, relative } => {
-                write!(f, "Invalid tolerance requested:\n`Either '{{' abs_tol: {absolute}, rel_tol: {relative} '}}'`\nThe absolute tolerance bound `abs_tol` requested for the adaptive integration routines must satisfy `abs_tol > 0.0`. The relative tolerance bound `rel_tol` requested for the adaptive integration routines must satisfy `rel_tol > 50.0 * f64::EPSILON`.")
-            }
-
-            InitialisationErrorKind::InvalidDimension(ndim) => {
-                write!( f, "An invalid integration dimensionality `NDIM = {ndim}` was used in a multi-dimensional integration.  This library only provides multi-dimensional integration routines suitable for dimensions `2 <= NDIM <= 15`.")
-            }
-
-            InitialisationErrorKind::InvalidDimensionForRule07(ndim) => {
-                write!( f, "An invalid integration dimensionality `NDIM = {ndim}` was used to construct the 7-point multi-dimensional integration rule [`Rule07`]. This rule is only suitable for dimensions `2 <= NDIM <= 15`.  ")
-            }
-
-            InitialisationErrorKind::InvalidDimensionForRule09(ndim) => {
-                write!( f, "An invalid integration dimensionality `NDIM = {ndim}` was used to construct the 9-point multi-dimensional integration rule [`Rule09`]. This rule is only suitable for dimensions `3 <= NDIM <= 15`.  ")
-            }
-
-            InitialisationErrorKind::InvalidDimensionForRule11(ndim) => {
-                write!(f, "An invalid integration dimensionality `NDIM = {ndim}` was used to construct the 11-point multi-dimensional integration rule [`Rule11`]. This rule is only suitable for dimensions `NDIM == 3`.")
-            }
-
-            InitialisationErrorKind::InvalidDimensionForRule13(ndim) => {
-                write!(f, "An invalid integration dimensionality `NDIM = {ndim}` was used to construct the 13-point multi-dimensional integration rule [`Rule13`]. This rule is only suitable for dimensions `NDIM == 2`.")
-            } //    InitialisationErrorKind::MinimumPointsLargerThanMaximum { min, max } => {
-              //        write!(
-              //            f,
-              //            "The minimum number of function evaluations, `min = {min}`, to be used in a multi-dimensional integration routine is larger than the supplied maximum number of function evaluations, `max = {max}`. The minimum number of function evaluations must satisfy `min < max`."
-              //        )
-              //    }
-
-              //    InitialisationErrorKind::MaximumPointsInsufficient {
-              //        ndim,
-              //        max,
-              //        minimum_max,
-              //    } => {
-              //        write!(f, "The maximum number of function evaluations, `max = {max}`, to be used in a multi-dimensional integration routine was less than the required minimum, `minimum_max = {minimum_max}`, for the given integral dimensionality `NDIM = {ndim}` and integration rule.\n- [`Rule07`] requires a `max > minimum_max = 1 + 6 NDIM + 2 NDIM (NDIM - 1) + 2^NDIM`.\n- [`Rule09`] requires a `max > minimum_max = 1 + 8 NDIM + 6 NDIM (NDIM - 1) + 4 NDIM (NDIM - 1) (NDIM - 1) / 3 + 2^NDIM`.\n- [`Rule11`] requires a `max > minimum_max = 127`.\n- [`Rule07`] requires a `max > minimum_max = 65`.")
-              //    }
-        }
+        )
     }
 }
 
@@ -399,48 +399,37 @@ impl<T: ScalarF64> fmt::Display for IntegrationError<T> {
         let result = estimate.result();
         let error = estimate.error();
         let iterations = estimate.iterations();
-        match self.kind() {
-            IntegrationErrorKind::MaximumIterationsReached(i) => {
-                write!(
-                    f,
+        write!(
+            f,
+            "{}",
+            match self.kind() {
+                IntegrationErrorKind::MaximumIterationsReached(i) => {
                     "Maximum number of iterations/subdivisions  ({i}) reached. Try increasing max_iterations. If this yields no improvement it is advised to analyse the integrand to determine integration difficulties. If the position of a local difficulty can be determined, one may gain from splitting the total integration interval and calling the integrator on each sub-interval.\nresult:\t{result}\nerror\t{error:.10e}\niterations:\t{iterations}."
-                )
-            }
+                }
 
-            IntegrationErrorKind::RoundoffErrorDetected => {
-                write!(
-                    f,
+                IntegrationErrorKind::RoundoffErrorDetected => {
                     "Roundoff error detected. This prevents the requested tolerance from being achieved and the returned error may be under-estimated.\nresult:\t{result}\nerror\t{error:.10e}\niterations:\t{iterations}."
-                )
-            }
+                }
 
-            IntegrationErrorKind::BadIntegrandBehaviour(limits) => {
-                let lower = limits.lower();
-                let upper = limits.upper();
-                write!(
-                    f,
+                IntegrationErrorKind::BadIntegrandBehaviour(limits) => {
+                    let lower = limits.lower();
+                    let upper = limits.upper();
                     "Extremely bad integrand behaviour. Possible non-integrable singularity, divergence, or discontinuity detected between ({lower},{upper}).\nresult:\t{result}\nerror\t{error:.10e}\niterations:\t{iterations}.\nTry reducing the requested tolerance."
-                )
-            }
+                }
 
-            IntegrationErrorKind::DoesNotConverge => {
-                write!(
-                    f,
+                IntegrationErrorKind::DoesNotConverge => {
                     "The algorithm does not converge. Roundoff error is detected in the extrapolation table. It is assumed that the requested tolerance cannot be achieved and the returned result is the best which can be obtained.\nresult:\t{result}\nerror\t{error:.10e}\niterations:\t{iterations}."
-                )
-            }
+                }
 
-            IntegrationErrorKind::DivergentOrSlowlyConverging => {
-                write!(
-                    f,
+                IntegrationErrorKind::DivergentOrSlowlyConverging => {
                     "The integral is probably divergent or slowly convergent. NOTE: divergence can also occur with any other error kind.\nresult:\t{result}\nerror\t{error:.10e}\niterations:\t{iterations}."
-                )
-            }
+                }
 
-            IntegrationErrorKind::UninitialisedWorkspace => {
-                write!(f, "The integration Workspace was not properly initialised. This error should not be possible. If this error is returned, contact the crate maintainers.")
+                IntegrationErrorKind::UninitialisedWorkspace => {
+                    "The integration Workspace was not properly initialised. This error should not be possible. If this error is returned, contact the crate maintainers."
+                }
             }
-        }
+        )
     }
 }
 
