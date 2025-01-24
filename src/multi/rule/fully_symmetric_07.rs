@@ -1,6 +1,6 @@
 use crate::multi::generator::Generator;
 use crate::multi::rule::{
-    scales_norms, BasicErrorCoeff, Data, Norms, Rule, Scales, ADAPTIVE_ERROR_COEFF,
+    scales_norms, BasicErrorCoeff, Data, Rule, ScalesNorms, ADAPTIVE_ERROR_COEFF,
 };
 use crate::multi::{two_pow_n, two_pow_n_f64};
 use crate::{InitialisationError, InitialisationErrorKind};
@@ -32,7 +32,7 @@ pub(crate) const fn generate_rule<const NDIM: usize>(
     let ratio = RATIO;
 
     let generators = generators::<NDIM>();
-    let (weights, scales, norms) = weights_scales_norms::<NDIM>();
+    let (weights, scales_norms) = weights_scales_norms::<NDIM>();
 
     let [g0, g1, g2, g3, g4, g5] = generators;
     let [w0, w1, w2, w3, w4, w5] = weights;
@@ -50,8 +50,7 @@ pub(crate) const fn generate_rule<const NDIM: usize>(
     Ok(Rule {
         initial_data,
         final_data,
-        scales,
-        norms,
+        scales_norms,
         basic_error_coeff,
         adaptive_error_coeff,
         evaluations,
@@ -214,8 +213,7 @@ const fn initial_weights<const NDIM: usize>() -> [[f64; 5]; TOTAL] {
     output
 }
 
-const fn weights_scales_norms<const NDIM: usize>(
-) -> ([[f64; 5]; TOTAL], Scales<TOTAL>, Norms<TOTAL>) {
+const fn weights_scales_norms<const NDIM: usize>() -> ([[f64; 5]; TOTAL], [ScalesNorms<TOTAL>; 3]) {
     let mut weights = initial_weights::<NDIM>();
     let rule_points = rule_points::<NDIM>();
 
@@ -241,8 +239,8 @@ const fn weights_scales_norms<const NDIM: usize>(
         k += 1;
     }
 
-    let (scales, norms) = scales_norms::<NDIM, TOTAL>(&weights, rule_points);
-    (weights, scales, norms)
+    let scales_norms = scales_norms::<NDIM, TOTAL>(&weights, rule_points);
+    (weights, scales_norms)
 }
 
 const fn generators<const NDIM: usize>() -> [Generator<NDIM>; TOTAL] {
@@ -278,68 +276,7 @@ const BASIC_ERROR_COEFF: BasicErrorCoeff = BasicErrorCoeff::new(5.0, 5.0, 1.0, 5
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn rel_or_abs_diff(a: f64, b: f64) -> f64 {
-        if a == 0.0 {
-            (a - b).abs()
-        } else {
-            (a - b).abs() / a.abs()
-        }
-    }
-
-    fn assert_check_vec_tol<const WL: usize, const TY: usize>(
-        calc: &[[f64; TY]; WL],
-        should_be: &[[f64; TY]; WL],
-        tol: f64,
-    ) {
-        for (x, y) in calc.iter().zip(should_be.iter()) {
-            for (a, b) in x.iter().zip(y.iter()) {
-                let val = rel_or_abs_diff(*a, *b);
-
-                assert!(val < tol);
-            }
-        }
-    }
-
-    fn assert_check_vec_data_tol<const WL: usize, const TY: usize>(
-        calc: &[Data<TY>; WL],
-        should_be: &[Data<TY>; WL],
-        tol: f64,
-    ) {
-        for (x, y) in calc.iter().zip(should_be.iter()) {
-            let genx = x.generator().generator();
-            let geny = y.generator().generator();
-            for (gx, gy) in genx.iter().zip(geny.iter()) {
-                let val = rel_or_abs_diff(*gx, *gy);
-                assert!(val < tol);
-            }
-
-            let wx = x.weight();
-            let wy = y.weight();
-            let val = rel_or_abs_diff(wx, wy);
-            assert!(val < tol);
-
-            let n1x = x.null1();
-            let n1y = y.null1();
-            let val = rel_or_abs_diff(n1x, n1y);
-            assert!(val < tol);
-
-            let n2x = x.null2();
-            let n2y = y.null2();
-            let val = rel_or_abs_diff(n2x, n2y);
-            assert!(val < tol);
-
-            let n3x = x.null3();
-            let n3y = y.null3();
-            let val = rel_or_abs_diff(n3x, n3y);
-            assert!(val < tol);
-
-            let n4x = x.null4();
-            let n4y = y.null4();
-            let val = rel_or_abs_diff(n4x, n4y);
-            assert!(val < tol);
-        }
-    }
+    use crate::multi::rule::util;
 
     #[test]
     fn check_evaluations_correct() {
@@ -430,7 +367,7 @@ mod tests {
                 let gx = x.generator();
                 let gy = y.generator();
                 for (a, b) in gx.iter().zip(gy.iter()) {
-                    let val = rel_or_abs_diff(*a, *b);
+                    let val = util::rel_or_abs_diff(*a, *b);
                     assert!(val < tol);
                 }
             }
@@ -455,7 +392,7 @@ mod tests {
                 let gx = x.generator();
                 let gy = y.generator();
                 for (a, b) in gx.iter().zip(gy.iter()) {
-                    let val = rel_or_abs_diff(*a, *b);
+                    let val = util::rel_or_abs_diff(*a, *b);
                     assert!(val < tol);
                 }
             }
@@ -518,7 +455,7 @@ mod tests {
                 let gx = x.generator();
                 let gy = y.generator();
                 for (a, b) in gx.iter().zip(gy.iter()) {
-                    let val = rel_or_abs_diff(*a, *b);
+                    let val = util::rel_or_abs_diff(*a, *b);
                     assert!(val < tol);
                 }
             }
@@ -635,7 +572,7 @@ mod tests {
                 let gx = x.generator();
                 let gy = y.generator();
                 for (a, b) in gx.iter().zip(gy.iter()) {
-                    let val = rel_or_abs_diff(*a, *b);
+                    let val = util::rel_or_abs_diff(*a, *b);
                     assert!(val < tol);
                 }
             }
@@ -647,7 +584,7 @@ mod tests {
         {
             let tol = 1e-14;
             const NDIM: usize = 2;
-            let (weights, scales, norms) = weights_scales_norms::<NDIM>();
+            let (weights, scales_norms) = weights_scales_norms::<NDIM>();
             let weights_should_be = [
                 [
                     -0.34070799859740308,
@@ -692,70 +629,78 @@ mod tests {
                     -8.8785828081335019E-002,
                 ],
             ];
-            let scales_should_be = Scales([
-                [
-                    1.5008744041523381,
-                    1.6484000000000030,
-                    -3.0676029974325698,
-                    100.00000000000000,
-                    1.0000000000000009,
-                    1.0000000000000024,
-                ],
-                [
-                    5.4619812724819363,
-                    4.4896318499947325,
-                    -5.9664353462315765,
-                    -0.0000000000000000,
-                    -0.82419999999999971,
-                    1.9999999999999960,
-                ],
-                [
-                    0.58853941731882520,
-                    0.22273541203632835,
-                    -1.1012332185617477,
-                    100.00000000000000,
-                    -1.9999999999999996,
-                    -2.0000000000000004,
-                ],
-            ]);
-            let norms_should_be = Norms([
-                [
-                    15.000673861797612,
-                    14.619562897422956,
-                    1.3243103526083444,
-                    6.2596209976816711E-002,
-                    8.5402855258664925,
-                    8.5402855258665067,
-                ],
-                [
-                    2.0594085530307291,
-                    2.6087348779812332,
-                    0.37804488185591240,
-                    0.90107710528805529,
-                    0.76131586120970718,
-                    1.3569737411797032,
-                ],
-                [
-                    2.4632784012088300,
-                    2.9652172226381066,
-                    0.64191377794942761,
-                    9.0308860340991368E-003,
-                    0.40539107822219211,
-                    0.40539107822219189,
-                ],
-            ]);
-            println!("{:?}", weights);
-            println!("{:?}", scales.0);
-            println!("{:?}", norms.0);
-            assert_check_vec_tol(&weights, &weights_should_be, tol);
-            assert_check_vec_tol(&scales.0, &scales_should_be.0, tol);
-            assert_check_vec_tol(&norms.0, &norms_should_be.0, tol);
+            let scales_norms_should_be = [
+                ScalesNorms::new(
+                    [
+                        1.5008744041523381,
+                        1.6484000000000030,
+                        -3.0676029974325698,
+                        100.00000000000000,
+                        1.0000000000000009,
+                        1.0000000000000024,
+                    ],
+                    [
+                        15.000673861797612,
+                        14.619562897422956,
+                        1.3243103526083444,
+                        6.2596209976816711E-002,
+                        8.5402855258664925,
+                        8.5402855258665067,
+                    ],
+                ),
+                ScalesNorms::new(
+                    [
+                        5.4619812724819363,
+                        4.4896318499947325,
+                        -5.9664353462315765,
+                        -0.0000000000000000,
+                        -0.82419999999999971,
+                        1.9999999999999960,
+                    ],
+                    [
+                        2.0594085530307291,
+                        2.6087348779812332,
+                        0.37804488185591240,
+                        0.90107710528805529,
+                        0.76131586120970718,
+                        1.3569737411797032,
+                    ],
+                ),
+                ScalesNorms::new(
+                    [
+                        0.58853941731882520,
+                        0.22273541203632835,
+                        -1.1012332185617477,
+                        100.00000000000000,
+                        -1.9999999999999996,
+                        -2.0000000000000004,
+                    ],
+                    [
+                        2.4632784012088300,
+                        2.9652172226381066,
+                        0.64191377794942761,
+                        9.0308860340991368E-003,
+                        0.40539107822219211,
+                        0.40539107822219189,
+                    ],
+                ),
+            ];
+            util::assert_check_vec_tol(&weights, &weights_should_be, tol);
+            for (calc, should) in scales_norms.iter().zip(scales_norms_should_be.iter()) {
+                let scales = calc.scales();
+                let scales_should_be = should.scales();
+
+                let norms = calc.norms();
+                let norms_should_be = should.norms();
+                util::assert_check_slice_tol(scales, scales_should_be, tol);
+                util::assert_check_slice_tol(norms, norms_should_be, tol);
+            }
         }
 
         {
             let tol = 1e-14;
             const NDIM: usize = 3;
-            let (weights, scales, norms) = weights_scales_norms::<NDIM>();
+            let (weights, scales_norms) = weights_scales_norms::<NDIM>();
             let weights_should_be = [
                 [
                     -3.1355219462968886,
@@ -800,67 +745,78 @@ mod tests {
                     -4.4392914040667510E-002,
                 ],
             ];
-            let scales_should_be = Scales([
-                [
-                    1.4877849957592586,
-                    1.6484000000000030,
-                    0.30172737868395333,
-                    100.00000000000000,
-                    1.0000000000000009,
-                    1.0000000000000024,
-                ],
-                [
-                    5.5948103857539246,
-                    4.4896318499947325,
-                    8.1505598895026630,
-                    -0.0000000000000000,
-                    -0.82419999999999971,
-                    1.9999999999999960,
-                ],
-                [
-                    0.48269512903437911,
-                    0.22273541203632835,
-                    -0.85172635402321450,
-                    100.00000000000000,
-                    -1.9999999999999996,
-                    -2.0000000000000004,
-                ],
-            ]);
-            let norms_should_be = Norms([
-                [
-                    18.453034922164381,
-                    17.534737522530300,
-                    6.1051989517188385,
-                    7.7783432141282596E-002,
-                    11.387047367821989,
-                    11.387047367822007,
-                ],
-                [
-                    2.9871962141915933,
-                    3.8481493502257038,
-                    1.1943369141825844,
-                    1.2014361403840739,
-                    1.0150878149462763,
-                    1.8092983215729377,
-                ],
-                [
-                    4.6216242818616493,
-                    5.3358825416997862,
-                    1.0394875480397585,
-                    1.2041181378798850E-002,
-                    0.54052143762958937,
-                    0.54052143762958926,
-                ],
-            ]);
-            assert_check_vec_tol(&weights, &weights_should_be, tol);
-            assert_check_vec_tol(&scales.0, &scales_should_be.0, tol);
-            assert_check_vec_tol(&norms.0, &norms_should_be.0, tol);
+            let scales_norms_should_be = [
+                ScalesNorms::new(
+                    [
+                        1.4877849957592586,
+                        1.6484000000000030,
+                        0.30172737868395333,
+                        100.00000000000000,
+                        1.0000000000000009,
+                        1.0000000000000024,
+                    ],
+                    [
+                        18.453034922164381,
+                        17.534737522530300,
+                        6.1051989517188385,
+                        7.7783432141282596E-002,
+                        11.387047367821989,
+                        11.387047367822007,
+                    ],
+                ),
+                ScalesNorms::new(
+                    [
+                        5.5948103857539246,
+                        4.4896318499947325,
+                        8.1505598895026630,
+                        -0.0000000000000000,
+                        -0.82419999999999971,
+                        1.9999999999999960,
+                    ],
+                    [
+                        2.9871962141915933,
+                        3.8481493502257038,
+                        1.1943369141825844,
+                        1.2014361403840739,
+                        1.0150878149462763,
+                        1.8092983215729377,
+                    ],
+                ),
+                ScalesNorms::new(
+                    [
+                        0.48269512903437911,
+                        0.22273541203632835,
+                        -0.85172635402321450,
+                        100.00000000000000,
+                        -1.9999999999999996,
+                        -2.0000000000000004,
+                    ],
+                    [
+                        4.6216242818616493,
+                        5.3358825416997862,
+                        1.0394875480397585,
+                        1.2041181378798850E-002,
+                        0.54052143762958937,
+                        0.54052143762958926,
+                    ],
+                ),
+            ];
+            util::assert_check_vec_tol(&weights, &weights_should_be, tol);
+            for (calc, should) in scales_norms.iter().zip(scales_norms_should_be.iter()) {
+                let scales = calc.scales();
+                let scales_should_be = should.scales();
+
+                let norms = calc.norms();
+                let norms_should_be = should.norms();
+                util::assert_check_slice_tol(scales, scales_should_be, tol);
+                util::assert_check_slice_tol(norms, norms_should_be, tol);
+            }
         }
 
         {
             let tol = 1e-14;
             const NDIM: usize = 6;
-            let (weights, scales, norms) = weights_scales_norms::<NDIM>();
+            let (weights, scales_norms) = weights_scales_norms::<NDIM>();
             let weights_should_be = [
                 [
                     -69.069796742618294,
@@ -905,67 +861,78 @@ mod tests {
                     -5.5491142550834387E-003,
                 ],
             ];
-            let scales_should_be = Scales([
-                [
-                    1.5933291581913094,
-                    1.6484000000000030,
-                    0.79963479609476151,
-                    100.00000000000000,
-                    1.0000000000000009,
-                    1.0000000000000024,
-                ],
-                [
-                    6.7427925536508191,
-                    4.4896318499947325,
-                    0.14752452202849281,
-                    -0.0000000000000000,
-                    -0.82419999999999971,
-                    1.9999999999999960,
-                ],
-                [
-                    0.33975773109453233,
-                    0.22273541203632835,
-                    4.8689277509197639,
-                    100.00000000000000,
-                    -1.9999999999999996,
-                    -2.0000000000000004,
-                ],
-            ]);
-            let norms_should_be = Norms([
-                [
-                    55.723869508898815,
-                    53.897283837715740,
-                    38.347503188392174,
-                    0.25839518414799995,
-                    45.548189471287955,
-                    45.548189471287984,
-                ],
-                [
-                    5.3192717756037737,
-                    8.1573764597229559,
-                    4.9278648878824640,
-                    4.8057445615362964,
-                    4.0603512597851052,
-                    6.0348034352727939,
-                ],
-                [
-                    29.171230471345883,
-                    30.707034067695144,
-                    1.0343404256680435,
-                    4.8164725515195399E-002,
-                    2.1620857505183579,
-                    2.1620857505183575,
-                ],
-            ]);
-            assert_check_vec_tol(&weights, &weights_should_be, tol);
-            assert_check_vec_tol(&scales.0, &scales_should_be.0, tol);
-            assert_check_vec_tol(&norms.0, &norms_should_be.0, tol);
+            let scales_norms_should_be = [
+                ScalesNorms::new(
+                    [
+                        1.5933291581913094,
+                        1.6484000000000030,
+                        0.79963479609476151,
+                        100.00000000000000,
+                        1.0000000000000009,
+                        1.0000000000000024,
+                    ],
+                    [
+                        55.723869508898815,
+                        53.897283837715740,
+                        38.347503188392174,
+                        0.25839518414799995,
+                        45.548189471287955,
+                        45.548189471287984,
+                    ],
+                ),
+                ScalesNorms::new(
+                    [
+                        6.7427925536508191,
+                        4.4896318499947325,
+                        0.14752452202849281,
+                        -0.0000000000000000,
+                        -0.82419999999999971,
+                        1.9999999999999960,
+                    ],
+                    [
+                        5.3192717756037737,
+                        8.1573764597229559,
+                        4.9278648878824640,
+                        4.8057445615362964,
+                        4.0603512597851052,
+                        6.0348034352727939,
+                    ],
+                ),
+                ScalesNorms::new(
+                    [
+                        0.33975773109453233,
+                        0.22273541203632835,
+                        4.8689277509197639,
+                        100.00000000000000,
+                        -1.9999999999999996,
+                        -2.0000000000000004,
+                    ],
+                    [
+                        29.171230471345883,
+                        30.707034067695144,
+                        1.0343404256680435,
+                        4.8164725515195399E-002,
+                        2.1620857505183579,
+                        2.1620857505183575,
+                    ],
+                ),
+            ];
+            util::assert_check_vec_tol(&weights, &weights_should_be, tol);
+            for (calc, should) in scales_norms.iter().zip(scales_norms_should_be.iter()) {
+                let scales = calc.scales();
+                let scales_should_be = should.scales();
+
+                let norms = calc.norms();
+                let norms_should_be = should.norms();
+                util::assert_check_slice_tol(scales, scales_should_be, tol);
+                util::assert_check_slice_tol(norms, norms_should_be, tol);
+            }
         }
 
         {
             let tol = 1e-13;
             const NDIM: usize = 15;
-            let (weights, scales, norms) = weights_scales_norms::<NDIM>();
+            let (weights, scales_norms) = weights_scales_norms::<NDIM>();
             let weights_should_be = [
                 [
                     -34206.907291385309,
@@ -1010,61 +977,72 @@ mod tests {
                     -1.0838113779459841E-005,
                 ],
             ];
-            let scales_should_be = Scales([
-                [
-                    -24.565913231874259,
-                    1.6484000000000030,
-                    0.93617250759124970,
-                    100.00000000000000,
-                    1.0000000000000009,
-                    1.0000000000000024,
-                ],
-                [
-                    20.786695150765901,
-                    4.4896318499947325,
-                    -0.55979817802793441,
-                    -0.0000000000000000,
-                    -0.82419999999999971,
-                    1.9999999999999960,
-                ],
-                [
-                    0.12111127236195365,
-                    0.22273541203632835,
-                    -2.4925416545559149,
-                    100.00000000000000,
-                    -1.9999999999999996,
-                    -2.0000000000000004,
-                ],
-            ]);
-            let norms_should_be = Norms([
-                [
-                    134.06536084307373,
-                    4844.7587668888145,
-                    9309.4130587031723,
-                    34.773936788842335,
-                    9328.2692037197648,
-                    9328.2692037197430,
-                ],
-                [
-                    143.86213251118596,
-                    621.16054365500952,
-                    875.10266687973365,
-                    858.12621321598749,
-                    831.55993800398949,
-                    736.72520029221721,
-                ],
-                [
-                    2562.7857645452909,
-                    2466.8688867813166,
-                    362.47368576565020,
-                    8.5705382397315226,
-                    442.79516170615960,
-                    442.79516170615943,
-                ],
-            ]);
-            assert_check_vec_tol(&weights, &weights_should_be, tol);
-            assert_check_vec_tol(&scales.0, &scales_should_be.0, tol);
-            assert_check_vec_tol(&norms.0, &norms_should_be.0, tol);
+            let scales_norms_should_be = [
+                ScalesNorms::new(
+                    [
+                        -24.565913231874259,
+                        1.6484000000000030,
+                        0.93617250759124970,
+                        100.00000000000000,
+                        1.0000000000000009,
+                        1.0000000000000024,
+                    ],
+                    [
+                        134.06536084307373,
+                        4844.7587668888145,
+                        9309.4130587031723,
+                        34.773936788842335,
+                        9328.2692037197648,
+                        9328.2692037197430,
+                    ],
+                ),
+                ScalesNorms::new(
+                    [
+                        20.786695150765901,
+                        4.4896318499947325,
+                        -0.55979817802793441,
+                        -0.0000000000000000,
+                        -0.82419999999999971,
+                        1.9999999999999960,
+                    ],
+                    [
+                        143.86213251118596,
+                        621.16054365500952,
+                        875.10266687973365,
+                        858.12621321598749,
+                        831.55993800398949,
+                        736.72520029221721,
+                    ],
+                ),
+                ScalesNorms::new(
+                    [
+                        0.12111127236195365,
+                        0.22273541203632835,
+                        -2.4925416545559149,
+                        100.00000000000000,
+                        -1.9999999999999996,
+                        -2.0000000000000004,
+                    ],
+                    [
+                        2562.7857645452909,
+                        2466.8688867813166,
+                        362.47368576565020,
+                        8.5705382397315226,
+                        442.79516170615960,
+                        442.79516170615943,
+                    ],
+                ),
+            ];
+            util::assert_check_vec_tol(&weights, &weights_should_be, tol);
+            for (calc, should) in scales_norms.iter().zip(scales_norms_should_be.iter()) {
+                let scales = calc.scales();
+                let scales_should_be = should.scales();
+
+                let norms = calc.norms();
+                let norms_should_be = should.norms();
+                util::assert_check_slice_tol(scales, scales_should_be, tol);
+                util::assert_check_slice_tol(norms, norms_should_be, tol);
+            }
         }
     }
 
@@ -1143,8 +1121,8 @@ mod tests {
                 ),
             ];
 
-            assert_check_vec_data_tol(&initial_data, &initial_should_be, tol);
-            assert_check_vec_data_tol(&final_data, &final_should_be, tol);
+            util::assert_check_vec_data_tol(&initial_data, &initial_should_be, tol);
+            util::assert_check_vec_data_tol(&final_data, &final_should_be, tol);
         }
 
         {
@@ -1223,8 +1201,8 @@ mod tests {
                     ],
                 ),
             ];
-            assert_check_vec_data_tol(&initial_data, &initial_should_be, tol);
-            assert_check_vec_data_tol(&final_data, &final_should_be, tol);
+            util::assert_check_vec_data_tol(&initial_data, &initial_should_be, tol);
+            util::assert_check_vec_data_tol(&final_data, &final_should_be, tol);
         }
 
         {
@@ -1341,8 +1319,8 @@ mod tests {
                     ],
                 ),
             ];
-            assert_check_vec_data_tol(&initial_data, &initial_should_be, tol);
-            assert_check_vec_data_tol(&final_data, &final_should_be, tol);
+            util::assert_check_vec_data_tol(&initial_data, &initial_should_be, tol);
+            util::assert_check_vec_data_tol(&final_data, &final_should_be, tol);
         }
 
         {
@@ -1513,8 +1491,8 @@ mod tests {
                     ],
                 ),
             ];
-            assert_check_vec_data_tol(&initial_data, &initial_should_be, tol);
-            assert_check_vec_data_tol(&final_data, &final_should_be, tol);
+            util::assert_check_vec_data_tol(&initial_data, &initial_should_be, tol);
+            util::assert_check_vec_data_tol(&final_data, &final_should_be, tol);
         }
     }
 }

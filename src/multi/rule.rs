@@ -6,12 +6,12 @@ mod fully_symmetric_13_2d;
 use crate::multi::generator::Generator;
 use crate::multi::two_pow_n_f64;
 use crate::InitialisationError;
+use crate::ScalarF64;
 
 pub struct Rule<const NDIM: usize, const FINAL: usize, const TOTAL: usize> {
     initial_data: [Data<NDIM>; 3],
     final_data: [Data<NDIM>; FINAL],
-    scales: Scales<TOTAL>,
-    norms: Norms<TOTAL>,
+    scales_norms: [ScalesNorms<TOTAL>; 3],
     basic_error_coeff: BasicErrorCoeff,
     adaptive_error_coeff: AdaptiveErrorCoeff,
     evaluations: usize,
@@ -31,12 +31,8 @@ impl<const NDIM: usize, const FINAL: usize, const TOTAL: usize> Rule<NDIM, FINAL
         &self.final_data
     }
 
-    pub(crate) const fn scales(&self) -> &Scales<TOTAL> {
-        &self.scales
-    }
-
-    pub(crate) const fn norms(&self) -> &Norms<TOTAL> {
-        &self.norms
+    pub(crate) const fn scales_norms(&self) -> &[ScalesNorms<TOTAL>] {
+        &self.scales_norms
     }
 
     pub(crate) const fn basic_error_coeff(&self) -> &BasicErrorCoeff {
@@ -160,34 +156,61 @@ impl<const NDIM: usize> Data<NDIM> {
     }
 }
 
-pub(crate) struct Scales<const TOTAL: usize>(pub(crate) [[f64; TOTAL]; 3]);
-pub(crate) struct Norms<const TOTAL: usize>(pub(crate) [[f64; TOTAL]; 3]);
+pub(crate) struct ScalesNorms<const TOTAL: usize> {
+    scales: [f64; TOTAL],
+    norms: [f64; TOTAL],
+}
+
+impl<const TOTAL: usize> ScalesNorms<TOTAL> {
+    const fn new(scales: [f64; TOTAL], norms: [f64; TOTAL]) -> Self {
+        Self { scales, norms }
+    }
+
+    const fn scales(&self) -> &[f64] {
+        &self.scales
+    }
+
+    const fn norms(&self) -> &[f64] {
+        &self.norms
+    }
+
+    pub(crate) fn max_consecutive_null<T: ScalarF64>(&self, null1: T, null2: T) -> T {
+        let scales = self.scales();
+        let norms = self.norms();
+
+        scales
+            .iter()
+            .zip(norms)
+            .map(|(s, n)| (null1 * s + null2) * n)
+            .fold(T::zero(), |a, b| if a.abs() < b.abs() { b } else { a })
+    }
+}
 
 pub(crate) const fn scales_norms<const NDIM: usize, const TOTAL: usize>(
     weights: &[[f64; 5]; TOTAL],
     rule_points: [f64; TOTAL],
-) -> (Scales<TOTAL>, Norms<TOTAL>) {
+) -> [ScalesNorms<TOTAL>; 3] {
     let two_ndim = two_pow_n_f64(NDIM);
 
-    let mut scales = [[0f64; 3]; TOTAL];
-    let mut norms = [[0f64; 3]; TOTAL];
+    let mut scales = [[0f64; TOTAL]; 3];
+    let mut norms = [[0f64; TOTAL]; 3];
     let mut we = [0f64; 14];
 
     let mut i = 0;
     while i < TOTAL {
         let mut k = 0;
         while k < 3 {
-            scales[i][k] = if weights[i][k + 1] != 0.0 {
+            scales[k][i] = if weights[i][k + 1] != 0.0 {
                 -weights[i][k + 2] / weights[i][k + 1]
             } else {
                 100.0
             };
             let mut j = 0;
             while j < TOTAL {
-                we[j] = weights[j][k + 2] + scales[i][k] * weights[j][k + 1];
+                we[j] = weights[j][k + 2] + scales[k][i] * weights[j][k + 1];
                 j += 1;
             }
-            norms[i][k] = 0.0;
+            norms[k][i] = 0.0;
             let mut j = 0;
             while j < TOTAL {
                 // FIXME TODO remove this check when abs() is const in stable
@@ -197,31 +220,21 @@ pub(crate) const fn scales_norms<const NDIM: usize, const TOTAL: usize>(
                     we[j]
                 };
 
-                norms[i][k] += rule_points[j] * weabs;
+                norms[k][i] += rule_points[j] * weabs;
                 j += 1;
             }
-            norms[i][k] = two_ndim / norms[i][k];
+            norms[k][i] = two_ndim / norms[k][i];
 
             k += 1;
         }
         i += 1;
     }
 
-    let mut scales_swap = [[0f64; TOTAL]; 3];
-    let mut norms_swap = [[0f64; TOTAL]; 3];
+    let scales_norms0 = ScalesNorms::new(scales[0], norms[0]);
+    let scales_norms1 = ScalesNorms::new(scales[1], norms[1]);
+    let scales_norms2 = ScalesNorms::new(scales[2], norms[2]);
 
-    let mut i = 0;
-    while i < TOTAL {
-        let mut j = 0;
-        while j < 3 {
-            scales_swap[j][i] = scales[i][j];
-            norms_swap[j][i] = norms[i][j];
-            j += 1;
-        }
-        i += 1;
-    }
-
-    (Scales(scales_swap), Norms(norms_swap))
+    [scales_norms0, scales_norms1, scales_norms2]
 }
 
 pub(crate) struct BasicErrorCoeff {
@@ -274,6 +287,81 @@ impl AdaptiveErrorCoeff {
     #[inline]
     pub(crate) const fn c6(&self) -> f64 {
         self.c6
+    }
+}
+
+#[cfg(test)]
+mod util {
+    use super::*;
+
+    pub(crate) fn rel_or_abs_diff(a: f64, b: f64) -> f64 {
+        if a == 0.0 {
+            (a - b).abs()
+        } else {
+            (a - b).abs() / a.abs()
+        }
+    }
+
+    pub(crate) fn assert_check_vec_tol<const WL: usize, const TY: usize>(
+        calc: &[[f64; TY]; WL],
+        should_be: &[[f64; TY]; WL],
+        tol: f64,
+    ) {
+        for (x, y) in calc.iter().zip(should_be.iter()) {
+            for (a, b) in x.iter().zip(y.iter()) {
+                let val = rel_or_abs_diff(*a, *b);
+
+                assert!(val < tol);
+            }
+        }
+    }
+
+    pub(crate) fn assert_check_slice_tol(calc: &[f64], should_be: &[f64], tol: f64) {
+        for (x, y) in calc.iter().zip(should_be.iter()) {
+            let val = rel_or_abs_diff(*x, *y);
+
+            assert!(val < tol);
+        }
+    }
+
+    pub(crate) fn assert_check_vec_data_tol<const WL: usize, const TY: usize>(
+        calc: &[Data<TY>; WL],
+        should_be: &[Data<TY>; WL],
+        tol: f64,
+    ) {
+        for (x, y) in calc.iter().zip(should_be.iter()) {
+            let genx = x.generator().generator();
+            let geny = y.generator().generator();
+            for (gx, gy) in genx.iter().zip(geny.iter()) {
+                let val = rel_or_abs_diff(*gx, *gy);
+                assert!(val < tol);
+            }
+
+            let wx = x.weight();
+            let wy = y.weight();
+            let val = rel_or_abs_diff(wx, wy);
+            assert!(val < tol);
+
+            let n1x = x.null1();
+            let n1y = y.null1();
+            let val = rel_or_abs_diff(n1x, n1y);
+            assert!(val < tol);
+
+            let n2x = x.null2();
+            let n2y = y.null2();
+            let val = rel_or_abs_diff(n2x, n2y);
+            assert!(val < tol);
+
+            let n3x = x.null3();
+            let n3y = y.null3();
+            let val = rel_or_abs_diff(n3x, n3y);
+            assert!(val < tol);
+
+            let n4x = x.null4();
+            let n4y = y.null4();
+            let val = rel_or_abs_diff(n4x, n4y);
+            assert!(val < tol);
+        }
     }
 }
 

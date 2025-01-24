@@ -12,7 +12,7 @@ pub(crate) struct Region<T, const NDIM: usize> {
     pub(crate) error: f64,
     pub(crate) result: T,
     pub(crate) limits: [Limits; NDIM],
-    pub(crate) bisect_axis: usize,
+    pub(crate) bisection_axis: usize,
     pub(crate) evaluations: usize,
     pub(crate) volume: f64,
 }
@@ -21,7 +21,7 @@ impl<T: ScalarF64, const NDIM: usize> PartialEq for Region<T, NDIM> {
     fn eq(&self, other: &Self) -> bool {
         (self.result == other.result)
             && (self.error == other.error)
-            && (self.bisect_axis == other.bisect_axis)
+            && (self.bisection_axis == other.bisection_axis)
             && (self.evaluations == other.evaluations)
             && (self.limits == other.limits)
             && (self.volume == other.volume)
@@ -51,12 +51,12 @@ impl<T: ScalarF64, const NDIM: usize> Ord for Region<T, NDIM> {
 
 impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
     pub(crate) fn unevaluated() -> Self {
-        let zero = <T as Zero>::zero();
+        let zero = T::zero();
         Self {
             error: 0.0,
             result: zero,
             limits: [Limits::new(0.0, 0.0); NDIM],
-            bisect_axis: 0,
+            bisection_axis: 0,
             evaluations: 0,
             volume: 0.0,
         }
@@ -77,8 +77,8 @@ impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
         self
     }
 
-    pub(crate) fn with_bisect_axis(mut self, bisect_axis: usize) -> Self {
-        self.bisect_axis = bisect_axis;
+    pub(crate) fn with_bisection_axis(mut self, bisection_axis: usize) -> Self {
+        self.bisection_axis = bisection_axis;
         self
     }
 
@@ -104,8 +104,8 @@ impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
         &self.limits
     }
 
-    pub(crate) fn bisect_axis(&self) -> usize {
-        self.bisect_axis
+    pub(crate) fn bisection_axis(&self) -> usize {
+        self.bisection_axis
     }
 
     pub(crate) fn evaluations(&self) -> usize {
@@ -117,8 +117,8 @@ impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
     }
 
     pub(crate) fn total_cmp_interval_length(&self, other: &Self) -> Ordering {
-        let width = self.limits[self.bisect_axis].width().abs();
-        let other_width = other.limits[other.bisect_axis].width().abs();
+        let width = self.limits[self.bisection_axis].width().abs();
+        let other_width = other.limits[other.bisection_axis].width().abs();
         let inverse_length = 1.0 / width;
         let other_inverse_length = 1.0 / other_width;
         inverse_length.total_cmp(&other_inverse_length)
@@ -130,12 +130,13 @@ impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
         inverse_volume.total_cmp(&other_inverse_volume)
     }
 
+    #[allow(clippy::needless_borrow)]
     pub(crate) fn bisect<I: MultiDimensionalIntegrand<NDIM>, const J: usize, const K: usize>(
         &self,
         function: &I,
         rule: &Rule<NDIM, J, K>,
     ) -> [Region<I::Scalar, NDIM>; 2] {
-        let axis_to_bisect = self.bisect_axis;
+        let axis_to_bisect = self.bisection_axis;
         let previous_limits = self.limits();
 
         let [lower, upper] = previous_limits[axis_to_bisect].bisect();
