@@ -102,28 +102,31 @@ pub trait ScalarF64:
     + fmt::Debug
     + sealed::Sealed
 {
+    /// Numerical integration routines require the scalar type to have a sensible definition of a
+    /// maximum value. For [`f64`] this is just [`f64::MAX`]. For [`Complex<f64>`] this is chosen
+    /// as `Complex(f64::MAX / 2f64.sqrt(), f64::MAX / 2f64.sqrt())`.
+    fn max_value() -> Self;
 }
 
-impl ScalarF64 for f64 {}
-impl ScalarF64 for Complex<f64> {}
+impl ScalarF64 for f64 {
+    fn max_value() -> Self {
+        f64::MAX
+    }
+}
+
+impl ScalarF64 for Complex<f64> {
+    fn max_value() -> Self {
+        Complex::new(f64::MAX / 2f64.sqrt(), f64::MAX / 2f64.sqrt())
+    }
+}
 
 pub(crate) mod sealed {
-    use super::Complex;
-    pub trait Sealed {
-        fn max_value() -> Self;
-    }
+    use num_complex::Complex;
 
-    impl Sealed for f64 {
-        fn max_value() -> Self {
-            f64::MAX
-        }
-    }
+    pub trait Sealed {}
 
-    impl Sealed for Complex<f64> {
-        fn max_value() -> Self {
-            Complex::new(f64::MAX / 2f64.sqrt(), f64::MAX / 2f64.sqrt())
-        }
-    }
+    impl Sealed for f64 {}
+    impl Sealed for Complex<f64> {}
 }
 
 /// User selected tolerance type.

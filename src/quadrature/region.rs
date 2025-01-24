@@ -47,7 +47,7 @@ impl<T: ScalarF64> Ord for Region<T> {
 
 impl<T: ScalarF64> Region<T> {
     pub(crate) fn unevaluated() -> Self {
-        let result = <T as Zero>::zero();
+        let result = T::zero();
 
         Self {
             error: 0.0,

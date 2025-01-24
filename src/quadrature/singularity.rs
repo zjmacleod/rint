@@ -643,7 +643,7 @@ impl<T: ScalarF64> Workspace<T> {
     }
 
     fn sum_results(&self) -> T {
-        let initial = <T as Zero>::zero();
+        let initial = T::zero();
         let store = self.store.iter().fold(initial, |a, v| a + v.result());
         let heap = self.heap.iter().fold(initial, |a, v| a + v.result());
         store + heap
@@ -736,7 +736,7 @@ impl<T: ScalarF64> Workspace<T> {
                 self.set_error_kind(IntegrationErrorKind::DoesNotConverge);
             }
 
-            let zero = <T as Zero>::zero();
+            let zero = T::zero();
 
             if self.table.result != zero && self.result != zero {
                 if self.table.error / self.table.result.abs() > self.error / self.result.abs() {
@@ -863,7 +863,7 @@ enum Cached<T> {
 
 impl<T: ScalarF64> ExtrapolationTable<T> {
     fn new() -> Self {
-        let zero = <T as Zero>::zero();
+        let zero = T::zero();
         let count = 0;
         let results = [zero; 52];
         let cached: Cached<T> = Cached::Empty;
@@ -946,7 +946,7 @@ impl<T: ScalarF64> ExtrapolationTable<T> {
         }
 
         self.results[n_current + 2] = self.results[n_current];
-        self.results[n_current] = <T as Sealed>::max_value();
+        self.results[n_current] = T::max_value();
 
         for i in 0..new_element {
             let mut res = self.results[n_current - 2 * i + 2];

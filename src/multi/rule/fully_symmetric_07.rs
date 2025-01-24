@@ -75,6 +75,7 @@ const fn rule_points<const NDIM: usize>() -> [f64; TOTAL] {
 }
 
 const fn initial_weights_1<const NDIM: usize>() -> [f64; TOTAL] {
+    let ndim = NDIM as f64;
     let two_ndim = two_pow_n_f64(NDIM);
 
     let f1 = 1f64 / ((3f64 * LAMBDA0_SQ) * (3f64 * LAMBDA0_SQ) * (3f64 * LAMBDA0_SQ)) / two_ndim;
@@ -88,7 +89,7 @@ const fn initial_weights_1<const NDIM: usize>() -> [f64; TOTAL] {
         - (5f64 * LAMBDA2_SQ / 3f64)
         - 5f64 * two_ndim * f1 * LAMBDA0_SQ * (LAMBDA0_SQ - LAMBDA2_SQ))
         / (10f64 * LAMBDA1_SQ * (LAMBDA1_SQ - LAMBDA2_SQ))
-        - 2f64 * ((NDIM - 1) as f64) * e1;
+        - 2f64 * (ndim - 1.0) * e1;
 
     let b1 = (1f64
         - (5f64 * LAMBDA1_SQ / 3f64)
@@ -101,6 +102,7 @@ const fn initial_weights_1<const NDIM: usize>() -> [f64; TOTAL] {
 }
 
 const fn initial_weights_2<const NDIM: usize>() -> [f64; TOTAL] {
+    let ndim = NDIM as f64;
     let two_ndim = two_pow_n_f64(NDIM);
 
     let f2 = 1f64 / (36f64 * LAMBDA0_SQ * LAMBDA0_SQ * LAMBDA0_SQ) / two_ndim;
@@ -114,7 +116,7 @@ const fn initial_weights_2<const NDIM: usize>() -> [f64; TOTAL] {
         - (5f64 * LAMBDA2_SQ / 3f64)
         - 5f64 * two_ndim * f2 * LAMBDA0_SQ * (LAMBDA0_SQ - LAMBDA2_SQ))
         / (10f64 * LAMBDA1_SQ * (LAMBDA1_SQ - LAMBDA2_SQ))
-        - 2f64 * ((NDIM - 1) as f64) * e2;
+        - 2f64 * (ndim - 1.0) * e2;
 
     let b2 = (1f64
         - (5f64 * LAMBDA1_SQ / 3f64)
@@ -127,6 +129,7 @@ const fn initial_weights_2<const NDIM: usize>() -> [f64; TOTAL] {
 }
 
 const fn initial_weights_3<const NDIM: usize>() -> [f64; TOTAL] {
+    let ndim = NDIM as f64;
     let two_ndim = two_pow_n_f64(NDIM);
 
     let f3 = 5f64 / (108f64 * LAMBDA0_SQ * LAMBDA0_SQ * LAMBDA0_SQ) / two_ndim;
@@ -143,7 +146,7 @@ const fn initial_weights_3<const NDIM: usize>() -> [f64; TOTAL] {
         - (5f64 * LAMBDAP_SQ / 3f64)
         - 5f64 * two_ndim * f3 * LAMBDA0_SQ * (LAMBDA0_SQ - LAMBDAP_SQ))
         / (10f64 * LAMBDA1_SQ * (LAMBDA1_SQ - LAMBDAP_SQ))
-        - 2f64 * ((NDIM - 1) as f64) * e3;
+        - 2f64 * (ndim - 1.0) * e3;
 
     let b3 = 0f64;
 
@@ -153,6 +156,7 @@ const fn initial_weights_3<const NDIM: usize>() -> [f64; TOTAL] {
 }
 
 const fn initial_weights_4<const NDIM: usize>() -> [f64; TOTAL] {
+    let ndim = NDIM as f64;
     let two_ndim = two_pow_n_f64(NDIM);
 
     let f4 = 1f64 / (54f64 * LAMBDA0_SQ * LAMBDA0_SQ * LAMBDA0_SQ) / two_ndim;
@@ -166,7 +170,7 @@ const fn initial_weights_4<const NDIM: usize>() -> [f64; TOTAL] {
         - (10f64 * LAMBDA2_SQ / 3f64)
         - 10f64 * two_ndim * f4 * LAMBDA0_SQ * (LAMBDA0_SQ - LAMBDA2_SQ))
         / (20f64 * LAMBDA1_SQ * (LAMBDA1_SQ - LAMBDA2_SQ))
-        - 2f64 * ((NDIM - 1) as f64) * e4;
+        - 2f64 * (ndim - 1.0) * e4;
 
     let b4 = (1f64
         - (10f64 * LAMBDA1_SQ / 3f64)

@@ -43,7 +43,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
 
 impl<T: ScalarF64> IntegralEstimate<T> {
     pub(crate) fn new() -> Self {
-        let result = <T as Zero>::zero();
+        let result = T::zero();
         Self {
             result,
             error: 0.0,
