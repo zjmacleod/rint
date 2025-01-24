@@ -1,16 +1,55 @@
-use crate::Limits;
-use crate::ScalarF64;
 use num_traits::Zero;
+use std::cmp::Ordering;
 
-pub(crate) struct Region<const NDIM: usize, T> {
+use crate::multi::Integrator;
+use crate::multi::Rule;
+use crate::Limits;
+use crate::MultiDimensionalIntegrand;
+use crate::ScalarF64;
+
+#[derive(Debug)]
+pub(crate) struct Region<T, const NDIM: usize> {
     pub(crate) error: f64,
     pub(crate) result: T,
     pub(crate) limits: [Limits; NDIM],
     pub(crate) bisect_axis: usize,
     pub(crate) function_evaluations: usize,
+    pub(crate) volume: f64,
 }
 
-impl<const NDIM: usize, T: ScalarF64> Region<NDIM, T> {
+impl<T: ScalarF64, const NDIM: usize> PartialEq for Region<T, NDIM> {
+    fn eq(&self, other: &Self) -> bool {
+        (self.result == other.result)
+            && (self.error == other.error)
+            && (self.bisect_axis == other.bisect_axis)
+            && (self.function_evaluations == other.function_evaluations)
+            && (self.limits == other.limits)
+            && (self.volume == other.volume)
+    }
+}
+
+impl<T: ScalarF64, const NDIM: usize> Eq for Region<T, NDIM> {}
+
+impl<T: ScalarF64, const NDIM: usize> PartialOrd for Region<T, NDIM> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl<T: ScalarF64, const NDIM: usize> Ord for Region<T, NDIM> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let mut ordering = self.total_cmp_error(other);
+        if let Ordering::Equal = ordering {
+            ordering = self.total_cmp_interval_length(other);
+        }
+        if let Ordering::Equal = ordering {
+            ordering = self.total_cmp_volume(other);
+        }
+        ordering
+    }
+}
+
+impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
     pub(crate) fn unevaluated() -> Self {
         let zero = <T as Zero>::zero();
         Self {
@@ -19,6 +58,7 @@ impl<const NDIM: usize, T: ScalarF64> Region<NDIM, T> {
             limits: [Limits::new(0.0, 0.0); NDIM],
             bisect_axis: 0,
             function_evaluations: 0,
+            volume: 0.0,
         }
     }
 
@@ -47,6 +87,11 @@ impl<const NDIM: usize, T: ScalarF64> Region<NDIM, T> {
         self
     }
 
+    pub(crate) fn with_volume(mut self, volume: f64) -> Self {
+        self.volume = volume;
+        self
+    }
+
     pub(crate) fn error(&self) -> f64 {
         self.error
     }
@@ -66,30 +111,44 @@ impl<const NDIM: usize, T: ScalarF64> Region<NDIM, T> {
     pub(crate) fn function_evaluations(&self) -> usize {
         self.function_evaluations
     }
-}
 
-//impl<const NDIM: usize, T: ScalarF64> Region<NDIM, T> {
-//
-//    pub(crate) fn bisect<I: MultiDimensionalIntegrand<NDIM>>(
-//        &self,
-//        function: &I,
-//    ) -> [Region<NDIM, I::Scalar>; 2] {
-//        let axis_to_bisect = self.bisect_axis;
-//        let previous_limits = self.limits();
-//
-//        let [lower, upper] = previous_limits[axis_to_bisect].bisect();
-//
-//        let mut lower_limits = *previous_limits;
-//        lower_limits[axis_to_bisect] = lower;
-//
-//        let mut upper_limits = *previous_limits;
-//        upper_limits[axis_to_bisect] = upper;
-//
-//        let lower_integral =
-//            MultiDimensionalBasic::new_unchecked(lower_limits, function).integrate_internal();
-//        let upper_integral =
-//            MultiDimensionalBasic::new_unchecked(upper_limits, function).integrate_internal();
-//
-//        [lower_integral, upper_integral]
-//    }
-//}
+    pub(crate) fn total_cmp_error(&self, other: &Self) -> Ordering {
+        self.error.total_cmp(&other.error)
+    }
+
+    pub(crate) fn total_cmp_interval_length(&self, other: &Self) -> Ordering {
+        let width = self.limits[self.bisect_axis].width().abs();
+        let other_width = other.limits[other.bisect_axis].width().abs();
+        let inverse_length = 1.0 / width;
+        let other_inverse_length = 1.0 / other_width;
+        inverse_length.total_cmp(&other_inverse_length)
+    }
+
+    pub(crate) fn total_cmp_volume(&self, other: &Self) -> Ordering {
+        let inverse_volume = 1.0 / self.volume.abs();
+        let other_inverse_volume = 1.0 / other.volume.abs();
+        inverse_volume.total_cmp(&other_inverse_volume)
+    }
+
+    pub(crate) fn bisect<I: MultiDimensionalIntegrand<NDIM>, const J: usize, const K: usize>(
+        &self,
+        function: &I,
+        rule: &Rule<NDIM, J, K>,
+    ) -> [Region<I::Scalar, NDIM>; 2] {
+        let axis_to_bisect = self.bisect_axis;
+        let previous_limits = self.limits();
+
+        let [lower, upper] = previous_limits[axis_to_bisect].bisect();
+
+        let mut lower_limits = *previous_limits;
+        lower_limits[axis_to_bisect] = lower;
+
+        let mut upper_limits = *previous_limits;
+        upper_limits[axis_to_bisect] = upper;
+
+        let lower_integral = Integrator::new(&function, &rule, lower_limits).integrate();
+        let upper_integral = Integrator::new(&function, &rule, upper_limits).integrate();
+
+        [lower_integral, upper_integral]
+    }
+}

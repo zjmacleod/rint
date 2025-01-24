@@ -38,7 +38,7 @@ where
         Geometry::new(&self.limits)
     }
 
-    pub(crate) fn integrate(&self) -> Region<NDIM, I::Scalar> {
+    pub(crate) fn integrate(&self) -> Region<I::Scalar, NDIM> {
         let evaluations = self.rule.evaluations();
         let basic_error_coeff = self.rule.basic_error_coeff();
         let ratio = self.rule.ratio();
@@ -193,6 +193,7 @@ where
             .with_limits(self.limits)
             .with_function_evaluations(evaluations)
             .with_bisect_axis(bisection_index)
+            .with_volume(volume)
     }
 }
 
