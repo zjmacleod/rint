@@ -43,7 +43,7 @@ fn adaptive_gauss_kronrod_terminates_due_to_roundoff_error_31_point() -> Result<
             let result = estimate.result();
             let error = estimate.error();
             let iterations = estimate.iterations();
-            let evaluations = estimate.function_evaluations();
+            let evaluations = estimate.evaluations();
 
             util::test_relative_error(
                 result,
@@ -102,7 +102,7 @@ fn adaptive_gauss_kronrod_terminates_due_to_roundoff_error_31_point() -> Result<
             let result = estimate.result();
             let error = estimate.error();
             let iterations = estimate.iterations();
-            let evaluations = estimate.function_evaluations();
+            let evaluations = estimate.evaluations();
 
             util::test_relative_error(
                 result,
@@ -174,7 +174,7 @@ fn adaptive_gauss_kronrod_terminates_due_to_max_iterations_reached_61_point() ->
         let result = estimate.result();
         let error = estimate.error();
         let iterations = estimate.iterations();
-        let evaluations = estimate.function_evaluations();
+        let evaluations = estimate.evaluations();
 
         if let IntegrationErrorKind::MaximumIterationsReached(iter) = err.kind() {
             util::test_relative_error(
@@ -232,7 +232,7 @@ fn adaptive_gauss_kronrod_terminates_due_to_max_iterations_reached_61_point() ->
         let result = estimate.result();
         let error = estimate.error();
         let iterations = estimate.iterations();
-        let evaluations = estimate.function_evaluations();
+        let evaluations = estimate.evaluations();
 
         if let IntegrationErrorKind::MaximumIterationsReached(iter) = err.kind() {
             util::test_relative_error(
@@ -310,7 +310,7 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
         if let IntegrationErrorKind::BadIntegrandBehaviour(limits) = err.kind() {
             let estimate = err.estimate();
             let iterations = estimate.iterations();
-            let evaluations = estimate.function_evaluations();
+            let evaluations = estimate.evaluations();
 
             assert!(limits.lower() < -0.1f64);
             assert!(limits.upper() > -0.1f64);
@@ -354,7 +354,7 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
         if let IntegrationErrorKind::BadIntegrandBehaviour(limits) = err.kind() {
             let estimate = err.estimate();
             let iterations = estimate.iterations();
-            let evaluations = estimate.function_evaluations();
+            let evaluations = estimate.evaluations();
 
             assert!(limits.lower() > -0.1f64);
             assert!(limits.upper() < -0.1f64);

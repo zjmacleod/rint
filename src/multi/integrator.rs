@@ -191,7 +191,7 @@ where
             .with_error(error)
             .with_result(result)
             .with_limits(self.limits)
-            .with_function_evaluations(evaluations)
+            .with_evaluations(evaluations)
             .with_bisect_axis(bisection_index)
             .with_volume(volume)
     }

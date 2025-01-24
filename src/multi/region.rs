@@ -13,7 +13,7 @@ pub(crate) struct Region<T, const NDIM: usize> {
     pub(crate) result: T,
     pub(crate) limits: [Limits; NDIM],
     pub(crate) bisect_axis: usize,
-    pub(crate) function_evaluations: usize,
+    pub(crate) evaluations: usize,
     pub(crate) volume: f64,
 }
 
@@ -22,7 +22,7 @@ impl<T: ScalarF64, const NDIM: usize> PartialEq for Region<T, NDIM> {
         (self.result == other.result)
             && (self.error == other.error)
             && (self.bisect_axis == other.bisect_axis)
-            && (self.function_evaluations == other.function_evaluations)
+            && (self.evaluations == other.evaluations)
             && (self.limits == other.limits)
             && (self.volume == other.volume)
     }
@@ -57,7 +57,7 @@ impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
             result: zero,
             limits: [Limits::new(0.0, 0.0); NDIM],
             bisect_axis: 0,
-            function_evaluations: 0,
+            evaluations: 0,
             volume: 0.0,
         }
     }
@@ -82,8 +82,8 @@ impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
         self
     }
 
-    pub(crate) fn with_function_evaluations(mut self, function_evaluations: usize) -> Self {
-        self.function_evaluations = function_evaluations;
+    pub(crate) fn with_evaluations(mut self, evaluations: usize) -> Self {
+        self.evaluations = evaluations;
         self
     }
 
@@ -108,8 +108,8 @@ impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
         self.bisect_axis
     }
 
-    pub(crate) fn function_evaluations(&self) -> usize {
-        self.function_evaluations
+    pub(crate) fn evaluations(&self) -> usize {
+        self.evaluations
     }
 
     pub(crate) fn total_cmp_error(&self, other: &Self) -> Ordering {

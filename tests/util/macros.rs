@@ -186,7 +186,7 @@ macro_rules! adaptive_test_passing {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -223,7 +223,7 @@ macro_rules! adaptive_test_passing {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -292,7 +292,7 @@ macro_rules! adaptive_test_passing {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -329,7 +329,7 @@ macro_rules! adaptive_test_passing {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -401,7 +401,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -438,7 +438,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -506,7 +506,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -543,7 +543,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -609,7 +609,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -675,7 +675,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -741,7 +741,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -807,7 +807,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -868,7 +868,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -929,7 +929,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -995,7 +995,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -1032,7 +1032,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -1098,7 +1098,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -1135,7 +1135,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -1199,7 +1199,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -1263,7 +1263,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -1327,7 +1327,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -1391,7 +1391,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -1450,7 +1450,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,
@@ -1509,7 +1509,7 @@ macro_rules! singularity_test {
             let result = integral_result.result();
             let error = integral_result.error();
             let iterations = integral_result.iterations();
-            let evaluations = integral_result.function_evaluations();
+            let evaluations = integral_result.evaluations();
 
             util::test_relative_error(
                 result,

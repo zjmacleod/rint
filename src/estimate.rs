@@ -11,7 +11,7 @@ pub struct IntegralEstimate<T> {
     result: T,
     error: f64,
     iterations: usize,
-    function_evaluations: usize,
+    evaluations: usize,
 }
 
 /// # Getters
@@ -36,8 +36,8 @@ impl<T: ScalarF64> IntegralEstimate<T> {
 
     /// Return the number of function evaluations used in the integration.
     #[must_use]
-    pub const fn function_evaluations(&self) -> usize {
-        self.function_evaluations
+    pub const fn evaluations(&self) -> usize {
+        self.evaluations
     }
 }
 
@@ -48,7 +48,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
             result,
             error: 0.0,
             iterations: 0,
-            function_evaluations: 0,
+            evaluations: 0,
         }
     }
 
@@ -67,8 +67,8 @@ impl<T: ScalarF64> IntegralEstimate<T> {
         self
     }
 
-    pub(crate) fn with_function_evaluations(mut self, function_evaluations: usize) -> Self {
-        self.function_evaluations = function_evaluations;
+    pub(crate) fn with_evaluations(mut self, evaluations: usize) -> Self {
+        self.evaluations = evaluations;
         self
     }
 }

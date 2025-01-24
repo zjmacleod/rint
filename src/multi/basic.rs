@@ -48,7 +48,7 @@ where
             .with_result(integral.result())
             .with_error(integral.error())
             .with_iterations(1)
-            .with_function_evaluations(self.rule.evaluations())
+            .with_evaluations(self.rule.evaluations())
     }
 
     const fn integrator(&self) -> Integrator<'_, I, NDIM, FINAL, TOTAL> {

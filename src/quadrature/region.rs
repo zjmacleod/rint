@@ -140,18 +140,14 @@ impl<T: ScalarF64> Region<T> {
         self.limits.width().abs()
     }
 
-    pub(crate) fn estimate(
-        &self,
-        iterations: usize,
-        function_evaluations: usize,
-    ) -> IntegralEstimate<T> {
+    pub(crate) fn estimate(&self, iterations: usize, evaluations: usize) -> IntegralEstimate<T> {
         let result = self.result();
         let error = self.error();
         IntegralEstimate::new()
             .with_result(result)
             .with_error(error)
             .with_iterations(iterations)
-            .with_function_evaluations(function_evaluations)
+            .with_evaluations(evaluations)
     }
 }
 

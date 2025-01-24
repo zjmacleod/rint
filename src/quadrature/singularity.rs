@@ -90,13 +90,13 @@ use crate::{
 /// let result = integral_result.result();
 /// let error = integral_result.error();
 /// let iterations = integral_result.iterations();
-/// let function_evaluations = integral_result.function_evaluations();
+/// let evaluations = integral_result.evaluations();
 ///
 /// let tol = 1.0e-9;
 /// assert!((exp_result - result).abs() / exp_result.abs() < tol);
 /// assert!((exp_error - error).abs() / exp_error.abs() < tol);
 /// assert_eq!(iterations, 10);
-/// assert_eq!(function_evaluations, 2*15*(2*iterations - 1));
+/// assert_eq!(evaluations, 2*15*(2*iterations - 1));
 ///```
 pub struct AdaptiveSingularity<I> {
     function: I,
@@ -362,8 +362,7 @@ where
         let positive_integrand = initial.positivity();
         let roundoff_count = 0;
         let roundoff_on_high_iteration_count = 0;
-        let function_evaluations_per_integration =
-            self.rule.evaluations() * self.evaluations_multiplier;
+        let evaluations_per_integration = self.rule.evaluations() * self.evaluations_multiplier;
 
         heap.push(initial);
 
@@ -382,7 +381,7 @@ where
             positive_integrand,
             roundoff_count,
             roundoff_on_high_iteration_count,
-            function_evaluations_per_integration,
+            evaluations_per_integration,
         }
     }
 }
@@ -612,7 +611,7 @@ struct Workspace<T> {
     positive_integrand: bool,
     roundoff_count: usize,
     roundoff_on_high_iteration_count: usize,
-    function_evaluations_per_integration: usize,
+    evaluations_per_integration: usize,
 }
 
 impl<T: ScalarF64> Workspace<T> {
@@ -687,12 +686,12 @@ impl<T: ScalarF64> Workspace<T> {
         let result = self.sum_results();
         let error = self.error;
         let iterations = self.iteration;
-        let function_evaluations = (2 * iterations - 1) * self.function_evaluations_per_integration;
+        let evaluations = (2 * iterations - 1) * self.evaluations_per_integration;
         IntegralEstimate::new()
             .with_result(result)
             .with_error(error)
             .with_iterations(iterations)
-            .with_function_evaluations(function_evaluations)
+            .with_evaluations(evaluations)
     }
 
     fn prepare_next_iteration(&mut self) {
@@ -713,11 +712,8 @@ impl<T: ScalarF64> Workspace<T> {
     }
 
     fn compute_extrapolated_result(self) -> Result<IntegralEstimate<T>, IntegrationError<T>> {
-        let function_evaluations =
-            (2 * self.iteration - 1) * self.function_evaluations_per_integration;
-        let output = self
-            .table
-            .integral_estimate(self.iteration, function_evaluations);
+        let evaluations = (2 * self.iteration - 1) * self.evaluations_per_integration;
+        let output = self.table.integral_estimate(self.iteration, evaluations);
 
         if let Some(kind) = self.error_kind {
             Err(IntegrationError::new(output, kind))
@@ -1062,18 +1058,14 @@ impl<T: ScalarF64> ExtrapolationTable<T> {
         self
     }
 
-    fn integral_estimate(
-        &self,
-        iterations: usize,
-        function_evaluations: usize,
-    ) -> IntegralEstimate<T> {
+    fn integral_estimate(&self, iterations: usize, evaluations: usize) -> IntegralEstimate<T> {
         let result = self.result;
         let error = self.error;
         IntegralEstimate::new()
             .with_result(result)
             .with_error(error)
             .with_iterations(iterations)
-            .with_function_evaluations(function_evaluations)
+            .with_evaluations(evaluations)
     }
 }
 
