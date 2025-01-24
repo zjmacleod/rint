@@ -1,6 +1,7 @@
-use num_complex::ComplexFloat;
 use num_traits::Zero;
 use std::collections::binary_heap::BinaryHeap;
+
+use crate::ScalarF64;
 
 use crate::quadrature::{subinterval_too_small, IntegralEstimate, Integrator, Region, Rule};
 use crate::{
@@ -253,7 +254,7 @@ where
 }
 
 impl<I: Integrand> Adaptive<I> {
-    fn initialise_workspace(&self, initial: Region<I::Scalar>) -> Workspace<I> {
+    fn initialise_workspace(&self, initial: Region<I::Scalar>) -> Workspace<I::Scalar> {
         let mut heap = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
 
         let iteration = 1;
@@ -312,10 +313,10 @@ impl<I: Integrand> Adaptive<I> {
     }
 }
 
-struct Workspace<I: Integrand> {
-    heap: BinaryHeap<Region<I::Scalar>>,
+struct Workspace<T> {
+    heap: BinaryHeap<Region<T>>,
     iteration: usize,
-    result: I::Scalar,
+    result: T,
     error: f64,
     limits: Limits,
     roundoff_count: usize,
@@ -323,8 +324,8 @@ struct Workspace<I: Integrand> {
     function_evaluations_per_integration: usize,
 }
 
-impl<I: Integrand> Workspace<I> {
-    fn retrieve_largest_error(&mut self) -> Result<Region<I::Scalar>, IntegrationError<I::Scalar>> {
+impl<T: ScalarF64> Workspace<T> {
+    fn retrieve_largest_error(&mut self) -> Result<Region<T>, IntegrationError<T>> {
         self.iteration += 1;
         if let Some(previous) = self.pop() {
             self.limits = previous.limits();
@@ -336,20 +337,20 @@ impl<I: Integrand> Workspace<I> {
         }
     }
 
-    fn pop(&mut self) -> Option<Region<I::Scalar>> {
+    fn pop(&mut self) -> Option<Region<T>> {
         self.heap.pop()
     }
 
-    fn push(&mut self, integral: Region<I::Scalar>) {
+    fn push(&mut self, integral: Region<T>) {
         self.heap.push(integral);
     }
 
     fn improved_result_error(
         &mut self,
-        previous: &Region<I::Scalar>,
-        lower: &Region<I::Scalar>,
-        upper: &Region<I::Scalar>,
-    ) -> (I::Scalar, f64) {
+        previous: &Region<T>,
+        lower: &Region<T>,
+        upper: &Region<T>,
+    ) -> (T, f64) {
         let prev_result = previous.result();
         let prev_error = previous.error();
         let new_result = lower.result() + upper.result();
@@ -376,7 +377,7 @@ impl<I: Integrand> Workspace<I> {
         (result, error)
     }
 
-    fn check_roundoff(&self) -> Result<(), IntegrationError<I::Scalar>> {
+    fn check_roundoff(&self) -> Result<(), IntegrationError<T>> {
         if self.roundoff_count >= 6 || self.roundoff_on_high_iteration_count >= 20 {
             let output = self.integral_estimate();
             let kind = IntegrationErrorKind::RoundoffErrorDetected;
@@ -385,7 +386,7 @@ impl<I: Integrand> Workspace<I> {
         Ok(())
     }
 
-    fn check_singularity(&self) -> Result<(), IntegrationError<I::Scalar>> {
+    fn check_singularity(&self) -> Result<(), IntegrationError<T>> {
         let limits = self.limits;
         if subinterval_too_small(limits) {
             let output = self.integral_estimate();
@@ -396,13 +397,13 @@ impl<I: Integrand> Workspace<I> {
         }
     }
 
-    fn sum_results(&self) -> I::Scalar {
+    fn sum_results(&self) -> T {
         self.heap
             .iter()
-            .fold(<I::Scalar as Zero>::zero(), |a, v| a + v.result())
+            .fold(<T as Zero>::zero(), |a, v| a + v.result())
     }
 
-    fn integral_estimate(&self) -> IntegralEstimate<I::Scalar> {
+    fn integral_estimate(&self) -> IntegralEstimate<T> {
         let result = self.sum_results();
         let error = self.error;
         let iterations = self.iteration;
