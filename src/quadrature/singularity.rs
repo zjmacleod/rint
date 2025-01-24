@@ -3,7 +3,7 @@ use std::collections::binary_heap::BinaryHeap;
 
 use crate::quadrature::{subinterval_too_small, Integrator, Region, Rule};
 use crate::{
-    sealed::Max, InitialisationError, IntegralEstimate, Integrand, IntegrationError,
+    sealed::Sealed, InitialisationError, IntegralEstimate, Integrand, IntegrationError,
     IntegrationErrorKind, Limits, ScalarF64, Tolerance,
 };
 
@@ -946,7 +946,7 @@ impl<T: ScalarF64> ExtrapolationTable<T> {
         }
 
         self.results[n_current + 2] = self.results[n_current];
-        self.results[n_current] = <T as Max>::max_value();
+        self.results[n_current] = <T as Sealed>::max_value();
 
         for i in 0..new_element {
             let mut res = self.results[n_current - 2 * i + 2];

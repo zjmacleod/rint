@@ -1,3 +1,4 @@
+mod adaptive;
 mod basic;
 mod generator;
 mod geometry;
@@ -5,9 +6,10 @@ mod integrator;
 mod region;
 pub(crate) mod rule;
 
-pub(crate) use integrator::Integrator;
-//pub(crate) use region::Region;
+pub use adaptive::Adaptive;
 pub use basic::Basic;
+pub(crate) use integrator::Integrator;
+pub(crate) use region::Region;
 pub use rule::{Rule, Rule07, Rule09, Rule11, Rule13};
 
 #[inline]

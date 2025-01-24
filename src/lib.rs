@@ -5,6 +5,7 @@
 //!
 #![deny(clippy::pedantic)]
 #![allow(
+    unused,
     clippy::excessive_precision,
     clippy::module_name_repetitions,
     clippy::doc_lazy_continuation,
@@ -94,11 +95,16 @@ pub trait ScalarF64:
     + Copy
     + ops::Mul<f64, Output = Self>
     + ops::Div<f64, Output = Self>
+    + for<'a> ops::Mul<&'a f64, Output = Self>
+    + for<'a> ops::Div<&'a f64, Output = Self>
     + ops::AddAssign<Self>
     + ops::Add<Self>
     + ops::Sub<Self>
+    + for<'a> ops::AddAssign<&'a Self>
+    + for<'a> ops::Add<&'a Self, Output = Self>
+    + for<'a> ops::Sub<&'a Self, Output = Self>
+    + fmt::Display
     + fmt::Debug
-    + sealed::Max
     + sealed::Sealed
 {
 }
@@ -108,22 +114,17 @@ impl ScalarF64 for Complex<f64> {}
 
 pub(crate) mod sealed {
     use super::Complex;
-    pub trait Sealed {}
-
-    impl Sealed for f64 {}
-    impl Sealed for Complex<f64> {}
-
-    pub trait Max {
+    pub trait Sealed {
         fn max_value() -> Self;
     }
 
-    impl Max for f64 {
+    impl Sealed for f64 {
         fn max_value() -> Self {
             f64::MAX
         }
     }
 
-    impl Max for Complex<f64> {
+    impl Sealed for Complex<f64> {
         fn max_value() -> Self {
             Complex::new(f64::MAX / 2f64.sqrt(), f64::MAX / 2f64.sqrt())
         }
@@ -404,14 +405,14 @@ impl<T: ScalarF64> fmt::Display for IntegrationError<T> {
             IntegrationErrorKind::MaximumIterationsReached(i) => {
                 write!(
                     f,
-                    "Maximum number of iterations/subdivisions  ({i}) reached. Try increasing max_iterations. If this yields no improvement it is advised to analyse the integrand to determine integration difficulties. If the position of a local difficulty can be determined, one may gain from splitting the total integration interval and calling the integrator on each sub-interval.\nresult:\t{result:?}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                    "Maximum number of iterations/subdivisions  ({i}) reached. Try increasing max_iterations. If this yields no improvement it is advised to analyse the integrand to determine integration difficulties. If the position of a local difficulty can be determined, one may gain from splitting the total integration interval and calling the integrator on each sub-interval.\nresult:\t{result}\nerror\t{error:.10e}\niterations:\t{iterations}."
                 )
             }
 
             IntegrationErrorKind::RoundoffErrorDetected => {
                 write!(
                     f,
-                    "Roundoff error detected. This prevents the requested tolerance from being achieved and the returned error may be under-estimated.\nresult:\t{result:?}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                    "Roundoff error detected. This prevents the requested tolerance from being achieved and the returned error may be under-estimated.\nresult:\t{result}\nerror\t{error:.10e}\niterations:\t{iterations}."
                 )
             }
 
@@ -420,21 +421,21 @@ impl<T: ScalarF64> fmt::Display for IntegrationError<T> {
                 let upper = limits.upper();
                 write!(
                     f,
-                    "Extremely bad integrand behaviour. Possible non-integrable singularity, divergence, or discontinuity detected between ({lower},{upper}).\nresult:\t{result:?}\nerror\t{error:.10e}\niterations:\t{iterations}.\nTry reducing the requested tolerance."
+                    "Extremely bad integrand behaviour. Possible non-integrable singularity, divergence, or discontinuity detected between ({lower},{upper}).\nresult:\t{result}\nerror\t{error:.10e}\niterations:\t{iterations}.\nTry reducing the requested tolerance."
                 )
             }
 
             IntegrationErrorKind::DoesNotConverge => {
                 write!(
                     f,
-                    "The algorithm does not converge. Roundoff error is detected in the extrapolation table. It is assumed that the requested tolerance cannot be achieved and the returned result is the best which can be obtained.\nresult:\t{result:?}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                    "The algorithm does not converge. Roundoff error is detected in the extrapolation table. It is assumed that the requested tolerance cannot be achieved and the returned result is the best which can be obtained.\nresult:\t{result}\nerror\t{error:.10e}\niterations:\t{iterations}."
                 )
             }
 
             IntegrationErrorKind::DivergentOrSlowlyConverging => {
                 write!(
                     f,
-                    "The integral is probably divergent or slowly convergent. NOTE: divergence can also occur with any other error kind.\nresult:\t{result:?}\nerror\t{error:.10e}\niterations:\t{iterations}."
+                    "The integral is probably divergent or slowly convergent. NOTE: divergence can also occur with any other error kind.\nresult:\t{result}\nerror\t{error:.10e}\niterations:\t{iterations}."
                 )
             }
 
