@@ -39,12 +39,12 @@ impl<T: ScalarF64, const NDIM: usize> PartialOrd for Region<T, NDIM> {
 impl<T: ScalarF64, const NDIM: usize> Ord for Region<T, NDIM> {
     fn cmp(&self, other: &Self) -> Ordering {
         let mut ordering = self.total_cmp_error(other);
-        if let Ordering::Equal = ordering {
-            ordering = self.total_cmp_interval_length(other);
-        }
-        if let Ordering::Equal = ordering {
-            ordering = self.total_cmp_volume(other);
-        }
+        //if let Ordering::Equal = ordering {
+        //    ordering = self.total_cmp_interval_length(other);
+        //}
+        //if let Ordering::Equal = ordering {
+        //    ordering = self.total_cmp_volume(other);
+        //}
         ordering
     }
 }
@@ -141,14 +141,14 @@ impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
 
         let [lower, upper] = previous_limits[axis_to_bisect].bisect();
 
-        let mut lower_limits = *previous_limits;
-        lower_limits[axis_to_bisect] = lower;
-
         let mut upper_limits = *previous_limits;
         upper_limits[axis_to_bisect] = upper;
 
-        let lower_integral = Integrator::new(&function, &rule, lower_limits).integrate();
+        let mut lower_limits = *previous_limits;
+        lower_limits[axis_to_bisect] = lower;
+
         let upper_integral = Integrator::new(&function, &rule, upper_limits).integrate();
+        let lower_integral = Integrator::new(&function, &rule, lower_limits).integrate();
 
         [lower_integral, upper_integral]
     }

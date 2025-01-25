@@ -93,9 +93,11 @@ pub trait ScalarF64:
     + for<'a> ops::Mul<&'a f64, Output = Self>
     + for<'a> ops::Div<&'a f64, Output = Self>
     + ops::AddAssign<Self>
+    + ops::SubAssign<Self>
     + ops::Add<Self>
     + ops::Sub<Self>
     + for<'a> ops::AddAssign<&'a Self>
+    + for<'a> ops::SubAssign<&'a Self>
     + for<'a> ops::Add<&'a Self, Output = Self>
     + for<'a> ops::Sub<&'a Self, Output = Self>
     + fmt::Display
