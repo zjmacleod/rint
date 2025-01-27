@@ -83,16 +83,20 @@ where
         while workspace.iteration < self.max_iterations {
             let previous = workspace.retrieve_largest_error()?;
 
-            let [lower, upper] = previous.bisect(&self.function, &self.rule);
+            let [mut lower, mut upper] = previous.bisect(&self.function, &self.rule);
 
-            let (result, error) = workspace.improved_result_error(&previous, &lower, &upper);
+            let (result, error) = workspace.improved_result_error(
+                &previous,
+                &mut lower,
+                &mut upper,
+                &self.rule.adaptive_error_coeff(),
+            );
 
             let iteration_tolerance = self.tolerance.tolerance(&result);
 
             workspace.push(lower);
             workspace.push(upper);
 
-            // TODO error calc off with dcuhre ~ 1e-1 rel
             if error <= iteration_tolerance {
                 break;
             }
@@ -172,30 +176,45 @@ impl<T: ScalarF64, const NDIM: usize> Workspace<T, NDIM> {
     fn improved_result_error(
         &mut self,
         previous: &Region<T, NDIM>,
-        lower: &Region<T, NDIM>,
-        upper: &Region<T, NDIM>,
+        lower: &mut Region<T, NDIM>,
+        upper: &mut Region<T, NDIM>,
+        error_coef: &AdaptiveErrorCoeff,
     ) -> (T, f64) {
         let prev_result = previous.result();
         let prev_error = previous.error();
         let new_result = lower.result() + upper.result();
-        let new_error = lower.error() + upper.error();
+        let mut lower_error = lower.error();
+        let mut upper_error = upper.error();
+        let est1 = (prev_result - new_result).abs();
+        let est2 = lower_error + upper_error;
+
+        if est2 > 0.0 {
+            lower_error *= 1.0 + error_coef.c5() * est1 / est2;
+            upper_error *= 1.0 + error_coef.c5() * est1 / est2;
+        }
+
+        lower_error += error_coef.c6() * est1;
+        upper_error += error_coef.c6() * est1;
+
+        lower.error = lower_error;
+        upper.error = upper_error;
 
         //    if lower.result_asc().to_bits() != lower.error().to_bits()
         //        && upper.result_asc().to_bits() != upper.error().to_bits()
         //    {
         //        let delta = (prev_result - new_result).abs();
 
-        //        if delta <= 1e-5 * new_result.abs() && new_error >= 0.99 * prev_error {
+        //        if delta <= 1e-5 * new_result.abs() && est2 >= 0.99 * prev_error {
         //            self.roundoff_count += 1;
         //        }
-        //        if self.iteration >= 10 && new_error >= prev_error {
+        //        if self.iteration >= 10 && est2 >= prev_error {
         //            self.roundoff_on_high_iteration_count += 1;
         //        }
         //    }
 
-        // TODO error calc off with dcuhre ~ 1e-1 rel
         self.result += new_result - prev_result;
-        self.error += new_error - prev_error;
+        self.error += (lower_error + upper_error) - prev_error;
+
         let result = self.result;
         let error = self.error;
 
@@ -279,17 +298,9 @@ mod testswoo {
             let dcuhre_result = 0.79659959933664204;
             let dcuhre_error = 5.2361990216203975E-008;
             let dcuhre_iter = 8;
-            println!("res:\t{result}");
-            println!("sho:\t{dcuhre_result}");
-            println!("err:\t{error}");
-            println!("sho:\t{dcuhre_error}");
-            println!("ite:\t{iter}");
-            println!("sho:\t{dcuhre_iter}");
-            println!("{}", integral_result.evaluations());
 
             assert!((result - dcuhre_result).abs() / dcuhre_result.abs() < 1e-15);
-            // TODO check error calc
-            assert!((error - dcuhre_error).abs() / dcuhre_error.abs() < 1e-1);
+            assert!((error - dcuhre_error).abs() / dcuhre_error.abs() < 1e-7);
         }
         Ok(())
     }
