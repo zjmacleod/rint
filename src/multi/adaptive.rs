@@ -94,7 +94,7 @@ where
             }
 
             //workspace.check_roundoff()?;
-            //workspace.check_singularity()?;
+            workspace.check_singularity()?;
         }
 
         let final_iteration = workspace.iteration;
@@ -114,6 +114,7 @@ where
         let error = initial.error();
         let limits = *initial.limits();
         let evaluations_per_integration = self.rule.evaluations();
+        let bisection_axis = initial.bisection_axis();
 
         let mut heap = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
         heap.push(initial);
@@ -124,6 +125,7 @@ where
             result,
             error,
             limits,
+            bisection_axis,
             evaluations_per_integration,
         }
     }
@@ -135,6 +137,7 @@ struct Workspace<T: ScalarF64, const NDIM: usize> {
     result: T,
     error: f64,
     limits: [Limits; NDIM],
+    bisection_axis: usize,
     evaluations_per_integration: usize,
 }
 
@@ -143,6 +146,7 @@ impl<T: ScalarF64, const NDIM: usize> Workspace<T, NDIM> {
         self.iteration += 1;
         if let Some(previous) = self.pop() {
             self.limits = *previous.limits();
+            self.bisection_axis = previous.bisection_axis();
             Ok(previous)
         } else {
             let kind = IntegrationErrorKind::UninitialisedWorkspace;
@@ -191,16 +195,16 @@ impl<T: ScalarF64, const NDIM: usize> Workspace<T, NDIM> {
     //    Ok(())
     //}
 
-    //fn check_singularity(&self) -> Result<(), IntegrationError<T>> {
-    //    let limits = self.limits;
-    //    if subinterval_too_small(limits) {
-    //        let output = self.integral_estimate();
-    //        let kind = IntegrationErrorKind::BadIntegrandBehaviour(limits);
-    //        Err(IntegrationError::new(output, kind))
-    //    } else {
-    //        Ok(())
-    //    }
-    //}
+    fn check_singularity(&self) -> Result<(), IntegrationError<T>> {
+        let limits = self.limits[self.bisection_axis];
+        if limits.subinterval_too_small() {
+            let output = self.integral_estimate();
+            let kind = IntegrationErrorKind::BadIntegrandBehaviour(limits);
+            Err(IntegrationError::new(output, kind))
+        } else {
+            Ok(())
+        }
+    }
 
     fn sum_results(&self) -> T {
         self.heap.iter().fold(T::zero(), |a, v| a + v.result())
