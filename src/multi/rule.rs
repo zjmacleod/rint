@@ -19,10 +19,6 @@ pub struct Rule<const NDIM: usize, const FINAL: usize, const TOTAL: usize> {
 }
 
 impl<const NDIM: usize, const FINAL: usize, const TOTAL: usize> Rule<NDIM, FINAL, TOTAL> {
-    pub(crate) const fn total() -> usize {
-        TOTAL
-    }
-
     pub(crate) const fn initial_data(&self) -> &[Data<NDIM>; 3] {
         &self.initial_data
     }

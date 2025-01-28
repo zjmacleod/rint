@@ -1,5 +1,3 @@
-use num_traits::Zero;
-
 use crate::quadrature::rule::Rule;
 use crate::quadrature::{Adaptive, AdaptiveSingularity, Basic};
 use crate::{Error, Integrand, Limits, ScalarF64, Tolerance};

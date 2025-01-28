@@ -1,4 +1,3 @@
-use num_traits::Zero;
 use std::cmp::Ordering;
 
 use crate::quadrature::integrator::Integrator;

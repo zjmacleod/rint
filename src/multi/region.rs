@@ -1,5 +1,3 @@
-use num_complex::ComplexFloat;
-use num_traits::Zero;
 use std::cmp::Ordering;
 
 use crate::multi::Integrator;
@@ -14,7 +12,6 @@ pub(crate) struct Region<T: ScalarF64, const NDIM: usize> {
     pub(crate) result: T,
     pub(crate) limits: [Limits; NDIM],
     pub(crate) bisection_axis: usize,
-    pub(crate) evaluations: usize,
     pub(crate) volume: f64,
 }
 
@@ -23,7 +20,6 @@ impl<T: ScalarF64, const NDIM: usize> PartialEq for Region<T, NDIM> {
         (self.result == other.result)
             && (self.error == other.error)
             && (self.bisection_axis == other.bisection_axis)
-            && (self.evaluations == other.evaluations)
             && (self.limits == other.limits)
             && (self.volume == other.volume)
     }
@@ -58,7 +54,6 @@ impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
             result: zero,
             limits: [Limits::new(0.0, 0.0); NDIM],
             bisection_axis: 0,
-            evaluations: 0,
             volume: 0.0,
         }
     }
@@ -83,11 +78,6 @@ impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
         self
     }
 
-    pub(crate) fn with_evaluations(mut self, evaluations: usize) -> Self {
-        self.evaluations = evaluations;
-        self
-    }
-
     pub(crate) fn with_volume(mut self, volume: f64) -> Self {
         self.volume = volume;
         self
@@ -107,10 +97,6 @@ impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
 
     pub(crate) fn bisection_axis(&self) -> usize {
         self.bisection_axis
-    }
-
-    pub(crate) fn evaluations(&self) -> usize {
-        self.evaluations
     }
 
     pub(crate) fn total_cmp_error(&self, other: &Self) -> Ordering {
