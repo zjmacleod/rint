@@ -1,7 +1,48 @@
 //! Numerical integration routines written in Rust.
 //!
-//! This library exposes various numerical integration routines written in pure Rust.
-//! The algorithms are heavily inspired by the GNU Scientific Library & QUADPACK numerical integration routines.
+//!
+//! # Modules
+//!
+//! This library exposes various numerical integration routines written in pure Rust. These
+//! routines are split into two modules:
+//!
+//! - [`quadrature`]: Numerical integration of real or complex valued functions on the real line in
+//!     one dimension. The algorithms are based on the GNU Scientific Library & QUADPACK numerical
+//!     integration routines, providing `n`-point Gauss-Kronrod quadrature rules of polynomial degree
+//!     `15 <= n <= 61`.
+//!     Three classes of integration routine are provided:
+//!
+//!     - [`quadrature::Basic`]: A simple non-adaptive integrator.
+//!     - [`quadrature::Adaptive`]: An adaptive integrator suitable for integrating (relatively)
+//!         smooth functions over a finite interval.
+//!     - [`quadrature::AdaptiveSingularity`]: An adaptive integrator with additional extrapolation
+//!         suitable for integrating functions over infinite/semi-infinite intervals, finite intervals,
+//!         and/or with integrable singularities in the integrand.
+//!
+//! - [`multi`]: Numerical integration of real or complex valued functions on the real line in
+//!     `NDIM` dimension, where `2 <= NDIM <= 15`. The routines are based on the DCUHRE algorithm,
+//!     using `n`-point fully-symmetric integration rules of polynomial degree `7 <= n <= 13`.
+//!     Two classes of integration routine are provided:
+//!
+//!     - [`multi::Basic`]: A simple non-adaptive integrator.
+//!     - [`multi::Adaptive`]: An adaptive integrator suitable for integrating (relatively) smooth functions over a finite interval.
+//!
+//!
+//! # Traits
+//!
+//! The main entry points for each module are the associated `Integrand` traits:
+//!
+//! - [`Integrand`]: A real or complex valued function to be integrated over the real line in one
+//!     dimension.
+//!
+//! - [`MultiDimensionalIntegrand`]: A real or complex valued function to be integrated over an
+//! `NDIM` dimensional hypercube.
+//!
+//! Each trait requires an implementation of an `evaluate` method, which defines the value of the
+//! integrand for a given one- or NDIM-dimensional point.
+//! The return type of the `evaluate` function is the associated type `Scalar`, which defines
+//! whether the function is real valued (`Scalar = `[`std::f64`]), or complex valued (`Scalar =
+//! `[`Complex<f64>`]).
 //!
 #![deny(clippy::pedantic)]
 #![allow(
