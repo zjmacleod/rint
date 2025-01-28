@@ -3,6 +3,8 @@
 #[macro_use]
 pub(crate) mod macros;
 
+pub(crate) mod multi;
+
 use num_complex::Complex;
 use std::f64::consts::PI;
 
