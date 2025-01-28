@@ -40,12 +40,12 @@ impl<T: ScalarF64, const NDIM: usize> PartialOrd for Region<T, NDIM> {
 impl<T: ScalarF64, const NDIM: usize> Ord for Region<T, NDIM> {
     fn cmp(&self, other: &Self) -> Ordering {
         let mut ordering = self.total_cmp_error(other);
-        //if let Ordering::Equal = ordering {
-        //    ordering = self.total_cmp_interval_length(other);
-        //}
-        //if let Ordering::Equal = ordering {
-        //    ordering = self.total_cmp_volume(other);
-        //}
+        if let Ordering::Equal = ordering {
+            ordering = self.total_cmp_interval_length(other);
+            if let Ordering::Equal = ordering {
+                ordering = self.total_cmp_volume(other);
+            }
+        }
         ordering
     }
 }

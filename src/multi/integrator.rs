@@ -174,20 +174,17 @@ where
             largest_axis,
         } = self.geometry();
 
-        let mut initial_result = self.initial_integration(&centre, &half_widths, largest_axis);
+        let initial_result = self.initial_integration(&centre, &half_widths, largest_axis);
 
         let bisection_axis = initial_result.bisection_axis();
 
         let (result, error) =
             self.complete_integration(&centre, &half_widths, volume, initial_result);
 
-        let evaluations = self.rule.evaluations();
-
         Region::unevaluated()
             .with_result(result)
             .with_error(error)
             .with_bisection_axis(bisection_axis)
-            .with_evaluations(evaluations)
             .with_limits(self.limits)
             .with_volume(volume)
     }
