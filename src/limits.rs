@@ -39,6 +39,20 @@ impl Limits {
 
         [Self::new(lower, midpoint), Self::new(midpoint, upper)]
     }
+
+    #[inline]
+    pub(crate) fn subinterval_too_small(&self) -> bool {
+        let lower = self.lower();
+        let upper = self.upper();
+        let midpoint = self.centre();
+
+        let eps = f64::EPSILON;
+        let min = f64::MIN_POSITIVE;
+
+        let tmp = (1.0 + 100.0 * eps) * (midpoint.abs() + 1000.0 * min);
+
+        lower.abs() <= tmp && upper.abs() <= tmp
+    }
 }
 
 #[cfg(test)]

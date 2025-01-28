@@ -18,7 +18,6 @@ pub use singularity::AdaptiveSingularity;
 pub use rule::Rule;
 
 use crate::IntegralEstimate;
-use crate::Limits;
 
 pub(crate) fn rescale_error(error: f64, result_abs: f64, result_asc: f64) -> f64 {
     let mut error = error;
@@ -42,18 +41,4 @@ pub(crate) fn rescale_error(error: f64, result_abs: f64, result_asc: f64) -> f64
     }
 
     error
-}
-
-#[inline]
-pub(crate) fn subinterval_too_small(limits: Limits) -> bool {
-    let lower = limits.lower();
-    let upper = limits.upper();
-    let midpoint = limits.centre();
-
-    let eps = f64::EPSILON;
-    let min = f64::MIN_POSITIVE;
-
-    let tmp = (1.0 + 100.0 * eps) * (midpoint.abs() + 1000.0 * min);
-
-    lower.abs() <= tmp && upper.abs() <= tmp
 }

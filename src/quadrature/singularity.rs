@@ -1,10 +1,9 @@
-use num_traits::Zero;
 use std::collections::binary_heap::BinaryHeap;
 
-use crate::quadrature::{subinterval_too_small, Integrator, Region, Rule};
+use crate::quadrature::{Integrator, Region, Rule};
 use crate::{
-    sealed::Sealed, InitialisationError, IntegralEstimate, Integrand, IntegrationError,
-    IntegrationErrorKind, Limits, ScalarF64, Tolerance,
+    InitialisationError, IntegralEstimate, Integrand, IntegrationError, IntegrationErrorKind,
+    Limits, ScalarF64, Tolerance,
 };
 
 /// An adaptive Gauss-Kronrod quadrature integrator for functions of a single variable with
@@ -809,7 +808,7 @@ impl<T: ScalarF64> Workspace<T> {
 
         self.check_roundoff();
 
-        if subinterval_too_small(limits) {
+        if limits.subinterval_too_small() {
             self.set_error_kind(IntegrationErrorKind::BadIntegrandBehaviour(limits));
         }
 

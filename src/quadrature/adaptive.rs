@@ -3,7 +3,7 @@ use std::collections::binary_heap::BinaryHeap;
 
 use crate::ScalarF64;
 
-use crate::quadrature::{subinterval_too_small, IntegralEstimate, Integrator, Region, Rule};
+use crate::quadrature::{IntegralEstimate, Integrator, Region, Rule};
 use crate::{
     InitialisationError, Integrand, IntegrationError, IntegrationErrorKind, Limits, Tolerance,
 };
@@ -388,7 +388,7 @@ impl<T: ScalarF64> Workspace<T> {
 
     fn check_singularity(&self) -> Result<(), IntegrationError<T>> {
         let limits = self.limits;
-        if subinterval_too_small(limits) {
+        if limits.subinterval_too_small() {
             let output = self.integral_estimate();
             let kind = IntegrationErrorKind::BadIntegrandBehaviour(limits);
             Err(IntegrationError::new(output, kind))
