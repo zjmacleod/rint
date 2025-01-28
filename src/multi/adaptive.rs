@@ -224,7 +224,7 @@ impl<T: ScalarF64, const NDIM: usize> Workspace<T, NDIM> {
 }
 
 #[cfg(test)]
-mod tests_relative_woo {
+mod tests_relative {
     use super::*;
     use crate::multi::{Rule07, Rule09, Rule11, Rule13};
 
