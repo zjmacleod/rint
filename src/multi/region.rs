@@ -1,3 +1,4 @@
+use num_complex::ComplexFloat;
 use num_traits::Zero;
 use std::cmp::Ordering;
 
@@ -8,7 +9,7 @@ use crate::MultiDimensionalIntegrand;
 use crate::ScalarF64;
 
 #[derive(Debug)]
-pub(crate) struct Region<T, const NDIM: usize> {
+pub(crate) struct Region<T: ScalarF64, const NDIM: usize> {
     pub(crate) error: f64,
     pub(crate) result: T,
     pub(crate) limits: [Limits; NDIM],
@@ -131,13 +132,18 @@ impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
     }
 
     #[allow(clippy::needless_borrow)]
-    pub(crate) fn bisect<I: MultiDimensionalIntegrand<NDIM>, const J: usize, const K: usize>(
+    pub(crate) fn bisect<
+        I: MultiDimensionalIntegrand<NDIM, Scalar = T>,
+        const J: usize,
+        const K: usize,
+    >(
         &self,
         function: &I,
         rule: &Rule<NDIM, J, K>,
-    ) -> [Region<I::Scalar, NDIM>; 2] {
+    ) -> [Region<T, NDIM>; 2] {
         let axis_to_bisect = self.bisection_axis;
         let previous_limits = self.limits();
+        let previous_result = self.result();
 
         let [lower, upper] = previous_limits[axis_to_bisect].bisect();
 
@@ -147,8 +153,32 @@ impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
         let mut lower_limits = *previous_limits;
         lower_limits[axis_to_bisect] = lower;
 
-        let upper_integral = Integrator::new(&function, &rule, upper_limits).integrate();
-        let lower_integral = Integrator::new(&function, &rule, lower_limits).integrate();
+        let mut upper_integral = Integrator::new(&function, &rule, upper_limits).integrate();
+        let mut lower_integral = Integrator::new(&function, &rule, lower_limits).integrate();
+
+        // adjust error estimates according to Bernsten & Espelid 1991
+        {
+            let new_result = upper_integral.result() + lower_integral.result();
+
+            let mut upper_error = upper_integral.error();
+            let mut lower_error = lower_integral.error();
+
+            let est1 = (previous_result - new_result).abs();
+            let est2 = lower_error + upper_error;
+
+            let error_coeff = rule.adaptive_error_coeff();
+
+            if est2 > 0.0 {
+                lower_error *= 1.0 + error_coeff.c5() * est1 / est2;
+                upper_error *= 1.0 + error_coeff.c5() * est1 / est2;
+            }
+
+            upper_error += error_coeff.c6() * est1;
+            lower_error += error_coeff.c6() * est1;
+
+            upper_integral.error = upper_error;
+            lower_integral.error = lower_error;
+        }
 
         [lower_integral, upper_integral]
     }
