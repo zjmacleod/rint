@@ -233,7 +233,7 @@ impl<T: ScalarF64> IntermediateResult<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::multi::{Rule07, Rule09, Rule11, Rule13};
+    use crate::multi::{Rule07, Rule09, Rule09N2, Rule11, Rule13};
 
     #[test]
     fn compare_basic_7point_with_dcuhre_output_ndim_2() {
@@ -553,6 +553,178 @@ mod tests {
             assert_eq!(axis, dcuhre_bisection_axis);
             assert!((result - dcuhre_result).abs() / dcuhre_result.abs() < 1e-7);
             assert!((error - dcuhre_error).abs() / dcuhre_error.abs() < 1e-8);
+        }
+    }
+
+    #[test]
+    fn compare_basic_9point_with_dcuhre_output_ndim_2() {
+        const NDIM: usize = 2;
+
+        {
+            struct Function;
+
+            impl MultiDimensionalIntegrand<NDIM> for Function {
+                type Scalar = f64;
+                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                    let x = coordinates[0];
+                    let y = coordinates[1];
+                    let exponent = -x * y;
+                    f64::exp(exponent)
+                }
+            }
+
+            let function = Function;
+            let rule = Rule09N2::generate();
+            let limit = Limits::new(0.0, 1.0);
+            let limits = [limit; NDIM];
+
+            let integral = Integrator::new(&function, &rule, limits);
+
+            let integral_result = integral.integrate();
+
+            let result = integral_result.result();
+            let error = integral_result.error();
+            let axis = integral_result.bisection_axis();
+            let dcuhre_result = 0.79659960474276592;
+            let dcuhre_error = 1.1790454197979140E-007;
+            let dcuhre_bisection_axis = 0;
+
+            assert_eq!(axis, dcuhre_bisection_axis);
+            assert!((result - dcuhre_result).abs() / dcuhre_result.abs() < 1e-15);
+            assert!((error - dcuhre_error).abs() / dcuhre_error.abs() < 1e-9);
+        }
+
+        {
+            struct Function;
+
+            impl MultiDimensionalIntegrand<NDIM> for Function {
+                type Scalar = f64;
+                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                    let x = coordinates[0];
+                    let y = coordinates[1];
+                    let exponent = -(x * x + y * y);
+                    f64::exp(exponent)
+                }
+            }
+
+            let function = Function;
+            let rule = Rule09N2::generate();
+            let limit = Limits::new(0.0, 1.0);
+            let limits = [limit; NDIM];
+
+            let integral = Integrator::new(&function, &rule, limits);
+
+            let integral_result = integral.integrate();
+
+            let result = integral_result.result();
+            let error = integral_result.error();
+            let axis = integral_result.bisection_axis();
+            let dcuhre_result = 0.55774629320885161;
+            let dcuhre_error = 1.0994673617680367E-007;
+            let dcuhre_bisection_axis = 0;
+
+            assert_eq!(axis, dcuhre_bisection_axis);
+            assert!((result - dcuhre_result).abs() / dcuhre_result.abs() < 1e-15);
+            assert!((error - dcuhre_error).abs() / dcuhre_error.abs() < 1e-8);
+        }
+
+        {
+            struct Function;
+
+            impl MultiDimensionalIntegrand<NDIM> for Function {
+                type Scalar = f64;
+                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                    let x = coordinates[0];
+                    let y = coordinates[1];
+                    let exponent = -((x * x).cos().powi(2) * (y * y).cos().powi(2));
+                    f64::exp(exponent)
+                }
+            }
+
+            let function = Function;
+            let rule = Rule09N2::generate();
+            let limit = Limits::new(0.0, 1.0);
+            let limits = [limit; NDIM];
+
+            let integral = Integrator::new(&function, &rule, limits);
+
+            let integral_result = integral.integrate();
+
+            let result = integral_result.result();
+            let error = integral_result.error();
+            let axis = integral_result.bisection_axis();
+            let dcuhre_result = 0.51479767604881388;
+            let dcuhre_error = 1.7183634341731721E-005;
+            let dcuhre_bisection_axis = 0;
+
+            assert_eq!(axis, dcuhre_bisection_axis);
+            assert!((result - dcuhre_result).abs() / dcuhre_result.abs() < 1e-15);
+            assert!((error - dcuhre_error).abs() / dcuhre_error.abs() < 1e-9);
+        }
+
+        {
+            struct Function;
+
+            impl MultiDimensionalIntegrand<NDIM> for Function {
+                type Scalar = f64;
+                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                    let x = coordinates[0];
+                    let y = coordinates[1];
+                    f64::cos((1.0 + x * x).ln() * (1.0 + y * y).ln())
+                }
+            }
+
+            let function = Function;
+            let rule = Rule09N2::generate();
+            let limit = Limits::new(0.0, 1.0);
+            let limits = [limit; NDIM];
+
+            let integral = Integrator::new(&function, &rule, limits);
+
+            let integral_result = integral.integrate();
+
+            let result = integral_result.result();
+            let error = integral_result.error();
+            let axis = integral_result.bisection_axis();
+            let dcuhre_result = 0.99331749179495410;
+            let dcuhre_error = 4.5254236323764512E-006;
+            let dcuhre_bisection_axis = 0;
+
+            assert_eq!(axis, dcuhre_bisection_axis);
+            assert!((result - dcuhre_result).abs() / dcuhre_result.abs() < 1e-15);
+            assert!((error - dcuhre_error).abs() / dcuhre_error.abs() < 1e-9);
+        }
+
+        {
+            struct Function;
+
+            impl MultiDimensionalIntegrand<NDIM> for Function {
+                type Scalar = f64;
+                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                    let x = coordinates[0];
+                    let y = coordinates[1];
+                    (x * x / (2.0 - x.cos())) + (y * y / (2.0 - y.cos()))
+                }
+            }
+
+            let function = Function;
+            let rule = Rule09N2::generate();
+            let limits = [Limits::new(-2.0, 3.0), Limits::new(1.0, 10.0)];
+
+            let integral = Integrator::new(&function, &rule, limits);
+
+            let integral_result = integral.integrate();
+
+            let result = integral_result.result();
+            let error = integral_result.error();
+            let axis = integral_result.bisection_axis();
+            let dcuhre_result = 894.11725367485064;
+            let dcuhre_error = 205.10702112110653;
+            let dcuhre_bisection_axis = 1;
+
+            assert_eq!(axis, dcuhre_bisection_axis);
+            assert!((result - dcuhre_result).abs() / dcuhre_result.abs() < 1e-14);
+            assert!((error - dcuhre_error).abs() / dcuhre_error.abs() < 1e-9);
         }
     }
 

@@ -1,5 +1,6 @@
 mod fully_symmetric_07;
 mod fully_symmetric_09;
+mod fully_symmetric_09_2d;
 mod fully_symmetric_11_3d;
 mod fully_symmetric_13_2d;
 
@@ -73,6 +74,17 @@ impl<const NDIM: usize> Rule09<NDIM> {
     /// Will fail if `NDIM < 3` or `NDIM > 15`.
     pub const fn generate() -> Result<Self, InitialisationError> {
         fully_symmetric_09::generate_rule::<NDIM>()
+    }
+}
+
+/// A 9-point fully-symmetric integration rule valid for `NDIM == 2`.
+pub type Rule09N2 = Rule<2, 5, 8>;
+
+impl Rule09N2 {
+    /// Generate a fully-symmetric 9-point integration rule for NDIM == 3 dimensional integration.
+    #[must_use]
+    pub const fn generate() -> Self {
+        fully_symmetric_09_2d::generate_rule()
     }
 }
 

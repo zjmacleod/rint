@@ -10,7 +10,7 @@ pub use adaptive::Adaptive;
 pub use basic::Basic;
 pub(crate) use integrator::Integrator;
 pub(crate) use region::Region;
-pub use rule::{Rule, Rule07, Rule09, Rule11, Rule13};
+pub use rule::{Rule, Rule07, Rule09, Rule09N2, Rule11, Rule13};
 
 #[inline]
 pub(crate) const fn two_pow_n(n: usize) -> usize {

@@ -8,3 +8,10 @@ edition = "2021"
 [dependencies]
 num-complex = "0.4.6"
 num-traits = "0.2.19"
+
+[profile.bench]
+debug = true
+
+[profile.release]
+debug = true
+
