@@ -51,9 +51,10 @@ where
                 let point = data.point();
                 let gauss = data.gauss();
                 let kronrod = data.kronrod();
-                let abscissa = half_length * point;
-                let rate_plus = self.function.evaluate(centre + abscissa);
-                let rate_minus = self.function.evaluate(centre - abscissa);
+                let x_plus = point.mul_add(half_length, centre);
+                let x_minus = point.mul_add(-half_length, centre);
+                let rate_plus = self.function.evaluate(x_plus);
+                let rate_minus = self.function.evaluate(x_minus);
                 let rate = rate_plus + rate_minus;
                 let rate_abs = rate_plus.abs() + rate_minus.abs();
                 function_values.push((kronrod, (rate_plus, rate_minus)));
@@ -70,9 +71,10 @@ where
             .map(|data| {
                 let point = data.point();
                 let kronrod = data.kronrod();
-                let abscissa = half_length * point;
-                let rate_plus = self.function.evaluate(centre + abscissa);
-                let rate_minus = self.function.evaluate(centre - abscissa);
+                let x_plus = point.mul_add(half_length, centre);
+                let x_minus = point.mul_add(-half_length, centre);
+                let rate_plus = self.function.evaluate(x_plus);
+                let rate_minus = self.function.evaluate(x_minus);
                 let rate = rate_plus + rate_minus;
                 let rate_abs = rate_plus.abs() + rate_minus.abs();
                 function_values.push((kronrod, (rate_plus, rate_minus)));

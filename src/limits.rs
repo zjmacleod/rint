@@ -20,6 +20,7 @@ impl Limits {
         self.upper
     }
 
+    // TODO: change to (self.upper).mipoint(self.lower) when stabilised
     pub(crate) const fn centre(&self) -> f64 {
         (self.upper + self.lower) * 0.5
     }

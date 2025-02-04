@@ -182,6 +182,7 @@ pub(crate) mod sealed {
 /// [`Tolerance::Absolute(abserr)`]: crate::quadrature::Tolerance#variant.Absolute
 /// [`Tolerance::Relative(relerr)`]: crate::quadrature::Tolerance#variant.Relative
 /// [`Tolerance::Either{ abserr, relerr }`]: crate::quadrature::Tolerance#variant.Either
+#[derive(Debug, Copy, Clone)]
 pub enum Tolerance {
     /// Specify an absolute error and returns final [`IntegralEstimate`] when `error <= abserr`.
     Absolute(f64),
