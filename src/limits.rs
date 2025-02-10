@@ -54,6 +54,15 @@ impl Limits {
 
         lower.abs() <= tmp && upper.abs() <= tmp
     }
+
+    /// Scale the limits by a constant factor
+    #[must_use]
+    pub fn scale(self, scale: f64) -> Self {
+        let lower = self.lower() * scale;
+        let upper = self.upper() * scale;
+
+        Limits::new(lower, upper)
+    }
 }
 
 #[cfg(test)]

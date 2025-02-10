@@ -1,6 +1,5 @@
 //! Numerical integration routines written in Rust.
 //!
-//!
 //! # Modules
 //!
 //! This library exposes various numerical integration routines written in pure Rust. These
