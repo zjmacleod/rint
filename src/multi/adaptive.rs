@@ -10,16 +10,16 @@ use crate::{InitialisationError, InitialisationErrorKind};
 use crate::{IntegrationError, IntegrationErrorKind};
 use crate::{Limits, Tolerance};
 
-pub struct Adaptive<I, R, const NDIM: usize> {
-    function: I,
-    rule: R,
+pub struct Adaptive<'a, I, R, const NDIM: usize> {
+    function: &'a I,
+    rule: &'a R,
     limits: [Limits; NDIM],
     tolerance: Tolerance,
     max_iterations: usize,
 }
 
-impl<I, const NDIM: usize, const FINAL: usize, const TOTAL: usize>
-    Adaptive<I, Rule<NDIM, FINAL, TOTAL>, NDIM>
+impl<'a, I, const NDIM: usize, const FINAL: usize, const TOTAL: usize>
+    Adaptive<'a, I, Rule<NDIM, FINAL, TOTAL>, NDIM>
 where
     I: MultiDimensionalIntegrand<NDIM>,
 {
@@ -37,8 +37,8 @@ where
     ///     - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON`
     ///     - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON`
     pub fn new(
-        function: I,
-        rule: Rule<NDIM, FINAL, TOTAL>,
+        function: &'a I,
+        rule: &'a Rule<NDIM, FINAL, TOTAL>,
         limits: [Limits; NDIM],
         tolerance: Tolerance,
         max_iterations: usize,
@@ -253,7 +253,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -290,7 +290,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -327,7 +327,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -363,7 +363,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -398,7 +398,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -442,7 +442,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -480,7 +480,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -519,7 +519,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -556,7 +556,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -598,7 +598,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -642,7 +642,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -680,7 +680,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(1e-7);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -719,7 +719,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -756,7 +756,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -798,7 +798,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -842,7 +842,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -880,7 +880,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -919,7 +919,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -956,7 +956,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -998,7 +998,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -1041,7 +1041,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -1078,7 +1078,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -1115,7 +1115,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -1151,7 +1151,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 
@@ -1186,7 +1186,7 @@ mod tests_relative {
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
-            let integral = Adaptive::new(function, rule, limits, tol, max_iterations).unwrap();
+            let integral = Adaptive::new(&function, &rule, limits, tol, max_iterations).unwrap();
 
             let integral_result = integral.integrate().unwrap();
 

@@ -4,14 +4,14 @@ use crate::Limits;
 use crate::MultiDimensionalIntegrand;
 use crate::{InitialisationError, InitialisationErrorKind};
 
-pub struct Basic<I, R, const NDIM: usize> {
-    function: I,
-    rule: R,
+pub struct Basic<'a, I, R, const NDIM: usize> {
+    function: &'a I,
+    rule: &'a R,
     limits: [Limits; NDIM],
 }
 
-impl<I, const NDIM: usize, const FINAL: usize, const TOTAL: usize>
-    Basic<I, Rule<NDIM, FINAL, TOTAL>, NDIM>
+impl<'a, I, const NDIM: usize, const FINAL: usize, const TOTAL: usize>
+    Basic<'a, I, Rule<NDIM, FINAL, TOTAL>, NDIM>
 where
     I: MultiDimensionalIntegrand<NDIM>,
 {
@@ -26,8 +26,8 @@ where
     /// Will fail if `NDIM < 2` or `NDIM > 15`. The routines probided in this module are developed
     /// for dimensionalities between `2 <= NDIM <= 15`.
     pub fn new(
-        function: I,
-        rule: Rule<NDIM, FINAL, TOTAL>,
+        function: &'a I,
+        rule: &'a Rule<NDIM, FINAL, TOTAL>,
         limits: [Limits; NDIM],
     ) -> Result<Self, InitialisationError> {
         if NDIM < 2 || NDIM > 15 {

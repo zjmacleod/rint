@@ -22,7 +22,7 @@ fn van_booren_f1() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -43,7 +43,7 @@ fn van_booren_f1() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -68,7 +68,7 @@ fn van_booren_f1() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -89,7 +89,7 @@ fn van_booren_f1() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -114,7 +114,7 @@ fn van_booren_f1() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -135,7 +135,7 @@ fn van_booren_f1() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -160,7 +160,7 @@ fn van_booren_f1() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -181,7 +181,7 @@ fn van_booren_f1() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -205,7 +205,7 @@ fn van_booren_f1() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -226,7 +226,7 @@ fn van_booren_f1() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -251,7 +251,7 @@ fn van_booren_f1() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -272,7 +272,7 @@ fn van_booren_f1() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -307,7 +307,7 @@ fn van_booren_f2() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -328,7 +328,7 @@ fn van_booren_f2() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -353,7 +353,7 @@ fn van_booren_f2() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -374,7 +374,7 @@ fn van_booren_f2() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -399,7 +399,7 @@ fn van_booren_f2() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -420,7 +420,7 @@ fn van_booren_f2() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -445,7 +445,7 @@ fn van_booren_f2() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -466,7 +466,7 @@ fn van_booren_f2() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -490,7 +490,7 @@ fn van_booren_f2() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -511,7 +511,7 @@ fn van_booren_f2() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -536,7 +536,7 @@ fn van_booren_f2() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -557,7 +557,7 @@ fn van_booren_f2() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -592,7 +592,7 @@ fn van_booren_f3() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -613,7 +613,7 @@ fn van_booren_f3() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -634,7 +634,7 @@ fn van_booren_f3() {
         let rule = Rule11::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -659,7 +659,7 @@ fn van_booren_f3() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -680,7 +680,7 @@ fn van_booren_f3() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -701,7 +701,7 @@ fn van_booren_f3() {
         let rule = Rule11::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -726,7 +726,7 @@ fn van_booren_f3() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -747,7 +747,7 @@ fn van_booren_f3() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -768,7 +768,7 @@ fn van_booren_f3() {
         let rule = Rule11::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -793,7 +793,7 @@ fn van_booren_f3() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -814,7 +814,7 @@ fn van_booren_f3() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -834,7 +834,7 @@ fn van_booren_f3() {
         let rule = Rule11::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -859,7 +859,7 @@ fn van_booren_f3() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -880,7 +880,7 @@ fn van_booren_f3() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -901,7 +901,7 @@ fn van_booren_f3() {
         let rule = Rule11::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -926,7 +926,7 @@ fn van_booren_f3() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -947,7 +947,7 @@ fn van_booren_f3() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -968,7 +968,7 @@ fn van_booren_f3() {
         let rule = Rule11::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1003,7 +1003,7 @@ fn van_booren_f4() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1024,7 +1024,7 @@ fn van_booren_f4() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1049,7 +1049,7 @@ fn van_booren_f4() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1070,7 +1070,7 @@ fn van_booren_f4() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1095,7 +1095,7 @@ fn van_booren_f4() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1116,7 +1116,7 @@ fn van_booren_f4() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1141,7 +1141,7 @@ fn van_booren_f4() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1162,7 +1162,7 @@ fn van_booren_f4() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1186,7 +1186,7 @@ fn van_booren_f4() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1207,7 +1207,7 @@ fn van_booren_f4() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1232,7 +1232,7 @@ fn van_booren_f4() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1253,7 +1253,7 @@ fn van_booren_f4() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1288,7 +1288,7 @@ fn van_booren_f5() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1309,7 +1309,7 @@ fn van_booren_f5() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1334,7 +1334,7 @@ fn van_booren_f5() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1355,7 +1355,7 @@ fn van_booren_f5() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1380,7 +1380,7 @@ fn van_booren_f5() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1401,7 +1401,7 @@ fn van_booren_f5() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1426,7 +1426,7 @@ fn van_booren_f5() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1447,7 +1447,7 @@ fn van_booren_f5() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1471,7 +1471,7 @@ fn van_booren_f5() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1492,7 +1492,7 @@ fn van_booren_f5() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1517,7 +1517,7 @@ fn van_booren_f5() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1538,7 +1538,7 @@ fn van_booren_f5() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1573,7 +1573,7 @@ fn van_booren_f6() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1594,7 +1594,7 @@ fn van_booren_f6() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1619,7 +1619,7 @@ fn van_booren_f6() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1640,7 +1640,7 @@ fn van_booren_f6() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1665,7 +1665,7 @@ fn van_booren_f6() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1686,7 +1686,7 @@ fn van_booren_f6() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1711,7 +1711,7 @@ fn van_booren_f6() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1731,7 +1731,7 @@ fn van_booren_f6() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1756,7 +1756,7 @@ fn van_booren_f6() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1777,7 +1777,7 @@ fn van_booren_f6() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1802,7 +1802,7 @@ fn van_booren_f6() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1823,7 +1823,7 @@ fn van_booren_f6() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1858,7 +1858,7 @@ fn van_booren_f7() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1879,7 +1879,7 @@ fn van_booren_f7() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1900,7 +1900,7 @@ fn van_booren_f7() {
         let rule = Rule11::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1925,7 +1925,7 @@ fn van_booren_f7() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1946,7 +1946,7 @@ fn van_booren_f7() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1967,7 +1967,7 @@ fn van_booren_f7() {
         let rule = Rule11::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -1992,7 +1992,7 @@ fn van_booren_f7() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2013,7 +2013,7 @@ fn van_booren_f7() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2034,7 +2034,7 @@ fn van_booren_f7() {
         let rule = Rule11::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2059,7 +2059,7 @@ fn van_booren_f7() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2080,7 +2080,7 @@ fn van_booren_f7() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2100,7 +2100,7 @@ fn van_booren_f7() {
         let rule = Rule11::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2125,7 +2125,7 @@ fn van_booren_f7() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2146,7 +2146,7 @@ fn van_booren_f7() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2167,7 +2167,7 @@ fn van_booren_f7() {
         let rule = Rule11::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2192,7 +2192,7 @@ fn van_booren_f7() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2213,7 +2213,7 @@ fn van_booren_f7() {
         let rule = Rule09::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2234,7 +2234,7 @@ fn van_booren_f7() {
         let rule = Rule11::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2269,7 +2269,7 @@ fn van_booren_f8() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2290,7 +2290,7 @@ fn van_booren_f8() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2315,7 +2315,7 @@ fn van_booren_f8() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2336,7 +2336,7 @@ fn van_booren_f8() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2361,7 +2361,7 @@ fn van_booren_f8() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2382,7 +2382,7 @@ fn van_booren_f8() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2407,7 +2407,7 @@ fn van_booren_f8() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2427,7 +2427,7 @@ fn van_booren_f8() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2452,7 +2452,7 @@ fn van_booren_f8() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2473,7 +2473,7 @@ fn van_booren_f8() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2498,7 +2498,7 @@ fn van_booren_f8() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2519,7 +2519,7 @@ fn van_booren_f8() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2554,7 +2554,7 @@ fn van_booren_f9() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2575,7 +2575,7 @@ fn van_booren_f9() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2600,7 +2600,7 @@ fn van_booren_f9() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2621,7 +2621,7 @@ fn van_booren_f9() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2646,7 +2646,7 @@ fn van_booren_f9() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2667,7 +2667,7 @@ fn van_booren_f9() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2692,7 +2692,7 @@ fn van_booren_f9() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2712,7 +2712,7 @@ fn van_booren_f9() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2737,7 +2737,7 @@ fn van_booren_f9() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2758,7 +2758,7 @@ fn van_booren_f9() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2783,7 +2783,7 @@ fn van_booren_f9() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2804,7 +2804,7 @@ fn van_booren_f9() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2839,7 +2839,7 @@ fn van_booren_f10() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2860,7 +2860,7 @@ fn van_booren_f10() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2885,7 +2885,7 @@ fn van_booren_f10() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2906,7 +2906,7 @@ fn van_booren_f10() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2931,7 +2931,7 @@ fn van_booren_f10() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2952,7 +2952,7 @@ fn van_booren_f10() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2977,7 +2977,7 @@ fn van_booren_f10() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -2997,7 +2997,7 @@ fn van_booren_f10() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -3022,7 +3022,7 @@ fn van_booren_f10() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -3043,7 +3043,7 @@ fn van_booren_f10() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -3068,7 +3068,7 @@ fn van_booren_f10() {
         let rule = Rule07::<NDIM>::generate().unwrap();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
@@ -3089,7 +3089,7 @@ fn van_booren_f10() {
         let rule = Rule13::generate();
         let tolerance = Tolerance::Relative(TOL);
 
-        let integrand = Adaptive::new(function, rule, limits, tolerance, max_iterations).unwrap();
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
 
         let integral = integrand.integrate().unwrap();
         let result = integral.result();
