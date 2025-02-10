@@ -79,9 +79,9 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// Note: for the [`Basic`] integrator the number of iterations is `1`, and the number of
     /// function evaluations for an `n`-point integration rule is `n`.
     pub fn basic<I: Integrand>(
+        function: &I,
+        rule: &Rule,
         limits: Limits,
-        rule: Rule,
-        function: I,
     ) -> IntegralEstimate<I::Scalar> {
         Basic::new(function, rule, limits).integrate()
     }
@@ -119,11 +119,11 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// [`Kind::InvalidTolerance`]: crate::quadrature::Kind#variant.InvalidTolerance
     /// [`Kind::RelativeBoundTooSmall`]: crate::quadrature::Kind#variant.RelativeBoundTooSmall
     /// [`Kind::AbsoluteBoundNegativeOrZero`]: crate::quadrature::Kind#variant.AbsoluteBoundNegativeOrZero
-    pub fn adaptive<I: Integrand>(
+    pub fn adaptive<'a, I: Integrand>(
+        function: &'a I,
+        rule: &'a Rule,
         limits: Limits,
         tolerance: Tolerance,
-        rule: Rule,
-        function: I,
         max_iterations: usize,
     ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
         let res = Adaptive::new(function, rule, limits, tolerance, max_iterations)?.integrate()?;

@@ -78,7 +78,7 @@ use crate::{
 /// // Integrate with the adaptive algorithm
 /// let integral = Adaptive::new(
 ///     &function,
-///     rule,
+///     &rule,
 ///     limits,
 ///     tolerance,
 ///     1000,
@@ -124,7 +124,7 @@ use crate::{
 /// let rule = Rule::gk21();
 /// let integral_basic = Basic::new(
 ///     &function,
-///     rule,
+///     &rule,
 ///     limits,
 /// );
 ///
@@ -137,15 +137,15 @@ use crate::{
 /// assert!((exp_result - result_basic).abs() / exp_result.abs() < tol);
 /// assert!((exp_error - error_basic).abs() / exp_error.abs() < tol);
 ///```
-pub struct Adaptive<I> {
-    function: I,
-    rule: Rule,
+pub struct Adaptive<'a, I> {
+    function: &'a I,
+    rule: &'a Rule,
     limits: Limits,
     tolerance: Tolerance,
     max_iterations: usize,
 }
 
-impl<I> Adaptive<I>
+impl<'a, I> Adaptive<'a, I>
 where
     I: Integrand,
 {
@@ -170,8 +170,8 @@ where
     /// - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON`,
     /// - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
     pub fn new(
-        function: I,
-        rule: Rule,
+        function: &'a I,
+        rule: &'a Rule,
         limits: Limits,
         tolerance: Tolerance,
         max_iterations: usize,
@@ -208,7 +208,7 @@ where
     /// - An error is encountered when initialising the integration workspace. This is an internal
     /// error, which should not occur downstream (kind = [`Kind::UninitialisedWorkspace`]).
     pub fn integrate(&self) -> Result<IntegralEstimate<I::Scalar>, IntegrationError<I::Scalar>> {
-        let initial = Integrator::new(&self.function, &self.rule, self.limits).integrate();
+        let initial = Integrator::new(self.function, self.rule, self.limits).integrate();
 
         if let Some(output) = self.check_initial_integration(&initial)? {
             return Ok(output);
@@ -219,7 +219,7 @@ where
         while workspace.iteration < self.max_iterations {
             let previous = workspace.retrieve_largest_error()?;
 
-            let [lower, upper] = previous.bisect(&self.function, &self.rule);
+            let [lower, upper] = previous.bisect(self.function, self.rule);
 
             let (result, error) = workspace.improved_result_error(&previous, &lower, &upper);
 
@@ -253,7 +253,7 @@ where
     }
 }
 
-impl<I: Integrand> Adaptive<I> {
+impl<'a, I: Integrand> Adaptive<'a, I> {
     fn initialise_workspace(&self, initial: Region<I::Scalar>) -> Workspace<I::Scalar> {
         let mut heap = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
 

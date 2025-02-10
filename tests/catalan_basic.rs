@@ -10,7 +10,7 @@ fn catalan_test_basic_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -21,7 +21,7 @@ fn catalan_test_basic_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -32,7 +32,7 @@ fn catalan_test_basic_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -43,7 +43,7 @@ fn catalan_test_basic_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -54,7 +54,7 @@ fn catalan_test_basic_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -71,7 +71,7 @@ fn catalan_test_basic_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -88,7 +88,7 @@ fn catalan_test_basic_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -105,7 +105,7 @@ fn catalan_test_basic_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -122,7 +122,7 @@ fn catalan_test_basic_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -139,7 +139,7 @@ fn catalan_test_basic_15() -> Result<(), String> {
     let rule = Rule::gk15();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -163,7 +163,7 @@ fn catalan_test_basic_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -174,7 +174,7 @@ fn catalan_test_basic_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -185,7 +185,7 @@ fn catalan_test_basic_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -196,7 +196,7 @@ fn catalan_test_basic_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -207,7 +207,7 @@ fn catalan_test_basic_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -224,7 +224,7 @@ fn catalan_test_basic_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -241,7 +241,7 @@ fn catalan_test_basic_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -258,7 +258,7 @@ fn catalan_test_basic_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -275,7 +275,7 @@ fn catalan_test_basic_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -292,7 +292,7 @@ fn catalan_test_basic_21() -> Result<(), String> {
     let rule = Rule::gk21();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -316,7 +316,7 @@ fn catalan_test_basic_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -327,7 +327,7 @@ fn catalan_test_basic_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -338,7 +338,7 @@ fn catalan_test_basic_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -349,7 +349,7 @@ fn catalan_test_basic_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -360,7 +360,7 @@ fn catalan_test_basic_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -377,7 +377,7 @@ fn catalan_test_basic_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -394,7 +394,7 @@ fn catalan_test_basic_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -411,7 +411,7 @@ fn catalan_test_basic_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -428,7 +428,7 @@ fn catalan_test_basic_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -445,7 +445,7 @@ fn catalan_test_basic_31() -> Result<(), String> {
     let rule = Rule::gk31();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -469,7 +469,7 @@ fn catalan_test_basic_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -480,7 +480,7 @@ fn catalan_test_basic_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -491,7 +491,7 @@ fn catalan_test_basic_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -502,7 +502,7 @@ fn catalan_test_basic_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -513,7 +513,7 @@ fn catalan_test_basic_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -530,7 +530,7 @@ fn catalan_test_basic_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -547,7 +547,7 @@ fn catalan_test_basic_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -564,7 +564,7 @@ fn catalan_test_basic_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -581,7 +581,7 @@ fn catalan_test_basic_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -598,7 +598,7 @@ fn catalan_test_basic_41() -> Result<(), String> {
     let rule = Rule::gk41();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -622,7 +622,7 @@ fn catalan_test_basic_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -633,7 +633,7 @@ fn catalan_test_basic_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -644,7 +644,7 @@ fn catalan_test_basic_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -655,7 +655,7 @@ fn catalan_test_basic_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -666,7 +666,7 @@ fn catalan_test_basic_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -683,7 +683,7 @@ fn catalan_test_basic_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -700,7 +700,7 @@ fn catalan_test_basic_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -717,7 +717,7 @@ fn catalan_test_basic_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -734,7 +734,7 @@ fn catalan_test_basic_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -751,7 +751,7 @@ fn catalan_test_basic_51() -> Result<(), String> {
     let rule = Rule::gk51();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -775,7 +775,7 @@ fn catalan_test_basic_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::Catalan1::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -786,7 +786,7 @@ fn catalan_test_basic_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::Catalan2::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -797,7 +797,7 @@ fn catalan_test_basic_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::Catalan3::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -808,7 +808,7 @@ fn catalan_test_basic_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::Catalan4::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let error = integral.error();
     let abs_actual_error = (EXPECTED - result).abs();
@@ -819,7 +819,7 @@ fn catalan_test_basic_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan12::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -836,7 +836,7 @@ fn catalan_test_basic_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan13::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -853,7 +853,7 @@ fn catalan_test_basic_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan14::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -870,7 +870,7 @@ fn catalan_test_basic_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan23::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -887,7 +887,7 @@ fn catalan_test_basic_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan24::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;
@@ -904,7 +904,7 @@ fn catalan_test_basic_61() -> Result<(), String> {
     let rule = Rule::gk61();
     let catalan = util::ComplexCatalan34::new();
     let limits = catalan.limits();
-    let integral = Basic::new(catalan, rule, limits).integrate();
+    let integral = Basic::new(&catalan, &rule, limits).integrate();
     let result = integral.result();
     let result_re = result.re;
     let result_im = result.im;

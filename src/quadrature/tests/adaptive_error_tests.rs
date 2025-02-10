@@ -28,7 +28,7 @@ fn adaptive_gauss_kronrod_terminates_due_to_roundoff_error_31_point() -> Result<
 
     let integral = Adaptive::new(
         &function,
-        rule,
+        &rule,
         Limits::new(lower, upper),
         error_bound,
         1000,
@@ -87,7 +87,7 @@ fn adaptive_gauss_kronrod_terminates_due_to_roundoff_error_31_point() -> Result<
 
     let integral = Adaptive::new(
         &function,
-        rule,
+        &rule,
         Limits::new(lower, upper),
         error_bound,
         1000,
@@ -164,7 +164,7 @@ fn adaptive_gauss_kronrod_terminates_due_to_max_iterations_reached_61_point() ->
     let function = util::Function16::new(alpha);
 
     let integral =
-        Adaptive::new(&function, rule, Limits::new(lower, upper), error_bound, 3).unwrap();
+        Adaptive::new(&function, &rule, Limits::new(lower, upper), error_bound, 3).unwrap();
 
     let integral_result = integral.integrate();
 
@@ -223,7 +223,7 @@ fn adaptive_gauss_kronrod_terminates_due_to_max_iterations_reached_61_point() ->
     let upper = -1.0;
 
     let integral =
-        Adaptive::new(&function, rule, Limits::new(lower, upper), error_bound, 3).unwrap();
+        Adaptive::new(&function, &rule, Limits::new(lower, upper), error_bound, 3).unwrap();
 
     let integral_result = integral.integrate();
 
@@ -297,7 +297,7 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
 
     let integral = Adaptive::new(
         &function,
-        rule,
+        &rule,
         Limits::new(lower, upper),
         error_bound,
         1000,
@@ -341,7 +341,7 @@ fn test_adaptive_singularity_51() -> Result<(), String> {
 
     let integral = Adaptive::new(
         &function,
-        rule,
+        &rule,
         Limits::new(lower, upper),
         error_bound,
         1000,

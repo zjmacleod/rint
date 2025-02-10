@@ -52,7 +52,7 @@ use crate::Limits;
 ///
 /// let function = Function1 { alpha };
 /// let rule = Rule::gk15();
-/// let integral = Basic::new(&function, rule, limits);
+/// let integral = Basic::new(&function, &rule, limits);
 ///
 /// let integral_result = integral.integrate();
 /// let result = integral_result.result();
@@ -64,13 +64,13 @@ use crate::Limits;
 /// assert!((exp_result - result).abs() / exp_result.abs() < rel_tolerance);
 /// assert!((exp_abserr - abserr).abs() / exp_abserr.abs() < rel_tolerance);
 ///```
-pub struct Basic<I> {
-    function: I,
-    rule: Rule,
+pub struct Basic<'a, I> {
+    function: &'a I,
+    rule: &'a Rule,
     limits: Limits,
 }
 
-impl<I> Basic<I>
+impl<'a, I> Basic<'a, I>
 where
     I: Integrand,
 {
@@ -80,7 +80,7 @@ where
     /// [`Integrand`] trait and selects a Gauss-Kronrod quadrature [`Rule`],
     /// `rule`, to integrate the function with between the integration [`Limits`],
     /// `limits`.
-    pub const fn new(function: I, rule: Rule, limits: Limits) -> Self {
+    pub const fn new(function: &'a I, rule: &'a Rule, limits: Limits) -> Self {
         Self {
             function,
             rule,
@@ -95,6 +95,7 @@ where
     /// function evaluations and integration routine iterations.
     /// Note: for the [`Basic`] integrator the number of iterations is `1`, and the number of
     /// function evaluations for an `n`-point integration rule is `n`.
+    #[must_use]
     pub fn integrate(&self) -> IntegralEstimate<I::Scalar> {
         let integral = self.integrator().integrate();
         IntegralEstimate::new()
@@ -105,11 +106,13 @@ where
     }
 
     /// Return the integration [`Limits`].
+    #[must_use]
     pub const fn limits(&self) -> Limits {
         self.limits
     }
 
+    #[must_use]
     const fn integrator(&self) -> Integrator<'_, I> {
-        Integrator::new(&self.function, &self.rule, self.limits)
+        Integrator::new(self.function, self.rule, self.limits)
     }
 }
