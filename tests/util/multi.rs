@@ -2,6 +2,7 @@
 // P. van Dooren & L. de Ridder, "An adaptive algorithm for numerical integration over an
 // n-dimensional cube", J. Comp. App. Math., Vol. 2, (1976) 207-217
 
+use num_complex::Complex;
 use rint::Limits;
 use rint::MultiDimensionalIntegrand;
 
@@ -299,5 +300,74 @@ impl MultiDimensionalIntegrand<DIMF10> for F10 {
         let [x1, x2] = coordinates;
 
         (x1 + x2 - 1.0).abs().exp()
+    }
+}
+
+// C11 = F1 + i F1
+
+const DIMC11: usize = 6;
+pub const C11_TARGET_RE: f64 = F1_TARGET;
+pub const C11_TARGET_IM: f64 = F1_TARGET;
+
+pub struct C11 {
+    pub limits: [Limits; DIMC11],
+}
+
+impl C11 {
+    pub fn new() -> Self {
+        let x1 = Limits::new(0.0, 2.0);
+        let x2 = Limits::new(0.0, 1.0);
+        let x3 = Limits::new(0.0, std::f64::consts::PI / 2.0);
+        let x4 = Limits::new(-1.0, 1.0);
+        let x5 = Limits::new(-1.0, 1.0);
+        let x6 = Limits::new(-1.0, 1.0);
+        let limits = [x1, x2, x3, x4, x5, x6];
+        Self { limits }
+    }
+}
+
+impl MultiDimensionalIntegrand<DIMC11> for C11 {
+    type Scalar = Complex<f64>;
+
+    fn evaluate(&self, coordinates: &[f64; DIMC11]) -> Self::Scalar {
+        let [x1, x2, x3, x4, x5, x6] = coordinates;
+
+        let re = x1 * x2.powi(2) * x3.sin() / (4.0 + x4 + x5 + x6);
+        let im = x1 * x2.powi(2) * x3.sin() / (4.0 + x4 + x5 + x6);
+
+        Complex::new(re, im)
+    }
+}
+
+// C37 = F3 + i F7
+
+const DIMC37: usize = 3;
+pub const C37_TARGET_RE: f64 = 2.152_142_832_595_894;
+pub const C37_TARGET_IM: f64 = 8.630_462_173_553_432e-1;
+
+pub struct C37 {
+    pub limits: [Limits; DIMC37],
+}
+
+impl C37 {
+    pub fn new() -> Self {
+        let x1 = Limits::new(0.0, 1.0);
+        let x2 = Limits::new(0.0, 1.0);
+        let x3 = Limits::new(0.0, 1.0);
+        let limits = [x1, x2, x3];
+        Self { limits }
+    }
+}
+
+impl MultiDimensionalIntegrand<DIMC37> for C37 {
+    type Scalar = Complex<f64>;
+
+    fn evaluate(&self, coordinates: &[f64; DIMC37]) -> Self::Scalar {
+        let [x1, x2, x3] = coordinates;
+
+        let re = 8.0 / (1.0 + 2.0 * (x1 + x2 + x3));
+        let im = 1.0 / (x1 + x2 + x3).powi(2);
+
+        Complex::new(re, im)
     }
 }

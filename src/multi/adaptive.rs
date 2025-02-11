@@ -90,6 +90,7 @@ where
             workspace.push(upper);
 
             if error <= iteration_tolerance {
+                // TODO add individual checks on re and im error
                 break;
             }
 

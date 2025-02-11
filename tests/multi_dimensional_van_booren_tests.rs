@@ -2,6 +2,8 @@ use rint::multi::Adaptive;
 use rint::multi::{Rule07, Rule09, Rule11, Rule13};
 use rint::Tolerance;
 
+use num_complex::ComplexFloat;
+
 mod util;
 
 #[test]
@@ -3103,5 +3105,428 @@ fn van_booren_f10() {
         assert!(actual_error < requested_error);
 
         println!("rule:\tRule13\tresult:\t{result:e}\terror:\t{error:e}\tactual:\t{actual_error:e}\titerations:\t{iterations}\tevaluations:\t{evaluations}");
+    }
+}
+
+#[test]
+fn van_booren_c11() {
+    use util::multi::{C11, C11_TARGET_IM, C11_TARGET_RE};
+
+    let max_iterations = 10000;
+    const NDIM: usize = 6;
+    const TARGET_RE: f64 = C11_TARGET_RE;
+    const TARGET_IM: f64 = C11_TARGET_IM;
+    println!("target re:\t{TARGET_RE}");
+    println!("target im:\t{TARGET_IM}");
+
+    {
+        const TOL: f64 = 1e-2;
+        println!("REL TOL:\t{TOL:e}");
+        let function = C11::new();
+
+        let limits = function.limits;
+        let rule = Rule07::<NDIM>::generate().unwrap();
+        let tolerance = Tolerance::Relative(TOL);
+
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
+
+        let integral = integrand.integrate().unwrap();
+        let result = integral.result();
+        let error = integral.error();
+        let iterations = integral.iterations();
+        let evaluations = integral.evaluations();
+
+        let result_re = result.re;
+        let result_im = result.im;
+        let actual_error_re = (result_re - TARGET_RE).abs();
+        let actual_error_im = (result_im - TARGET_IM).abs();
+        let requested_error = TOL * result.abs();
+
+        assert!(actual_error_re < requested_error);
+        assert!(actual_error_im < requested_error);
+
+        println!("rule:\tRule07\nresult re:\t{result_re:e}\tactual re:\t{actual_error_re:e}\nresult im:\t{result_im:e}\tactual im:\t{actual_error_im:e}\nerror:\t{error:e}\titerations:\t{iterations}\tevaluations:\t{evaluations}");
+
+        let function = C11::new();
+
+        let limits = function.limits;
+        let rule = Rule09::<NDIM>::generate().unwrap();
+        let tolerance = Tolerance::Relative(TOL);
+
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
+
+        let integral = integrand.integrate().unwrap();
+        let result = integral.result();
+        let error = integral.error();
+        let iterations = integral.iterations();
+        let evaluations = integral.evaluations();
+
+        let result_re = result.re;
+        let result_im = result.im;
+        let actual_error_re = (result_re - TARGET_RE).abs();
+        let actual_error_im = (result_im - TARGET_IM).abs();
+        let requested_error = TOL * result.abs();
+
+        assert!(actual_error_re < requested_error);
+        assert!(actual_error_im < requested_error);
+
+        println!("rule:\tRule09\nresult re:\t{result_re:e}\tactual re:\t{actual_error_re:e}\nresult im:\t{result_im:e}\tactual im:\t{actual_error_im:e}\nerror:\t{error:e}\titerations:\t{iterations}\tevaluations:\t{evaluations}");
+    }
+
+    {
+        const TOL: f64 = 1e-3;
+        println!("REL TOL:\t{TOL:e}");
+        let function = C11::new();
+
+        let limits = function.limits;
+        let rule = Rule07::<NDIM>::generate().unwrap();
+        let tolerance = Tolerance::Relative(TOL);
+
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
+
+        let integral = integrand.integrate().unwrap();
+        let result = integral.result();
+        let error = integral.error();
+        let iterations = integral.iterations();
+        let evaluations = integral.evaluations();
+
+        let result_re = result.re;
+        let result_im = result.im;
+        let actual_error_re = (result_re - TARGET_RE).abs();
+        let actual_error_im = (result_im - TARGET_IM).abs();
+        let requested_error = TOL * result.abs();
+
+        assert!(actual_error_re < requested_error);
+        assert!(actual_error_im < requested_error);
+
+        println!("rule:\tRule07\nresult re:\t{result_re:e}\tactual re:\t{actual_error_re:e}\nresult im:\t{result_im:e}\tactual im:\t{actual_error_im:e}\nerror:\t{error:e}\titerations:\t{iterations}\tevaluations:\t{evaluations}");
+
+        let function = C11::new();
+
+        let limits = function.limits;
+        let rule = Rule09::<NDIM>::generate().unwrap();
+        let tolerance = Tolerance::Relative(TOL);
+
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
+
+        let integral = integrand.integrate().unwrap();
+        let result = integral.result();
+        let error = integral.error();
+        let iterations = integral.iterations();
+        let evaluations = integral.evaluations();
+
+        let result_re = result.re;
+        let result_im = result.im;
+        let actual_error_re = (result_re - TARGET_RE).abs();
+        let actual_error_im = (result_im - TARGET_IM).abs();
+        let requested_error = TOL * result.abs();
+
+        assert!(actual_error_re < requested_error);
+        assert!(actual_error_im < requested_error);
+
+        println!("rule:\tRule09\nresult re:\t{result_re:e}\tactual re:\t{actual_error_re:e}\nresult im:\t{result_im:e}\tactual im:\t{actual_error_im:e}\nerror:\t{error:e}\titerations:\t{iterations}\tevaluations:\t{evaluations}");
+    }
+
+    {
+        const TOL: f64 = 1e-7;
+        println!("REL TOL:\t{TOL:e}");
+        let function = C11::new();
+
+        let limits = function.limits;
+        let rule = Rule07::<NDIM>::generate().unwrap();
+        let tolerance = Tolerance::Relative(TOL);
+
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
+
+        let integral = integrand.integrate().unwrap();
+        let result = integral.result();
+        let error = integral.error();
+        let iterations = integral.iterations();
+        let evaluations = integral.evaluations();
+
+        let result_re = result.re;
+        let result_im = result.im;
+        let actual_error_re = (result_re - TARGET_RE).abs();
+        let actual_error_im = (result_im - TARGET_IM).abs();
+        let requested_error = TOL * result.abs();
+
+        assert!(actual_error_re < requested_error);
+        assert!(actual_error_im < requested_error);
+
+        println!("rule:\tRule07\nresult re:\t{result_re:e}\tactual re:\t{actual_error_re:e}\nresult im:\t{result_im:e}\tactual im:\t{actual_error_im:e}\nerror:\t{error:e}\titerations:\t{iterations}\tevaluations:\t{evaluations}");
+
+        let function = C11::new();
+
+        let limits = function.limits;
+        let rule = Rule09::<NDIM>::generate().unwrap();
+        let tolerance = Tolerance::Relative(TOL);
+
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
+
+        let integral = integrand.integrate().unwrap();
+        let result = integral.result();
+        let error = integral.error();
+        let iterations = integral.iterations();
+        let evaluations = integral.evaluations();
+
+        let result_re = result.re;
+        let result_im = result.im;
+        let actual_error_re = (result_re - TARGET_RE).abs();
+        let actual_error_im = (result_im - TARGET_IM).abs();
+        let requested_error = TOL * result.abs();
+
+        assert!(actual_error_re < requested_error);
+        assert!(actual_error_im < requested_error);
+
+        println!("rule:\tRule09\nresult re:\t{result_re:e}\tactual re:\t{actual_error_re:e}\nresult im:\t{result_im:e}\tactual im:\t{actual_error_im:e}\nerror:\t{error:e}\titerations:\t{iterations}\tevaluations:\t{evaluations}");
+    }
+}
+
+#[test]
+fn van_booren_c37() {
+    use util::multi::{C37, C37_TARGET_IM, C37_TARGET_RE};
+
+    let max_iterations = 10000;
+    const NDIM: usize = 3;
+    const TARGET_RE: f64 = C37_TARGET_RE;
+    const TARGET_IM: f64 = C37_TARGET_IM;
+    println!("target re:\t{TARGET_RE}");
+    println!("target im:\t{TARGET_IM}");
+
+    {
+        // TODO possible for error on re and im to be significantly different
+        const TOL: f64 = 1e-1;
+        println!("REL TOL:\t{TOL:e}");
+        let function = C37::new();
+
+        let limits = function.limits;
+        let rule = Rule07::<NDIM>::generate().unwrap();
+        let tolerance = Tolerance::Relative(TOL);
+
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
+
+        let integral = integrand.integrate().unwrap();
+        let result = integral.result();
+        let error = integral.error();
+        let iterations = integral.iterations();
+        let evaluations = integral.evaluations();
+
+        let result_re = result.re;
+        let result_im = result.im;
+        let actual_error_re = (result_re - TARGET_RE).abs();
+        let actual_error_im = (result_im - TARGET_IM).abs();
+        let requested_error = TOL * result.abs();
+        println!("rule:\tRule07\nresult re:\t{result_re:e}\tactual re:\t{actual_error_re:e}\nresult im:\t{result_im:e}\tactual im:\t{actual_error_im:e}\nerror:\t{error:e}\titerations:\t{iterations}\tevaluations:\t{evaluations}");
+
+        assert!(actual_error_re < requested_error);
+        assert!(actual_error_im < requested_error);
+
+        let function = C37::new();
+
+        let limits = function.limits;
+        let rule = Rule09::<NDIM>::generate().unwrap();
+        let tolerance = Tolerance::Relative(TOL);
+
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
+
+        let integral = integrand.integrate().unwrap();
+        let result = integral.result();
+        let error = integral.error();
+        let iterations = integral.iterations();
+        let evaluations = integral.evaluations();
+
+        let result_re = result.re;
+        let result_im = result.im;
+        let actual_error_re = (result_re - TARGET_RE).abs();
+        let actual_error_im = (result_im - TARGET_IM).abs();
+        let requested_error = TOL * result.abs();
+
+        assert!(actual_error_re < requested_error);
+        assert!(actual_error_im < requested_error);
+
+        println!("rule:\tRule09\nresult re:\t{result_re:e}\tactual re:\t{actual_error_re:e}\nresult im:\t{result_im:e}\tactual im:\t{actual_error_im:e}\nerror:\t{error:e}\titerations:\t{iterations}\tevaluations:\t{evaluations}");
+
+        let function = C37::new();
+
+        let limits = function.limits;
+        let rule = Rule11::generate();
+        let tolerance = Tolerance::Relative(TOL);
+
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
+
+        let integral = integrand.integrate().unwrap();
+        let result = integral.result();
+        let error = integral.error();
+        let iterations = integral.iterations();
+        let evaluations = integral.evaluations();
+
+        let result_re = result.re;
+        let result_im = result.im;
+        let actual_error_re = (result_re - TARGET_RE).abs();
+        let actual_error_im = (result_im - TARGET_IM).abs();
+        let requested_error = TOL * result.abs();
+
+        assert!(actual_error_re < requested_error);
+        assert!(actual_error_im < requested_error);
+
+        println!("rule:\tRule09\nresult re:\t{result_re:e}\tactual re:\t{actual_error_re:e}\nresult im:\t{result_im:e}\tactual im:\t{actual_error_im:e}\nerror:\t{error:e}\titerations:\t{iterations}\tevaluations:\t{evaluations}");
+    }
+
+    {
+        const TOL: f64 = 1e-3;
+        println!("REL TOL:\t{TOL:e}");
+        let function = C37::new();
+
+        let limits = function.limits;
+        let rule = Rule07::<NDIM>::generate().unwrap();
+        let tolerance = Tolerance::Relative(TOL);
+
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
+
+        let integral = integrand.integrate().unwrap();
+        let result = integral.result();
+        let error = integral.error();
+        let iterations = integral.iterations();
+        let evaluations = integral.evaluations();
+
+        let result_re = result.re;
+        let result_im = result.im;
+        let actual_error_re = (result_re - TARGET_RE).abs();
+        let actual_error_im = (result_im - TARGET_IM).abs();
+        let requested_error = TOL * result.abs();
+
+        assert!(actual_error_re < requested_error);
+        assert!(actual_error_im < requested_error);
+
+        println!("rule:\tRule07\nresult re:\t{result_re:e}\tactual re:\t{actual_error_re:e}\nresult im:\t{result_im:e}\tactual im:\t{actual_error_im:e}\nerror:\t{error:e}\titerations:\t{iterations}\tevaluations:\t{evaluations}");
+
+        let function = C37::new();
+
+        let limits = function.limits;
+        let rule = Rule09::<NDIM>::generate().unwrap();
+        let tolerance = Tolerance::Relative(TOL);
+
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
+
+        let integral = integrand.integrate().unwrap();
+        let result = integral.result();
+        let error = integral.error();
+        let iterations = integral.iterations();
+        let evaluations = integral.evaluations();
+
+        let result_re = result.re;
+        let result_im = result.im;
+        let actual_error_re = (result_re - TARGET_RE).abs();
+        let actual_error_im = (result_im - TARGET_IM).abs();
+        let requested_error = TOL * result.abs();
+
+        assert!(actual_error_re < requested_error);
+        assert!(actual_error_im < requested_error);
+
+        println!("rule:\tRule09\nresult re:\t{result_re:e}\tactual re:\t{actual_error_re:e}\nresult im:\t{result_im:e}\tactual im:\t{actual_error_im:e}\nerror:\t{error:e}\titerations:\t{iterations}\tevaluations:\t{evaluations}");
+
+        let function = C37::new();
+
+        let limits = function.limits;
+        let rule = Rule11::generate();
+        let tolerance = Tolerance::Relative(TOL);
+
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
+
+        let integral = integrand.integrate().unwrap();
+        let result = integral.result();
+        let error = integral.error();
+        let iterations = integral.iterations();
+        let evaluations = integral.evaluations();
+
+        let result_re = result.re;
+        let result_im = result.im;
+        let actual_error_re = (result_re - TARGET_RE).abs();
+        let actual_error_im = (result_im - TARGET_IM).abs();
+        let requested_error = TOL * result.abs();
+
+        assert!(actual_error_re < requested_error);
+        assert!(actual_error_im < requested_error);
+
+        println!("rule:\tRule09\nresult re:\t{result_re:e}\tactual re:\t{actual_error_re:e}\nresult im:\t{result_im:e}\tactual im:\t{actual_error_im:e}\nerror:\t{error:e}\titerations:\t{iterations}\tevaluations:\t{evaluations}");
+    }
+
+    {
+        const TOL: f64 = 1e-7;
+        println!("REL TOL:\t{TOL:e}");
+        let function = C37::new();
+
+        let limits = function.limits;
+        let rule = Rule07::<NDIM>::generate().unwrap();
+        let tolerance = Tolerance::Relative(TOL);
+
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
+
+        let integral = integrand.integrate().unwrap();
+        let result = integral.result();
+        let error = integral.error();
+        let iterations = integral.iterations();
+        let evaluations = integral.evaluations();
+
+        let result_re = result.re;
+        let result_im = result.im;
+        let actual_error_re = (result_re - TARGET_RE).abs();
+        let actual_error_im = (result_im - TARGET_IM).abs();
+        let requested_error = TOL * result.abs();
+
+        assert!(actual_error_re < requested_error);
+        assert!(actual_error_im < requested_error);
+
+        println!("rule:\tRule07\nresult re:\t{result_re:e}\tactual re:\t{actual_error_re:e}\nresult im:\t{result_im:e}\tactual im:\t{actual_error_im:e}\nerror:\t{error:e}\titerations:\t{iterations}\tevaluations:\t{evaluations}");
+
+        let function = C37::new();
+
+        let limits = function.limits;
+        let rule = Rule09::<NDIM>::generate().unwrap();
+        let tolerance = Tolerance::Relative(TOL);
+
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
+
+        let integral = integrand.integrate().unwrap();
+        let result = integral.result();
+        let error = integral.error();
+        let iterations = integral.iterations();
+        let evaluations = integral.evaluations();
+
+        let result_re = result.re;
+        let result_im = result.im;
+        let actual_error_re = (result_re - TARGET_RE).abs();
+        let actual_error_im = (result_im - TARGET_IM).abs();
+        let requested_error = TOL * result.abs();
+
+        assert!(actual_error_re < requested_error);
+        assert!(actual_error_im < requested_error);
+
+        println!("rule:\tRule09\nresult re:\t{result_re:e}\tactual re:\t{actual_error_re:e}\nresult im:\t{result_im:e}\tactual im:\t{actual_error_im:e}\nerror:\t{error:e}\titerations:\t{iterations}\tevaluations:\t{evaluations}");
+
+        let function = C37::new();
+
+        let limits = function.limits;
+        let rule = Rule11::generate();
+        let tolerance = Tolerance::Relative(TOL);
+
+        let integrand = Adaptive::new(&function, &rule, limits, tolerance, max_iterations).unwrap();
+
+        let integral = integrand.integrate().unwrap();
+        let result = integral.result();
+        let error = integral.error();
+        let iterations = integral.iterations();
+        let evaluations = integral.evaluations();
+
+        let result_re = result.re;
+        let result_im = result.im;
+        let actual_error_re = (result_re - TARGET_RE).abs();
+        let actual_error_im = (result_im - TARGET_IM).abs();
+        let requested_error = TOL * result.abs();
+
+        assert!(actual_error_re < requested_error);
+        assert!(actual_error_im < requested_error);
+
+        println!("rule:\tRule09\nresult re:\t{result_re:e}\tactual re:\t{actual_error_re:e}\nresult im:\t{result_im:e}\tactual im:\t{actual_error_im:e}\nerror:\t{error:e}\titerations:\t{iterations}\tevaluations:\t{evaluations}");
     }
 }

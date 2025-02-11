@@ -190,6 +190,7 @@ where
             workspace.update(lower, upper);
 
             if error <= iteration_tolerance {
+                // TODO add individual checks on re and im error
                 return workspace.compute_result();
             }
 
