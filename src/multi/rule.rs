@@ -224,12 +224,7 @@ pub(crate) const fn scales_norms<const NDIM: usize, const TOTAL: usize>(
             norms[k][i] = 0.0;
             let mut j = 0;
             while j < TOTAL {
-                // FIXME TODO remove this check when abs() is const in stable
-                let weabs = if we[j].is_sign_negative() {
-                    -we[j]
-                } else {
-                    we[j]
-                };
+                let weabs = we[j].abs();
 
                 norms[k][i] += rule_points[j] * weabs;
                 j += 1;
