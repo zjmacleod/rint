@@ -33,7 +33,8 @@ impl Limits {
         self.width() * 0.5
     }
 
-    pub(crate) const fn bisect(&self) -> [Self; 2] {
+    #[must_use]
+    pub const fn bisect(&self) -> [Self; 2] {
         let upper = self.upper();
         let lower = self.lower();
         let midpoint = (upper + lower) * 0.5;

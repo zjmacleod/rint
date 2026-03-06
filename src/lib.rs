@@ -272,13 +272,14 @@ impl InitialisationError {
         Self { kind }
     }
 
-    pub(crate) const fn kind(&self) -> InitialisationErrorKind {
+    #[must_use]
+    pub const fn kind(&self) -> InitialisationErrorKind {
         self.kind
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
-pub(crate) enum InitialisationErrorKind {
+pub enum InitialisationErrorKind {
     /// The absolute tolerance bound `tol` requested for the adaptive integration routines must satisfy `tol > 0.0`.
     AbsoluteBoundNegativeOrZero(f64),
 
@@ -350,7 +351,7 @@ impl<T: ScalarF64> IntegrationError<T> {
     }
 
     /// Return the error [`IntegrationErrorKind`] which was encountered.
-    pub(crate) const fn kind(&self) -> IntegrationErrorKind {
+    pub const fn kind(&self) -> IntegrationErrorKind {
         self.kind
     }
 
@@ -362,7 +363,7 @@ impl<T: ScalarF64> IntegrationError<T> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
-pub(crate) enum IntegrationErrorKind {
+pub enum IntegrationErrorKind {
     /// The user supplied maximum number of adaptive iterations was reached before the
     /// requested numerical integration tolerance could be achieved.
     MaximumIterationsReached(usize),
