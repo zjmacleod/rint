@@ -1,4 +1,4 @@
-#[derive(Copy, Clone, Debug, PartialOrd, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Limits {
     lower: f64,
     upper: f64,

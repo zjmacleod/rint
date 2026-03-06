@@ -16,6 +16,7 @@
 /// The [`Rule`] struct defines a Gauss-Kronrod quadrature rule, containing the sets of points `x_i`
 /// and weights `w_i` for the `n`-point Gauss rule and the corresponding `(2n - 1)`-point Kronrod
 /// extension.
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Rule {
     evaluations: usize,
     kronrod_centre: f64,
@@ -136,6 +137,7 @@ impl Rule {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub(crate) struct SharedData {
     point: f64,
     gauss: f64,
@@ -161,6 +163,7 @@ impl SharedData {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub(crate) struct ExtendedData {
     point: f64,
     kronrod: f64,

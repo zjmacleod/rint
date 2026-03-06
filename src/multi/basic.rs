@@ -4,6 +4,7 @@ use crate::Limits;
 use crate::MultiDimensionalIntegrand;
 use crate::{InitialisationError, InitialisationErrorKind};
 
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Basic<'a, I, R, const NDIM: usize> {
     function: &'a I,
     rule: &'a R,

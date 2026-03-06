@@ -7,6 +7,7 @@ use crate::quadrature::rule::Rule;
 use crate::Integrand;
 use crate::Limits;
 
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub(crate) struct Integrator<'a, I> {
     function: &'a I,
     rule: &'a Rule,

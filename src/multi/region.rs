@@ -6,7 +6,7 @@ use crate::Limits;
 use crate::MultiDimensionalIntegrand;
 use crate::ScalarF64;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct Region<T: ScalarF64, const NDIM: usize> {
     pub(crate) error: f64,
     pub(crate) result: T,

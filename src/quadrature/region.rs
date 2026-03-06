@@ -7,7 +7,7 @@ use crate::Integrand;
 use crate::Limits;
 use crate::ScalarF64;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct Region<T> {
     pub(crate) result: T,
     pub(crate) error: f64,

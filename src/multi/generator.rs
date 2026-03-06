@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub(crate) struct Generator<const NDIM: usize>([f64; NDIM]);
 
 impl<const NDIM: usize> Generator<NDIM> {

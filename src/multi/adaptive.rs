@@ -10,6 +10,7 @@ use crate::{InitialisationError, InitialisationErrorKind};
 use crate::{IntegrationError, IntegrationErrorKind};
 use crate::{Limits, Tolerance};
 
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Adaptive<'a, I, R, const NDIM: usize> {
     function: &'a I,
     rule: &'a R,

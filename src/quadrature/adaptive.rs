@@ -137,6 +137,7 @@ use crate::{
 /// assert!((exp_result - result_basic).abs() / exp_result.abs() < tol);
 /// assert!((exp_error - error_basic).abs() / exp_error.abs() < tol);
 ///```
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Adaptive<'a, I> {
     function: &'a I,
     rule: &'a Rule,

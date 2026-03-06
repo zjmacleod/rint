@@ -97,6 +97,7 @@ use crate::{
 /// assert_eq!(iterations, 10);
 /// assert_eq!(evaluations, 2*15*(2*iterations - 1));
 ///```
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct AdaptiveSingularity<I> {
     function: I,
     rule: Rule,

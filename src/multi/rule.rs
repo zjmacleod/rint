@@ -9,6 +9,7 @@ use crate::multi::two_pow_n_f64;
 use crate::InitialisationError;
 use crate::ScalarF64;
 
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Rule<const NDIM: usize, const FINAL: usize, const TOTAL: usize> {
     initial_data: [Data<NDIM>; 3],
     final_data: [Data<NDIM>; FINAL],
@@ -112,6 +113,7 @@ impl Rule13 {
 
 const ADAPTIVE_ERROR_COEFF: AdaptiveErrorCoeff = AdaptiveErrorCoeff::new(0.5, 0.25);
 
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub(crate) struct Data<const NDIM: usize> {
     generator: Generator<NDIM>,
     weight: f64,
@@ -164,6 +166,7 @@ impl<const NDIM: usize> Data<NDIM> {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub(crate) struct ScalesNorms<const TOTAL: usize> {
     scales: [f64; TOTAL],
     norms: [f64; TOTAL],
@@ -245,6 +248,7 @@ pub(crate) const fn scales_norms<const NDIM: usize, const TOTAL: usize>(
     [scales_norms0, scales_norms1, scales_norms2]
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub(crate) struct BasicErrorCoeff {
     c1: f64,
     c2: f64,
@@ -277,6 +281,7 @@ impl BasicErrorCoeff {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub(crate) struct AdaptiveErrorCoeff {
     c5: f64,
     c6: f64,

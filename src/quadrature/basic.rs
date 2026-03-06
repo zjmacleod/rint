@@ -64,6 +64,7 @@ use crate::Limits;
 /// assert!((exp_result - result).abs() / exp_result.abs() < rel_tolerance);
 /// assert!((exp_abserr - abserr).abs() / exp_abserr.abs() < rel_tolerance);
 ///```
+#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Basic<'a, I> {
     function: &'a I,
     rule: &'a Rule,
