@@ -236,6 +236,7 @@ mod tests {
     use crate::multi::{Rule07, Rule09, Rule09N2, Rule11, Rule13};
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn compare_basic_7point_with_dcuhre_output_ndim_2() {
         const NDIM: usize = 2;
 
@@ -264,8 +265,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.79659970249839818;
-            let dcuhre_error = 2.7359932817440052E-005;
+            let dcuhre_result = 0.796_599_702_498_398_18;
+            let dcuhre_error = 2.735_993_281_744_005_2E-005;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -298,8 +299,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.55774638300971069;
-            let dcuhre_error = 1.3049001762496107E-005;
+            let dcuhre_result = 0.557_746_383_009_710_69;
+            let dcuhre_error = 1.304_900_176_249_610_7E-005;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -332,8 +333,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.51478351071879791;
-            let dcuhre_error = 0.37449223525594855;
+            let dcuhre_result = 0.514_783_510_718_797_91;
+            let dcuhre_error = 0.374_492_235_255_948_55;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -365,8 +366,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.99332124356102158;
-            let dcuhre_error = 9.3939393118662768E-005;
+            let dcuhre_result = 0.993_321_243_561_021_58;
+            let dcuhre_error = 9.393_939_311_866_276_8E-005;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -397,8 +398,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 887.97458362328393;
-            let dcuhre_error = 611.03739938210026;
+            let dcuhre_result = 887.974_583_623_283_93;
+            let dcuhre_error = 611.037_399_382_100_26;
             let dcuhre_bisection_axis = 1;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -408,6 +409,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn compare_basic_7point_with_dcuhre_output_ndim_3() {
         const NDIM: usize = 3;
 
@@ -437,8 +439,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.89120896753764178;
-            let dcuhre_error = 1.3869851434747299E-005;
+            let dcuhre_result = 0.891_208_967_537_641_78;
+            let dcuhre_error = 1.386_985_143_474_729_9E-005;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -473,8 +475,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.57845060677495597;
-            let dcuhre_error = 0.47067683202127575;
+            let dcuhre_result = 0.578_450_606_774_955_97;
+            let dcuhre_error = 0.470_676_832_021_275_75;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -507,8 +509,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.99921595669136032;
-            let dcuhre_error = 2.5792992219862503E-003;
+            let dcuhre_result = 0.999_215_956_691_360_32;
+            let dcuhre_error = 2.579_299_221_986_250_3E-003;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -546,8 +548,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = -899.77650881070997;
-            let dcuhre_error = 543.83282190394414;
+            let dcuhre_result = -899.776_508_810_709_97;
+            let dcuhre_error = 543.832_821_903_944_14;
             let dcuhre_bisection_axis = 1;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -557,6 +559,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn compare_basic_9point_with_dcuhre_output_ndim_2() {
         const NDIM: usize = 2;
 
@@ -585,8 +588,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.79659960474276592;
-            let dcuhre_error = 1.1790454197979140E-007;
+            let dcuhre_result = 0.796_599_604_742_765_92;
+            let dcuhre_error = 1.179_045_419_797_914_0E-007;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -619,8 +622,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.55774629320885161;
-            let dcuhre_error = 1.0994673617680367E-007;
+            let dcuhre_result = 0.557_746_293_208_851_61;
+            let dcuhre_error = 1.099_467_361_768_036_7E-007;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -653,8 +656,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.51479767604881388;
-            let dcuhre_error = 1.7183634341731721E-005;
+            let dcuhre_result = 0.514_797_676_048_813_88;
+            let dcuhre_error = 1.718_363_434_173_172_1E-005;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -686,8 +689,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.99331749179495410;
-            let dcuhre_error = 4.5254236323764512E-006;
+            let dcuhre_result = 0.993_317_491_794_954_10;
+            let dcuhre_error = 4.525_423_632_376_451_2E-006;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -718,8 +721,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 894.11725367485064;
-            let dcuhre_error = 205.10702112110653;
+            let dcuhre_result = 894.117_253_674_850_64;
+            let dcuhre_error = 205.107_021_121_106_53;
             let dcuhre_bisection_axis = 1;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -729,6 +732,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn compare_basic_9point_with_dcuhre_output_ndim_3() {
         const NDIM: usize = 3;
 
@@ -758,8 +762,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.89121284475576390;
-            let dcuhre_error = 2.8431093456305666E-003;
+            let dcuhre_result = 0.891_212_844_755_763_90;
+            let dcuhre_error = 2.843_109_345_630_566_6E-003;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -793,8 +797,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.41653839142919569;
-            let dcuhre_error = 7.2117833072453187E-008;
+            let dcuhre_result = 0.416_538_391_429_195_69;
+            let dcuhre_error = 7.211_783_307_245_318_7E-008;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -829,8 +833,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.57854494486523600;
-            let dcuhre_error = 4.2597555388569463E-005;
+            let dcuhre_result = 0.578_544_944_865_236_00;
+            let dcuhre_error = 4.259_755_538_856_946_3E-005;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -863,8 +867,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.99922153302627292;
-            let dcuhre_error = 7.5347754069994284E-004;
+            let dcuhre_result = 0.999_221_533_026_272_92;
+            let dcuhre_error = 7.534_775_406_999_428_4E-004;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -902,8 +906,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = -905.91915061432690;
-            let dcuhre_error = 144.00666640485426;
+            let dcuhre_result = -905.919_150_614_326_90;
+            let dcuhre_error = 144.006_666_404_854_26;
             let dcuhre_bisection_axis = 1;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -913,6 +917,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn compare_basic_11point_with_dcuhre_output_ndim_3() {
         const NDIM: usize = 3;
 
@@ -942,8 +947,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.89121279793446351;
-            let dcuhre_error = 1.5894785143767116E-008;
+            let dcuhre_result = 0.891_212_797_934_463_51;
+            let dcuhre_error = 1.589_478_514_376_711_6E-008;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -977,8 +982,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.41653838596655557;
-            let dcuhre_error = 3.2348830851556911E-006;
+            let dcuhre_result = 0.416_538_385_966_555_57;
+            let dcuhre_error = 3.234_883_085_155_691_1E-006;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -1013,8 +1018,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.57853848358343507;
-            let dcuhre_error = 2.3874271216029219E-003;
+            let dcuhre_result = 0.578_538_483_583_435_07;
+            let dcuhre_error = 2.387_427_121_602_921_9E-003;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -1047,8 +1052,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.99922120779864210;
-            let dcuhre_error = 1.3732744589107246E-007;
+            let dcuhre_result = 0.999_221_207_798_642_10;
+            let dcuhre_error = 1.373_274_458_910_724_6E-007;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -1086,8 +1091,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = -904.73349759612938;
-            let dcuhre_error = 36.531147257907918;
+            let dcuhre_result = -904.733_497_596_129_38;
+            let dcuhre_error = 36.531_147_257_907_918;
             let dcuhre_bisection_axis = 1;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -1097,6 +1102,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn compare_basic_13point_with_dcuhre_output_ndim_2() {
         const NDIM: usize = 2;
 
@@ -1125,8 +1131,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.79659959929708202;
-            let dcuhre_error = 3.2673674642535072E-013;
+            let dcuhre_result = 0.796_599_599_297_082_02;
+            let dcuhre_error = 3.267_367_464_253_507_2E-013;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -1159,8 +1165,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.55774628535131576;
-            let dcuhre_error = 9.7456124932917485E-012;
+            let dcuhre_result = 0.557_746_285_351_315_76;
+            let dcuhre_error = 9.745_612_493_291_748_5E-012;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -1193,8 +1199,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.51478983417297963;
-            let dcuhre_error = 4.4473459718302440E-004;
+            let dcuhre_result = 0.514_789_834_172_979_63;
+            let dcuhre_error = 4.447_345_971_830_244_0E-004;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -1226,8 +1232,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 0.99331725120688252;
-            let dcuhre_error = 8.0707600531214359E-010;
+            let dcuhre_result = 0.993_317_251_206_882_52;
+            let dcuhre_error = 8.070_760_053_121_435_9E-010;
             let dcuhre_bisection_axis = 0;
 
             assert_eq!(axis, dcuhre_bisection_axis);
@@ -1258,8 +1264,8 @@ mod tests {
             let result = integral_result.result();
             let error = integral_result.error();
             let axis = integral_result.bisection_axis();
-            let dcuhre_result = 911.85973569354837;
-            let dcuhre_error = 129.79778763945998;
+            let dcuhre_result = 911.859_735_693_548_37;
+            let dcuhre_error = 129.797_787_639_459_98;
             let dcuhre_bisection_axis = 1;
 
             assert_eq!(axis, dcuhre_bisection_axis);

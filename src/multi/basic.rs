@@ -35,7 +35,7 @@ where
             return Err(InitialisationError::new(
                 InitialisationErrorKind::InvalidDimension(NDIM),
             ));
-        };
+        }
         Ok(Self {
             function,
             rule,
@@ -43,6 +43,7 @@ where
         })
     }
 
+    #[must_use]
     pub fn integrate(&self) -> IntegralEstimate<I::Scalar> {
         let integral = self.integrator().integrate();
         IntegralEstimate::new()
@@ -53,6 +54,6 @@ where
     }
 
     const fn integrator(&self) -> Integrator<'_, I, NDIM, FINAL, TOTAL> {
-        Integrator::new(&self.function, &self.rule, self.limits)
+        Integrator::new(self.function, self.rule, self.limits)
     }
 }

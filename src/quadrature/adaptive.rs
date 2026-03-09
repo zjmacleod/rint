@@ -250,12 +250,13 @@ where
     }
 
     /// Return the integration [`Limits`]
+    #[must_use]
     pub const fn limits(&self) -> Limits {
         self.limits
     }
 }
 
-impl<'a, I: Integrand> Adaptive<'a, I> {
+impl<I: Integrand> Adaptive<'_, I> {
     fn initialise_workspace(&self, initial: Region<I::Scalar>) -> Workspace<I::Scalar> {
         let mut heap = BinaryHeap::with_capacity(2 * self.max_iterations + 1);
 

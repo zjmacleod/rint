@@ -40,6 +40,7 @@ pub(crate) const fn two_pow_n_f64(n: usize) -> f64 {
 }
 
 #[cfg(test)]
+#[allow(clippy::float_cmp)]
 mod tests {
     use super::*;
 

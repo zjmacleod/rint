@@ -89,7 +89,7 @@ impl<const NDIM: usize> Iterator for Permutations<NDIM> {
         if self.initial {
             self.initial = false;
             return Some(self.point());
-        };
+        }
 
         for i in 0..NDIM {
             self.current[i] = -self.current[i];
@@ -107,14 +107,14 @@ impl<const NDIM: usize> Iterator for Permutations<NDIM> {
                     self.current.swap(j - 1, i - j);
                     if value_j <= value_i {
                         self.i_exchange -= 1;
-                    };
+                    }
                     if self.current[j - 1] > value_i {
                         self.j_exchange = j - 1;
-                    };
+                    }
                 }
                 if self.current[self.i_exchange] <= value_i {
                     self.i_exchange = self.j_exchange;
-                };
+                }
                 self.current[i] = self.current[self.i_exchange];
                 self.current[self.i_exchange] = value_i;
                 return Some(self.point());
@@ -126,6 +126,7 @@ impl<const NDIM: usize> Iterator for Permutations<NDIM> {
 }
 
 #[cfg(test)]
+#[allow(clippy::float_cmp)] // TODO change comparisons and remove this
 mod tests_no_centre_or_half_widths {
     use super::*;
 
@@ -196,6 +197,7 @@ mod tests_no_centre_or_half_widths {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn check_ndim_3_generators() {
         let ndim = 3;
 
@@ -367,6 +369,7 @@ mod tests_no_centre_or_half_widths {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn check_ndim_4_generators() {
         let ndim = 4;
 
@@ -710,6 +713,7 @@ mod tests_no_centre_or_half_widths {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn check_ndim_5_generators() {
         let ndim = 5;
 
@@ -1317,6 +1321,7 @@ mod tests_no_centre_or_half_widths {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn check_ndim_6_generators() {
         let ndim = 6;
 
@@ -1589,7 +1594,7 @@ mod tests_no_centre_or_half_widths {
         {
             let vv = Generator::new([0.75f64, 0.75, 0.5, 0.0, 0.0, 0.0]);
 
-            let should_be = [
+            let should_be = vec![
                 [0.75, 0.75, 0.50, 0.0, 0.0, 0.0],
                 [-0.75, 0.75, 0.50, 0.0, 0.0, 0.0],
                 [0.75, -0.75, 0.50, 0.0, 0.0, 0.0],
@@ -2070,8 +2075,8 @@ mod tests_no_centre_or_half_widths {
                 [-0.0, 0.0, -0.0, -0.50, 0.75, -0.75],
                 [0.0, -0.0, 0.0, 0.50, -0.75, -0.75],
                 [-0.0, 0.0, -0.0, -0.50, -0.75, -0.75],
-            ]
-            .iter();
+            ];
+            let should_be = should_be.iter();
 
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
@@ -2345,6 +2350,7 @@ mod tests_no_centre_or_half_widths {
 }
 
 #[cfg(test)]
+#[allow(clippy::float_cmp)] // TODO change comparisons and remove this
 mod tests_with_centre_and_half_widths {
     use super::*;
     use crate::multi::two_pow_n;
@@ -2423,6 +2429,7 @@ mod tests_with_centre_and_half_widths {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn with_centre_hw_check_ndim_3_generators() {
         const NDIM: usize = 3;
 
@@ -2587,7 +2594,7 @@ mod tests_with_centre_and_half_widths {
             let mut count = 0;
             for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
-                println!("{:?}", a);
+                println!("{a:?}");
                 assert_eq!(a[0], b[0]);
                 assert_eq!(a[1], b[1]);
                 assert_eq!(a[2], b[2]);
@@ -2598,6 +2605,7 @@ mod tests_with_centre_and_half_widths {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn with_centre_hw_check_ndim_6_generators() {
         const NDIM: usize = 6;
 
@@ -2891,7 +2899,7 @@ mod tests_with_centre_and_half_widths {
         {
             let vv = Generator::new([0.75f64, 0.75, 0.5, 0.0, 0.0, 0.0]);
 
-            let should_be = [
+            let should_be = vec![
                 [0.75, 0.75, 0.50, 0.0, 0.0, 0.0],
                 [-0.75, 0.75, 0.50, 0.0, 0.0, 0.0],
                 [0.75, -0.75, 0.50, 0.0, 0.0, 0.0],
@@ -3372,8 +3380,9 @@ mod tests_with_centre_and_half_widths {
                 [-0.0, 0.0, -0.0, -0.50, 0.75, -0.75],
                 [0.0, -0.0, 0.0, 0.50, -0.75, -0.75],
                 [-0.0, 0.0, -0.0, -0.50, -0.75, -0.75],
-            ]
-            .map(|[a, b, c, d, e, f]| {
+            ];
+
+            let should_be = should_be.iter().map(|[a, b, c, d, e, f]| {
                 [
                     CV + a * HWV,
                     CV + b * HWV,

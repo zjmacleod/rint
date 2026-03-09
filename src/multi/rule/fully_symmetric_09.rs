@@ -27,7 +27,7 @@ pub(crate) const fn generate_rule<const NDIM: usize>(
         return Err(InitialisationError::new(
             InitialisationErrorKind::InvalidDimensionForRule09(NDIM),
         ));
-    };
+    }
 
     let evaluations = evaluations::<NDIM>();
     let basic_error_coeff = BASIC_ERROR_COEFF;
@@ -437,6 +437,7 @@ const fn generators<const NDIM: usize>() -> [Generator<NDIM>; TOTAL] {
 const BASIC_ERROR_COEFF: BasicErrorCoeff = BasicErrorCoeff::new(5.0, 5.0, 1.0, 5.0);
 
 #[cfg(test)]
+#[allow(clippy::too_many_lines, clippy::float_cmp, clippy::unreadable_literal)]
 mod tests {
     use super::*;
     use crate::multi::rule::util;
@@ -460,60 +461,60 @@ mod tests {
             const NDIM: usize = 3;
             let rule_points = rule_points::<NDIM>();
             let should_be = [1.0, 6.0, 6.0, 6.0, 6.0, 12.0, 24.0, 8.0, 8.0];
-            let mut sum: usize = 0;
+            let mut sum: f64 = 0.0;
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
                 assert_eq!(x, y);
-                sum += *x as usize;
+                sum += *x;
             }
-            assert_eq!(sum, evaluations::<NDIM>());
+            assert_eq!(sum, evaluations::<NDIM>() as f64);
         }
 
         {
             const NDIM: usize = 4;
             let rule_points = rule_points::<NDIM>();
             let should_be = [1.0, 8.0, 8.0, 8.0, 8.0, 24.0, 48.0, 32.0, 16.0];
-            let mut sum: usize = 0;
+            let mut sum: f64 = 0.0;
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
                 assert_eq!(x, y);
-                sum += *x as usize;
+                sum += *x;
             }
-            assert_eq!(sum, evaluations::<NDIM>());
+            assert_eq!(sum, evaluations::<NDIM>() as f64);
         }
 
         {
             const NDIM: usize = 5;
             let rule_points = rule_points::<NDIM>();
             let should_be = [1.0, 10.0, 10.0, 10.0, 10.0, 40.0, 80.0, 80.0, 32.0];
-            let mut sum: usize = 0;
+            let mut sum: f64 = 0.0;
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
                 assert_eq!(x, y);
-                sum += *x as usize;
+                sum += *x;
             }
-            assert_eq!(sum, evaluations::<NDIM>());
+            assert_eq!(sum, evaluations::<NDIM>() as f64);
         }
 
         {
             const NDIM: usize = 6;
             let rule_points = rule_points::<NDIM>();
             let should_be = [1.0, 12.0, 12.0, 12.0, 12.0, 60.0, 120.0, 160.0, 64.0];
-            let mut sum: usize = 0;
+            let mut sum: f64 = 0.0;
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
                 assert_eq!(x, y);
-                sum += *x as usize;
+                sum += *x;
             }
-            assert_eq!(sum, evaluations::<NDIM>());
+            assert_eq!(sum, evaluations::<NDIM>() as f64);
         }
 
         {
             const NDIM: usize = 15;
             let rule_points = rule_points::<NDIM>();
             let should_be = [1.0, 30.0, 30.0, 30.0, 30.0, 420.0, 840.0, 3640.0, 32768.0];
-            let mut sum: usize = 0;
+            let mut sum: f64 = 0.0;
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
                 assert_eq!(x, y);
-                sum += *x as usize;
+                sum += *x;
             }
-            assert_eq!(sum, evaluations::<NDIM>());
+            assert_eq!(sum, evaluations::<NDIM>() as f64);
         }
     }
 
@@ -1097,8 +1098,9 @@ mod tests {
     #[test]
     fn check_weights_scales_norms_correct() {
         {
-            let tol = 1e-12;
             const NDIM: usize = 3;
+
+            let tol = 1e-12;
             let (weights, scales_norms) = weights_scales_norms::<NDIM>();
             let weights_should_be = [
                 [
@@ -1252,8 +1254,9 @@ mod tests {
         }
 
         {
-            let tol = 1e-12;
             const NDIM: usize = 6;
+
+            let tol = 1e-12;
             let (weights, scales_norms) = weights_scales_norms::<NDIM>();
             let weights_should_be = [
                 [
@@ -1407,8 +1410,9 @@ mod tests {
         }
 
         {
-            let tol = 1e-12;
             const NDIM: usize = 15;
+
+            let tol = 1e-12;
             let (weights, scales_norms) = weights_scales_norms::<NDIM>();
 
             let weights_should_be = [
@@ -1566,8 +1570,9 @@ mod tests {
     #[test]
     fn check_data09_correct() {
         {
-            let tol = 1e-12;
             const NDIM: usize = 3;
+
+            let tol = 1e-12;
             let rule = generate_rule::<NDIM>().unwrap();
 
             let initial_data = rule.initial_data();
@@ -1674,13 +1679,14 @@ mod tests {
                     ],
                 ),
             ];
-            util::assert_check_vec_data_tol(&initial_data, &initial_should_be, tol);
-            util::assert_check_vec_data_tol(&final_data, &final_should_be, tol);
+            util::assert_check_vec_data_tol(initial_data, &initial_should_be, tol);
+            util::assert_check_vec_data_tol(final_data, &final_should_be, tol);
         }
 
         {
-            let tol = 1e-12;
             const NDIM: usize = 6;
+
+            let tol = 1e-12;
             let rule = generate_rule::<NDIM>().unwrap();
 
             let initial_data = rule.initial_data();
@@ -1843,13 +1849,14 @@ mod tests {
                     ],
                 ),
             ];
-            util::assert_check_vec_data_tol(&initial_data, &initial_should_be, tol);
-            util::assert_check_vec_data_tol(&final_data, &final_should_be, tol);
+            util::assert_check_vec_data_tol(initial_data, &initial_should_be, tol);
+            util::assert_check_vec_data_tol(final_data, &final_should_be, tol);
         }
 
         {
-            let tol = 1e-12;
             const NDIM: usize = 15;
+
+            let tol = 1e-12;
             let rule = generate_rule::<NDIM>().unwrap();
 
             let initial_data = rule.initial_data();
@@ -2093,8 +2100,8 @@ mod tests {
                     ],
                 ),
             ];
-            util::assert_check_vec_data_tol(&initial_data, &initial_should_be, tol);
-            util::assert_check_vec_data_tol(&final_data, &final_should_be, tol);
+            util::assert_check_vec_data_tol(initial_data, &initial_should_be, tol);
+            util::assert_check_vec_data_tol(final_data, &final_should_be, tol);
         }
     }
 }

@@ -25,7 +25,7 @@ pub(crate) const fn generate_rule<const NDIM: usize>(
         return Err(InitialisationError::new(
             InitialisationErrorKind::InvalidDimensionForRule07(NDIM),
         ));
-    };
+    }
     let evaluations = evaluations::<NDIM>();
     let basic_error_coeff = BASIC_ERROR_COEFF;
     let adaptive_error_coeff = ADAPTIVE_ERROR_COEFF;
@@ -278,6 +278,8 @@ const fn generators<const NDIM: usize>() -> [Generator<NDIM>; TOTAL] {
 const BASIC_ERROR_COEFF: BasicErrorCoeff = BasicErrorCoeff::new(5.0, 5.0, 1.0, 5.0);
 
 #[cfg(test)]
+#[allow(clippy::float_cmp)]
+#[allow(clippy::unreadable_literal)]
 mod tests {
     use super::*;
     use crate::multi::rule::util;
@@ -353,6 +355,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn check_generators_correct() {
         let tol = 1e-15;
 

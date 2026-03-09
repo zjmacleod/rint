@@ -22,7 +22,7 @@ impl<const NDIM: usize> Geometry<NDIM> {
             volume *= half_widths[j];
             if half_widths[j] > half_widths[largest_axis] {
                 largest_axis = j;
-            };
+            }
             j += 1;
         }
 
@@ -36,6 +36,7 @@ impl<const NDIM: usize> Geometry<NDIM> {
 }
 
 #[cfg(test)]
+#[allow(clippy::float_cmp)]
 mod tests {
     use super::*;
 

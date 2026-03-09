@@ -48,7 +48,7 @@ where
             return Err(InitialisationError::new(
                 InitialisationErrorKind::InvalidDimension(NDIM),
             ));
-        };
+        }
 
         tolerance.check()?;
 
@@ -68,7 +68,7 @@ where
     /// Returns an [`IntegrationError`] if:
     /// - TODO
     pub fn integrate(&self) -> Result<IntegralEstimate<I::Scalar>, IntegrationError<I::Scalar>> {
-        let initial = Integrator::new(&self.function, &self.rule, self.limits).integrate();
+        let initial = Integrator::new(&self.function, self.rule, self.limits).integrate();
 
         // TODO check initial integration?
         //
@@ -81,7 +81,7 @@ where
         while workspace.iteration < self.max_iterations {
             let previous = workspace.retrieve_largest_error()?;
 
-            let [lower, upper] = previous.bisect(&self.function, &self.rule);
+            let [lower, upper] = previous.bisect(&self.function, self.rule);
 
             let (result, error) = workspace.improved_result_error(&previous, &lower, &upper);
 
@@ -231,6 +231,7 @@ mod tests_relative {
     use crate::multi::{Rule07, Rule09, Rule11, Rule13};
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn compare_adaptive_7point_with_dcuhre_output_ndim_2() {
         const NDIM: usize = 2;
         const TOL: f64 = 1e-7;
@@ -262,8 +263,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.79659959933664204;
-            let dcuhre_error = 5.2361990216203975E-008;
+            let dcuhre_result = 0.796_599_599_336_642_04;
+            let dcuhre_error = 5.236_199_021_620_397_5E-008;
             let dcuhre_iter = 8;
 
             assert_eq!(iter, dcuhre_iter);
@@ -299,8 +300,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.55774628528556447;
-            let dcuhre_error = 3.6639853981745754E-008;
+            let dcuhre_result = 0.557_746_285_285_564_47;
+            let dcuhre_error = 3.663_985_398_174_575_4E-008;
             let dcuhre_iter = 15;
 
             assert_eq!(iter, dcuhre_iter);
@@ -336,8 +337,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.51478982537195195;
-            let dcuhre_error = 5.1101592647406511E-008;
+            let dcuhre_result = 0.514_789_825_371_951_95;
+            let dcuhre_error = 5.110_159_264_740_651_1E-008;
             let dcuhre_iter = 32;
 
             assert_eq!(iter, dcuhre_iter);
@@ -372,8 +373,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.99331725144532956;
-            let dcuhre_error = 8.1154853602071175E-008;
+            let dcuhre_result = 0.993_317_251_445_329_56;
+            let dcuhre_error = 8.115_485_360_207_117_5E-008;
             let dcuhre_iter = 13;
 
             assert_eq!(iter, dcuhre_iter);
@@ -407,8 +408,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 915.16141422826388;
-            let dcuhre_error = 9.0498160158280369E-005;
+            let dcuhre_result = 915.161_414_228_263_88;
+            let dcuhre_error = 9.049_816_015_828_036_9E-005;
             let dcuhre_iter = 122;
 
             assert_eq!(iter, dcuhre_iter);
@@ -419,6 +420,7 @@ mod tests_relative {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn compare_adaptive_7point_with_dcuhre_output_ndim_3() {
         const NDIM: usize = 3;
         const TOL: f64 = 1e-7;
@@ -451,8 +453,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.89121279725479763;
-            let dcuhre_error = 8.4688451939699204E-008;
+            let dcuhre_result = 0.891_212_797_254_797_63;
+            let dcuhre_error = 8.468_845_193_969_920_4E-008;
             let dcuhre_iter = 29;
 
             assert_eq!(iter, dcuhre_iter);
@@ -489,8 +491,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.41653838589891773;
-            let dcuhre_error = 4.1309505449997359E-008;
+            let dcuhre_result = 0.416_538_385_898_917_73;
+            let dcuhre_error = 4.130_950_544_999_735_9E-008;
             let dcuhre_iter = 50;
 
             assert_eq!(iter, dcuhre_iter);
@@ -528,8 +530,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.57854055859751030;
-            let dcuhre_error = 5.7504381834204602E-008;
+            let dcuhre_result = 0.578_540_558_597_510_30;
+            let dcuhre_error = 5.750_438_183_420_460_2E-008;
             let dcuhre_iter = 161;
 
             assert_eq!(iter, dcuhre_iter);
@@ -565,8 +567,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.99922121344591008;
-            let dcuhre_error = 9.8730425677660813E-008;
+            let dcuhre_result = 0.999_221_213_445_910_08;
+            let dcuhre_error = 9.873_042_567_766_081_3E-008;
             let dcuhre_iter = 19;
 
             assert_eq!(iter, dcuhre_iter);
@@ -607,8 +609,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = -926.96331826144592;
-            let dcuhre_error = 9.1088004807296453E-005;
+            let dcuhre_result = -926.963_318_261_445_92;
+            let dcuhre_error = 9.108_800_480_729_645_3E-005;
             let dcuhre_iter = 323;
 
             assert_eq!(iter, dcuhre_iter);
@@ -619,6 +621,7 @@ mod tests_relative {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn compare_adaptive_9point_with_dcuhre_output_ndim_3() {
         const NDIM: usize = 3;
         const TOL: f64 = 1e-7;
@@ -651,8 +654,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.89121279904294926;
-            let dcuhre_error = 2.9095568211933360E-008;
+            let dcuhre_result = 0.891_212_799_042_949_26;
+            let dcuhre_error = 2.909_556_821_193_336_0E-008;
             let dcuhre_iter = 11;
 
             assert_eq!(iter, dcuhre_iter);
@@ -689,8 +692,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.41653838877485561;
-            let dcuhre_error = 3.9221810923491651E-008;
+            let dcuhre_result = 0.416_538_388_774_855_61;
+            let dcuhre_error = 3.922_181_092_349_165_1E-008;
             let dcuhre_iter = 3;
 
             assert_eq!(iter, dcuhre_iter);
@@ -728,8 +731,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.57854055859929987;
-            let dcuhre_error = 4.8429415555578287E-008;
+            let dcuhre_result = 0.578_540_558_599_299_87;
+            let dcuhre_error = 4.842_941_555_557_828_7E-008;
             let dcuhre_iter = 30;
 
             assert_eq!(iter, dcuhre_iter);
@@ -765,8 +768,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.99922122294090299;
-            let dcuhre_error = 8.6788242268484642E-008;
+            let dcuhre_result = 0.999_221_222_940_902_99;
+            let dcuhre_error = 8.678_824_226_848_464_2E-008;
             let dcuhre_iter = 4;
 
             assert_eq!(iter, dcuhre_iter);
@@ -807,8 +810,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = -926.96332279388207;
-            let dcuhre_error = 8.9393505865191549E-005;
+            let dcuhre_result = -926.963_322_793_882_07;
+            let dcuhre_error = 8.939_350_586_519_154_9E-005;
             let dcuhre_iter = 49;
 
             assert_eq!(iter, dcuhre_iter);
@@ -819,6 +822,7 @@ mod tests_relative {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn compare_adaptive_11point_with_dcuhre_output_ndim_3() {
         const NDIM: usize = 3;
         const TOL: f64 = 1e-7;
@@ -851,8 +855,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.89121279809085707;
-            let dcuhre_error = 2.7684230235366546E-009;
+            let dcuhre_result = 0.891_212_798_090_857_07;
+            let dcuhre_error = 2.768_423_023_536_654_6E-009;
             let dcuhre_iter = 2;
 
             assert_eq!(iter, dcuhre_iter);
@@ -889,8 +893,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.41653838589354836;
-            let dcuhre_error = 1.5049516251831965E-009;
+            let dcuhre_result = 0.416_538_385_893_548_36;
+            let dcuhre_error = 1.504_951_625_183_196_5E-009;
             let dcuhre_iter = 2;
 
             assert_eq!(iter, dcuhre_iter);
@@ -928,8 +932,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.57854056257168118;
-            let dcuhre_error = 3.3561510766170479E-008;
+            let dcuhre_result = 0.578_540_562_571_681_18;
+            let dcuhre_error = 3.356_151_076_617_047_9E-008;
             let dcuhre_iter = 11;
 
             assert_eq!(iter, dcuhre_iter);
@@ -965,8 +969,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.99922121087502347;
-            let dcuhre_error = 3.3840200784563892E-008;
+            let dcuhre_result = 0.999_221_210_875_023_47;
+            let dcuhre_error = 3.384_020_078_456_389_2E-008;
             let dcuhre_iter = 2;
 
             assert_eq!(iter, dcuhre_iter);
@@ -1007,8 +1011,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = -926.96326270996929;
-            let dcuhre_error = 9.1854004280122431E-005;
+            let dcuhre_result = -926.963_262_709_969_29;
+            let dcuhre_error = 9.185_400_428_012_243_1E-005;
             let dcuhre_iter = 42;
 
             assert_eq!(iter, dcuhre_iter);
@@ -1019,6 +1023,7 @@ mod tests_relative {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn compare_adaptive_13point_with_dcuhre_output_ndim_2() {
         const NDIM: usize = 2;
         const TOL: f64 = 1e-7;
@@ -1050,8 +1055,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.79659959929705360;
-            let dcuhre_error = 4.2849519163043052E-010;
+            let dcuhre_result = 0.796_599_599_297_053_60;
+            let dcuhre_error = 4.284_951_916_304_305_2E-010;
             let dcuhre_iter = 2;
 
             assert_eq!(iter, dcuhre_iter);
@@ -1087,8 +1092,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.55774628535112658;
-            let dcuhre_error = 2.1148653359684426E-011;
+            let dcuhre_result = 0.557_746_285_351_126_58;
+            let dcuhre_error = 2.114_865_335_968_442_6E-011;
             let dcuhre_iter = 2;
 
             assert_eq!(iter, dcuhre_iter);
@@ -1124,8 +1129,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.51478982547960483;
-            let dcuhre_error = 7.6107864567909130E-009;
+            let dcuhre_result = 0.514_789_825_479_604_83;
+            let dcuhre_error = 7.610_786_456_790_913_0E-009;
             let dcuhre_iter = 7;
 
             assert_eq!(iter, dcuhre_iter);
@@ -1160,8 +1165,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 0.99331725120714986;
-            let dcuhre_error = 1.0234173072687019E-010;
+            let dcuhre_result = 0.993_317_251_207_149_86;
+            let dcuhre_error = 1.023_417_307_268_701_9E-010;
             let dcuhre_iter = 2;
 
             assert_eq!(iter, dcuhre_iter);
@@ -1195,8 +1200,8 @@ mod tests_relative {
             let result = integral_result.result();
             let error = integral_result.error();
             let iter = integral_result.iterations();
-            let dcuhre_result = 915.16141806432074;
-            let dcuhre_error = 8.3877707439014823E-005;
+            let dcuhre_result = 915.161_418_064_320_74;
+            let dcuhre_error = 8.387_770_743_901_482_3E-005;
             let dcuhre_iter = 37;
 
             assert_eq!(iter, dcuhre_iter);

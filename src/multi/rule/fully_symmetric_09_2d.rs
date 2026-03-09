@@ -359,6 +359,7 @@ pub const GENERATORS: [Generator<2>; TOTAL] = [
 const BASIC_ERROR_COEFF: BasicErrorCoeff = BasicErrorCoeff::new(5.0, 5.0, 1.0, 5.0);
 
 #[cfg(test)]
+#[allow(clippy::unreadable_literal)]
 mod tests {
     use super::*;
     use crate::multi::rule::util;

@@ -227,13 +227,13 @@ where
                     if next.abs_interval_length() > workspace.smallest_interval {
                         continue;
                     }
-                };
+                }
 
                 // the next interval to be bisected has the largest error and
                 // smallest interval. Store it to reduce error in large intervals
                 if let Some(smallest) = workspace.pop() {
                     workspace.store(smallest);
-                };
+                }
                 workspace.extrapolate = true;
             }
 
@@ -724,7 +724,7 @@ impl<T: ScalarF64> Workspace<T> {
     }
 
     fn check_error_and_compute(mut self) -> Result<IntegralEstimate<T>, IntegrationError<T>> {
-        if self.table.error == f64::MAX {
+        if (self.table.error - f64::MAX).abs() < f64::EPSILON {
             return self.compute_result();
         }
 
@@ -790,7 +790,7 @@ impl<T: ScalarF64> Workspace<T> {
             }
             if let Some(next) = self.pop() {
                 self.store(next);
-            };
+            }
         }
         false
     }
@@ -1109,8 +1109,8 @@ mod tests {
         let result_asc = 0.0;
         let limits = Limits::new(0.0, 0.0);
         let value = Region {
-            error,
             result,
+            error,
             result_abs,
             result_asc,
             limits,

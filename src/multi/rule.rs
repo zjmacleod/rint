@@ -332,6 +332,7 @@ mod util {
         }
     }
 
+    #[allow(clippy::similar_names)]
     pub(crate) fn assert_check_vec_data_tol<const WL: usize, const TY: usize>(
         calc: &[Data<TY>; WL],
         should_be: &[Data<TY>; WL],
