@@ -65,11 +65,7 @@ pub(crate) const fn generate_rule<const N: usize>(
 }
 
 const fn evaluations<const N: usize>() -> usize {
-    1 + 8 * N
-        + 2 * N * (N - 1)
-        + 4 * N * (N - 1)
-        + 4 * N * (N - 1) * (N - 2) / 3
-        + two_pow_n(N)
+    1 + 8 * N + 2 * N * (N - 1) + 4 * N * (N - 1) + 4 * N * (N - 1) * (N - 2) / 3 + two_pow_n(N)
 }
 
 const fn rule_points<const N: usize>() -> [f64; TOTAL] {

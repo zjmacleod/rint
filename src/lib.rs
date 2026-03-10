@@ -78,7 +78,7 @@
 //!         let mu = self.mean;
 //!         let sigma = self.standard_dev;
 //!
-//!         let prefactor = 1.0 / (2.0 * std::f64:consts::PI * sigma.powi(2));
+//!         let prefactor = 1.0 / (2.0 * std::f64::consts::PI * sigma.powi(2));
 //!         let exponent = - (x - mu).powi(2) / (2.0 * sigma.powi(2));
 //!
 //!         prefactor * exponent.exp()
@@ -306,11 +306,9 @@
 //! # Multi-dimensional example
 //!
 //! The following example integtates a 4-dimensional function $f(\mathbf{x})$,
-//!
 //! $$
 //! f(\mathbf{x}) = \frac{x_{3}^{2} x_{4} e^{x_{3} x_{4}}}{(1 + x_{1} + x_{2})^{2}}
 //! $$
-//!
 //! where $\mathbf{x} = (x_{1}, x_{2}, x_{3}, x_{4})$ over an $N=4$ dimensional hypercube
 //! $((0,1),(0,1),(0,2),(0,1))$ using a fully-symmetric 7-point adaptive algorithm.
 //! Adapted from P. van Dooren & L. de Ridder, "An adaptive algorithm for numerical integration over
@@ -419,7 +417,7 @@ pub use limits::Limits;
 ///         let mu = self.mean;
 ///         let sigma = self.standard_dev;
 ///
-///         let prefactor = 1.0 / (2.0 * std::f64:consts::PI * sigma.powi(2));
+///         let prefactor = 1.0 / (2.0 * std::f64::consts::PI * sigma.powi(2));
 ///         let exponent = - (x - mu).powi(2) / (2.0 * sigma.powi(2));
 ///
 ///         prefactor * exponent.exp()
@@ -460,35 +458,32 @@ impl<I: Integrand> Integrand for &I {
 /// the [`Integrand::evaluate`] method, which defines the value of the integrand at a point. The
 /// return type of the `evaluate` function is the associated type `Scalar`, which defines whether
 /// the function is real- (`Scalar=`[`std::f64`]) or complex-valued (`Scalar=`[`Complex<f64>`]).
-/// For example, consider probability density function of a normal distribution,
+/// For example, consider a nonlinear 4-dimensional function $f(\mathbf{x})$,
 /// $$
-/// f(x) = \frac{1}{\sqrt{2 \pi \sigma^{2}}} e^{- \frac{(x - \mu)^{2}}{2 \sigma^{2}}}
+/// f(\mathbf{x}) = a \frac{x_{3}^{2} x_{4} e^{x_{3} x_{4}}}{(1 + x_{1} + x_{2})^{2}}
 /// $$
-/// which has mean $\mu$ and standard deviation $\sigma$. To integrate this function, one first
-/// implements the [`Integrand`] trait,
+/// where $\mathbf{x} = (x_{1}, x_{2}, x_{3}, x_{4})$, which has some amplitude $a$. To integrate
+/// this function, one first implements the [`MultiDimensionalIntegrand`] trait,
 ///```rust
-/// use rint::Integrand;
+/// use rint::MultiDimensionalIntegrand;
 ///
-/// struct NormalDist {
-///     mean: f64,
-///     standard_dev: f64,
+/// const N: usize = 4;
+///
+/// struct F {
+///     amplitude: f64,
 /// }
 ///
-/// impl Integrand for NormalDist {
+/// impl MultiDimensionalIntegrand<N> for F {
 ///     type Scalar = f64;
-///     fn evaluate(&self, x: f64) -> Self::Scalar {
-///         let mu = self.mean;
-///         let sigma = self.standard_dev;
-///
-///         let prefactor = 1.0 / (2.0 * std::f64:consts::PI * sigma.powi(2));
-///         let exponent = - (x - mu).powi(2) / (2.0 * sigma.powi(2));
-///
-///         prefactor * exponent.exp()
+///     fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
+///         let [x1, x2, x3, x4] = coordinates;
+///         let a = self.amplitude;
+///         a * x3.powi(2) * x4 * (x3 * x4).exp() / (x1 + x2 + 1.0).powi(2)
 ///     }
 /// }
 ///```
-/// The type `NormalDist` can then be used as the `function` parameter in one of the numerical
-/// integration routines provided by the [`quadrature`] module.
+/// The type `F` can then be used as the `function` parameter in one of the numerical integration
+/// routines provided by the [`multi`] module.
 pub trait MultiDimensionalIntegrand<const N: usize> {
     /// The type that the function evaluates to.
     ///

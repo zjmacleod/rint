@@ -10,11 +10,7 @@ impl<const N: usize> Generator<N> {
         &self.0
     }
 
-    pub(crate) const fn point(
-        &self,
-        centre: &[f64; N],
-        half_widths: &[f64; N],
-    ) -> [f64; N] {
+    pub(crate) const fn point(&self, centre: &[f64; N], half_widths: &[f64; N]) -> [f64; N] {
         let mut point = [0.0; N];
         let mut i = 0;
         while i < N {
