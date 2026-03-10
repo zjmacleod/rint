@@ -15,3 +15,5 @@ debug = true
 [profile.release]
 debug = true
 
+[package.metadata.docs.rs]
+rustdoc-args = [ "--html-in-header", "katex-header.html" ]
