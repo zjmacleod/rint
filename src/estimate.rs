@@ -12,7 +12,6 @@ pub struct IntegralEstimate<T> {
     evaluations: usize,
 }
 
-/// TODO
 /// # Getters
 impl<T: ScalarF64> IntegralEstimate<T> {
     /// Return the numerically approximated value of the integral.
