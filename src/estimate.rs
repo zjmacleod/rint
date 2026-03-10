@@ -91,35 +91,11 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// for details.
     ///
     /// # Errors
-    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
-    /// obtained before an error was encountered.
-    /// The integration routine has several ways of failing:
-    /// - Function will return an error if the user provided `Tolerance` does not satisfy the
-    /// following constraints:
-    ///     - `Tolerance::Absolute(v)` where `v > 0.0` (kind = [`Kind::AbsoluteBoundNegativeOrZero`])
-    ///     - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON` (kind = [`Kind::RelativeBoundTooSmall`])
-    ///     - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON` (kind = [`Kind::InvalidTolerance`])
-    /// - The user supplied [`Tolerance`] could not be satisfied within the maximum number of
-    /// iterations (kind = [`Kind::MaximumIterationsReached`]).
-    /// - A roundoff error was detected. Can occur when the calculated numerical error from an
-    /// internal integration is smaller than the estimated roundoff, but larger than the tolerance
-    /// requested by the user, or when too many successive iterations do not reasonably improve the
-    /// integral value and error estimate (kind = [`Kind::RoundoffErrorDetected`]).
-    /// - Bisection of the highest error region into two subregions results in subregions with
-    /// integraion limits that are too small (kind = [`Kind::BadIntegrandBehaviour`]).
-    /// - An error is encountered when initialising the integration workspace. This is an internal
-    /// error, which should not occur downstream (kind = [`Kind::UninitialisedWorkspace`]).
+    /// The error enum [`Error`] will return the error variant, which either corresponds to an
+    /// [`InitialisationError`] or an [`IntegrationError`].
     ///
-    /// [`Kind`]: crate::quadrature::Kind
-    /// [`Kind::DivergentOrSlowlyConverging`]: crate::quadrature::Kind#variant.DivergentOrSlowlyConverging
-    /// [`Kind::BadIntegrandBehaviour`]: crate::quadrature::Kind#variant.BadIntegrandBehaviour
-    /// [`Kind::DoesNotConverge`]: crate::quadrature::Kind#variant.DoesNotConverge
-    /// [`Kind::UninitialisedWorkspace`]: crate::quadrature::Kind#variant.UninitialisedWorkspace
-    /// [`Kind::MaximumIterationsReached`]: crate::quadrature::Kind#variant.MaximumIterationsReached
-    /// [`Kind::RoundoffErrorDetected`]: crate::quadrature::Kind#variant.RoundoffErrorDetected
-    /// [`Kind::InvalidTolerance`]: crate::quadrature::Kind#variant.InvalidTolerance
-    /// [`Kind::RelativeBoundTooSmall`]: crate::quadrature::Kind#variant.RelativeBoundTooSmall
-    /// [`Kind::AbsoluteBoundNegativeOrZero`]: crate::quadrature::Kind#variant.AbsoluteBoundNegativeOrZero
+    /// [`InitialisationError`]: crate::InitialisationError
+    /// [`IntegrationError`]: crate::IntegrationError
     pub fn adaptive<'a, I: Integrand>(
         function: &'a I,
         rule: &'a Rule,
@@ -135,45 +111,15 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// interval, see [`AdaptiveSingularity`] for details.
     ///
     /// # Errors
-    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
-    /// obtained before an error was encountered.
-    /// The integration routine has several ways of failing:
-    /// - Function will return an error if the user provided `Tolerance` does not satisfy the
-    /// following constraints:
-    ///     - `Tolerance::Absolute(v)` where `v > 0.0` (kind = [`Kind::AbsoluteBoundNegativeOrZero`])
-    ///     - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON` (kind = [`Kind::RelativeBoundTooSmall`])
-    ///     - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON` (kind = [`Kind::InvalidTolerance`])
-    /// - The user supplied [`Tolerance`] could not be satisfied within the maximum number of
-    /// iterations (kind = [`Kind::MaximumIterationsReached`]).
-    /// - A roundoff error was detected. Can occur when the calculated numerical error from an
-    /// internal integration is smaller than the estimated roundoff, but larger than the tolerance
-    /// requested by the user, or when too many successive iterations do not reasonably improve the
-    /// integral value and error estimate (kind = [`Kind::RoundoffErrorDetected`]).
-    /// - Bisection of the highest error region into two subregions results in subregions with
-    /// integraion limits that are too small (kind = [`Kind::BadIntegrandBehaviour`]).
-    /// - The integral does not converge. Occurs if at least 5 bisections with extrapolation have
-    /// failed to improve the integral value and error estimates (kind = [`Kind::DoesNotConverge`])
-    /// - The integral is divergent or slowly convergent. Occurs if the ratio of the extrapolation
-    /// improved integral estimate and the non-extrapolated estimate is too large or small, or if
-    /// the calculated error is larger than the calculated value of the integral (kind =
-    /// [`Kind::DivergentOrSlowlyConverging`])
-    /// - An error is encountered when initialising the integration workspace. This is an internal
-    /// error, which should not occur downstream (kind = [`Kind::UninitialisedWorkspace`]).
+    /// The error enum [`Error`] will return the error variant, which either corresponds to an
+    /// [`InitialisationError`] or an [`IntegrationError`].
     ///
-    /// [`Kind`]: crate::quadrature::Kind
-    /// [`Kind::DivergentOrSlowlyConverging`]: crate::quadrature::Kind#variant.DivergentOrSlowlyConverging
-    /// [`Kind::BadIntegrandBehaviour`]: crate::quadrature::Kind#variant.BadIntegrandBehaviour
-    /// [`Kind::DoesNotConverge`]: crate::quadrature::Kind#variant.DoesNotConverge
-    /// [`Kind::UninitialisedWorkspace`]: crate::quadrature::Kind#variant.UninitialisedWorkspace
-    /// [`Kind::MaximumIterationsReached`]: crate::quadrature::Kind#variant.MaximumIterationsReached
-    /// [`Kind::RoundoffErrorDetected`]: crate::quadrature::Kind#variant.RoundoffErrorDetected
-    /// [`Kind::InvalidTolerance`]: crate::quadrature::Kind#variant.InvalidTolerance
-    /// [`Kind::RelativeBoundTooSmall`]: crate::quadrature::Kind#variant.RelativeBoundTooSmall
-    /// [`Kind::AbsoluteBoundNegativeOrZero`]: crate::quadrature::Kind#variant.AbsoluteBoundNegativeOrZero
+    /// [`InitialisationError`]: crate::InitialisationError
+    /// [`IntegrationError`]: crate::IntegrationError
     pub fn adaptive_singularity_finite<I: Integrand>(
+        function: I,
         limits: Limits,
         tolerance: Tolerance,
-        function: I,
         max_iterations: usize,
     ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
         let res = AdaptiveSingularity::finite(function, limits, tolerance, max_iterations)?
@@ -185,44 +131,14 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// interval, see [`AdaptiveSingularity`] for details.
     ///
     /// # Errors
-    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
-    /// obtained before an error was encountered.
-    /// The integration routine has several ways of failing:
-    /// - Function will return an error if the user provided `Tolerance` does not satisfy the
-    /// following constraints:
-    ///     - `Tolerance::Absolute(v)` where `v > 0.0` (kind = [`Kind::AbsoluteBoundNegativeOrZero`])
-    ///     - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON` (kind = [`Kind::RelativeBoundTooSmall`])
-    ///     - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON` (kind = [`Kind::InvalidTolerance`])
-    /// - The user supplied [`Tolerance`] could not be satisfied within the maximum number of
-    /// iterations (kind = [`Kind::MaximumIterationsReached`]).
-    /// - A roundoff error was detected. Can occur when the calculated numerical error from an
-    /// internal integration is smaller than the estimated roundoff, but larger than the tolerance
-    /// requested by the user, or when too many successive iterations do not reasonably improve the
-    /// integral value and error estimate (kind = [`Kind::RoundoffErrorDetected`]).
-    /// - Bisection of the highest error region into two subregions results in subregions with
-    /// integraion limits that are too small (kind = [`Kind::BadIntegrandBehaviour`]).
-    /// - The integral does not converge. Occurs if at least 5 bisections with extrapolation have
-    /// failed to improve the integral value and error estimates (kind = [`Kind::DoesNotConverge`])
-    /// - The integral is divergent or slowly convergent. Occurs if the ratio of the extrapolation
-    /// improved integral estimate and the non-extrapolated estimate is too large or small, or if
-    /// the calculated error is larger than the calculated value of the integral (kind =
-    /// [`Kind::DivergentOrSlowlyConverging`])
-    /// - An error is encountered when initialising the integration workspace. This is an internal
-    /// error, which should not occur downstream (kind = [`Kind::UninitialisedWorkspace`]).
+    /// The error enum [`Error`] will return the error variant, which either corresponds to an
+    /// [`InitialisationError`] or an [`IntegrationError`].
     ///
-    /// [`Kind`]: crate::quadrature::Kind
-    /// [`Kind::DivergentOrSlowlyConverging`]: crate::quadrature::Kind#variant.DivergentOrSlowlyConverging
-    /// [`Kind::BadIntegrandBehaviour`]: crate::quadrature::Kind#variant.BadIntegrandBehaviour
-    /// [`Kind::DoesNotConverge`]: crate::quadrature::Kind#variant.DoesNotConverge
-    /// [`Kind::UninitialisedWorkspace`]: crate::quadrature::Kind#variant.UninitialisedWorkspace
-    /// [`Kind::MaximumIterationsReached`]: crate::quadrature::Kind#variant.MaximumIterationsReached
-    /// [`Kind::RoundoffErrorDetected`]: crate::quadrature::Kind#variant.RoundoffErrorDetected
-    /// [`Kind::InvalidTolerance`]: crate::quadrature::Kind#variant.InvalidTolerance
-    /// [`Kind::RelativeBoundTooSmall`]: crate::quadrature::Kind#variant.RelativeBoundTooSmall
-    /// [`Kind::AbsoluteBoundNegativeOrZero`]: crate::quadrature::Kind#variant.AbsoluteBoundNegativeOrZero
+    /// [`InitialisationError`]: crate::InitialisationError
+    /// [`IntegrationError`]: crate::IntegrationError
     pub fn adaptive_singularity_infinite<I: Integrand>(
-        tolerance: Tolerance,
         function: I,
+        tolerance: Tolerance,
         max_iterations: usize,
     ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
         let res =
@@ -234,45 +150,15 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// interval (b, Inf), see [`AdaptiveSingularity`] for details.
     ///
     /// # Errors
-    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
-    /// obtained before an error was encountered.
-    /// The integration routine has several ways of failing:
-    /// - Function will return an error if the user provided `Tolerance` does not satisfy the
-    /// following constraints:
-    ///     - `Tolerance::Absolute(v)` where `v > 0.0` (kind = [`Kind::AbsoluteBoundNegativeOrZero`])
-    ///     - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON` (kind = [`Kind::RelativeBoundTooSmall`])
-    ///     - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON` (kind = [`Kind::InvalidTolerance`])
-    /// - The user supplied [`Tolerance`] could not be satisfied within the maximum number of
-    /// iterations (kind = [`Kind::MaximumIterationsReached`]).
-    /// - A roundoff error was detected. Can occur when the calculated numerical error from an
-    /// internal integration is smaller than the estimated roundoff, but larger than the tolerance
-    /// requested by the user, or when too many successive iterations do not reasonably improve the
-    /// integral value and error estimate (kind = [`Kind::RoundoffErrorDetected`]).
-    /// - Bisection of the highest error region into two subregions results in subregions with
-    /// integraion limits that are too small (kind = [`Kind::BadIntegrandBehaviour`]).
-    /// - The integral does not converge. Occurs if at least 5 bisections with extrapolation have
-    /// failed to improve the integral value and error estimates (kind = [`Kind::DoesNotConverge`])
-    /// - The integral is divergent or slowly convergent. Occurs if the ratio of the extrapolation
-    /// improved integral estimate and the non-extrapolated estimate is too large or small, or if
-    /// the calculated error is larger than the calculated value of the integral (kind =
-    /// [`Kind::DivergentOrSlowlyConverging`])
-    /// - An error is encountered when initialising the integration workspace. This is an internal
-    /// error, which should not occur downstream (kind = [`Kind::UninitialisedWorkspace`]).
+    /// The error enum [`Error`] will return the error variant, which either corresponds to an
+    /// [`InitialisationError`] or an [`IntegrationError`].
     ///
-    /// [`Kind`]: crate::quadrature::Kind
-    /// [`Kind::DivergentOrSlowlyConverging`]: crate::quadrature::Kind#variant.DivergentOrSlowlyConverging
-    /// [`Kind::BadIntegrandBehaviour`]: crate::quadrature::Kind#variant.BadIntegrandBehaviour
-    /// [`Kind::DoesNotConverge`]: crate::quadrature::Kind#variant.DoesNotConverge
-    /// [`Kind::UninitialisedWorkspace`]: crate::quadrature::Kind#variant.UninitialisedWorkspace
-    /// [`Kind::MaximumIterationsReached`]: crate::quadrature::Kind#variant.MaximumIterationsReached
-    /// [`Kind::RoundoffErrorDetected`]: crate::quadrature::Kind#variant.RoundoffErrorDetected
-    /// [`Kind::InvalidTolerance`]: crate::quadrature::Kind#variant.InvalidTolerance
-    /// [`Kind::RelativeBoundTooSmall`]: crate::quadrature::Kind#variant.RelativeBoundTooSmall
-    /// [`Kind::AbsoluteBoundNegativeOrZero`]: crate::quadrature::Kind#variant.AbsoluteBoundNegativeOrZero
+    /// [`InitialisationError`]: crate::InitialisationError
+    /// [`IntegrationError`]: crate::IntegrationError
     pub fn adaptive_singularity_semi_infinite_upper<I: Integrand>(
+        function: I,
         lower: f64,
         tolerance: Tolerance,
-        function: I,
         max_iterations: usize,
     ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
         let res =
@@ -285,45 +171,15 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     /// interval (-Inf, a), see [`AdaptiveSingularity`] for details.
     ///
     /// # Errors
-    /// The error type [`Error`] will return both the error [`Kind`] and the [`IntegralEstimate`]
-    /// obtained before an error was encountered.
-    /// The integration routine has several ways of failing:
-    /// - Function will return an error if the user provided `Tolerance` does not satisfy the
-    /// following constraints:
-    ///     - `Tolerance::Absolute(v)` where `v > 0.0` (kind = [`Kind::AbsoluteBoundNegativeOrZero`])
-    ///     - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON` (kind = [`Kind::RelativeBoundTooSmall`])
-    ///     - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON` (kind = [`Kind::InvalidTolerance`])
-    /// - The user supplied [`Tolerance`] could not be satisfied within the maximum number of
-    /// iterations (kind = [`Kind::MaximumIterationsReached`]).
-    /// - A roundoff error was detected. Can occur when the calculated numerical error from an
-    /// internal integration is smaller than the estimated roundoff, but larger than the tolerance
-    /// requested by the user, or when too many successive iterations do not reasonably improve the
-    /// integral value and error estimate (kind = [`Kind::RoundoffErrorDetected`]).
-    /// - Bisection of the highest error region into two subregions results in subregions with
-    /// integraion limits that are too small (kind = [`Kind::BadIntegrandBehaviour`]).
-    /// - The integral does not converge. Occurs if at least 5 bisections with extrapolation have
-    /// failed to improve the integral value and error estimates (kind = [`Kind::DoesNotConverge`])
-    /// - The integral is divergent or slowly convergent. Occurs if the ratio of the extrapolation
-    /// improved integral estimate and the non-extrapolated estimate is too large or small, or if
-    /// the calculated error is larger than the calculated value of the integral (kind =
-    /// [`Kind::DivergentOrSlowlyConverging`])
-    /// - An error is encountered when initialising the integration workspace. This is an internal
-    /// error, which should not occur downstream (kind = [`Kind::UninitialisedWorkspace`]).
+    /// The error enum [`Error`] will return the error variant, which either corresponds to an
+    /// [`InitialisationError`] or an [`IntegrationError`].
     ///
-    /// [`Kind`]: crate::quadrature::Kind
-    /// [`Kind::DivergentOrSlowlyConverging`]: crate::quadrature::Kind#variant.DivergentOrSlowlyConverging
-    /// [`Kind::BadIntegrandBehaviour`]: crate::quadrature::Kind#variant.BadIntegrandBehaviour
-    /// [`Kind::DoesNotConverge`]: crate::quadrature::Kind#variant.DoesNotConverge
-    /// [`Kind::UninitialisedWorkspace`]: crate::quadrature::Kind#variant.UninitialisedWorkspace
-    /// [`Kind::MaximumIterationsReached`]: crate::quadrature::Kind#variant.MaximumIterationsReached
-    /// [`Kind::RoundoffErrorDetected`]: crate::quadrature::Kind#variant.RoundoffErrorDetected
-    /// [`Kind::InvalidTolerance`]: crate::quadrature::Kind#variant.InvalidTolerance
-    /// [`Kind::RelativeBoundTooSmall`]: crate::quadrature::Kind#variant.RelativeBoundTooSmall
-    /// [`Kind::AbsoluteBoundNegativeOrZero`]: crate::quadrature::Kind#variant.AbsoluteBoundNegativeOrZero
+    /// [`InitialisationError`]: crate::InitialisationError
+    /// [`IntegrationError`]: crate::IntegrationError
     pub fn adaptive_singularity_semi_infinite_lower<I: Integrand>(
+        function: I,
         upper: f64,
         tolerance: Tolerance,
-        function: I,
         max_iterations: usize,
     ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
         let res =

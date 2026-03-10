@@ -146,25 +146,25 @@ where
     /// [`IntegralEstimate`] upon successful completion.
     ///
     /// # Errors
-    /// The error type [`IntegrationError`] will return both the error [`Kind`] and the [`IntegralEstimate`]
+    /// The error type [`IntegrationError`] will return both the error [`IntegrationErrorKind`] and the [`IntegralEstimate`]
     /// obtained before an error was encountered.
     /// The integration routine has several ways of failing:
     /// - The user supplied [`Tolerance`] could not be satisfied within the maximum number of
-    /// iterations (kind = [`Kind::MaximumIterationsReached`]).
+    /// iterations (kind = [`IntegrationErrorKind::MaximumIterationsReached`]).
     /// - A roundoff error was detected. Can occur when the calculated numerical error from an
     /// internal integration is smaller than the estimated roundoff, but larger than the tolerance
     /// requested by the user, or when too many successive iterations do not reasonably improve the
-    /// integral value and error estimate (kind = [`Kind::RoundoffErrorDetected`]).
+    /// integral value and error estimate (kind = [`IntegrationErrorKind::RoundoffErrorDetected`]).
     /// - Bisection of the highest error region into two subregions results in subregions with
-    /// integraion limits that are too small (kind = [`Kind::BadIntegrandBehaviour`]).
+    /// integraion limits that are too small (kind = [`IntegrationErrorKind::BadIntegrandBehaviour`]).
     /// - The integral does not converge. Occurs if at least 5 bisections with extrapolation have
-    /// failed to improve the integral value and error estimates (kind = [`Kind::DoesNotConverge`])
+    /// failed to improve the integral value and error estimates (kind = [`IntegrationErrorKind::DoesNotConverge`])
     /// - The integral is divergent or slowly convergent. Occurs if the ratio of the extrapolation
     /// improved integral estimate and the non-extrapolated estimate is too large or small, or if
     /// the calculated error is larger than the calculated value of the integral (kind =
-    /// [`Kind::DivergentOrSlowlyConverging`])
+    /// [`IntegrationErrorKind::DivergentOrSlowlyConverging`])
     /// - An error is encountered when initialising the integration workspace. This is an internal
-    /// error, which should not occur downstream (kind = [`Kind::UninitialisedWorkspace`]).
+    /// error, which should not occur downstream (kind = [`IntegrationErrorKind::UninitialisedWorkspace`]).
     pub fn integrate(&self) -> Result<IntegralEstimate<I::Scalar>, IntegrationError<I::Scalar>> {
         let initial = Integrator::new(&self.function, &self.rule, self.limits).integrate();
 
