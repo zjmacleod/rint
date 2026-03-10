@@ -9,24 +9,24 @@ use crate::Limits;
 use crate::MultiDimensionalIntegrand;
 use crate::ScalarF64;
 
-pub(crate) struct Integrator<'a, I, const NDIM: usize, const FINAL: usize, const TOTAL: usize>
+pub(crate) struct Integrator<'a, I, const N: usize, const FINAL: usize, const TOTAL: usize>
 where
-    I: MultiDimensionalIntegrand<NDIM>,
+    I: MultiDimensionalIntegrand<N>,
 {
     function: &'a I,
-    rule: &'a Rule<NDIM, FINAL, TOTAL>,
-    limits: [Limits; NDIM],
+    rule: &'a Rule<N, FINAL, TOTAL>,
+    limits: [Limits; N],
 }
 
-impl<'a, I, const NDIM: usize, const FINAL: usize, const TOTAL: usize>
-    Integrator<'a, I, NDIM, FINAL, TOTAL>
+impl<'a, I, const N: usize, const FINAL: usize, const TOTAL: usize>
+    Integrator<'a, I, N, FINAL, TOTAL>
 where
-    I: MultiDimensionalIntegrand<NDIM>,
+    I: MultiDimensionalIntegrand<N>,
 {
     pub(crate) const fn new(
         function: &'a I,
-        rule: &'a Rule<NDIM, FINAL, TOTAL>,
-        limits: [Limits; NDIM],
+        rule: &'a Rule<N, FINAL, TOTAL>,
+        limits: [Limits; N],
     ) -> Self {
         Self {
             function,
@@ -35,14 +35,14 @@ where
         }
     }
 
-    const fn geometry(&self) -> Geometry<NDIM> {
+    const fn geometry(&self) -> Geometry<N> {
         Geometry::new(&self.limits)
     }
 
     fn initial_integration(
         &self,
-        centre: &[f64; NDIM],
-        half_widths: &[f64; NDIM],
+        centre: &[f64; N],
+        half_widths: &[f64; N],
         largest_axis: usize,
     ) -> IntermediateResult<I::Scalar> {
         let ratio = self.rule.ratio();
@@ -60,7 +60,7 @@ where
 
         let mut difmax = 0.0;
 
-        for i in 0..NDIM {
+        for i in 0..N {
             point[i] = centre[i] - half_widths[i] * gen1;
             let fval_1_minus = self.function.evaluate(&point);
 
@@ -101,8 +101,8 @@ where
 
     fn complete_integration(
         &self,
-        centre: &[f64; NDIM],
-        half_widths: &[f64; NDIM],
+        centre: &[f64; N],
+        half_widths: &[f64; N],
         volume: f64,
         initial: IntermediateResult<I::Scalar>,
     ) -> (I::Scalar, f64) {
@@ -166,7 +166,7 @@ where
         error.abs()
     }
 
-    pub(crate) fn integrate(&self) -> Region<I::Scalar, NDIM> {
+    pub(crate) fn integrate(&self) -> Region<I::Scalar, N> {
         let Geometry {
             centre,
             half_widths,
@@ -200,7 +200,7 @@ struct IntermediateResult<T> {
 }
 
 impl<T: ScalarF64> IntermediateResult<T> {
-    fn new<const NDIM: usize>(fval: T, data: &Data<NDIM>, bisection_axis: usize) -> Self {
+    fn new<const N: usize>(fval: T, data: &Data<N>, bisection_axis: usize) -> Self {
         Self {
             result: fval * data.weight(),
             null1: fval * data.null1(),
@@ -211,7 +211,7 @@ impl<T: ScalarF64> IntermediateResult<T> {
         }
     }
 
-    fn add<const NDIM: usize>(&mut self, fval: T, data: &Data<NDIM>) -> &mut Self {
+    fn add<const N: usize>(&mut self, fval: T, data: &Data<N>) -> &mut Self {
         self.result += fval * data.weight();
         self.null1 += fval * data.null1();
         self.null2 += fval * data.null2();
@@ -238,14 +238,14 @@ mod tests {
     #[test]
     #[allow(clippy::too_many_lines)]
     fn compare_basic_7point_with_dcuhre_output_ndim_2() {
-        const NDIM: usize = 2;
+        const N: usize = 2;
 
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let exponent = -x * y;
@@ -256,7 +256,7 @@ mod tests {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -277,9 +277,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let exponent = -(x * x + y * y);
@@ -290,7 +290,7 @@ mod tests {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -311,9 +311,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let exponent = -((x * x).cos().powi(2) * (y * y).cos().powi(2));
@@ -324,7 +324,7 @@ mod tests {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -345,9 +345,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     f64::cos((1.0 + x * x).ln() * (1.0 + y * y).ln())
@@ -357,7 +357,7 @@ mod tests {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -378,9 +378,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     (x * x / (2.0 - x.cos())) + (y * y / (2.0 - y.cos()))
@@ -411,14 +411,14 @@ mod tests {
     #[test]
     #[allow(clippy::too_many_lines)]
     fn compare_basic_7point_with_dcuhre_output_ndim_3() {
-        const NDIM: usize = 3;
+        const N: usize = 3;
 
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -430,7 +430,7 @@ mod tests {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -451,9 +451,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -466,7 +466,7 @@ mod tests {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -487,9 +487,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -500,7 +500,7 @@ mod tests {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -521,9 +521,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -561,14 +561,14 @@ mod tests {
     #[test]
     #[allow(clippy::too_many_lines)]
     fn compare_basic_9point_with_dcuhre_output_ndim_2() {
-        const NDIM: usize = 2;
+        const N: usize = 2;
 
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let exponent = -x * y;
@@ -579,7 +579,7 @@ mod tests {
             let function = Function;
             let rule = Rule09N2::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -600,9 +600,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let exponent = -(x * x + y * y);
@@ -613,7 +613,7 @@ mod tests {
             let function = Function;
             let rule = Rule09N2::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -634,9 +634,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let exponent = -((x * x).cos().powi(2) * (y * y).cos().powi(2));
@@ -647,7 +647,7 @@ mod tests {
             let function = Function;
             let rule = Rule09N2::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -668,9 +668,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     f64::cos((1.0 + x * x).ln() * (1.0 + y * y).ln())
@@ -680,7 +680,7 @@ mod tests {
             let function = Function;
             let rule = Rule09N2::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -701,9 +701,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     (x * x / (2.0 - x.cos())) + (y * y / (2.0 - y.cos()))
@@ -734,14 +734,14 @@ mod tests {
     #[test]
     #[allow(clippy::too_many_lines)]
     fn compare_basic_9point_with_dcuhre_output_ndim_3() {
-        const NDIM: usize = 3;
+        const N: usize = 3;
 
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -753,7 +753,7 @@ mod tests {
             let function = Function;
             let rule = Rule09::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -774,9 +774,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -788,7 +788,7 @@ mod tests {
             let function = Function;
             let rule = Rule09::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -809,9 +809,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -824,7 +824,7 @@ mod tests {
             let function = Function;
             let rule = Rule09::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -845,9 +845,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -858,7 +858,7 @@ mod tests {
             let function = Function;
             let rule = Rule09::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -879,9 +879,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -919,14 +919,14 @@ mod tests {
     #[test]
     #[allow(clippy::too_many_lines)]
     fn compare_basic_11point_with_dcuhre_output_ndim_3() {
-        const NDIM: usize = 3;
+        const N: usize = 3;
 
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -938,7 +938,7 @@ mod tests {
             let function = Function;
             let rule = Rule11::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -959,9 +959,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -973,7 +973,7 @@ mod tests {
             let function = Function;
             let rule = Rule11::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -994,9 +994,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -1009,7 +1009,7 @@ mod tests {
             let function = Function;
             let rule = Rule11::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -1030,9 +1030,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -1043,7 +1043,7 @@ mod tests {
             let function = Function;
             let rule = Rule11::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -1064,9 +1064,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -1104,14 +1104,14 @@ mod tests {
     #[test]
     #[allow(clippy::too_many_lines)]
     fn compare_basic_13point_with_dcuhre_output_ndim_2() {
-        const NDIM: usize = 2;
+        const N: usize = 2;
 
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let exponent = -x * y;
@@ -1122,7 +1122,7 @@ mod tests {
             let function = Function;
             let rule = Rule13::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -1143,9 +1143,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let exponent = -(x * x + y * y);
@@ -1156,7 +1156,7 @@ mod tests {
             let function = Function;
             let rule = Rule13::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -1177,9 +1177,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let exponent = -((x * x).cos().powi(2) * (y * y).cos().powi(2));
@@ -1190,7 +1190,7 @@ mod tests {
             let function = Function;
             let rule = Rule13::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -1211,9 +1211,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     f64::cos((1.0 + x * x).ln() * (1.0 + y * y).ln())
@@ -1223,7 +1223,7 @@ mod tests {
             let function = Function;
             let rule = Rule13::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -1244,9 +1244,9 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     (x * x / (2.0 - x.cos())) + (y * y / (2.0 - y.cos()))

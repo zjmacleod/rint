@@ -16,7 +16,7 @@ pub use rule::{Rule, Rule07, Rule09, Rule09N2, Rule11, Rule13};
 pub(crate) const fn two_pow_n(n: usize) -> usize {
     let mut exp = n;
 
-    // Never need to check this since NDIM > 2
+    // Never need to check this since N > 2
     //if exp == 0 {
     //    return 1;
     //}

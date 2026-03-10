@@ -10,9 +10,9 @@ use crate::InitialisationError;
 use crate::ScalarF64;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub struct Rule<const NDIM: usize, const FINAL: usize, const TOTAL: usize> {
-    initial_data: [Data<NDIM>; 3],
-    final_data: [Data<NDIM>; FINAL],
+pub struct Rule<const N: usize, const FINAL: usize, const TOTAL: usize> {
+    initial_data: [Data<N>; 3],
+    final_data: [Data<N>; FINAL],
     scales_norms: [ScalesNorms<TOTAL>; 3],
     basic_error_coeff: BasicErrorCoeff,
     adaptive_error_coeff: AdaptiveErrorCoeff,
@@ -20,12 +20,12 @@ pub struct Rule<const NDIM: usize, const FINAL: usize, const TOTAL: usize> {
     ratio: f64,
 }
 
-impl<const NDIM: usize, const FINAL: usize, const TOTAL: usize> Rule<NDIM, FINAL, TOTAL> {
-    pub(crate) const fn initial_data(&self) -> &[Data<NDIM>; 3] {
+impl<const N: usize, const FINAL: usize, const TOTAL: usize> Rule<N, FINAL, TOTAL> {
+    pub(crate) const fn initial_data(&self) -> &[Data<N>; 3] {
         &self.initial_data
     }
 
-    pub(crate) const fn final_data(&self) -> &[Data<NDIM>; FINAL] {
+    pub(crate) const fn final_data(&self) -> &[Data<N>; FINAL] {
         &self.final_data
     }
 
@@ -50,61 +50,61 @@ impl<const NDIM: usize, const FINAL: usize, const TOTAL: usize> Rule<NDIM, FINAL
     }
 }
 
-/// A 7-point fully-symmetric integration rule valid for `2 <= NDIM <= 15`.
+/// A 7-point fully-symmetric integration rule valid for `2 <= N <= 15`.
 ///
 /// This is the recommended rule to use when a significant amount of adaptivity is required.
-pub type Rule07<const NDIM: usize> = Rule<NDIM, 3, 6>;
+pub type Rule07<const N: usize> = Rule<N, 3, 6>;
 
-impl<const NDIM: usize> Rule07<NDIM> {
+impl<const N: usize> Rule07<N> {
     /// Generate a fully-symmetric 7-point integration rule.
     ///
     /// # Errors
-    /// Will fail if `NDIM < 2` or `NDIM > 15`.
+    /// Will fail if `N < 2` or `N > 15`.
     pub const fn generate() -> Result<Self, InitialisationError> {
-        fully_symmetric_07::generate_rule::<NDIM>()
+        fully_symmetric_07::generate_rule::<N>()
     }
 }
 
-/// A 9-point fully-symmetric integration rule valid for `3 <= NDIM <= 15`.
-pub type Rule09<const NDIM: usize> = Rule<NDIM, 6, 9>;
+/// A 9-point fully-symmetric integration rule valid for `3 <= N <= 15`.
+pub type Rule09<const N: usize> = Rule<N, 6, 9>;
 
-impl<const NDIM: usize> Rule09<NDIM> {
-    /// Generate a fully-symmetric 9-point integration rule for NDIM > 3 dimensional integration.
+impl<const N: usize> Rule09<N> {
+    /// Generate a fully-symmetric 9-point integration rule for N > 3 dimensional integration.
     ///
     /// # Errors
-    /// Will fail if `NDIM < 3` or `NDIM > 15`.
+    /// Will fail if `N < 3` or `N > 15`.
     pub const fn generate() -> Result<Self, InitialisationError> {
-        fully_symmetric_09::generate_rule::<NDIM>()
+        fully_symmetric_09::generate_rule::<N>()
     }
 }
 
-/// A 9-point fully-symmetric integration rule valid for `NDIM == 2`.
+/// A 9-point fully-symmetric integration rule valid for `N == 2`.
 pub type Rule09N2 = Rule<2, 5, 8>;
 
 impl Rule09N2 {
-    /// Generate a fully-symmetric 9-point integration rule for NDIM == 3 dimensional integration.
+    /// Generate a fully-symmetric 9-point integration rule for N == 3 dimensional integration.
     #[must_use]
     pub const fn generate() -> Self {
         fully_symmetric_09_2d::generate_rule()
     }
 }
 
-/// A 11-point fully-symmetric integration rule valid for `NDIM == 3`.
+/// A 11-point fully-symmetric integration rule valid for `N == 3`.
 pub type Rule11 = Rule<3, 10, 13>;
 
 impl Rule11 {
-    /// Generate a fully-symmetric 11-point integration rule for `NDIM = 3` dimensional integration.
+    /// Generate a fully-symmetric 11-point integration rule for `N = 3` dimensional integration.
     #[must_use]
     pub const fn generate() -> Self {
         fully_symmetric_11_3d::generate_rule()
     }
 }
 
-/// A 13-point fully-symmetric integration rule valid for `NDIM == 2`.
+/// A 13-point fully-symmetric integration rule valid for `N == 2`.
 pub type Rule13 = Rule<2, 11, 14>;
 
 impl Rule13 {
-    /// Generate a fully-symmetric 13-point integration rule for `NDIM = 2` dimensional integration.
+    /// Generate a fully-symmetric 13-point integration rule for `N = 2` dimensional integration.
     #[must_use]
     pub const fn generate() -> Self {
         fully_symmetric_13_2d::generate_rule()
@@ -114,8 +114,8 @@ impl Rule13 {
 const ADAPTIVE_ERROR_COEFF: AdaptiveErrorCoeff = AdaptiveErrorCoeff::new(0.5, 0.25);
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub(crate) struct Data<const NDIM: usize> {
-    generator: Generator<NDIM>,
+pub(crate) struct Data<const N: usize> {
+    generator: Generator<N>,
     weight: f64,
     null1: f64,
     null2: f64,
@@ -123,8 +123,8 @@ pub(crate) struct Data<const NDIM: usize> {
     null4: f64,
 }
 
-impl<const NDIM: usize> Data<NDIM> {
-    pub(crate) const fn new(generator: Generator<NDIM>, weights: [f64; 5]) -> Self {
+impl<const N: usize> Data<N> {
+    pub(crate) const fn new(generator: Generator<N>, weights: [f64; 5]) -> Self {
         let [weight, null1, null2, null3, null4] = weights;
         Self {
             generator,
@@ -136,7 +136,7 @@ impl<const NDIM: usize> Data<NDIM> {
         }
     }
 
-    pub(crate) const fn generator(&self) -> &Generator<NDIM> {
+    pub(crate) const fn generator(&self) -> &Generator<N> {
         &self.generator
     }
 
@@ -197,11 +197,11 @@ impl<const TOTAL: usize> ScalesNorms<TOTAL> {
     }
 }
 
-pub(crate) const fn scales_norms<const NDIM: usize, const TOTAL: usize>(
+pub(crate) const fn scales_norms<const N: usize, const TOTAL: usize>(
     weights: &[[f64; 5]; TOTAL],
     rule_points: [f64; TOTAL],
 ) -> [ScalesNorms<TOTAL>; 3] {
-    let two_ndim = two_pow_n_f64(NDIM);
+    let two_ndim = two_pow_n_f64(N);
 
     let mut scales = [[0f64; TOTAL]; 3];
     let mut norms = [[0f64; TOTAL]; 3];
@@ -381,54 +381,54 @@ mod tests {
     #[test]
     fn error_when_wrong_dimension() {
         {
-            const NDIM: usize = 1;
-            let err = Rule07::<NDIM>::generate();
+            const N: usize = 1;
+            let err = Rule07::<N>::generate();
             assert!(err.is_err());
         }
         {
-            const NDIM: usize = 2;
-            let err = Rule07::<NDIM>::generate();
+            const N: usize = 2;
+            let err = Rule07::<N>::generate();
             assert!(err.is_ok());
         }
         {
-            const NDIM: usize = 8;
-            let err = Rule07::<NDIM>::generate();
+            const N: usize = 8;
+            let err = Rule07::<N>::generate();
             assert!(err.is_ok());
         }
         {
-            const NDIM: usize = 15;
-            let err = Rule07::<NDIM>::generate();
+            const N: usize = 15;
+            let err = Rule07::<N>::generate();
             assert!(err.is_ok());
         }
         {
-            const NDIM: usize = 16;
-            let err = Rule07::<NDIM>::generate();
+            const N: usize = 16;
+            let err = Rule07::<N>::generate();
             assert!(err.is_err());
         }
 
         {
-            const NDIM: usize = 1;
-            let err = Rule09::<NDIM>::generate();
+            const N: usize = 1;
+            let err = Rule09::<N>::generate();
             assert!(err.is_err());
         }
         {
-            const NDIM: usize = 2;
-            let err = Rule09::<NDIM>::generate();
+            const N: usize = 2;
+            let err = Rule09::<N>::generate();
             assert!(err.is_err());
         }
         {
-            const NDIM: usize = 8;
-            let err = Rule09::<NDIM>::generate();
+            const N: usize = 8;
+            let err = Rule09::<N>::generate();
             assert!(err.is_ok());
         }
         {
-            const NDIM: usize = 15;
-            let err = Rule09::<NDIM>::generate();
+            const N: usize = 15;
+            let err = Rule09::<N>::generate();
             assert!(err.is_ok());
         }
         {
-            const NDIM: usize = 16;
-            let err = Rule09::<NDIM>::generate();
+            const N: usize = 16;
+            let err = Rule09::<N>::generate();
             assert!(err.is_err());
         }
     }

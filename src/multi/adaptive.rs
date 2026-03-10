@@ -11,27 +11,27 @@ use crate::{IntegrationError, IntegrationErrorKind};
 use crate::{Limits, Tolerance};
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
-pub struct Adaptive<'a, I, R, const NDIM: usize> {
+pub struct Adaptive<'a, I, R, const N: usize> {
     function: &'a I,
     rule: &'a R,
-    limits: [Limits; NDIM],
+    limits: [Limits; N],
     tolerance: Tolerance,
     max_iterations: usize,
 }
 
-impl<'a, I, const NDIM: usize, const FINAL: usize, const TOTAL: usize>
-    Adaptive<'a, I, Rule<NDIM, FINAL, TOTAL>, NDIM>
+impl<'a, I, const N: usize, const FINAL: usize, const TOTAL: usize>
+    Adaptive<'a, I, Rule<N, FINAL, TOTAL>, N>
 where
-    I: MultiDimensionalIntegrand<NDIM>,
+    I: MultiDimensionalIntegrand<N>,
 {
     /// Generate a new adaptive multi-dimensional integrator.
     ///
     /// # Errors
     ///
     /// Returns an [`InitialisationError`] if:
-    /// - The requested dimensionality `NDIM` is invalid. `NDIM` must match the dimensionality of
+    /// - The requested dimensionality `N` is invalid. `N` must match the dimensionality of
     /// the selected fully-symmetric multi-dimensional integration [`Rule`] and (in general)
-    /// satisfy `2 <= NDIM <= 15`.
+    /// satisfy `2 <= N <= 15`.
     /// - The requested [`Tolerance`] is invalid. The tolerance muse satisfy the following
     /// constraints:
     ///     - `Tolerance::Absolute(v)` where `v > 0.0`
@@ -39,14 +39,14 @@ where
     ///     - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON`
     pub fn new(
         function: &'a I,
-        rule: &'a Rule<NDIM, FINAL, TOTAL>,
-        limits: [Limits; NDIM],
+        rule: &'a Rule<N, FINAL, TOTAL>,
+        limits: [Limits; N],
         tolerance: Tolerance,
         max_iterations: usize,
     ) -> Result<Self, InitialisationError> {
-        if NDIM < 2 || NDIM > 15 {
+        if N < 2 || N > 15 {
             return Err(InitialisationError::new(
-                InitialisationErrorKind::InvalidDimension(NDIM),
+                InitialisationErrorKind::InvalidDimension(N),
             ));
         }
 
@@ -110,7 +110,7 @@ where
         }
     }
 
-    fn initialise_workspace(&self, initial: Region<I::Scalar, NDIM>) -> Workspace<I::Scalar, NDIM> {
+    fn initialise_workspace(&self, initial: Region<I::Scalar, N>) -> Workspace<I::Scalar, N> {
         let iteration = 1;
         let result = initial.result();
         let error = initial.error();
@@ -133,18 +133,18 @@ where
     }
 }
 
-struct Workspace<T: ScalarF64, const NDIM: usize> {
-    heap: BinaryHeap<Region<T, NDIM>>,
+struct Workspace<T: ScalarF64, const N: usize> {
+    heap: BinaryHeap<Region<T, N>>,
     iteration: usize,
     result: T,
     error: f64,
-    limits: [Limits; NDIM],
+    limits: [Limits; N],
     bisection_axis: usize,
     evaluations_per_integration: usize,
 }
 
-impl<T: ScalarF64, const NDIM: usize> Workspace<T, NDIM> {
-    fn retrieve_largest_error(&mut self) -> Result<Region<T, NDIM>, IntegrationError<T>> {
+impl<T: ScalarF64, const N: usize> Workspace<T, N> {
+    fn retrieve_largest_error(&mut self) -> Result<Region<T, N>, IntegrationError<T>> {
         self.iteration += 1;
         if let Some(previous) = self.pop() {
             self.limits = *previous.limits();
@@ -157,19 +157,19 @@ impl<T: ScalarF64, const NDIM: usize> Workspace<T, NDIM> {
         }
     }
 
-    fn pop(&mut self) -> Option<Region<T, NDIM>> {
+    fn pop(&mut self) -> Option<Region<T, N>> {
         self.heap.pop()
     }
 
-    fn push(&mut self, integral: Region<T, NDIM>) {
+    fn push(&mut self, integral: Region<T, N>) {
         self.heap.push(integral);
     }
 
     fn improved_result_error(
         &mut self,
-        previous: &Region<T, NDIM>,
-        lower: &Region<T, NDIM>,
-        upper: &Region<T, NDIM>,
+        previous: &Region<T, N>,
+        lower: &Region<T, N>,
+        upper: &Region<T, N>,
     ) -> (T, f64) {
         let prev_result = previous.result();
         let prev_error = previous.error();
@@ -233,15 +233,15 @@ mod tests_relative {
     #[test]
     #[allow(clippy::too_many_lines)]
     fn compare_adaptive_7point_with_dcuhre_output_ndim_2() {
-        const NDIM: usize = 2;
+        const N: usize = 2;
         const TOL: f64 = 1e-7;
 
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let exponent = -x * y;
@@ -252,7 +252,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -276,9 +276,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let exponent = -(x * x + y * y);
@@ -289,7 +289,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -313,9 +313,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let exponent = -((x * x).cos().powi(2) * (y * y).cos().powi(2));
@@ -326,7 +326,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -350,9 +350,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     f64::cos((1.0 + x * x).ln() * (1.0 + y * y).ln())
@@ -362,7 +362,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -386,9 +386,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     (x * x / (2.0 - x.cos())) + (y * y / (2.0 - y.cos()))
@@ -422,15 +422,15 @@ mod tests_relative {
     #[test]
     #[allow(clippy::too_many_lines)]
     fn compare_adaptive_7point_with_dcuhre_output_ndim_3() {
-        const NDIM: usize = 3;
+        const N: usize = 3;
         const TOL: f64 = 1e-7;
 
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -442,7 +442,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -466,9 +466,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -480,7 +480,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -504,9 +504,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -519,7 +519,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -543,9 +543,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -556,7 +556,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -580,9 +580,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -623,15 +623,15 @@ mod tests_relative {
     #[test]
     #[allow(clippy::too_many_lines)]
     fn compare_adaptive_9point_with_dcuhre_output_ndim_3() {
-        const NDIM: usize = 3;
+        const N: usize = 3;
         const TOL: f64 = 1e-7;
 
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -643,7 +643,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule09::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -667,9 +667,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -681,7 +681,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule09::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(1e-7);
             let max_iterations = 1000;
 
@@ -705,9 +705,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -720,7 +720,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule09::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -744,9 +744,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -757,7 +757,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule09::generate().unwrap();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -781,9 +781,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -824,15 +824,15 @@ mod tests_relative {
     #[test]
     #[allow(clippy::too_many_lines)]
     fn compare_adaptive_11point_with_dcuhre_output_ndim_3() {
-        const NDIM: usize = 3;
+        const N: usize = 3;
         const TOL: f64 = 1e-7;
 
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -844,7 +844,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule11::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -868,9 +868,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -882,7 +882,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule11::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -906,9 +906,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -921,7 +921,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule11::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -945,9 +945,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -958,7 +958,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule11::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -982,9 +982,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let z = coordinates[2];
@@ -1025,15 +1025,15 @@ mod tests_relative {
     #[test]
     #[allow(clippy::too_many_lines)]
     fn compare_adaptive_13point_with_dcuhre_output_ndim_2() {
-        const NDIM: usize = 2;
+        const N: usize = 2;
         const TOL: f64 = 1e-7;
 
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let exponent = -x * y;
@@ -1044,7 +1044,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule13::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -1068,9 +1068,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let exponent = -(x * x + y * y);
@@ -1081,7 +1081,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule13::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -1105,9 +1105,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     let exponent = -((x * x).cos().powi(2) * (y * y).cos().powi(2));
@@ -1118,7 +1118,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule13::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -1142,9 +1142,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     f64::cos((1.0 + x * x).ln() * (1.0 + y * y).ln())
@@ -1154,7 +1154,7 @@ mod tests_relative {
             let function = Function;
             let rule = Rule13::generate();
             let limit = Limits::new(0.0, 1.0);
-            let limits = [limit; NDIM];
+            let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -1178,9 +1178,9 @@ mod tests_relative {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<NDIM> for Function {
+            impl MultiDimensionalIntegrand<N> for Function {
                 type Scalar = f64;
-                fn evaluate(&self, coordinates: &[f64; NDIM]) -> Self::Scalar {
+                fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
                     let y = coordinates[1];
                     (x * x / (2.0 - x.cos())) + (y * y / (2.0 - y.cos()))

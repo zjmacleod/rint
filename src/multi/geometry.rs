@@ -1,22 +1,22 @@
 use crate::Limits;
 
-pub(crate) struct Geometry<const NDIM: usize> {
-    pub(crate) centre: [f64; NDIM],
-    pub(crate) half_widths: [f64; NDIM],
+pub(crate) struct Geometry<const N: usize> {
+    pub(crate) centre: [f64; N],
+    pub(crate) half_widths: [f64; N],
     pub(crate) volume: f64,
     pub(crate) largest_axis: usize,
 }
 
-impl<const NDIM: usize> Geometry<NDIM> {
-    pub(crate) const fn new(limits: &[Limits; NDIM]) -> Self {
-        let mut centre = [0.0; NDIM];
-        let mut half_widths = [0.0; NDIM];
+impl<const N: usize> Geometry<N> {
+    pub(crate) const fn new(limits: &[Limits; N]) -> Self {
+        let mut centre = [0.0; N];
+        let mut half_widths = [0.0; N];
 
         let mut volume = 1.0;
 
         let mut j = 0;
         let mut largest_axis = 0;
-        while j < NDIM {
+        while j < N {
             centre[j] = limits[j].centre();
             half_widths[j] = limits[j].half_width();
             volume *= half_widths[j];

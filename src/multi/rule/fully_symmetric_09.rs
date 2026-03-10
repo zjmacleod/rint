@@ -21,21 +21,21 @@ const TOTAL: usize = 9;
 const FINAL: usize = TOTAL - 3;
 const RATIO: f64 = (LAMBDA2 / LAMBDA1) * (LAMBDA2 / LAMBDA1);
 
-pub(crate) const fn generate_rule<const NDIM: usize>(
-) -> Result<Rule<NDIM, FINAL, TOTAL>, InitialisationError> {
-    if NDIM < 3 || NDIM > 15 {
+pub(crate) const fn generate_rule<const N: usize>(
+) -> Result<Rule<N, FINAL, TOTAL>, InitialisationError> {
+    if N < 3 || N > 15 {
         return Err(InitialisationError::new(
-            InitialisationErrorKind::InvalidDimensionForRule09(NDIM),
+            InitialisationErrorKind::InvalidDimensionForRule09(N),
         ));
     }
 
-    let evaluations = evaluations::<NDIM>();
+    let evaluations = evaluations::<N>();
     let basic_error_coeff = BASIC_ERROR_COEFF;
     let adaptive_error_coeff = ADAPTIVE_ERROR_COEFF;
     let ratio = RATIO;
 
-    let generators = generators::<NDIM>();
-    let (weights, scales_norms) = weights_scales_norms::<NDIM>();
+    let generators = generators::<N>();
+    let (weights, scales_norms) = weights_scales_norms::<N>();
 
     let [g0, g1, g2, g3, g4, g5, g6, g7, g8] = generators;
     let [w0, w1, w2, w3, w4, w5, w6, w7, w8] = weights;
@@ -64,16 +64,16 @@ pub(crate) const fn generate_rule<const NDIM: usize>(
     })
 }
 
-const fn evaluations<const NDIM: usize>() -> usize {
-    1 + 8 * NDIM
-        + 2 * NDIM * (NDIM - 1)
-        + 4 * NDIM * (NDIM - 1)
-        + 4 * NDIM * (NDIM - 1) * (NDIM - 2) / 3
-        + two_pow_n(NDIM)
+const fn evaluations<const N: usize>() -> usize {
+    1 + 8 * N
+        + 2 * N * (N - 1)
+        + 4 * N * (N - 1)
+        + 4 * N * (N - 1) * (N - 2) / 3
+        + two_pow_n(N)
 }
 
-const fn rule_points<const NDIM: usize>() -> [f64; TOTAL] {
-    let ndim = NDIM as f64;
+const fn rule_points<const N: usize>() -> [f64; TOTAL] {
+    let ndim = N as f64;
     [
         1.0,
         2.0 * ndim,
@@ -83,13 +83,13 @@ const fn rule_points<const NDIM: usize>() -> [f64; TOTAL] {
         2.0 * ndim * (ndim - 1.0),
         4.0 * ndim * (ndim - 1.0),
         4.0 * ndim * (ndim - 1.0) * (ndim - 2.0) / 3.0,
-        two_pow_n_f64(NDIM),
+        two_pow_n_f64(N),
     ]
 }
 
-const fn initial_weights_1<const NDIM: usize>() -> [f64; TOTAL] {
-    let two_ndim = two_pow_n_f64(NDIM);
-    let ndim = NDIM as f64;
+const fn initial_weights_1<const N: usize>() -> [f64; TOTAL] {
+    let two_ndim = two_pow_n_f64(N);
+    let ndim = N as f64;
 
     let w8 = 1.0
         / ((3.0 * LAMBDA0_SQ) * (3.0 * LAMBDA0_SQ) * (3.0 * LAMBDA0_SQ) * (3.0 * LAMBDA0_SQ))
@@ -151,9 +151,9 @@ const fn initial_weights_1<const NDIM: usize>() -> [f64; TOTAL] {
     [w0, w1, w2, w3, w4, w5, w6, w7, w8]
 }
 
-const fn initial_weights_2<const NDIM: usize>() -> [f64; TOTAL] {
-    let two_ndim = two_pow_n_f64(NDIM);
-    let ndim = NDIM as f64;
+const fn initial_weights_2<const N: usize>() -> [f64; TOTAL] {
+    let two_ndim = two_pow_n_f64(N);
+    let ndim = N as f64;
 
     let w8 = 1.0 / (108.0 * LAMBDA0_SQ * LAMBDA0_SQ * LAMBDA0_SQ * LAMBDA0_SQ) / two_ndim;
 
@@ -209,9 +209,9 @@ const fn initial_weights_2<const NDIM: usize>() -> [f64; TOTAL] {
     [w0, w1, w2, w3, w4, w5, w6, w7, w8]
 }
 
-const fn initial_weights_3<const NDIM: usize>() -> [f64; TOTAL] {
-    let two_ndim = two_pow_n_f64(NDIM);
-    let ndim = NDIM as f64;
+const fn initial_weights_3<const N: usize>() -> [f64; TOTAL] {
+    let two_ndim = two_pow_n_f64(N);
+    let ndim = N as f64;
 
     let w8 = 5.0 / (324.0 * LAMBDA0_SQ * LAMBDA0_SQ * LAMBDA0_SQ * LAMBDA0_SQ) / two_ndim;
 
@@ -267,9 +267,9 @@ const fn initial_weights_3<const NDIM: usize>() -> [f64; TOTAL] {
     [w0, w1, w2, w3, w4, w5, w6, w7, w8]
 }
 
-const fn initial_weights_4<const NDIM: usize>() -> [f64; TOTAL] {
-    let two_ndim = two_pow_n_f64(NDIM);
-    let ndim = NDIM as f64;
+const fn initial_weights_4<const N: usize>() -> [f64; TOTAL] {
+    let two_ndim = two_pow_n_f64(N);
+    let ndim = N as f64;
 
     let w8 = 2.0 / (81.0 * LAMBDA0_SQ * LAMBDA0_SQ * LAMBDA0_SQ * LAMBDA0_SQ) / two_ndim;
 
@@ -325,20 +325,20 @@ const fn initial_weights_4<const NDIM: usize>() -> [f64; TOTAL] {
     [w0, w1, w2, w3, w4, w5, w6, w7, w8]
 }
 
-const fn initial_weights_5<const NDIM: usize>() -> [f64; TOTAL] {
+const fn initial_weights_5<const N: usize>() -> [f64; TOTAL] {
     let mut weights = [0.0; TOTAL];
     weights[1] = 1.0 / (6.0 * LAMBDA1_SQ);
 
     weights
 }
 
-const fn initial_weights<const NDIM: usize>() -> [[f64; 5]; TOTAL] {
+const fn initial_weights<const N: usize>() -> [[f64; 5]; TOTAL] {
     let initial = [
-        initial_weights_1::<NDIM>(),
-        initial_weights_2::<NDIM>(),
-        initial_weights_3::<NDIM>(),
-        initial_weights_4::<NDIM>(),
-        initial_weights_5::<NDIM>(),
+        initial_weights_1::<N>(),
+        initial_weights_2::<N>(),
+        initial_weights_3::<N>(),
+        initial_weights_4::<N>(),
+        initial_weights_5::<N>(),
     ];
 
     let mut output = [[0.0; 5]; TOTAL];
@@ -356,11 +356,11 @@ const fn initial_weights<const NDIM: usize>() -> [[f64; 5]; TOTAL] {
     output
 }
 
-const fn weights_scales_norms<const NDIM: usize>() -> ([[f64; 5]; TOTAL], [ScalesNorms<TOTAL>; 3]) {
-    let mut weights = initial_weights::<NDIM>();
-    let rule_points = rule_points::<NDIM>();
+const fn weights_scales_norms<const N: usize>() -> ([[f64; 5]; TOTAL], [ScalesNorms<TOTAL>; 3]) {
+    let mut weights = initial_weights::<N>();
+    let rule_points = rule_points::<N>();
 
-    let two_ndim = two_pow_n_f64(NDIM);
+    let two_ndim = two_pow_n_f64(N);
 
     weights[0][0] = two_ndim;
 
@@ -382,52 +382,52 @@ const fn weights_scales_norms<const NDIM: usize>() -> ([[f64; 5]; TOTAL], [Scale
         k += 1;
     }
 
-    let scales_norms = scales_norms::<NDIM, TOTAL>(&weights, rule_points);
+    let scales_norms = scales_norms::<N, TOTAL>(&weights, rule_points);
     (weights, scales_norms)
 }
 
-const fn generators<const NDIM: usize>() -> [Generator<NDIM>; TOTAL] {
-    let gen_0 = Generator::new([0.0; NDIM]);
+const fn generators<const N: usize>() -> [Generator<N>; TOTAL] {
+    let gen_0 = Generator::new([0.0; N]);
     let gen_1 = {
-        let mut init = [0.0; NDIM];
+        let mut init = [0.0; N];
         init[0] = LAMBDA1;
         Generator::new(init)
     };
     let gen_2 = {
-        let mut init = [0.0; NDIM];
+        let mut init = [0.0; N];
         init[0] = LAMBDA2;
         Generator::new(init)
     };
     let gen_3 = {
-        let mut init = [0.0; NDIM];
+        let mut init = [0.0; N];
         init[0] = LAMBDA3;
         Generator::new(init)
     };
     let gen_4 = {
-        let mut init = [0.0; NDIM];
+        let mut init = [0.0; N];
         init[0] = LAMBDAP;
         Generator::new(init)
     };
     let gen_5 = {
-        let mut init = [0.0; NDIM];
+        let mut init = [0.0; N];
         init[0] = LAMBDA1;
         init[1] = init[0];
         Generator::new(init)
     };
     let gen_6 = {
-        let mut init = [0.0; NDIM];
+        let mut init = [0.0; N];
         init[0] = LAMBDA1;
         init[1] = LAMBDA2;
         Generator::new(init)
     };
     let gen_7 = {
-        let mut init = [0.0; NDIM];
+        let mut init = [0.0; N];
         init[0] = LAMBDA1;
         init[1] = init[0];
         init[2] = init[0];
         Generator::new(init)
     };
-    let gen_8 = Generator::new([LAMBDA0; NDIM]);
+    let gen_8 = Generator::new([LAMBDA0; N]);
 
     [
         gen_0, gen_1, gen_2, gen_3, gen_4, gen_5, gen_6, gen_7, gen_8,
@@ -458,71 +458,71 @@ mod tests {
     #[test]
     fn check_rule_points_correct() {
         {
-            const NDIM: usize = 3;
-            let rule_points = rule_points::<NDIM>();
+            const N: usize = 3;
+            let rule_points = rule_points::<N>();
             let should_be = [1.0, 6.0, 6.0, 6.0, 6.0, 12.0, 24.0, 8.0, 8.0];
             let mut sum: f64 = 0.0;
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
                 assert_eq!(x, y);
                 sum += *x;
             }
-            assert_eq!(sum, evaluations::<NDIM>() as f64);
+            assert_eq!(sum, evaluations::<N>() as f64);
         }
 
         {
-            const NDIM: usize = 4;
-            let rule_points = rule_points::<NDIM>();
+            const N: usize = 4;
+            let rule_points = rule_points::<N>();
             let should_be = [1.0, 8.0, 8.0, 8.0, 8.0, 24.0, 48.0, 32.0, 16.0];
             let mut sum: f64 = 0.0;
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
                 assert_eq!(x, y);
                 sum += *x;
             }
-            assert_eq!(sum, evaluations::<NDIM>() as f64);
+            assert_eq!(sum, evaluations::<N>() as f64);
         }
 
         {
-            const NDIM: usize = 5;
-            let rule_points = rule_points::<NDIM>();
+            const N: usize = 5;
+            let rule_points = rule_points::<N>();
             let should_be = [1.0, 10.0, 10.0, 10.0, 10.0, 40.0, 80.0, 80.0, 32.0];
             let mut sum: f64 = 0.0;
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
                 assert_eq!(x, y);
                 sum += *x;
             }
-            assert_eq!(sum, evaluations::<NDIM>() as f64);
+            assert_eq!(sum, evaluations::<N>() as f64);
         }
 
         {
-            const NDIM: usize = 6;
-            let rule_points = rule_points::<NDIM>();
+            const N: usize = 6;
+            let rule_points = rule_points::<N>();
             let should_be = [1.0, 12.0, 12.0, 12.0, 12.0, 60.0, 120.0, 160.0, 64.0];
             let mut sum: f64 = 0.0;
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
                 assert_eq!(x, y);
                 sum += *x;
             }
-            assert_eq!(sum, evaluations::<NDIM>() as f64);
+            assert_eq!(sum, evaluations::<N>() as f64);
         }
 
         {
-            const NDIM: usize = 15;
-            let rule_points = rule_points::<NDIM>();
+            const N: usize = 15;
+            let rule_points = rule_points::<N>();
             let should_be = [1.0, 30.0, 30.0, 30.0, 30.0, 420.0, 840.0, 3640.0, 32768.0];
             let mut sum: f64 = 0.0;
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
                 assert_eq!(x, y);
                 sum += *x;
             }
-            assert_eq!(sum, evaluations::<NDIM>() as f64);
+            assert_eq!(sum, evaluations::<N>() as f64);
         }
     }
 
     #[test]
     fn test_initial_weights_1() {
         {
-            const NDIM: usize = 3;
-            let w = initial_weights_1::<NDIM>();
+            const N: usize = 3;
+            let w = initial_weights_1::<N>();
             let should_be = [
                 0.0000000000000000,
                 -8.0377377870386235E-002,
@@ -539,8 +539,8 @@ mod tests {
         }
 
         {
-            const NDIM: usize = 9;
-            let w = initial_weights_1::<NDIM>();
+            const N: usize = 9;
+            let w = initial_weights_1::<N>();
             let should_be = [
                 0.0000000000000000,
                 -0.26102711772491327,
@@ -557,8 +557,8 @@ mod tests {
         }
 
         {
-            const NDIM: usize = 14;
-            let w = initial_weights_1::<NDIM>();
+            const N: usize = 14;
+            let w = initial_weights_1::<N>();
             let should_be = [
                 0.0000000000000000,
                 -0.21677196276138094,
@@ -578,8 +578,8 @@ mod tests {
     #[test]
     fn test_initial_weights_2() {
         {
-            const NDIM: usize = 3;
-            let w = initial_weights_2::<NDIM>();
+            const N: usize = 3;
+            let w = initial_weights_2::<N>();
             let should_be = [
                 0.0000000000000000,
                 -0.14720886256392740,
@@ -596,8 +596,8 @@ mod tests {
         }
 
         {
-            const NDIM: usize = 9;
-            let w = initial_weights_2::<NDIM>();
+            const N: usize = 9;
+            let w = initial_weights_2::<N>();
             let should_be = [
                 0.0000000000000000,
                 -0.36677060181546750,
@@ -614,8 +614,8 @@ mod tests {
         }
 
         {
-            const NDIM: usize = 14;
-            let w = initial_weights_2::<NDIM>();
+            const N: usize = 14;
+            let w = initial_weights_2::<N>();
             let should_be = [
                 0.0000000000000000,
                 -0.23676897249056994,
@@ -635,8 +635,8 @@ mod tests {
     #[test]
     fn test_initial_weights_3() {
         {
-            const NDIM: usize = 3;
-            let w = initial_weights_3::<NDIM>();
+            const N: usize = 3;
+            let w = initial_weights_3::<N>();
             let should_be = [
                 0.0000000000000000,
                 1.1432093192986353E-003,
@@ -653,8 +653,8 @@ mod tests {
         }
 
         {
-            const NDIM: usize = 9;
-            let w = initial_weights_3::<NDIM>();
+            const N: usize = 9;
+            let w = initial_weights_3::<N>();
             let should_be = [
                 0.0000000000000000,
                 -0.14059453113821502,
@@ -671,8 +671,8 @@ mod tests {
         }
 
         {
-            const NDIM: usize = 14;
-            let w = initial_weights_3::<NDIM>();
+            const N: usize = 14;
+            let w = initial_weights_3::<N>();
             let should_be = [
                 0.0000000000000000,
                 -0.18208585053604776,
@@ -692,8 +692,8 @@ mod tests {
     #[test]
     fn test_initial_weights_4() {
         {
-            const NDIM: usize = 3;
-            let w = initial_weights_4::<NDIM>();
+            const N: usize = 3;
+            let w = initial_weights_4::<N>();
             let should_be = [
                 0.0000000000000000,
                 1.8330509758613034,
@@ -710,8 +710,8 @@ mod tests {
         }
 
         {
-            const NDIM: usize = 9;
-            let w = initial_weights_4::<NDIM>();
+            const N: usize = 9;
+            let w = initial_weights_4::<N>();
             let should_be = [
                 0.0000000000000000,
                 4.5398339969403088,
@@ -728,8 +728,8 @@ mod tests {
         }
 
         {
-            const NDIM: usize = 14;
-            let w = initial_weights_4::<NDIM>();
+            const N: usize = 14;
+            let w = initial_weights_4::<N>();
             let should_be = [
                 0.0000000000000000,
                 7.1850797241907554,
@@ -749,8 +749,8 @@ mod tests {
     #[test]
     fn test_initial_weights_5() {
         {
-            const NDIM: usize = 3;
-            let w = initial_weights_5::<NDIM>();
+            const N: usize = 3;
+            let w = initial_weights_5::<N>();
             let should_be = [
                 0.0000000000000000,
                 0.18239678493024578,
@@ -767,8 +767,8 @@ mod tests {
         }
 
         {
-            const NDIM: usize = 9;
-            let w = initial_weights_5::<NDIM>();
+            const N: usize = 9;
+            let w = initial_weights_5::<N>();
             let should_be = [
                 0.0000000000000000,
                 0.18239678493024578,
@@ -785,8 +785,8 @@ mod tests {
         }
 
         {
-            const NDIM: usize = 14;
-            let w = initial_weights_5::<NDIM>();
+            const N: usize = 14;
+            let w = initial_weights_5::<N>();
             let should_be = [
                 0.0000000000000000,
                 0.18239678493024578,
@@ -808,8 +808,8 @@ mod tests {
         let tol = 1e-14;
 
         {
-            const NDIM: usize = 3;
-            let generators = generators::<NDIM>();
+            const N: usize = 3;
+            let generators = generators::<N>();
             let should_be = [
                 Generator::new([0.0000000000000000, 0.0000000000000000, 0.0000000000000000]),
                 Generator::new([0.95590731580453892, 0.0000000000000000, 0.0000000000000000]),
@@ -840,8 +840,8 @@ mod tests {
         }
 
         {
-            const NDIM: usize = 6;
-            let generators = generators::<NDIM>();
+            const N: usize = 6;
+            let generators = generators::<N>();
             let should_be = [
                 Generator::new([
                     0.0000000000000000,
@@ -927,8 +927,8 @@ mod tests {
         }
 
         {
-            const NDIM: usize = 15;
-            let generators = generators::<NDIM>();
+            const N: usize = 15;
+            let generators = generators::<N>();
             let should_be = [
                 Generator::new([
                     0.0000000000000000,
@@ -1098,10 +1098,10 @@ mod tests {
     #[test]
     fn check_weights_scales_norms_correct() {
         {
-            const NDIM: usize = 3;
+            const N: usize = 3;
 
             let tol = 1e-12;
-            let (weights, scales_norms) = weights_scales_norms::<NDIM>();
+            let (weights, scales_norms) = weights_scales_norms::<N>();
             let weights_should_be = [
                 [
                     -1.6230738498982409,
@@ -1254,10 +1254,10 @@ mod tests {
         }
 
         {
-            const NDIM: usize = 6;
+            const N: usize = 6;
 
             let tol = 1e-12;
-            let (weights, scales_norms) = weights_scales_norms::<NDIM>();
+            let (weights, scales_norms) = weights_scales_norms::<N>();
             let weights_should_be = [
                 [
                     33.151498239465923,
@@ -1410,10 +1410,10 @@ mod tests {
         }
 
         {
-            const NDIM: usize = 15;
+            const N: usize = 15;
 
             let tol = 1e-12;
-            let (weights, scales_norms) = weights_scales_norms::<NDIM>();
+            let (weights, scales_norms) = weights_scales_norms::<N>();
 
             let weights_should_be = [
                 [
@@ -1570,10 +1570,10 @@ mod tests {
     #[test]
     fn check_data09_correct() {
         {
-            const NDIM: usize = 3;
+            const N: usize = 3;
 
             let tol = 1e-12;
-            let rule = generate_rule::<NDIM>().unwrap();
+            let rule = generate_rule::<N>().unwrap();
 
             let initial_data = rule.initial_data();
             let final_data = rule.final_data();
@@ -1684,10 +1684,10 @@ mod tests {
         }
 
         {
-            const NDIM: usize = 6;
+            const N: usize = 6;
 
             let tol = 1e-12;
-            let rule = generate_rule::<NDIM>().unwrap();
+            let rule = generate_rule::<N>().unwrap();
 
             let initial_data = rule.initial_data();
             let final_data = rule.final_data();
@@ -1854,10 +1854,10 @@ mod tests {
         }
 
         {
-            const NDIM: usize = 15;
+            const N: usize = 15;
 
             let tol = 1e-12;
-            let rule = generate_rule::<NDIM>().unwrap();
+            let rule = generate_rule::<N>().unwrap();
 
             let initial_data = rule.initial_data();
             let final_data = rule.final_data();

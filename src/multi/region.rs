@@ -7,15 +7,15 @@ use crate::MultiDimensionalIntegrand;
 use crate::ScalarF64;
 
 #[derive(Debug, Clone)]
-pub(crate) struct Region<T: ScalarF64, const NDIM: usize> {
+pub(crate) struct Region<T: ScalarF64, const N: usize> {
     pub(crate) error: f64,
     pub(crate) result: T,
-    pub(crate) limits: [Limits; NDIM],
+    pub(crate) limits: [Limits; N],
     pub(crate) bisection_axis: usize,
     pub(crate) volume: f64,
 }
 
-impl<T: ScalarF64, const NDIM: usize> PartialEq for Region<T, NDIM> {
+impl<T: ScalarF64, const N: usize> PartialEq for Region<T, N> {
     fn eq(&self, other: &Self) -> bool {
         (self.result == other.result)
             && (self.error == other.error)
@@ -25,15 +25,15 @@ impl<T: ScalarF64, const NDIM: usize> PartialEq for Region<T, NDIM> {
     }
 }
 
-impl<T: ScalarF64, const NDIM: usize> Eq for Region<T, NDIM> {}
+impl<T: ScalarF64, const N: usize> Eq for Region<T, N> {}
 
-impl<T: ScalarF64, const NDIM: usize> PartialOrd for Region<T, NDIM> {
+impl<T: ScalarF64, const N: usize> PartialOrd for Region<T, N> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<T: ScalarF64, const NDIM: usize> Ord for Region<T, NDIM> {
+impl<T: ScalarF64, const N: usize> Ord for Region<T, N> {
     fn cmp(&self, other: &Self) -> Ordering {
         let mut ordering = self.total_cmp_error(other);
         if let Ordering::Equal = ordering {
@@ -46,13 +46,13 @@ impl<T: ScalarF64, const NDIM: usize> Ord for Region<T, NDIM> {
     }
 }
 
-impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
+impl<T: ScalarF64, const N: usize> Region<T, N> {
     pub(crate) fn unevaluated() -> Self {
         let zero = T::zero();
         Self {
             error: 0.0,
             result: zero,
-            limits: [Limits::new(0.0, 0.0); NDIM],
+            limits: [Limits::new(0.0, 0.0); N],
             bisection_axis: 0,
             volume: 0.0,
         }
@@ -68,7 +68,7 @@ impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
         self
     }
 
-    pub(crate) fn with_limits(mut self, limits: [Limits; NDIM]) -> Self {
+    pub(crate) fn with_limits(mut self, limits: [Limits; N]) -> Self {
         self.limits = limits;
         self
     }
@@ -91,7 +91,7 @@ impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
         self.result
     }
 
-    pub(crate) fn limits(&self) -> &[Limits; NDIM] {
+    pub(crate) fn limits(&self) -> &[Limits; N] {
         &self.limits
     }
 
@@ -119,14 +119,14 @@ impl<T: ScalarF64, const NDIM: usize> Region<T, NDIM> {
 
     #[allow(clippy::needless_borrow)]
     pub(crate) fn bisect<
-        I: MultiDimensionalIntegrand<NDIM, Scalar = T>,
+        I: MultiDimensionalIntegrand<N, Scalar = T>,
         const J: usize,
         const K: usize,
     >(
         &self,
         function: &I,
-        rule: &Rule<NDIM, J, K>,
-    ) -> [Region<T, NDIM>; 2] {
+        rule: &Rule<N, J, K>,
+    ) -> [Region<T, N>; 2] {
         let axis_to_bisect = self.bisection_axis;
         let previous_limits = self.limits();
         let previous_result = self.result();

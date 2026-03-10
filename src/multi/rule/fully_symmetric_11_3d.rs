@@ -3,11 +3,11 @@ use crate::multi::rule::{
     scales_norms, BasicErrorCoeff, Data, Rule, ScalesNorms, ADAPTIVE_ERROR_COEFF,
 };
 
-const NDIM: usize = 3;
+const N: usize = 3;
 const TOTAL: usize = 13;
 const FINAL: usize = TOTAL - 3;
 
-pub(crate) const fn generate_rule() -> Rule<NDIM, FINAL, TOTAL> {
+pub(crate) const fn generate_rule() -> Rule<N, FINAL, TOTAL> {
     let evaluations = EVALUATIONS;
     let basic_error_coeff = BASIC_ERROR_COEFF;
     let adaptive_error_coeff = ADAPTIVE_ERROR_COEFF;
@@ -128,9 +128,9 @@ const WEIGHTS: [[f64; 5]; TOTAL] = [
 const RATIO: f64 = (0.500_000_000_000_000e+0 / 0.190_000_000_000_000e+0)
     * (0.500_000_000_000_000e+0 / 0.190_000_000_000_000e+0);
 
-const SCALES_NORMS: [ScalesNorms<TOTAL>; 3] = scales_norms::<NDIM, TOTAL>(&WEIGHTS, RULE_POINTS);
+const SCALES_NORMS: [ScalesNorms<TOTAL>; 3] = scales_norms::<N, TOTAL>(&WEIGHTS, RULE_POINTS);
 
-const INITIAL_DATA: [Data<NDIM>; 3] = [
+const INITIAL_DATA: [Data<N>; 3] = [
     Data::new(
         Generator::new([
             0.000_000_000_000_000e+0,
@@ -175,7 +175,7 @@ const INITIAL_DATA: [Data<NDIM>; 3] = [
     ),
 ];
 
-const FINAL_DATA: [Data<NDIM>; FINAL] = [
+const FINAL_DATA: [Data<N>; FINAL] = [
     Data::new(
         Generator::new([
             0.750_000_000_000_000e+0,

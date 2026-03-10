@@ -1,23 +1,23 @@
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub(crate) struct Generator<const NDIM: usize>([f64; NDIM]);
+pub(crate) struct Generator<const N: usize>([f64; N]);
 
-impl<const NDIM: usize> Generator<NDIM> {
-    pub(crate) const fn new(input: [f64; NDIM]) -> Self {
+impl<const N: usize> Generator<N> {
+    pub(crate) const fn new(input: [f64; N]) -> Self {
         Self(input)
     }
 
-    pub(crate) const fn generator(&self) -> &[f64; NDIM] {
+    pub(crate) const fn generator(&self) -> &[f64; N] {
         &self.0
     }
 
     pub(crate) const fn point(
         &self,
-        centre: &[f64; NDIM],
-        half_widths: &[f64; NDIM],
-    ) -> [f64; NDIM] {
-        let mut point = [0.0; NDIM];
+        centre: &[f64; N],
+        half_widths: &[f64; N],
+    ) -> [f64; N] {
+        let mut point = [0.0; N];
         let mut i = 0;
-        while i < NDIM {
+        while i < N {
             point[i] = centre[i] + self.0[i] * half_widths[i];
             i += 1;
         }
@@ -25,56 +25,56 @@ impl<const NDIM: usize> Generator<NDIM> {
     }
 
     #[cfg(test)]
-    pub(crate) const fn permutations(&self) -> Permutations<NDIM> {
+    pub(crate) const fn permutations(&self) -> Permutations<N> {
         Permutations::new(self.generator())
     }
 
     pub(crate) const fn point_permutations(
         &self,
-        centre: &[f64; NDIM],
-        half_widths: &[f64; NDIM],
-    ) -> Permutations<NDIM> {
+        centre: &[f64; N],
+        half_widths: &[f64; N],
+    ) -> Permutations<N> {
         Permutations::new(self.generator())
             .with_centre(centre)
             .with_half_widths(half_widths)
     }
 }
 
-pub(crate) struct Permutations<const NDIM: usize> {
+pub(crate) struct Permutations<const N: usize> {
     initial: bool,
-    current: [f64; NDIM],
+    current: [f64; N],
     j_exchange: usize,
     i_exchange: usize,
-    centre: [f64; NDIM],
-    half_widths: [f64; NDIM],
+    centre: [f64; N],
+    half_widths: [f64; N],
 }
 
-impl<const NDIM: usize> Permutations<NDIM> {
-    pub(crate) const fn new(first: &[f64; NDIM]) -> Self {
+impl<const N: usize> Permutations<N> {
+    pub(crate) const fn new(first: &[f64; N]) -> Self {
         Self {
             initial: true,
             current: *first,
             j_exchange: 0,
             i_exchange: 0,
-            centre: [0.0; NDIM],
-            half_widths: [1.0; NDIM],
+            centre: [0.0; N],
+            half_widths: [1.0; N],
         }
     }
 
-    pub(crate) const fn with_centre(mut self, centre: &[f64; NDIM]) -> Self {
+    pub(crate) const fn with_centre(mut self, centre: &[f64; N]) -> Self {
         self.centre = *centre;
         self
     }
 
-    pub(crate) const fn with_half_widths(mut self, half_widths: &[f64; NDIM]) -> Self {
+    pub(crate) const fn with_half_widths(mut self, half_widths: &[f64; N]) -> Self {
         self.half_widths = *half_widths;
         self
     }
 
-    const fn point(&self) -> [f64; NDIM] {
-        let mut output = [0.0; NDIM];
+    const fn point(&self) -> [f64; N] {
+        let mut output = [0.0; N];
         let mut i = 0;
-        while i < NDIM {
+        while i < N {
             output[i] = self.centre[i] + self.current[i] * self.half_widths[i];
             i += 1;
         }
@@ -82,8 +82,8 @@ impl<const NDIM: usize> Permutations<NDIM> {
     }
 }
 
-impl<const NDIM: usize> Iterator for Permutations<NDIM> {
-    type Item = [f64; NDIM];
+impl<const N: usize> Iterator for Permutations<N> {
+    type Item = [f64; N];
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.initial {
@@ -91,14 +91,14 @@ impl<const NDIM: usize> Iterator for Permutations<NDIM> {
             return Some(self.point());
         }
 
-        for i in 0..NDIM {
+        for i in 0..N {
             self.current[i] = -self.current[i];
             if self.current[i] < 0.0 {
                 return Some(self.point());
             }
         }
 
-        for i in 1..NDIM {
+        for i in 1..N {
             if self.current[i - 1] > self.current[i] {
                 let value_i = self.current[i];
                 self.i_exchange = i - 1;
@@ -2360,10 +2360,10 @@ mod tests_with_centre_and_half_widths {
 
     #[test]
     fn with_centre_hw_check_ndim_2_generators() {
-        const NDIM: usize = 2;
+        const N: usize = 2;
 
-        let centre = [CV; NDIM];
-        let half_widths = [HWV; NDIM];
+        let centre = [CV; N];
+        let half_widths = [HWV; N];
 
         {
             let vv = Generator::new([0.75f64, 0.75]);
@@ -2378,7 +2378,7 @@ mod tests_with_centre_and_half_widths {
                 assert_eq!(a[1], b[1]);
             }
 
-            assert_eq!(count, two_pow_n(NDIM));
+            assert_eq!(count, two_pow_n(N));
         }
 
         {
@@ -2403,7 +2403,7 @@ mod tests_with_centre_and_half_widths {
                 assert_eq!(a[1], b[1]);
             }
 
-            assert_eq!(count, 4 * NDIM * (NDIM - 1));
+            assert_eq!(count, 4 * N * (N - 1));
         }
 
         {
@@ -2424,17 +2424,17 @@ mod tests_with_centre_and_half_widths {
                 assert_eq!(a[1], b[1]);
             }
 
-            assert_eq!(count, 2 * NDIM);
+            assert_eq!(count, 2 * N);
         }
     }
 
     #[test]
     #[allow(clippy::too_many_lines)]
     fn with_centre_hw_check_ndim_3_generators() {
-        const NDIM: usize = 3;
+        const N: usize = 3;
 
-        let centre = [CV; NDIM];
-        let half_widths = [HWV; NDIM];
+        let centre = [CV; N];
+        let half_widths = [HWV; N];
 
         {
             let vv = Generator::new([0.75f64, 0.75, 0.75]);
@@ -2460,7 +2460,7 @@ mod tests_with_centre_and_half_widths {
                 assert_eq!(a[2], b[2]);
             }
 
-            assert_eq!(count, two_pow_n(NDIM));
+            assert_eq!(count, two_pow_n(N));
         }
 
         {
@@ -2503,7 +2503,7 @@ mod tests_with_centre_and_half_widths {
                 assert_eq!(a[2], b[2]);
             }
 
-            assert_eq!(count, 4 * NDIM * (NDIM - 1) * (NDIM - 2));
+            assert_eq!(count, 4 * N * (N - 1) * (N - 2));
         }
 
         {
@@ -2545,7 +2545,7 @@ mod tests_with_centre_and_half_widths {
                 assert_eq!(a[2], b[2]);
             }
 
-            assert_eq!(count, 4 * NDIM * (NDIM - 1));
+            assert_eq!(count, 4 * N * (N - 1));
         }
 
         {
@@ -2575,7 +2575,7 @@ mod tests_with_centre_and_half_widths {
                 assert_eq!(a[2], b[2]);
             }
 
-            assert_eq!(count, 2 * NDIM * (NDIM - 1));
+            assert_eq!(count, 2 * N * (N - 1));
         }
 
         {
@@ -2600,17 +2600,17 @@ mod tests_with_centre_and_half_widths {
                 assert_eq!(a[2], b[2]);
             }
 
-            assert_eq!(count, 2 * NDIM);
+            assert_eq!(count, 2 * N);
         }
     }
 
     #[test]
     #[allow(clippy::too_many_lines)]
     fn with_centre_hw_check_ndim_6_generators() {
-        const NDIM: usize = 6;
+        const N: usize = 6;
 
-        let centre = [CV; NDIM];
-        let half_widths = [HWV; NDIM];
+        let centre = [CV; N];
+        let half_widths = [HWV; N];
 
         {
             let vv = Generator::new([0.75f64, 0.75, 0.75, 0.75, 0.75, 0.75]);
@@ -2703,7 +2703,7 @@ mod tests_with_centre_and_half_widths {
                 assert_eq!(a[5], b[5]);
             }
 
-            assert_eq!(count, two_pow_n(NDIM));
+            assert_eq!(count, two_pow_n(N));
         }
 
         {
@@ -2893,7 +2893,7 @@ mod tests_with_centre_and_half_widths {
                 assert_eq!(a[5], b[5]);
             }
 
-            assert_eq!(count, 4 * NDIM * (NDIM - 1) * (NDIM - 2) / 3);
+            assert_eq!(count, 4 * N * (N - 1) * (N - 2) / 3);
         }
 
         {
@@ -3404,7 +3404,7 @@ mod tests_with_centre_and_half_widths {
                 assert_eq!(a[5], b[5]);
             }
 
-            assert_eq!(count, 4 * NDIM * (NDIM - 1) * (NDIM - 2));
+            assert_eq!(count, 4 * N * (N - 1) * (N - 2));
         }
 
         {
@@ -3554,7 +3554,7 @@ mod tests_with_centre_and_half_widths {
                 assert_eq!(a[5], b[5]);
             }
 
-            assert_eq!(count, 4 * NDIM * (NDIM - 1));
+            assert_eq!(count, 4 * N * (N - 1));
         }
 
         {
@@ -3644,7 +3644,7 @@ mod tests_with_centre_and_half_widths {
                 assert_eq!(a[5], b[5]);
             }
 
-            assert_eq!(count, 2 * NDIM * (NDIM - 1));
+            assert_eq!(count, 2 * N * (N - 1));
         }
 
         {
@@ -3686,7 +3686,7 @@ mod tests_with_centre_and_half_widths {
                 assert_eq!(a[5], b[5]);
             }
 
-            assert_eq!(count, 2 * NDIM);
+            assert_eq!(count, 2 * N);
         }
     }
 }

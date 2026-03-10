@@ -760,15 +760,15 @@ impl fmt::Display for InitialisationError {
             }
 
             InitialisationErrorKind::InvalidDimension(ndim) => {
-                write!(f, "An invalid integration dimensionality `NDIM = {ndim}` was used in a multi-dimensional integration.  This library only provides multi-dimensional integration routines suitable for dimensions `2 <= NDIM <= 15`.")
+                write!(f, "An invalid integration dimensionality `N = {ndim}` was used in a multi-dimensional integration.  This library only provides multi-dimensional integration routines suitable for dimensions `2 <= N <= 15`.")
             }
 
             InitialisationErrorKind::InvalidDimensionForRule07(ndim) => {
-                write!(f, "An invalid integration dimensionality `NDIM = {ndim}` was used to construct the 7-point multi-dimensional integration rule [`Rule07`]. This rule is only suitable for dimensions `2 <= NDIM <= 15`.  ")
+                write!(f, "An invalid integration dimensionality `N = {ndim}` was used to construct the 7-point multi-dimensional integration rule [`Rule07`]. This rule is only suitable for dimensions `2 <= N <= 15`.  ")
             }
 
             InitialisationErrorKind::InvalidDimensionForRule09(ndim) => {
-                write!(f, "An invalid integration dimensionality `NDIM = {ndim}` was used to construct the 9-point multi-dimensional integration rule [`Rule09`]. This rule is only suitable for dimensions `3 <= NDIM <= 15`.  ")
+                write!(f, "An invalid integration dimensionality `N = {ndim}` was used to construct the 9-point multi-dimensional integration rule [`Rule09`]. This rule is only suitable for dimensions `3 <= N <= 15`.  ")
             }
         }
     }
