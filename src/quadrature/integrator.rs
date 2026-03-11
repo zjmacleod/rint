@@ -7,6 +7,15 @@ use crate::quadrature::rule::Rule;
 use crate::Integrand;
 use crate::Limits;
 
+/// The core integrator for the one-dimensional routines.
+///
+/// This is the core integrator which takes a one-dimensional `function` implementing the
+/// [`Integrator`] trait, a Gauss-Kronrod integration [`Rule`], and an integration region defined
+/// by the passed [`Limits`]. The [`Basic`] integration routine simply applies this integrator once
+/// to the function over the given integration region, while the [`Adaptive`] and
+/// [`AdaptiveSingularity`] routines use bisection approaches to concentrate more integration
+/// points in regions of higher numerical error, applying the [`Integrator`] to each subsequent
+/// bisected region.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub(crate) struct Integrator<'a, I> {
     function: &'a I,
@@ -26,6 +35,21 @@ where
         }
     }
 
+    /// The core integrator implementation for the one-dimensional routines.
+    ///
+    /// This method is the primary implementation of the Gauss-Kronrod integration rules. A
+    /// Gaussian numerical integration rule approximates an integral of a function by performing a
+    /// weighted sum of the function evaluated at defined abscissae. The order of an integration
+    /// rule, $n$, denotes the number of abscissae, $x_{i}$, at which the function is evaluated and
+    /// the number of weights $w_{i}$ for the weighted sum. A Gauss-Kronrod integration rule
+    /// combines two rules of different order for efficient estimation of the numerical error.The
+    /// rules for an $n$-point Gauss-Kronrod rule contain $m = (n - 1) / 2$ abscissae _shared_ by
+    /// the Gaussian and Kronrod rules and an extended set of $n - m$ Kronrod abscissae. The
+    /// weighted sum of the full set of $n$ Kronrod function evaluations are used to approximate
+    /// the result of the integration, while the weighted sum of the lower order set of $m$
+    /// Gaussian points are used to calculate the numerical error in the routine. This approach is
+    /// efficient, as only $n$ total function evaluations are required to obtain the result
+    /// approximation and error estimate.
     pub(crate) fn integrate(&self) -> Region<I::Scalar> {
         let centre = self.limits.centre();
         let half_length = self.limits.half_width();
@@ -44,6 +68,7 @@ where
         // Vec<(kronrod_weight, (rate_plus, rate_minus))>
         let mut function_values = Vec::with_capacity(61);
 
+        // Calculate shared
         let (gauss_result, kronrod_shared, abs_shared) = self
             .rule
             .shared_data()
@@ -65,6 +90,7 @@ where
                 (a.0 + v.0, a.1 + v.1, a.2 + v.2)
             });
 
+        // Calculate extended
         let (kronrod_result, abs_result) = self
             .rule
             .extended_data()
