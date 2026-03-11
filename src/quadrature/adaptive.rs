@@ -8,41 +8,62 @@ use crate::{
     InitialisationError, Integrand, IntegrationError, IntegrationErrorKind, Limits, Tolerance,
 };
 
-/// An adaptive Gauss-Kronrod quadrature integrator for (relatively) smooth general functions of a
-/// single variable over a finite integration interval.
+/// An adaptive Gauss-Kronrod integrator.
 ///
-/// The user constructs a `function` implementing [`Integrand`] to be integrated and provides an
-/// integration [`Rule`], integration [`Limits`], [`Tolerance`], and `max_iterations` count.
-/// The adaptive routine works by bisecting the integration region with the largest error estimate
-/// and iteratively applying the n-point Gauss-Kronrod integration [`Rule`] until the constraints
-/// imposed by the user provided [`Tolerance`] are satisfied, or until an [`IntegrationError`] is
-/// encountered.
+/// The [`Adaptive`] integrator is an adaptive integrator designed for approximating one-dimensional
+/// integrals of the form,
+/// $$
+/// I = \int_{b}^{a} f(x) dx
+/// $$
+/// using Gauss-Kronrod integration rules. The function $f(x)$ is encoded in [`Adaptive`] as something
+/// implementing the [`Integrand`] trait. A Gaussian numerical integration rule approximates an
+/// integral of a function by performing a weighted sum of the function evaluated at defined
+/// points/abscissae. The order of an integration rule, $n$, denotes the number of abscissae,
+/// $x_{i}$, at which the function is evaluated and the number of weights $w_{i}$ for the weighted
+/// sum, such that the approximation is,
+/// $$
+/// I \approx \sum_{i = 1}^{n} W_{i} f(X_{i}) = I_{n}
+/// $$
+/// where the $X_{i}$ and $W_{i}$ are the rescaled abscissae and weights,
+/// $$
+/// X_{i} = \frac{b + a + (a - b) x_{i}}{2} ~~~~~~~~ W_{i} = \frac{(a - b) w_{i}}{2}
+/// $$
+/// where the `limits` $a$ and $b$ are encoded in [`Adaptive`] via [`Limits`] passed to the
+/// constructor. A Gauss-Kronrod integration rule combines two rules of different order for
+/// efficient estimation of the numerical error. The rules for an $n$-point Gauss-Kronrod rule
+/// contain $m = (n - 1) / 2$ abscissae _shared_ by the Gaussian and Kronrod rules and an extended
+/// set of $n - m$ Kronrod abscissae. The weighted sum of the full set of $n$ Kronrod function
+/// evaluations are used to approximate the result of the integration, while the weighted sum of
+/// the lower order set of $m$ Gaussian points are used to calculate the numerical error in the
+/// routine,
+/// $$
+/// E = |I_{n} - I_{m}|
+/// $$
+/// This approach is efficient, as only $n$ total function evaluations are required to obtain the
+/// result approximation and error estimate. See [`Rule`] for the available Gauss-Kronrod rules.
 ///
-/// The routine applies an n-point Gauss-Kronrod integration [`Rule`] using the same integration
-/// algorithm as [`Basic`] on each iteration.
-/// The available Gauss-Kronrod integration rules are:
-/// * 15-point: 7-point Gauss, 15-point Kronrod ([`Rule::gk15()`])
-/// * 21-point: 10-point Gauss, 21-point Kronrod ([`Rule::gk21()`])
-/// * 31-point: 15-point Gauss, 31-point Kronrod ([`Rule::gk31()`])
-/// * 41-point: 20-point Gauss, 41-point Kronrod ([`Rule::gk41()`])
-/// * 51-point: 25-point Gauss, 51-point Kronrod ([`Rule::gk51()`])
-/// * 61-point: 30-point Gauss, 61-point Kronrod ([`Rule::gk61()`])
+/// Unlike the [`Basic`] routine, the routine implemented by [`Adaptive`] is adaptive. After the
+/// initial integration, each iteration of the routine picks the previous integration area which
+/// has the largest error estimate and bisects this region, updating the estimate to the integal
+/// and the total approximated error. The adaptive routine will return the first approximation,
+/// `result`, to the integral which has an absolute `error` smaller than the tolerance `tol` encoded
+/// through the [`Tolerance`] enum, where
 ///
-/// The adaptive routine will return the first approximation, `result`, to the integral which has an
-/// absolute `error` smaller than the tolerance set by the choice of [`Tolerance`], where
-/// * [`Tolerance::Absolute(abserr)`] specifies an absolute error and returns final [`IntegralEstimate`] when `error <= abserr`,
-/// * [`Tolerance::Relative(relerr)`] specifies a relative error and returns final [`IntegralEstimate`] when `error <= relerr * abs(result)`,  
-/// * [`Tolerance::Either{ abserr, relerr }`] to return a result as soon as _either_ the relative or absolute error bound has been satisfied.
+/// * [`Tolerance::Absolute`] specifies absolute tolerance and returns final estimate when
+/// `error <= tol`,
+/// * [`Tolerance::Relative`] specifies a relative error and returns final estimate when
+/// `error <= tol * abs(result)`,  
+/// * [`Tolerance::Either`] to return a result as soon as _either_ the relative or
+/// absolute error bound has been satisfied.
 ///
-///
-/// The total number of function evaluations when using an n-point rule is `T = (2 n - 1) * i`
-/// where `i` is the number of iterations used by the adaptive algorithm to reach the desired
-/// tolerance.
+/// The routine will end when _either_ one of the tolerance conditions have been satisfied _or_ an
+/// error has occurred, see [`Error`] for more details.
 ///
 /// [`Basic`]: crate::quadrature::Basic
-/// [`Tolerance::Absolute(abserr)`]: crate::Tolerance#variant.Absolute
-/// [`Tolerance::Relative(relerr)`]: crate::Tolerance#variant.Relative
-/// [`Tolerance::Either{ abserr, relerr }`]: crate::Tolerance#variant.Either
+/// [`Error`]: crate::Error
+/// [`Tolerance`]: crate::Tolerance
+///
+/// # Example
 ///
 ///```rust
 /// use rint::{Limits, Integrand};
@@ -153,10 +174,9 @@ where
     /// Generate a new [`Adaptive`] integrator.
     ///
     /// Initialise an adaptive Gauss-Kronrod integrator. Arguments:
-    /// - `function`: A user supplied function to be integrated, which is a struct implementing the
+    /// - `function`: A user supplied function to be integrated which is something implementing the
     /// [`Integrand`] trait.
-    /// - `rule`: An n-point Gauss-Kronrod integration [`Rule`], generated using one of the
-    /// generator methods e.g. [`Rule::gk15()`], [`Rule::gk21()`], etc.
+    /// - `rule`: An n-point Gauss-Kronrod integration [`Rule`]
     /// - `limits`: The interval over which the `function` should be integrated, [`Limits`].
     /// - `tolerance`: The tolerance requested by the user. Can be either an absolute tolerance
     /// or relative tolerance. Determines the exit condition of the integration routine, see
@@ -165,11 +185,9 @@ where
     /// to try to satisfy the requested tolerance.
     ///
     /// # Errors
-    /// Function will return an error if the user provided `Tolerance` does not satisfy the
-    /// following constraints:
-    /// - `Tolerance::Absolute(v)` where `v > 0.0`,
-    /// - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON`,
-    /// - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
+    /// Function can return an error if it receives bad user input. This is primarily related to
+    /// using invalid values for the `tolerance`. The returned error is an [`InitialisationError`].
+    /// See [`Tolerance`] and [`InitialisationError`] for more details.
     pub fn new(
         function: &'a I,
         rule: &'a Rule,
@@ -195,9 +213,9 @@ where
     /// successful completion.
     ///
     /// # Errors
-    /// The error type [`IntegrationError`] will return both the error [`IntegrationErrorKind`] and the [`IntegralEstimate`]
-    /// obtained before an error was encountered.
-    /// The integration routine has several ways of failing:
+    /// The error type [`IntegrationError`] will return both the error [`IntegrationErrorKind`] and
+    /// the [`IntegralEstimate`] obtained before an error was encountered. The integration routine
+    /// has several ways of failing:
     /// - The user supplied [`Tolerance`] could not be satisfied within the maximum number of
     /// iterations (kind = [`IntegrationErrorKind::MaximumIterationsReached`]).
     /// - A roundoff error was detected. Can occur when the calculated numerical error from an
@@ -218,6 +236,7 @@ where
         let mut workspace = self.initialise_workspace(initial);
 
         while workspace.iteration < self.max_iterations {
+            // XXX Increases iterations, should this be taken out into own function for clarity?
             let previous = workspace.retrieve_largest_error()?;
 
             let [lower, upper] = previous.bisect(self.function, self.rule);
@@ -282,10 +301,15 @@ impl<I: Integrand> Adaptive<'_, I> {
         }
     }
 
+    /// Roundoff value used in diagnostics, matches GSL implementation.
     const fn roundoff(result_abs: f64) -> f64 {
         50.0 * f64::EPSILON * result_abs
     }
 
+    /// Check if the initial integration was problematic such that the integration should be
+    /// stopped immediately, whether the integration produced an error estimate which already
+    /// satisfies the user supplied tolerance constraints, or if the integration was fine but
+    /// should be further calculated using the adaptive algorithm to reduce the error estimate.
     pub(crate) fn check_initial_integration(
         &self,
         initial: &Region<I::Scalar>,
@@ -316,6 +340,15 @@ impl<I: Integrand> Adaptive<'_, I> {
     }
 }
 
+/// The integration workspace.
+///
+/// We use a workspace for maintaining the state of the adaptive integration routines. The `heap`
+/// is a [`BinaryHeap`] storing [`Region`]s which have been integrated, and upon using
+/// [`Workspace::pop`] returns the region with the highest `error` approximation which is the next
+/// region to be bisected and re-integrated. Also tracked are the current estimates of `result` and
+/// `error` across the entire integration region, the number of `iteration`s, and counts of times
+/// that roundoff errors may have occurred, used as a diagnostic for terminating the integration
+/// early if problematic roundoff behaviour is observed.
 struct Workspace<T> {
     heap: BinaryHeap<Region<T>>,
     iteration: usize,
@@ -328,6 +361,7 @@ struct Workspace<T> {
 }
 
 impl<T: ScalarF64> Workspace<T> {
+    /// Get the next [`Region`] in the [`BinaryHeap`] queue with the largest `error` estimate.
     fn retrieve_largest_error(&mut self) -> Result<Region<T>, IntegrationError<T>> {
         self.iteration += 1;
         if let Some(previous) = self.pop() {
@@ -348,6 +382,12 @@ impl<T: ScalarF64> Workspace<T> {
         self.heap.push(integral);
     }
 
+    /// Determine the new estimate of the integral of a region which has been bisected.
+    ///
+    /// The region `previous` has been bisected into two new regions, `lower` and `upper`. This
+    /// function returns the updated value of `previous.result` and `previous.error` using the
+    /// newly calculated values from the bisected regions, including tests for roundoff errors to
+    /// keep track of problematic or difficult regions in the integration.
     fn improved_result_error(
         &mut self,
         previous: &Region<T>,
@@ -359,6 +399,9 @@ impl<T: ScalarF64> Workspace<T> {
         let new_result = lower.result() + upper.result();
         let new_error = lower.error() + upper.error();
 
+        // The comparisons was done here at the bit level as we only want to ignore this if we have
+        // exact correspondence between the result_asc and error values. XXX should this just
+        // compare up to f64::EPSILON, e.g. if (lower.result_asc() - lower.error()) > f64::EPSILON?
         if lower.result_asc().to_bits() != lower.error().to_bits()
             && upper.result_asc().to_bits() != upper.error().to_bits()
         {
@@ -380,6 +423,9 @@ impl<T: ScalarF64> Workspace<T> {
         (result, error)
     }
 
+    /// Check the roundoff counters, triggering a roundoff error if the counts are too high. The
+    /// conditions used here are the same as those found in the GSL numerical integration routines
+    /// qag.c.
     fn check_roundoff(&self) -> Result<(), IntegrationError<T>> {
         if self.roundoff_count >= 6 || self.roundoff_on_high_iteration_count >= 20 {
             let output = self.integral_estimate();
@@ -389,6 +435,9 @@ impl<T: ScalarF64> Workspace<T> {
         Ok(())
     }
 
+    /// Check the integration for a non-integrable singularity. This is triggered if the next set
+    /// of `limits` to be bisected (so has the highest error) corresponds to a region which is too
+    /// small to be bisected again.
     fn check_singularity(&self) -> Result<(), IntegrationError<T>> {
         let limits = self.limits;
         if limits.subinterval_too_small() {
