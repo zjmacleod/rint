@@ -21,6 +21,18 @@
 //! $$
 //! where $\mathbf{x} = (x_{1}, x_{2}, \dots, x_{N})$ and $\Sigma_{N}$ is an $N$-dimensional
 //! hypercube.
+//! A Gaussian numerical integration rule approximates an integral of a function by performing a
+//! weighted sum of the function evaluated at defined points/abscissae. The order of an integration
+//! rule, $n$, denotes the number of abscissae, $x_{i}$, at which the function is evaluated and the
+//! number of weights $w_{i}$ for the weighted sum, such that the approximation is,
+//! $$
+//! I = \int_{b}^{a} f(x) dx \approx \sum_{i = 1}^{n} W_{i} f(X_{i}) = I_{n}
+//! $$
+//! where the $X_{i}$ and $W_{i}$ are the rescaled abscissae and weights,
+//! $$
+//! X_{i} = \frac{b + a + (a - b) x_{i}}{2} ~~~~~~~~ W_{i} = \frac{(a - b) w_{i}}{2}
+//! $$
+//!
 //! The user supplies a [`Tolerance`] which can be an absolute bound, `abs`, a relative bound, `rel`, or both.
 //! The integration routine calculates an approximation to the given integral, `result`, and an
 //! estimate of the numerical error, `error`.
@@ -103,9 +115,19 @@
 //! function in one dimension. The main routines are based primarily on the algorithms presented in
 //! the Fortran library QUADPACK (Piessens, de Doncker-Kapenga, Ueberhuber and Kahaner) \[1\] and
 //! reimplemented in the GNU scientific library (GSL) (Gough, Alken, Gonnet, Holoborodko,
-//! Griessinger) \[2\]. The algorithms are based on Gauss-Kronrod rules which consists of an order $m$
-//! Gaussian quadrature rule and a Kronrod $2m + 1$ quadrature rule, where the difference between
-//! the numerical integration with each rule is used to define the error estimate.
+//! Griessinger) \[2\]. The routines implement Gauss-Kronrod integration rules for efficient
+//! determination of the integral approximation and the error. A Gauss-Kronrod integration rule
+//! combines two rules of different order for efficient estimation of the numerical error. The
+//! rules for an $n$-point Gauss-Kronrod rule contain $m = (n - 1) / 2$ abscissae _shared_ by the
+//! Gaussian and Kronrod rules and an extended set of $n - m$ Kronrod abscissae. The weighted sum
+//! of the full set of $n$ Kronrod function evaluations are used to approximate the result of the
+//! integration, while the weighted sum of the lower order set of $m$ Gaussian points are used to
+//! calculate the numerical error in the routine,
+//! $$
+//! E = |I_{n} - I_{m}|
+//! $$
+//! This approach is efficient, as only $n$ total function evaluations are required to obtain the
+//! result approximation and error estimate.
 //!
 //! The `rint` library departs from the naming conventions of the QUADPACK and GSL, but provides a
 //! selection of comparable implementations:

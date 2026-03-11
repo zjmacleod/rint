@@ -1,21 +1,36 @@
-/// Gauss-Kronrod integration rule.
+/// A one-dimensional Gauss-Kronrod integration rule.
 ///
-/// Gaussian quadrature is a method of approximating the definite integral of a function as a
-/// weighted sum of function values at specified points within the domain of integration.
-/// An `n` point Gaussian quadrature rule consists of a set of points `x_i` and weights `w_i` for
-/// `i = 1,...,n`.
-/// Gauss-Kronrod quadrature is a variant of Gaussian quadrature which combines an `n`-point
-/// Gaussian rule with a `(2n - 1)`-rule such that the resulting combination is of order `3n + 1`.
-/// The difference between the lower-order `n`-point rule and the Kronrod extension are used to
-/// estimate the approximate error of the numerical integration.
+/// A Gaussian numerical integration rule approximates an integral of a function by performing a
+/// weighted sum of the function evaluated at defined points/abscissae. The order of an integration
+/// rule, $n$, denotes the number of abscissae, $x_{i}$, at which the function is evaluated and the
+/// number of weights $w_{i}$ for the weighted sum, such that the approximation is,
+/// $$
+/// I = \int_{b}^{a} f(x) dx \approx \sum_{i = 1}^{n} W_{i} f(X_{i}) = I_{n}
+/// $$
+/// where the $X_{i}$ and $W_{i}$ are the rescaled abscissae and weights,
+/// $$
+/// X_{i} = \frac{b + a + (a - b) x_{i}}{2} ~~~~~~~~ W_{i} = \frac{(a - b) w_{i}}{2}
+/// $$
+/// A Gauss-Kronrod integration rule combines two rules of different order for efficient estimation
+/// of the numerical error. The rules for an $n$-point Gauss-Kronrod rule contain $m = (n - 1) / 2$
+/// abscissae _shared_ by the Gaussian and Kronrod rules and an extended set of $n - m$ Kronrod
+/// abscissae. The weighted sum of the full set of $n$ Kronrod function evaluations are used to
+/// approximate the result of the integration, while the weighted sum of the lower order set of $m$
+/// Gaussian points are used to calculate the numerical error in the routine,
+/// $$
+/// E = |I_{n} - I_{m}|
+/// $$
+/// This approach is efficient, as only $n$ total function evaluations are required to obtain the
+/// result approximation and error estimate.
 ///
-/// The rules are efficient as function evaluations used for the Gaussian n-point rule are reused
-/// for the (2n - 1)-point Kronrod rule, meaning that the total number of function evaluations
-/// required is (2n - 1).
+/// The [`Rule`] struct defines a Gauss-Kronrod quadrature rule for use in the one-dimensional
+/// numerical integration routines [`Basic`], [`Adaptive`], and [`AdaptiveSingularity`]. Rules of varying
+/// order $n$ are generated through dedicated constructor functions [`Rule::gk*`].
 ///
-/// The [`Rule`] struct defines a Gauss-Kronrod quadrature rule, containing the sets of points `x_i`
-/// and weights `w_i` for the `n`-point Gauss rule and the corresponding `(2n - 1)`-point Kronrod
-/// extension.
+/// [`Basic`]: crate::quadrature::Basic
+/// [`Adaptive`]: crate::quadrature::Adaptive
+/// [`AdaptiveSingularity`]: crate::quadrature::AdaptiveSingularity
+/// [`Rule::gk*`]: struct.Rule.html#impl-Rule
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Rule {
     evaluations: usize,
@@ -25,10 +40,11 @@ pub struct Rule {
     extended_data: &'static [ExtendedData],
 }
 
+/// Constructors
 impl Rule {
     /// 15-point Gauss-Kronrod rule
     ///
-    /// Generates the evaluation points `x_i` and weights `w_i` for a 15-point Gauss-Kronrod
+    /// Generates the evaluation points/abscissae $x_{i}$ and weights $w_{i}$ for a 15-point Gauss-Kronrod
     /// integration rule.
     #[must_use]
     pub const fn gk15() -> Self {
@@ -43,7 +59,7 @@ impl Rule {
 
     /// 21-point Gauss-Kronrod rule
     ///
-    /// Generates the evaluation points `x_i` and weights `w_i` for a 21-point Gauss-Kronrod
+    /// Generates the evaluation points/abscissae $x_{i}$ and weights $w_{i}$ for a 21-point Gauss-Kronrod
     /// integration rule.
     #[must_use]
     pub const fn gk21() -> Self {
@@ -58,7 +74,7 @@ impl Rule {
 
     /// 31-point Gauss-Kronrod rule
     ///
-    /// Generates the evaluation points `x_i` and weights `w_i` for a 31-point Gauss-Kronrod
+    /// Generates the evaluation points/abscissae $x_{i}$ and weights $w_{i}$ for a 31-point Gauss-Kronrod
     /// integration rule.
     #[must_use]
     pub const fn gk31() -> Self {
@@ -73,7 +89,7 @@ impl Rule {
 
     /// 41-point Gauss-Kronrod rule
     ///
-    /// Generates the evaluation points `x_i` and weights `w_i` for a 41-point Gauss-Kronrod
+    /// Generates the evaluation points/abscissae $x_{i}$ and weights $w_{i}$ for a 41-point Gauss-Kronrod
     /// integration rule.
     #[must_use]
     pub const fn gk41() -> Self {
@@ -88,7 +104,7 @@ impl Rule {
 
     /// 51-point Gauss-Kronrod rule
     ///
-    /// Generates the evaluation points `x_i` and weights `w_i` for a 51-point Gauss-Kronrod
+    /// Generates the evaluation points/abscissae $x_{i}$ and weights $w_{i}$ for a 51-point Gauss-Kronrod
     /// integration rule.
     #[must_use]
     pub const fn gk51() -> Self {
@@ -103,7 +119,7 @@ impl Rule {
 
     /// 61-point Gauss-Kronrod rule
     ///
-    /// Generates the evaluation points `x_i` and weights `w_i` for a 61-point Gauss-Kronrod
+    /// Generates the evaluation points/abscissae $x_{i}$ and weights $w_{i}$ for a 61-point Gauss-Kronrod
     /// integration rule.
     #[must_use]
     pub const fn gk61() -> Self {
@@ -115,36 +131,56 @@ impl Rule {
             extended_data: &gk61::EXTENDED_DATA,
         }
     }
+}
 
+impl Rule {
+    /// The number of function evaluations required by the rule.
     pub(crate) const fn evaluations(&self) -> usize {
         self.evaluations
     }
 
+    /// The Kronrod rules are all of odd order, and so have an abscissa/weight at the centre.
     pub(crate) const fn kronrod_centre(&self) -> f64 {
         self.kronrod_centre
     }
 
+    /// The Gaussian rules can be of even _or_ odd order, and so conditionally have an
+    /// abscissa/weight at the centre.
     pub(crate) const fn gauss_centre(&self) -> Option<f64> {
         self.gauss_centre
     }
 
+    /// Return a slice corresponding to the abscissae shared between the Gaussian and Kronrod
+    /// integration rules.
     pub(crate) const fn shared_data(&self) -> &[SharedData] {
         self.shared_data
     }
 
+    /// Return a slice corresponding to only the extended points of the Kronrad rule.
     pub(crate) const fn extended_data(&self) -> &[ExtendedData] {
         self.extended_data
     }
 }
 
+/// Data shared by the Gaussian and Kronrod rules.
+///
+/// Each [`SharedData`] contains a field `point` which corresponds to the abscissa at which the
+/// function is to be evaluated, a field `gauss` which is the Gaussian rule weight associated with
+/// the abscissa, and a field `kronrod` which is the Kronrod rule weight associated with the
+/// abscissa. The data are contained in the [`Rule`] in this form for most efficient use of Rust's
+/// [`Iterator`] trait methods in calculations.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub(crate) struct SharedData {
+    /// The abscissa at which the function is to be evaluated $x_{i}$.
     point: f64,
+    /// The weight associated with the Gaussian integration rule $w^{G}_{i}$ at the point $x_{i}$.
     gauss: f64,
+    /// The weight associated with the Kronrod integration rule $w^{K}_{i}$ at the point $x_{i}$.
     kronrod: f64,
 }
 
 impl SharedData {
+    /// Generate a new instance of [`SharedData`].
     pub(crate) const fn new(point: f64, gauss: f64, kronrod: f64) -> Self {
         Self {
             point,
@@ -152,17 +188,29 @@ impl SharedData {
             kronrod,
         }
     }
+
+    /// Return the abscissa/point at which the function is to be evaluated.
     pub(crate) const fn point(&self) -> f64 {
         self.point
     }
+
+    /// Return the Gaussian weight corresponding to the shared data absicssa.
     pub(crate) const fn gauss(&self) -> f64 {
         self.gauss
     }
+
+    /// Return the Kronrod weight corresponding to the shared data absicssa.
     pub(crate) const fn kronrod(&self) -> f64 {
         self.kronrod
     }
 }
 
+/// Data unique to the extended Kronrod rule.
+///
+/// Each [`ExtendedData`] contains a field `point` which corresponds to the abscissa at which the
+/// function is to be evaluated and a field `kronrod` which is the Kronrod rule weight associated
+/// with the abscissa. The data are contained in the [`Rule`] in this form for most efficient use
+/// of Rust's [`Iterator`] trait methods in calculations.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub(crate) struct ExtendedData {
     point: f64,
@@ -170,17 +218,23 @@ pub(crate) struct ExtendedData {
 }
 
 impl ExtendedData {
+    /// Generate a new instance of [`ExtendedData`].
     pub(crate) const fn new(point: f64, kronrod: f64) -> Self {
         Self { point, kronrod }
     }
+
+    /// Return the abscissa/point at which the function is to be evaluated.
     pub(crate) const fn point(&self) -> f64 {
         self.point
     }
+
+    /// Return the Kronrod weight corresponding to the extended data absicssa.
     pub(crate) const fn kronrod(&self) -> f64 {
         self.kronrod
     }
 }
 
+/// Data for the 15-point Gauss-Kronrod integration rule.
 mod gk15 {
     use super::{ExtendedData, SharedData};
     pub(super) const KRONROD_CENTRE: f64 = 0.209_482_141_084_727_828_012_999_174_891_714;
@@ -228,6 +282,7 @@ mod gk15 {
     ];
 }
 
+/// Data for the 21-point Gauss-Kronrod integration rule.
 mod gk21 {
     use super::{ExtendedData, SharedData};
     pub(super) const KRONROD_CENTRE: f64 = 0.149_445_554_002_916_905_664_936_468_389_821;
@@ -288,6 +343,7 @@ mod gk21 {
     ];
 }
 
+/// Data for the 31-point Gauss-Kronrod integration rule.
 mod gk31 {
     use super::{ExtendedData, SharedData};
     pub(super) const KRONROD_CENTRE: f64 = 0.101_330_007_014_791_549_017_374_792_767_493;
@@ -371,6 +427,7 @@ mod gk31 {
     ];
 }
 
+/// Data for the 41-point Gauss-Kronrod integration rule.
 mod gk41 {
     use super::{ExtendedData, SharedData};
     pub(super) const KRONROD_CENTRE: f64 = 0.076_600_711_917_999_656_445_049_901_530_102;
@@ -476,6 +533,7 @@ mod gk41 {
     ];
 }
 
+/// Data for the 51-point Gauss-Kronrod integration rule.
 mod gk51 {
     use super::{ExtendedData, SharedData};
     pub(super) const KRONROD_CENTRE: f64 = 0.061_580_818_067_832_935_078_759_824_240_066;
@@ -604,6 +662,7 @@ mod gk51 {
     ];
 }
 
+/// Data for the 61-point Gauss-Kronrod integration rule.
 mod gk61 {
     use super::{ExtendedData, SharedData};
     pub(super) const KRONROD_CENTRE: f64 = 0.051_494_729_429_451_567_558_340_433_647_099;
