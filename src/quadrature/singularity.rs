@@ -6,97 +6,229 @@ use crate::{
     Limits, ScalarF64, Tolerance,
 };
 
-/// An adaptive Gauss-Kronrod quadrature integrator for functions of a single variable with
-/// integrable singularities.
+/// An adaptive Gauss-Kronrod integrator with extrapolation for integrable singularities.
 ///
-/// The user constructs a `function` implementing [`Integrand`] to be integrated and provides
-/// integration [`Limits`], [`Tolerance`], and `max_iterations` count.
-/// The adaptive routine works by bisecting the integration region with the largest error estimate
-/// and iteratively applying an integration [`Rule`] until the constraints
-/// imposed by the user provided [`Tolerance`] are satisfied, or until an [`IntegrationError`] is
-/// encountered.
-/// To deal with integrable singularities in the integration region the [`AdaptiveSingularity`]
-/// integrator combines the adaptive routine with an extrapolation proceedure, specifically the
-/// Wynn epsilon-algorithm.
-/// This can be applied to integrals with finite integration limits as well as integrals with
-/// infinite and semi-infinite integration limits.
-/// Each of these has a dedicated constructor:
-/// - [`AdaptiveSingularity::finite()`]: finite interval (b, a)
-/// - [`AdaptiveSingularity::infinite()`]: infinite interval (-Inf, Inf)
-/// - [`AdaptiveSingularity::semi_infinite_lower()`]: infinite lower limit, (-Inf, a)
-/// - [`AdaptiveSingularity::semi_infinite_upper()`]: infinite upper limit, (b, Inf)
+/// # Overview
+///
+/// The [`AdaptiveSingularity`] integrator is an adaptive integrator designed for approximating
+/// one-dimensional integrals of the form,
+/// $$
+/// I = \int_{b}^{a} f(x) dx
+/// $$
+/// using Gauss-Kronrod integration rules. The function $f(x)$ is encoded in
+/// [`AdaptiveSingularity`] as something implementing the [`Integrand`] trait. A Gaussian numerical
+/// integration rule approximates an integral of a function by performing a weighted sum of the
+/// function evaluated at defined points/abscissae. The order of an integration rule, $n$, denotes
+/// the number of abscissae, $x_{i}$, at which the function is evaluated and the number of weights
+/// $w_{i}$ for the weighted sum, such that the approximation
+/// is,
+/// $$
+/// I \approx \sum_{i = 1}^{n} W_{i} f(X_{i}) = I_{n}
+/// $$
+/// where the $X_{i}$ and $W_{i}$ are the rescaled abscissae and weights,
+/// $$
+/// X_{i} = \frac{b + a + (a - b) x_{i}}{2} ~~~~~~~~ W_{i} = \frac{(a - b) w_{i}}{2}
+/// $$
+/// where the `limits` $a$ and $b$ are encoded in [`AdaptiveSingularity`] via [`Limits`] passed to
+/// the constructor. A Gauss-Kronrod integration rule combines two rules of different order for
+/// efficient estimation of the numerical error. The rules for an $n$-point Gauss-Kronrod rule
+/// contain $m = (n - 1) / 2$ abscissae _shared_ by the Gaussian and Kronrod rules and an extended
+/// set of $n - m$ Kronrod abscissae. The weighted sum of the full set of $n$ Kronrod function
+/// evaluations are used to approximate the result of the integration, while the weighted sum of
+/// the lower order set of $m$ Gaussian points are used to calculate the numerical error in the
+/// routine,
+/// $$
+/// E = |I_{n} - I_{m}|
+/// $$
+/// This approach is efficient, as only $n$ total function evaluations are required to obtain the
+/// result approximation and error estimate. Unlike the [`Adaptive`] integrator, a choice of
+/// Gauss-Kronrod integration rule is not required for the [`AdaptiveSingularity`] integrator.
+/// Instead, for general functions on finite intervals the 21-point rule [`Rule::gk21()`] is used,
+/// while for (semi-)infinite intervals (see below) the lower 15-point rule [`Rule::gk15()`]
+/// is used.
+///
+/// Unlike the [`Basic`] routine, the routine implemented by [`AdaptiveSingularity`] is adaptive.
+/// After the initial integration, each iteration of the routine picks the previous integration
+/// area which has the largest error estimate and bisects this region, updating the estimate to the
+/// integal and the total approximated error. Adaptive routines concentrate new subintervals around
+/// the region of highest error. If this region contains an integrable singularity, then the
+/// adaptive routine of [`Adaptive`] may fail to obtain a suitable estimate. To overcome this,
+/// [`AdaptiveSingularity`] uses an additional Wynn epsilon-algorithm extrapolation proceedure to
+/// manage these integrable singularities and provide a suitable estimate.
+///
+/// The adaptive routine will return the first approximation, `result`, to the integral which has
+/// an absolute `error` smaller than the tolerance `tol` encoded through the [`Tolerance`] enum,
+/// where
+///
+/// * [`Tolerance::Absolute`] specifies absolute tolerance and returns final estimate when
+/// `error <= tol`,
+/// * [`Tolerance::Relative`] specifies a relative error and returns final estimate when
+/// `error <= tol * abs(result)`,  
+/// * [`Tolerance::Either`] to return a result as soon as _either_ the relative or
+/// absolute error bound has been satisfied.
+///
+/// The routine will end when _either_ one of the tolerance conditions have been satisfied _or_ an
+/// error has occurred, see [`Error`] for more details.
+///
+/// # Infinite and semi-infinite integration regions
+///
+/// As well as being able to calculate integrals over integrable singularities within finite
+/// integration limits , [`AdaptiveSingularity`] can also be used for integrations over infinite
+/// and semi-infinite integration limits. Each of these has a dedicated constructor:
+/// - [`AdaptiveSingularity::finite`]: finite interval $x \in (b,a)$
+/// - [`AdaptiveSingularity::infinite`]: infinite interval $x \in (-\infty,+\infty)
+/// - [`AdaptiveSingularity::semi_infinite_lower`]: infinite lower limit $x \in (-\infty,a)$
+/// - [`AdaptiveSingularity::semi_infinite_upper`]: infinite upper limit, $x \in (b,+\infty)$
 ///
 /// The integrations over (semi-)infinite intervals are managed by transforming to a finite
 /// interval. This can introduce integrable singularities even to smooth functions, which is why
 /// the additional extrapolation provided by [`AdaptiveSingularity`] should be used for these.
 ///
-/// Unlike the [`Adaptive`] integrator, a choice of Gauss-Kronrod integration rule is not required
-/// for the [`AdaptiveSingularity`] integrator. Instead, for general functions on finite intervals
-/// the 21-point rule [`Rule::gk21()`] is used, while for (semi-)infinite intervals the lower
-/// 15-point rule [`Rule::gk15()`] is used.
 ///
-/// The adaptive routine will return the first approximation, `result`, to the integral which has an
-/// absolute `error` smaller than the tolerance set by the choice of [`Tolerance`], where
-/// * [`Tolerance::Absolute(abserr)`] specifies an absolute error and returns final [`IntegralEstimate`] when `error <= abserr`,
-/// * [`Tolerance::Relative(relerr)`] specifies a relative error and returns final [`IntegralEstimate`] when `error <= relerr * abs(result)`,  
-/// * [`Tolerance::Either{ abserr, relerr }`] to return a result as soon as _either_ the relative or absolute error bound has been satisfied.
+/// ## Example: finite integration region
 ///
-/// The total number of function evaluations when using an n-point rule is:
-/// - Finite integration interval: `T = (2 n - 1) * i`
-/// - (Semi-)Infinite interval: `T = 2 * (2 n - 1) * i`
-/// where `i` is the number of iterations used by the adaptive algorithm to reach the desired
-/// tolerance.
-///
-/// [`Basic`]: crate::quadrature::Basic
-/// [`Adaptive`]: crate::quadrature::Adaptive
-/// [`Tolerance::Absolute(abserr)`]: crate::Tolerance#variant.Absolute
-/// [`Tolerance::Relative(relerr)`]: crate::Tolerance#variant.Relative
-/// [`Tolerance::Either{ abserr, relerr }`]: crate::Tolerance#variant.Either
-///
+/// Here we present a calculation of [Catalan's constant] $G$ using the integral representation:
+/// $$
+/// G = \int_{0}^{1} \frac{\mathrm{arcsinh} x}{\sqrt{1 - x^{2}}} d x
+/// $$
+/// which has a finite integration region $x \in (0,1)$ but difficult integral behaviour as the
+/// integration variable $x \to 1$. We use [`AdaptiveSingularity::finite`] to approximate $G$.
 ///```rust
-/// use rint::{Limits, Integrand};
+/// use rint::{Integrand, Limits, Tolerance};
 /// use rint::quadrature::AdaptiveSingularity;
-/// use rint::Tolerance;
 ///
-/// /* f455(x) = log(x)/(1+100*x^2) */
-/// /* integ(f455,x,0,inf) = -log(10)/20 */
-/// struct Function455;
+/// const G: f64 = 0.915_965_594_177_219_015_054_603_514_932_384_110_774;
+/// const TOL: f64 = 1.0e-12;
 ///
-/// impl Integrand for Function455 {
+/// struct Catalan;
+///
+/// impl Integrand for Catalan {
 ///     type Scalar = f64;
+///
 ///     fn evaluate(&self, x: f64) -> Self::Scalar {
-///         x.ln() / (1.0 + 100.0 * x.powi(2))
+///         x.asinh() / (1.0 - x.powi(2)).sqrt()
 ///     }
 /// }
 ///
-/// let lower = 0.0;
-/// let exp_result =     -3.616892186127022568E-01;
-/// let exp_error =       3.016716913328831851E-06;
+/// let catalan = Catalan;
+/// let limits = Limits::new(0.0,1.0);
+/// let tolerance = Tolerance::Relative(TOL);
+/// let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
+///     .unwrap()
+///     .integrate()
+///     .unwrap();
 ///
-/// let tolerance = Tolerance::Relative(1.0e-3);
-///
-/// let function = Function455;
-///
-/// // Integrate with the adaptive algorithm
-/// let integral = AdaptiveSingularity::semi_infinite_upper(
-///     &function,
-///     lower,
-///     tolerance,
-///     1000,
-/// ).unwrap();
-///
-/// let integral_result = integral.integrate().unwrap();
-/// let result = integral_result.result();
-/// let error = integral_result.error();
-/// let iterations = integral_result.iterations();
-/// let evaluations = integral_result.evaluations();
-///
-/// let tol = 1.0e-9;
-/// assert!((exp_result - result).abs() / exp_result.abs() < tol);
-/// assert!((exp_error - error).abs() / exp_error.abs() < tol);
-/// assert_eq!(iterations, 10);
-/// assert_eq!(evaluations, 2*15*(2*iterations - 1));
+/// let result = integral.result();
+/// let error = integral.error();
+/// let abs_actual_error = (G - result).abs();
+/// let tol = TOL * result.abs();
+/// let iters = integral.iterations();
+/// assert_eq!(iters, 10);
+/// assert!(abs_actual_error < error);
+/// assert!(error < tol);
 ///```
+///
+///
+/// ## Example: infinite integration region
+///
+/// Here we present a calculation of [Euler's constant] $\gamma$ ([`std::f64::consts::EULER_GAMMA`])
+/// using the integral representation:
+/// $$
+/// \gamma = -\int_{-\infty}^{+\infty} x e^{x - e^{x}} dx
+/// $$
+/// which has an infinite integration region $x\in(-\infty,+\infty)$. We use [`AdaptiveSingularity::infinite`]
+/// to approximate $\gamma$.
+///```rust
+/// use rint::{Integrand, Tolerance};
+/// use rint::quadrature::AdaptiveSingularity;
+///
+/// const GAMMA: f64 = std::f64::consts::EULER_GAMMA;
+/// const TOL: f64 = 1.0e-12;
+///
+/// struct Gamma;
+///
+/// impl Integrand for Gamma {
+///     type Scalar = f64;
+///
+///     fn evaluate(&self, x: f64) -> Self::Scalar {
+///         let exponent = x - x.exp();
+///         -x * exponent.exp()
+///     }
+/// }
+///
+/// let gamma = Gamma;
+/// let tolerance = Tolerance::Relative(TOL);
+/// let integral = AdaptiveSingularity::infinite(gamma, tolerance, 1000)
+///     .unwrap()
+///     .integrate()
+///     .unwrap();
+///
+/// let result = integral.result();
+/// let error = integral.error();
+/// let abs_actual_error = (GAMMA - result).abs();
+/// let tol = TOL * result.abs();
+/// let iters = integral.iterations();
+/// assert_eq!(iters, 11);
+/// assert!(abs_actual_error < error);
+/// assert!(error < tol);
+///```
+///
+///
+/// ## Example: semi-infinite integration region
+///
+/// Here we present a calculation of [Catalan's constant] $G$ using the integral representation:
+/// $$
+/// G = \frac{\pi}{2} \int_{1}^{+\infty} \frac{(x^{4} - 6 x^{2} + 1) \ln \ln x}{(1+x^{2})^{3}} d x
+/// $$
+/// which has a semi-infinite integration region $x \in (1,+\infty)$ We use
+/// [`AdaptiveSingularity::semi_infinite_upper`] to approximate $G$.
+///```rust
+/// use rint::{Integrand, Limits, Tolerance};
+/// use rint::quadrature::AdaptiveSingularity;
+///
+/// const G: f64 = 0.915_965_594_177_219_015_054_603_514_932_384_110_774;
+/// const TOL: f64 = 1.0e-12;
+///
+/// struct Catalan;
+///
+/// impl Integrand for Catalan {
+///     type Scalar = f64;
+///
+///     fn evaluate(&self, x: f64) -> Self::Scalar {
+///         let FRAC_PI_2 = std::f64::consts::FRAC_PI_2;
+///         let polynomial = x.powi(4) - 6.0 * x.powi(2) + 1.0;
+///         let denominator = (1.0 + x.powi(2)).powi(3);
+///         let lnlnx = x.ln().ln();
+///         
+///         FRAC_PI_2 * polynomial * lnlnx / denominator
+///     }
+/// }
+///
+/// let catalan = Catalan;
+/// let lower = 1.0;
+/// let tolerance = Tolerance::Relative(TOL);
+/// let integral = AdaptiveSingularity::semi_infinite_upper(catalan, lower, tolerance, 1000)
+///     .unwrap()
+///     .integrate()
+///     .unwrap();
+///
+/// let result = integral.result();
+/// let error = integral.error();
+/// let abs_actual_error = (G - result).abs();
+/// let tol = TOL * result.abs();
+/// let iters = integral.iterations();
+/// assert_eq!(iters, 32);
+/// assert!(abs_actual_error < error);
+/// assert!(error < tol);
+///```
+///
+/// [Catalan's constant]: <https://en.wikipedia.org/wiki/Catalan%27s_constant>
+/// [Euler's constant]: <https://en.wikipedia.org/wiki/Euler%27s_constant>
+/// [`Basic`]: crate::quadrature::Basic
+/// [`Adaptive`]: crate::quadrature::Adaptive
+/// [`Tolerance`]: crate::Tolerance
+/// [`Error`]: crate::Error
+///
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct AdaptiveSingularity<I> {
     function: I,
@@ -111,24 +243,76 @@ impl<I> AdaptiveSingularity<I>
 where
     I: Integrand,
 {
-    /// Generate a new [`AdaptiveSingularity`] integrator for functions with integrable singularities on finite intervals.
+    /// Generate a new [`AdaptiveSingularity`] integrator for functions with possible integrable
+    /// singularities on finite intervals.
     ///
-    /// Arguments:
-    /// - `function`: A user supplied function to be integrated, which is a struct implementing the
+    ///
+    /// Initialise an adaptive Gauss-Kronrod integrator with extrapolation for approximating
+    /// integrals of the form,
+    /// $$
+    /// \int_{b}^{a} f(x) dx.
+    /// $$
+    /// with finite integration bounds $x \in (b,a)$.
+    ///
+    ///  Arguments:
+    /// - `function`: A user supplied function to be integrated which is something implementing the
     /// [`Integrand`] trait.
     /// - `limits`: The interval over which the `function` should be integrated, [`Limits`].
     /// - `tolerance`: The tolerance requested by the user. Can be either an absolute tolerance
     /// or relative tolerance. Determines the exit condition of the integration routine, see
     /// [`Tolerance`].
-    /// - `max_iterations`: The maximum number of iterations that the adaptive routine should use
-    /// to try to satisfy the requested tolerance.
+    /// - `max_iterations`: The maximum number of iterations that the routine should use to try to
+    /// satisfy the requested tolerance.
     ///
     /// # Errors
-    /// Function will return an error if the user provided `Tolerance` does not satisfy the
-    /// following constraints:
-    /// - `Tolerance::Absolute(v)` where `v > 0.0`,
-    /// - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON`,
-    /// - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
+    /// Function can return an error if it receives bad user input. This is primarily related to
+    /// using invalid values for the `tolerance`. The returned error is an [`InitialisationError`].
+    /// See [`Tolerance`] and [`InitialisationError`] for more details.
+    ///
+    ///
+    /// # Example
+    ///
+    /// Here we present a calculation of [Catalan's constant] $G$ using the integral representation:
+    /// $$
+    /// G = \int_{0}^{1} \frac{\mathrm{arcsinh} x}{\sqrt{1 - x^{2}}} d x
+    /// $$
+    /// which has a finite integration region $x \in (0,1)$ but difficult integral behaviour as the
+    /// integration variable $x \to 1$. We use [`AdaptiveSingularity::finite`] to approximate $G$.
+    ///```rust
+    /// use rint::{Integrand, Limits, Tolerance};
+    /// use rint::quadrature::AdaptiveSingularity;
+    ///
+    /// const G: f64 = 0.915_965_594_177_219_015_054_603_514_932_384_110_774;
+    /// const TOL: f64 = 1.0e-12;
+    ///
+    /// struct Catalan;
+    ///
+    /// impl Integrand for Catalan {
+    ///     type Scalar = f64;
+    ///
+    ///     fn evaluate(&self, x: f64) -> Self::Scalar {
+    ///         x.asinh() / (1.0 - x.powi(2)).sqrt()
+    ///     }
+    /// }
+    ///
+    /// let catalan = Catalan;
+    /// let limits = Limits::new(0.0,1.0);
+    /// let tolerance = Tolerance::Relative(TOL);
+    /// let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
+    ///     .unwrap()
+    ///     .integrate()
+    ///     .unwrap();
+    ///
+    /// let result = integral.result();
+    /// let error = integral.error();
+    /// let abs_actual_error = (G - result).abs();
+    /// let tol = TOL * result.abs();
+    /// let iters = integral.iterations();
+    /// assert_eq!(iters, 10);
+    /// assert!(abs_actual_error < error);
+    /// assert!(error < tol);
+    ///```
+    ///
     pub fn finite(
         function: I,
         limits: Limits,
@@ -146,25 +330,33 @@ where
     /// [`IntegralEstimate`] upon successful completion.
     ///
     /// # Errors
-    /// The error type [`IntegrationError`] will return both the error [`IntegrationErrorKind`] and the [`IntegralEstimate`]
-    /// obtained before an error was encountered.
-    /// The integration routine has several ways of failing:
+    /// The error type [`IntegrationError`] will return both the error [`IntegrationErrorKind`] and
+    /// the [`IntegralEstimate`] obtained before an error was encountered. The integration routine
+    /// has several ways of failing:
     /// - The user supplied [`Tolerance`] could not be satisfied within the maximum number of
-    /// iterations (kind = [`IntegrationErrorKind::MaximumIterationsReached`]).
+    /// iterations, see [`IntegrationErrorKind::MaximumIterationsReached`].
+    ///
     /// - A roundoff error was detected. Can occur when the calculated numerical error from an
     /// internal integration is smaller than the estimated roundoff, but larger than the tolerance
     /// requested by the user, or when too many successive iterations do not reasonably improve the
-    /// integral value and error estimate (kind = [`IntegrationErrorKind::RoundoffErrorDetected`]).
+    /// integral value and error estimate, see [`IntegrationErrorKind::RoundoffErrorDetected`].
+    ///
     /// - Bisection of the highest error region into two subregions results in subregions with
-    /// integraion limits that are too small (kind = [`IntegrationErrorKind::BadIntegrandBehaviour`]).
+    /// integraion limits that are too small, see [`IntegrationErrorKind::BadIntegrandBehaviour`].
+    ///
     /// - The integral does not converge. Occurs if at least 5 bisections with extrapolation have
-    /// failed to improve the integral value and error estimates (kind = [`IntegrationErrorKind::DoesNotConverge`])
+    /// failed to improve the integral value and error estimates, see
+    /// [`IntegrationErrorKind::DoesNotConverge`].
+    ///
     /// - The integral is divergent or slowly convergent. Occurs if the ratio of the extrapolation
     /// improved integral estimate and the non-extrapolated estimate is too large or small, or if
-    /// the calculated error is larger than the calculated value of the integral (kind =
-    /// [`IntegrationErrorKind::DivergentOrSlowlyConverging`])
+    /// the calculated error is larger than the calculated value of the integral, see
+    /// [`IntegrationErrorKind::DivergentOrSlowlyConverging`].
+    ///
     /// - An error is encountered when initialising the integration workspace. This is an internal
-    /// error, which should not occur downstream (kind = [`IntegrationErrorKind::UninitialisedWorkspace`]).
+    /// error, which should not occur downstream , see
+    /// [`IntegrationErrorKind::UninitialisedWorkspace`].
+    ///
     pub fn integrate(&self) -> Result<IntegralEstimate<I::Scalar>, IntegrationError<I::Scalar>> {
         let initial = Integrator::new(&self.function, &self.rule, self.limits).integrate();
 
@@ -191,7 +383,6 @@ where
             workspace.update(lower, upper);
 
             if error <= iteration_tolerance {
-                // TODO add individual checks on re and im error
                 return workspace.compute_result();
             }
 
@@ -220,9 +411,16 @@ where
                 iteration_error,
             );
 
-            // peek the next interval with the largest error and check if it
-            // is the smallest interval.
+            // We want to reduce the error in the [`Region`]s with large integration intervals
+            // first. If we are _not_ extrapolating, compare the length of the next [`Region`]
+            // with the highest `error` with the smallest interval previously encountered. Iff
+            // the next [`Region`] is LARGER, return to the start of the loop. Otherwise, the
+            // next iteration has the highest error and smallest interval. Store it in the
+            // workspace.store and set extrapolate to true.
             if !workspace.extrapolate {
+                // peek the next interval with the largest error. If the interval length is larger
+                // than the smallest interval previously encountered then go to the start of the
+                // loop.
                 if let Some(next) = workspace.peek() {
                     if next.abs_interval_length() > workspace.smallest_interval {
                         continue;
@@ -387,10 +585,14 @@ where
     }
 }
 
-/// A function defined over an infinite integration interval (-Inf, Inf).
+/// A function defined over an infinite integration interval $x \in (-\infty,+\infty)$
 ///
-/// This is a wrapper around a user supplied function implementing the [`Integrand`] trait, which
-/// is to be integrated between the interval (-Inf, Inf).
+/// This is a wrapper around a user supplied function implementing the [`Integrand`] trait which is
+/// to be integrated over the infinite integration interval $x \in (-\infty,+\infty)$, i.e. in
+/// integrals of the form,
+/// $$
+/// \int_{-\infty}^{+\infty} f(x) dx.
+/// $$
 /// This is achieved by transforming the integrand to be defined on the interval (0,1).
 pub struct InfiniteInterval<I> {
     function: I,
@@ -419,23 +621,76 @@ impl<I> AdaptiveSingularity<InfiniteInterval<I>>
 where
     I: Integrand,
 {
-    /// Generate a new [`AdaptiveSingularity`] integrator for functions with integrable singularities on infinite intervals.
+    /// Generate a new [`AdaptiveSingularity`] integrator for functions with possible integrable
+    /// singularities on infinite intervals.
     ///
-    /// Arguments:
-    /// - `function`: A user supplied function to be integrated, which is a struct implementing the
+    ///
+    /// Initialise an adaptive Gauss-Kronrod integrator with extrapolation for approximating
+    /// integrals of the form,
+    /// $$
+    /// \int_{-\infty}^{+\infty} f(x) dx.
+    /// $$
+    /// with finite integration bounds $x \in (-\infty,+\infty)$.
+    ///
+    ///  Arguments:
+    /// - `function`: A user supplied function to be integrated which is something implementing the
     /// [`Integrand`] trait.
     /// - `tolerance`: The tolerance requested by the user. Can be either an absolute tolerance
     /// or relative tolerance. Determines the exit condition of the integration routine, see
     /// [`Tolerance`].
-    /// - `max_iterations`: The maximum number of iterations that the adaptive routine should use
-    /// to try to satisfy the requested tolerance.
+    /// - `max_iterations`: The maximum number of iterations that the routine should use to try to
+    /// satisfy the requested tolerance.
     ///
     /// # Errors
-    /// Function will return an error if the user provided `Tolerance` does not satisfy the
-    /// following constraints:
-    /// - `Tolerance::Absolute(v)` where `v > 0.0`,
-    /// - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON`,
-    /// - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
+    /// Function can return an error if it receives bad user input. This is primarily related to
+    /// using invalid values for the `tolerance`. The returned error is an [`InitialisationError`].
+    /// See [`Tolerance`] and [`InitialisationError`] for more details.
+    ///
+    /// # Example
+    ///
+    ///
+    /// Here we present a calculation of [Euler's constant] $\gamma$ ([`std::f64::consts::EULER_GAMMA`])
+    /// using the integral representation:
+    /// $$
+    /// \gamma = -\int_{-\infty}^{+\infty} x e^{x - e^{x}} dx
+    /// $$
+    /// which has an infinite integration region $x\in(-\infty,+\infty)$. We use [`AdaptiveSingularity::infinite`]
+    /// to approximate $\gamma$.
+    ///```rust
+    /// use rint::{Integrand, Tolerance};
+    /// use rint::quadrature::AdaptiveSingularity;
+    ///
+    /// const GAMMA: f64 = std::f64::consts::EULER_GAMMA;
+    /// const TOL: f64 = 1.0e-12;
+    ///
+    /// struct Gamma;
+    ///
+    /// impl Integrand for Gamma {
+    ///     type Scalar = f64;
+    ///
+    ///     fn evaluate(&self, x: f64) -> Self::Scalar {
+    ///         let exponent = x - x.exp();
+    ///         -x * exponent.exp()
+    ///     }
+    /// }
+    ///
+    /// let gamma = Gamma;
+    /// let tolerance = Tolerance::Relative(TOL);
+    /// let integral = AdaptiveSingularity::infinite(gamma, tolerance, 1000)
+    ///     .unwrap()
+    ///     .integrate()
+    ///     .unwrap();
+    ///
+    /// let result = integral.result();
+    /// let error = integral.error();
+    /// let abs_actual_error = (GAMMA - result).abs();
+    /// let tol = TOL * result.abs();
+    /// let iters = integral.iterations();
+    /// assert_eq!(iters, 11);
+    /// assert!(abs_actual_error < error);
+    /// assert!(error < tol);
+    ///```
+    ///
     pub fn infinite(
         function: I,
         tolerance: Tolerance,
@@ -455,10 +710,14 @@ where
     }
 }
 
-/// A function defined over a semi-infinite integration interval (b, Inf).
+/// A function defined over a semi-infinite integration interval $x \in (b,+\infty)$
 ///
-/// This is a wrapper around a user supplied function implementing the [`Integrand`] trait, which
-/// is to be integrated between the interval (b, Inf).
+/// This is a wrapper around a user supplied function implementing the [`Integrand`] trait which is
+/// to be integrated over the infinite integration interval $x \in (b,+\infty)$, i.e. in
+/// integrals of the form,
+/// $$
+/// \int_{b}^{+\infty} f(x) dx.
+/// $$
 /// This is achieved by transforming the integrand to be defined on the interval (0,1).
 pub struct SemiInfiniteIntervalPositive<I> {
     function: I,
@@ -488,24 +747,79 @@ impl<I> AdaptiveSingularity<SemiInfiniteIntervalPositive<I>>
 where
     I: Integrand,
 {
-    /// Generate a new [`AdaptiveSingularity`] integrator for functions with integrable singularities on semi-infinite intervals (b, Inf).
+    /// Generate a new [`AdaptiveSingularity`] integrator for functions with possible integrable
+    /// singularities on semi-infinite intervals with an upper infinite limit.
     ///
-    /// Arguments:
-    /// - `function`: A user supplied function to be integrated, which is a struct implementing the
+    ///
+    /// Initialise an adaptive Gauss-Kronrod integrator with extrapolation for approximating
+    /// integrals of the form,
+    /// $$
+    /// \int_{b}^{+\infty} f(x) dx.
+    /// $$
+    /// with finite integration bounds $x \in (b,+\infty)$.
+    ///
+    ///  Arguments:
+    /// - `function`: A user supplied function to be integrated which is something implementing the
     /// [`Integrand`] trait.
-    /// - `lower`: The lower integration limit.
+    /// - `lower`: the lower integration bound.
     /// - `tolerance`: The tolerance requested by the user. Can be either an absolute tolerance
     /// or relative tolerance. Determines the exit condition of the integration routine, see
     /// [`Tolerance`].
-    /// - `max_iterations`: The maximum number of iterations that the adaptive routine should use
-    /// to try to satisfy the requested tolerance.
+    /// - `max_iterations`: The maximum number of iterations that the routine should use to try to
+    /// satisfy the requested tolerance.
     ///
     /// # Errors
-    /// Function will return an error if the user provided `Tolerance` does not satisfy the
-    /// following constraints:
-    /// - `Tolerance::Absolute(v)` where `v > 0.0`,
-    /// - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON`,
-    /// - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
+    /// Function can return an error if it receives bad user input. This is primarily related to
+    /// using invalid values for the `tolerance`. The returned error is an [`InitialisationError`].
+    /// See [`Tolerance`] and [`InitialisationError`] for more details.
+    ///
+    /// # Example
+    ///
+    /// Here we present a calculation of [Catalan's constant] $G$ using the integral representation:
+    /// $$
+    /// G = \frac{\pi}{2} \int_{1}^{+\infty} \frac{(x^{4} - 6 x^{2} + 1) \ln \ln x}{(1+x^{2})^{3}} d x
+    /// $$
+    /// which has a semi-infinite integration region $x \in (1,+\infty)$ We use
+    /// [`AdaptiveSingularity::semi_infinite_upper`] to approximate $G$.
+    ///```rust
+    /// use rint::{Integrand, Limits, Tolerance};
+    /// use rint::quadrature::AdaptiveSingularity;
+    ///
+    /// const G: f64 = 0.915_965_594_177_219_015_054_603_514_932_384_110_774;
+    /// const TOL: f64 = 1.0e-12;
+    ///
+    /// struct Catalan;
+    ///
+    /// impl Integrand for Catalan {
+    ///     type Scalar = f64;
+    ///
+    ///     fn evaluate(&self, x: f64) -> Self::Scalar {
+    ///         let FRAC_PI_2 = std::f64::consts::FRAC_PI_2;
+    ///         let polynomial = x.powi(4) - 6.0 * x.powi(2) + 1.0;
+    ///         let denominator = (1.0 + x.powi(2)).powi(3);
+    ///         let lnlnx = x.ln().ln();
+    ///         
+    ///         FRAC_PI_2 * polynomial * lnlnx / denominator
+    ///     }
+    /// }
+    ///
+    /// let catalan = Catalan;
+    /// let lower = 1.0;
+    /// let tolerance = Tolerance::Relative(TOL);
+    /// let integral = AdaptiveSingularity::semi_infinite_upper(catalan, lower, tolerance, 1000)
+    ///     .unwrap()
+    ///     .integrate()
+    ///     .unwrap();
+    ///
+    /// let result = integral.result();
+    /// let error = integral.error();
+    /// let abs_actual_error = (G - result).abs();
+    /// let tol = TOL * result.abs();
+    /// let iters = integral.iterations();
+    /// assert_eq!(iters, 32);
+    /// assert!(abs_actual_error < error);
+    /// assert!(error < tol);
+    ///```
     pub fn semi_infinite_upper(
         function: I,
         lower: f64,
@@ -526,10 +840,14 @@ where
     }
 }
 
-/// A function defined over a semi-infinite integration interval (-Inf, a).
+/// A function defined over a semi-infinite integration interval $x \in (-\infty,b)$
 ///
-/// This is a wrapper around a user supplied function implementing the [`Integrand`] trait, which
-/// is to be integrated between the interval (-Inf, a).
+/// This is a wrapper around a user supplied function implementing the [`Integrand`] trait which is
+/// to be integrated over the infinite integration interval $x \in (-\infty,b)$, i.e. in
+/// integrals of the form,
+/// $$
+/// \int_{-\infty}^{b} f(x) dx.
+/// $$
 /// This is achieved by transforming the integrand to be defined on the interval (0,1).
 pub struct SemiInfiniteIntervalNegative<I> {
     function: I,
@@ -559,24 +877,79 @@ impl<I> AdaptiveSingularity<SemiInfiniteIntervalNegative<I>>
 where
     I: Integrand,
 {
-    /// Generate a new [`AdaptiveSingularity`] integrator for functions with integrable singularities on semi-infinite intervals (-Inf, a).
+    /// Generate a new [`AdaptiveSingularity`] integrator for functions with possible integrable
+    /// singularities on semi-infinite intervals with an upper infinite limit.
     ///
-    /// Arguments:
-    /// - `function`: A user supplied function to be integrated, which is a struct implementing the
+    ///
+    /// Initialise an adaptive Gauss-Kronrod integrator with extrapolation for approximating
+    /// integrals of the form,
+    /// $$
+    /// \int_{-\infty}^{a} f(x) dx.
+    /// $$
+    /// with finite integration bounds $x \in (-\infty,a)$.
+    ///
+    ///  Arguments:
+    /// - `function`: A user supplied function to be integrated which is something implementing the
     /// [`Integrand`] trait.
-    /// - `upper`: The upper integration limit.
+    /// - `upper`: the upper integration bound.
     /// - `tolerance`: The tolerance requested by the user. Can be either an absolute tolerance
     /// or relative tolerance. Determines the exit condition of the integration routine, see
     /// [`Tolerance`].
-    /// - `max_iterations`: The maximum number of iterations that the adaptive routine should use
-    /// to try to satisfy the requested tolerance.
+    /// - `max_iterations`: The maximum number of iterations that the routine should use to try to
+    /// satisfy the requested tolerance.
     ///
     /// # Errors
-    /// Function will return an error if the user provided `Tolerance` does not satisfy the
-    /// following constraints:
-    /// - `Tolerance::Absolute(v)` where `v > 0.0`,
-    /// - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON`,
-    /// - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON`.
+    /// Function can return an error if it receives bad user input. This is primarily related to
+    /// using invalid values for the `tolerance`. The returned error is an [`InitialisationError`].
+    /// See [`Tolerance`] and [`InitialisationError`] for more details.
+    ///
+    /// # Example
+    ///
+    /// Here we present a calculation of [Catalan's constant] $G$ using the integral representation:
+    /// $$
+    /// G = \frac{\pi}{2} \int_{1}^{+\infty} \frac{(x^{4} - 6 x^{2} + 1) \ln \ln x}{(1+x^{2})^{3}} d x
+    /// $$
+    /// which has a semi-infinite integration region $x \in (1,+\infty)$ We use
+    /// [`AdaptiveSingularity::semi_infinite_upper`] to approximate $G$.
+    ///```rust
+    /// use rint::{Integrand, Limits, Tolerance};
+    /// use rint::quadrature::AdaptiveSingularity;
+    ///
+    /// const G: f64 = 0.915_965_594_177_219_015_054_603_514_932_384_110_774;
+    /// const TOL: f64 = 1.0e-12;
+    ///
+    /// struct Catalan;
+    ///
+    /// impl Integrand for Catalan {
+    ///     type Scalar = f64;
+    ///
+    ///     fn evaluate(&self, x: f64) -> Self::Scalar {
+    ///         let FRAC_PI_2 = std::f64::consts::FRAC_PI_2;
+    ///         let polynomial = x.powi(4) - 6.0 * x.powi(2) + 1.0;
+    ///         let denominator = (1.0 + x.powi(2)).powi(3);
+    ///         let lnlnx = x.ln().ln();
+    ///         
+    ///         FRAC_PI_2 * polynomial * lnlnx / denominator
+    ///     }
+    /// }
+    ///
+    /// let catalan = Catalan;
+    /// let lower = 1.0;
+    /// let tolerance = Tolerance::Relative(TOL);
+    /// let integral = AdaptiveSingularity::semi_infinite_upper(catalan, lower, tolerance, 1000)
+    ///     .unwrap()
+    ///     .integrate()
+    ///     .unwrap();
+    ///
+    /// let result = integral.result();
+    /// let error = integral.error();
+    /// let abs_actual_error = (G - result).abs();
+    /// let tol = TOL * result.abs();
+    /// let iters = integral.iterations();
+    /// assert_eq!(iters, 32);
+    /// assert!(abs_actual_error < error);
+    /// assert!(error < tol);
+    ///```
     pub fn semi_infinite_lower(
         function: I,
         upper: f64,
@@ -597,6 +970,18 @@ where
     }
 }
 
+/// The integration workspace.
+///
+/// We use a workspace for maintaining the state of the adaptive integration routines. The `heap`
+/// is a [`BinaryHeap`] storing [`Region`]s which have been integrated, and upon using
+/// [`Workspace::pop`] returns the region with the highest `error` approximation which is the next
+/// region to be bisected and re-integrated.
+/// As well as this, the [`AdaptiveSingularity`] routine needs to keep track of the
+/// [`ExtrapolationTable`] and the `store`
+/// Also tracked are the current estimates of `result` and
+/// `error` across the entire integration region, the number of `iteration`s, and counts of times
+/// that roundoff errors may have occurred, used as a diagnostic for terminating the integration
+/// early if problematic roundoff behaviour is observed.
 struct Workspace<T> {
     heap: BinaryHeap<Region<T>>,
     iteration: usize,
@@ -616,6 +1001,8 @@ struct Workspace<T> {
 }
 
 impl<T: ScalarF64> Workspace<T> {
+    /// Get the next [`Region`] in the [`BinaryHeap`] with the largest `error` estimate and update
+    /// the workspace iteration number.
     fn retrieve_largest_error(&mut self) -> Result<Region<T>, IntegrationError<T>> {
         self.iteration += 1;
         if let Some(previous) = self.pop() {
