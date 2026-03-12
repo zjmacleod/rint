@@ -122,7 +122,7 @@ impl<const N: usize> Iterator for Permutations<N> {
 }
 
 #[cfg(test)]
-#[allow(clippy::float_cmp)] // TODO change comparisons and remove this
+#[allow(clippy::too_many_lines)]
 mod tests_no_centre_or_half_widths {
     use super::*;
 
@@ -138,8 +138,8 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2usize.pow(ndim));
@@ -163,8 +163,8 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * ndim * (ndim - 1));
@@ -184,8 +184,8 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2 * ndim);
@@ -193,7 +193,6 @@ mod tests_no_centre_or_half_widths {
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn check_ndim_3_generators() {
         let ndim = 3;
 
@@ -216,9 +215,9 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2usize.pow(ndim));
@@ -259,9 +258,9 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * ndim * (ndim - 1) * (ndim - 2));
@@ -301,9 +300,9 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * ndim * (ndim - 1));
@@ -331,9 +330,9 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2 * ndim * (ndim - 1));
@@ -355,9 +354,9 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2 * ndim);
@@ -365,7 +364,6 @@ mod tests_no_centre_or_half_widths {
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn check_ndim_4_generators() {
         let ndim = 4;
 
@@ -395,10 +393,10 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2usize.pow(ndim));
@@ -446,10 +444,10 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * ndim * (ndim - 1) * (ndim - 2) / 3);
@@ -561,10 +559,10 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * ndim * (ndim - 1) * (ndim - 2));
@@ -628,10 +626,10 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * ndim * (ndim - 1));
@@ -671,10 +669,10 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2 * ndim * (ndim - 1));
@@ -698,10 +696,10 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2 * ndim);
@@ -709,7 +707,6 @@ mod tests_no_centre_or_half_widths {
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn check_ndim_5_generators() {
         let ndim = 5;
 
@@ -755,11 +752,11 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2usize.pow(ndim));
@@ -855,11 +852,11 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * ndim * (ndim - 1) * (ndim - 2) / 3);
@@ -1115,11 +1112,11 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * ndim * (ndim - 1) * (ndim - 2));
@@ -1215,11 +1212,11 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * ndim * (ndim - 1));
@@ -1275,11 +1272,11 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2 * ndim * (ndim - 1));
@@ -1305,11 +1302,11 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2 * ndim);
@@ -1317,7 +1314,6 @@ mod tests_no_centre_or_half_widths {
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn check_ndim_6_generators() {
         let ndim = 6;
 
@@ -1395,12 +1391,12 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
-                assert_eq!(a[5], b[5]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
+                assert!((a[5] - b[5]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2usize.pow(ndim));
@@ -1576,12 +1572,12 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
-                assert_eq!(a[5], b[5]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
+                assert!((a[5] - b[5]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * ndim * (ndim - 1) * (ndim - 2) / 3);
@@ -2077,12 +2073,12 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
-                assert_eq!(a[5], b[5]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
+                assert!((a[5] - b[5]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * ndim * (ndim - 1) * (ndim - 2));
@@ -2218,12 +2214,12 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
-                assert_eq!(a[5], b[5]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
+                assert!((a[5] - b[5]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * ndim * (ndim - 1));
@@ -2299,12 +2295,12 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
-                assert_eq!(a[5], b[5]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
+                assert!((a[5] - b[5]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2 * ndim * (ndim - 1));
@@ -2332,12 +2328,12 @@ mod tests_no_centre_or_half_widths {
             let mut count = 0;
             for (a, b) in vv.permutations().zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
-                assert_eq!(a[5], b[5]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
+                assert!((a[5] - b[5]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2 * ndim);
@@ -2346,7 +2342,7 @@ mod tests_no_centre_or_half_widths {
 }
 
 #[cfg(test)]
-#[allow(clippy::float_cmp)] // TODO change comparisons and remove this
+#[allow(clippy::too_many_lines)]
 mod tests_with_centre_and_half_widths {
     use super::*;
     use crate::multi::two_pow_n;
@@ -2370,8 +2366,8 @@ mod tests_with_centre_and_half_widths {
             let mut count = 0;
             for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, two_pow_n(N));
@@ -2395,8 +2391,8 @@ mod tests_with_centre_and_half_widths {
             let mut count = 0;
             for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * N * (N - 1));
@@ -2416,8 +2412,8 @@ mod tests_with_centre_and_half_widths {
             let mut count = 0;
             for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2 * N);
@@ -2425,7 +2421,6 @@ mod tests_with_centre_and_half_widths {
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn with_centre_hw_check_ndim_3_generators() {
         const N: usize = 3;
 
@@ -2451,9 +2446,9 @@ mod tests_with_centre_and_half_widths {
             let mut count = 0;
             for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, two_pow_n(N));
@@ -2494,9 +2489,9 @@ mod tests_with_centre_and_half_widths {
             let mut count = 0;
             for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * N * (N - 1) * (N - 2));
@@ -2536,9 +2531,9 @@ mod tests_with_centre_and_half_widths {
             let mut count = 0;
             for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * N * (N - 1));
@@ -2566,9 +2561,9 @@ mod tests_with_centre_and_half_widths {
             let mut count = 0;
             for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2 * N * (N - 1));
@@ -2591,9 +2586,9 @@ mod tests_with_centre_and_half_widths {
             for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
                 println!("{a:?}");
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2 * N);
@@ -2601,7 +2596,6 @@ mod tests_with_centre_and_half_widths {
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn with_centre_hw_check_ndim_6_generators() {
         const N: usize = 6;
 
@@ -2691,12 +2685,12 @@ mod tests_with_centre_and_half_widths {
             let mut count = 0;
             for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
-                assert_eq!(a[5], b[5]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
+                assert!((a[5] - b[5]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, two_pow_n(N));
@@ -2881,12 +2875,12 @@ mod tests_with_centre_and_half_widths {
             let mut count = 0;
             for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
-                assert_eq!(a[5], b[5]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
+                assert!((a[5] - b[5]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * N * (N - 1) * (N - 2) / 3);
@@ -3392,12 +3386,12 @@ mod tests_with_centre_and_half_widths {
             let mut count = 0;
             for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
-                assert_eq!(a[5], b[5]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
+                assert!((a[5] - b[5]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * N * (N - 1) * (N - 2));
@@ -3542,12 +3536,12 @@ mod tests_with_centre_and_half_widths {
             let mut count = 0;
             for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
-                assert_eq!(a[5], b[5]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
+                assert!((a[5] - b[5]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 4 * N * (N - 1));
@@ -3632,12 +3626,12 @@ mod tests_with_centre_and_half_widths {
             let mut count = 0;
             for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
-                assert_eq!(a[5], b[5]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
+                assert!((a[5] - b[5]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2 * N * (N - 1));
@@ -3674,12 +3668,12 @@ mod tests_with_centre_and_half_widths {
             let mut count = 0;
             for (a, b) in vv.point_permutations(&centre, &half_widths).zip(should_be) {
                 count += 1;
-                assert_eq!(a[0], b[0]);
-                assert_eq!(a[1], b[1]);
-                assert_eq!(a[2], b[2]);
-                assert_eq!(a[3], b[3]);
-                assert_eq!(a[4], b[4]);
-                assert_eq!(a[5], b[5]);
+                assert!((a[0] - b[0]).abs() < f64::EPSILON);
+                assert!((a[1] - b[1]).abs() < f64::EPSILON);
+                assert!((a[2] - b[2]).abs() < f64::EPSILON);
+                assert!((a[3] - b[3]).abs() < f64::EPSILON);
+                assert!((a[4] - b[4]).abs() < f64::EPSILON);
+                assert!((a[5] - b[5]).abs() < f64::EPSILON);
             }
 
             assert_eq!(count, 2 * N);

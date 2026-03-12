@@ -143,7 +143,6 @@ pub(crate) const fn two_pow_n_f64(n: usize) -> f64 {
 }
 
 #[cfg(test)]
-#[allow(clippy::float_cmp)]
 mod tests {
     use super::*;
 
@@ -168,20 +167,20 @@ mod tests {
 
     #[test]
     fn test_two_pow_n_f64() {
-        assert_eq!(2.0, two_pow_n_f64(1));
-        assert_eq!(4.0, two_pow_n_f64(2));
-        assert_eq!(8.0, two_pow_n_f64(3));
-        assert_eq!(16.0, two_pow_n_f64(4));
-        assert_eq!(32.0, two_pow_n_f64(5));
-        assert_eq!(64.0, two_pow_n_f64(6));
-        assert_eq!(128.0, two_pow_n_f64(7));
-        assert_eq!(256.0, two_pow_n_f64(8));
-        assert_eq!(512.0, two_pow_n_f64(9));
-        assert_eq!(1024.0, two_pow_n_f64(10));
-        assert_eq!(2048.0, two_pow_n_f64(11));
-        assert_eq!(4096.0, two_pow_n_f64(12));
-        assert_eq!(8192.0, two_pow_n_f64(13));
-        assert_eq!(16384.0, two_pow_n_f64(14));
-        assert_eq!(32768.0, two_pow_n_f64(15));
+        assert!((2.0 - two_pow_n_f64(1)).abs() < f64::EPSILON);
+        assert!((4.0 - two_pow_n_f64(2)).abs() < f64::EPSILON);
+        assert!((8.0 - two_pow_n_f64(3)).abs() < f64::EPSILON);
+        assert!((16.0 - two_pow_n_f64(4)).abs() < f64::EPSILON);
+        assert!((32.0 - two_pow_n_f64(5)).abs() < f64::EPSILON);
+        assert!((64.0 - two_pow_n_f64(6)).abs() < f64::EPSILON);
+        assert!((128.0 - two_pow_n_f64(7)).abs() < f64::EPSILON);
+        assert!((256.0 - two_pow_n_f64(8)).abs() < f64::EPSILON);
+        assert!((512.0 - two_pow_n_f64(9)).abs() < f64::EPSILON);
+        assert!((1024.0 - two_pow_n_f64(10)).abs() < f64::EPSILON);
+        assert!((2048.0 - two_pow_n_f64(11)).abs() < f64::EPSILON);
+        assert!((4096.0 - two_pow_n_f64(12)).abs() < f64::EPSILON);
+        assert!((8192.0 - two_pow_n_f64(13)).abs() < f64::EPSILON);
+        assert!((16384.0 - two_pow_n_f64(14)).abs() < f64::EPSILON);
+        assert!((32768.0 - two_pow_n_f64(15)).abs() < f64::EPSILON);
     }
 }

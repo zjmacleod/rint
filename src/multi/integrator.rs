@@ -231,12 +231,12 @@ impl<T: ScalarF64> IntermediateResult<T> {
 }
 
 #[cfg(test)]
+#[allow(clippy::too_many_lines)]
 mod tests {
     use super::*;
     use crate::multi::{Rule07, Rule09, Rule09N2, Rule11, Rule13};
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn compare_basic_7point_with_dcuhre_output_ndim_2() {
         const N: usize = 2;
 
@@ -409,7 +409,6 @@ mod tests {
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn compare_basic_7point_with_dcuhre_output_ndim_3() {
         const N: usize = 3;
 
@@ -559,7 +558,6 @@ mod tests {
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn compare_basic_9point_with_dcuhre_output_ndim_2() {
         const N: usize = 2;
 
@@ -732,7 +730,6 @@ mod tests {
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn compare_basic_9point_with_dcuhre_output_ndim_3() {
         const N: usize = 3;
 
@@ -917,7 +914,6 @@ mod tests {
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn compare_basic_11point_with_dcuhre_output_ndim_3() {
         const N: usize = 3;
 
@@ -1102,7 +1098,6 @@ mod tests {
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn compare_basic_13point_with_dcuhre_output_ndim_2() {
         const N: usize = 2;
 

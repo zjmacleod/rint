@@ -226,12 +226,12 @@ impl<T: ScalarF64, const N: usize> Workspace<T, N> {
 }
 
 #[cfg(test)]
+#[allow(clippy::too_many_lines)]
 mod tests_relative {
     use super::*;
     use crate::multi::{Rule07, Rule09, Rule11, Rule13};
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn compare_adaptive_7point_with_dcuhre_output_ndim_2() {
         const N: usize = 2;
         const TOL: f64 = 1e-7;
@@ -420,7 +420,6 @@ mod tests_relative {
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn compare_adaptive_7point_with_dcuhre_output_ndim_3() {
         const N: usize = 3;
         const TOL: f64 = 1e-7;
@@ -621,7 +620,6 @@ mod tests_relative {
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn compare_adaptive_9point_with_dcuhre_output_ndim_3() {
         const N: usize = 3;
         const TOL: f64 = 1e-7;
@@ -822,7 +820,6 @@ mod tests_relative {
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn compare_adaptive_11point_with_dcuhre_output_ndim_3() {
         const N: usize = 3;
         const TOL: f64 = 1e-7;
@@ -1023,7 +1020,6 @@ mod tests_relative {
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn compare_adaptive_13point_with_dcuhre_output_ndim_2() {
         const N: usize = 2;
         const TOL: f64 = 1e-7;

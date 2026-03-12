@@ -75,8 +75,6 @@ use crate::{
 /// use rint::{Integrand, Limits, Tolerance};
 /// use rint::quadrature::{Adaptive, Basic, Rule};
 ///
-/// use rand::prelude::*;
-///
 /// use std::f64::consts::*;
 ///
 /// struct Function1 {

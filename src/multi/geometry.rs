@@ -36,7 +36,6 @@ impl<const N: usize> Geometry<N> {
 }
 
 #[cfg(test)]
-#[allow(clippy::float_cmp)]
 mod tests {
     use super::*;
 
@@ -61,14 +60,14 @@ mod tests {
         } = Geometry::new(&limits);
 
         for (a, b) in centre.iter().zip(centre_should_be.iter()) {
-            assert_eq!(a, b);
+            assert!((a - b).abs() < f64::EPSILON);
         }
 
         for (a, b) in half_widths.iter().zip(half_widths_should_be.iter()) {
-            assert_eq!(a, b);
+            assert!((a - b).abs() < f64::EPSILON);
         }
 
-        assert_eq!(volume, volume_should_be);
+        assert!((volume - volume_should_be).abs() < f64::EPSILON);
         assert_eq!(largest_axis, largest_axis_should_be);
     }
 }

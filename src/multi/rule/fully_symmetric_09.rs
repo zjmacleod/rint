@@ -433,7 +433,7 @@ const fn generators<const N: usize>() -> [Generator<N>; TOTAL] {
 const BASIC_ERROR_COEFF: BasicErrorCoeff = BasicErrorCoeff::new(5.0, 5.0, 1.0, 5.0);
 
 #[cfg(test)]
-#[allow(clippy::too_many_lines, clippy::float_cmp, clippy::unreadable_literal)]
+#[allow(clippy::too_many_lines, clippy::unreadable_literal)]
 mod tests {
     use super::*;
     use crate::multi::rule::util;
@@ -459,10 +459,10 @@ mod tests {
             let should_be = [1.0, 6.0, 6.0, 6.0, 6.0, 12.0, 24.0, 8.0, 8.0];
             let mut sum: f64 = 0.0;
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
-                assert_eq!(x, y);
+                assert!((x - y).abs() < f64::EPSILON);
                 sum += *x;
             }
-            assert_eq!(sum, evaluations::<N>() as f64);
+            assert!((sum - evaluations::<N>() as f64).abs() < f64::EPSILON);
         }
 
         {
@@ -471,10 +471,10 @@ mod tests {
             let should_be = [1.0, 8.0, 8.0, 8.0, 8.0, 24.0, 48.0, 32.0, 16.0];
             let mut sum: f64 = 0.0;
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
-                assert_eq!(x, y);
+                assert!((x - y).abs() < f64::EPSILON);
                 sum += *x;
             }
-            assert_eq!(sum, evaluations::<N>() as f64);
+            assert!((sum - evaluations::<N>() as f64).abs() < f64::EPSILON);
         }
 
         {
@@ -483,10 +483,10 @@ mod tests {
             let should_be = [1.0, 10.0, 10.0, 10.0, 10.0, 40.0, 80.0, 80.0, 32.0];
             let mut sum: f64 = 0.0;
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
-                assert_eq!(x, y);
+                assert!((x - y).abs() < f64::EPSILON);
                 sum += *x;
             }
-            assert_eq!(sum, evaluations::<N>() as f64);
+            assert!((sum - evaluations::<N>() as f64).abs() < f64::EPSILON);
         }
 
         {
@@ -495,10 +495,10 @@ mod tests {
             let should_be = [1.0, 12.0, 12.0, 12.0, 12.0, 60.0, 120.0, 160.0, 64.0];
             let mut sum: f64 = 0.0;
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
-                assert_eq!(x, y);
+                assert!((x - y).abs() < f64::EPSILON);
                 sum += *x;
             }
-            assert_eq!(sum, evaluations::<N>() as f64);
+            assert!((sum - evaluations::<N>() as f64).abs() < f64::EPSILON);
         }
 
         {
@@ -507,10 +507,10 @@ mod tests {
             let should_be = [1.0, 30.0, 30.0, 30.0, 30.0, 420.0, 840.0, 3640.0, 32768.0];
             let mut sum: f64 = 0.0;
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
-                assert_eq!(x, y);
+                assert!((x - y).abs() < f64::EPSILON);
                 sum += *x;
             }
-            assert_eq!(sum, evaluations::<N>() as f64);
+            assert!((sum - evaluations::<N>() as f64).abs() < f64::EPSILON);
         }
     }
 

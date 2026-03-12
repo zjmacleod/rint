@@ -278,8 +278,8 @@ const fn generators<const N: usize>() -> [Generator<N>; TOTAL] {
 const BASIC_ERROR_COEFF: BasicErrorCoeff = BasicErrorCoeff::new(5.0, 5.0, 1.0, 5.0);
 
 #[cfg(test)]
-#[allow(clippy::float_cmp)]
 #[allow(clippy::unreadable_literal)]
+#[allow(clippy::too_many_lines)]
 mod tests {
     use super::*;
     use crate::multi::rule::util;
@@ -304,7 +304,7 @@ mod tests {
             let rule_points = rule_points::<N>();
             let should_be = [1.0, 4.0, 4.0, 4.0, 4.0, 4.0];
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
-                assert_eq!(x, y);
+                assert!((x - y).abs() < f64::EPSILON);
             }
         }
 
@@ -313,7 +313,7 @@ mod tests {
             let rule_points = rule_points::<N>();
             let should_be = [1.0, 6.0, 6.0, 6.0, 12.0, 8.0];
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
-                assert_eq!(x, y);
+                assert!((x - y).abs() < f64::EPSILON);
             }
         }
 
@@ -322,7 +322,7 @@ mod tests {
             let rule_points = rule_points::<N>();
             let should_be = [1.0, 8.0, 8.0, 8.0, 24.0, 16.0];
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
-                assert_eq!(x, y);
+                assert!((x - y).abs() < f64::EPSILON);
             }
         }
 
@@ -331,7 +331,7 @@ mod tests {
             let rule_points = rule_points::<N>();
             let should_be = [1.0, 10.0, 10.0, 10.0, 40.0, 32.0];
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
-                assert_eq!(x, y);
+                assert!((x - y).abs() < f64::EPSILON);
             }
         }
 
@@ -340,7 +340,7 @@ mod tests {
             let rule_points = rule_points::<N>();
             let should_be = [1.0, 12.0, 12.0, 12.0, 60.0, 64.0];
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
-                assert_eq!(x, y);
+                assert!((x - y).abs() < f64::EPSILON);
             }
         }
 
@@ -349,13 +349,12 @@ mod tests {
             let rule_points = rule_points::<N>();
             let should_be = [1.0, 30.0, 30.0, 30.0, 420.0, 32768.0];
             for (x, y) in rule_points.iter().zip(should_be.iter()) {
-                assert_eq!(x, y);
+                assert!((x - y).abs() < f64::EPSILON);
             }
         }
     }
 
     #[test]
-    #[allow(clippy::too_many_lines)]
     fn check_generators_correct() {
         let tol = 1e-15;
 
