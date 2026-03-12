@@ -909,7 +909,7 @@ where
     /// $$
     /// G = \frac{\pi}{2} \int_{1}^{+\infty} \frac{(x^{4} - 6 x^{2} + 1) \ln \ln x}{(1+x^{2})^{3}} d x
     /// $$
-    /// which has a semi-infinite integration region $x \in (1,+\infty)$ We use
+    /// which has a semi-infinite integration region $x \in (1,+\infty)$. We use
     /// [`AdaptiveSingularity::semi_infinite_upper`] to approximate $G$.
     ///```rust
     /// use rint::{Integrand, Limits, Tolerance};

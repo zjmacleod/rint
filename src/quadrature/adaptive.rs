@@ -59,7 +59,16 @@ use crate::{
 /// The routine will end when _either_ one of the tolerance conditions have been satisfied _or_ an
 /// error has occurred, see [`Error`] for more details.
 ///
+/// This routine is primarily aimed towards the evaluation of integrals of relatively smooth
+/// functions on finite integration domains that are free from singularities. If the function the
+/// user wishes to integrate has integrable singularities and/or is defined on an infinite or
+/// semi-infinite integration domain then the [`AdaptiveSingularity`] integrator should be
+/// preferred. In fact, it can often be the case that the [`AdaptiveSingularity`] integrator is
+/// _generally_ more efficient than the [`Adaptive`] routine though this should be benchmarked on a
+/// case-by-case basis.
+///
 /// [`Basic`]: crate::quadrature::Basic
+/// [`AdaptiveSingularity`]: crate::quadrature::AdaptiveSingularity
 /// [`Error`]: crate::Error
 /// [`Tolerance`]: crate::Tolerance
 ///
