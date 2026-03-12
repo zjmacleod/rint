@@ -152,7 +152,7 @@
 //! - [`quadrature::AdaptiveSingularity`]: A one-dimensional adaptive routine based on the `qags.f`
 //! QUADPACK and `qags.c` GSL implementations.
 //! Adaptive routines concentrate new subintervals around the region of highest error.
-//! It this region contains an integrable singularity, then the adaptive routine of
+//! If this region contains an integrable singularity, then the adaptive routine of
 //! [`quadrature::Adaptive`] may fail to obtain a suitable estimate. However, this can be combined
 //! with an extrapolation proceedure such as the Wynn epsilon-algorithm to extrapolate the value at
 //! these integrable singularities and provide a suitable estimate.

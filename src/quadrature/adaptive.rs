@@ -65,15 +65,20 @@ use crate::{
 ///
 /// # Example
 ///
-///```rust
-/// use rint::{Limits, Integrand};
-/// use rint::quadrature::Adaptive;
-/// use rint::quadrature::Basic;
-/// use rint::quadrature::Rule;
-/// use rint::Tolerance;
+/// Here we present a calculation of the integral,
+/// $$
+/// I = \int_{0}^{1} x^{\alpha} \ln \frac{1}{x} dx = \frac{1}{(1+\alpha)^{2}}
+/// $$
+/// for different values of $\alpha$.
 ///
-/// /* f1(x) = x^alpha * log(1/x) */
-/// /* integ(f1,x,0,1) = 1/(alpha + 1)^2 */
+///```rust
+/// use rint::{Integrand, Limits, Tolerance};
+/// use rint::quadrature::{Adaptive, Basic, Rule};
+///
+/// use rand::prelude::*;
+///
+/// use std::f64::consts::*;
+///
 /// struct Function1 {
 ///     alpha: f64,
 /// }
@@ -86,77 +91,32 @@ use crate::{
 ///     }
 /// }
 ///
-/// let exp_result = 7.716049382716050342E-02;
-/// let exp_error = 2.227969521869139532E-15;
+/// const TOL: f64 = 1.0e-12;
 ///
-/// let tolerance = Tolerance::Absolute(1.0e-14);
-/// let alpha = 2.6;
+/// let tolerance = Tolerance::Relative(TOL);
 /// let limits = Limits::new(0.0, 1.0);
+/// let rule = Rule::gk31();
+/// let max_iterations = 1000;
 ///
-/// let function = Function1 { alpha };
-/// let rule = Rule::gk21();
+/// let alpha_values = [2.6, PI, EULER_GAMMA, LOG10_E, 100.0, PI.powi(3)];
 ///
-/// // Integrate with the adaptive algorithm
-/// let integral = Adaptive::new(
-///     &function,
-///     &rule,
-///     limits,
-///     tolerance,
-///     1000,
-/// ).unwrap();
+/// for alpha in alpha_values {
+///     let function = Function1 { alpha };
 ///
-/// let integral_result = integral.integrate().unwrap();
-/// let result = integral_result.result();
-/// let error = integral_result.error();
-/// let iterations = integral_result.iterations();
-/// let evaluations = integral_result.evaluations();
+///     let integral = Adaptive::new(&function, &rule, limits, tolerance, max_iterations)
+///                     .unwrap()
+///                     .integrate()
+///                     .unwrap();
 ///
-/// let tol = 1.0e-8;
-/// assert!((exp_result - result).abs() / exp_result.abs() < tol);
-/// assert!((exp_error - error).abs() / exp_error.abs() < tol);
-/// assert_eq!(iterations, 8);
-/// assert_eq!(evaluations, 21*(2*iterations - 1));
-///```
-///```should_panic
-/// # use rint::{Limits, Integrand};
-/// # use rint::quadrature::Adaptive;
-/// # use rint::quadrature::Basic;
-/// # use rint::quadrature::Rule;
-/// # use rint::Tolerance;
-/// # /* f1(x) = x^alpha * log(1/x) */
-/// # /* integ(f1,x,0,1) = 1/(alpha + 1)^2 */
-/// # struct Function1 {
-/// #     alpha: f64,
-/// # }
-/// # impl Integrand for Function1 {
-/// #     type Scalar = f64;
-/// #     fn evaluate(&self, x: f64) -> Self::Scalar {
-/// #         let alpha = self.alpha;
-/// #         x.powf(alpha) * (1.0 / x).ln()
-/// #     }
-/// # }
-/// # let exp_result = 7.716049382716050342E-02;
-/// # let exp_error = 2.227969521869139532E-15;
-/// # let tolerance = Tolerance::Absolute(1.0e-14);
-/// # let alpha = 2.6;
-/// # let limits = Limits::new(0.0, 1.0);
-/// # let function = Function1 { alpha };
-/// // Integrate with the basic algorithm to compare
-/// let rule = Rule::gk21();
-/// let integral_basic = Basic::new(
-///     &function,
-///     &rule,
-///     limits,
-/// );
+///     let target = 1.0 / (1.0 + alpha).powi(2);
+///     let result = integral.result();
+///     let error = integral.error();
+///     let abs_actual_error = (result - target).abs();
+///     let tol = TOL * result.abs();
 ///
-/// let integral_result_basic = integral_basic.integrate();
-/// let result_basic = integral_result_basic.result();
-/// let error_basic = integral_result_basic.error();
-///
-/// # let tol = 1.0e-8;
-/// // should panic
-/// assert!((exp_result - result_basic).abs() / exp_result.abs() < tol);
-/// assert!((exp_error - error_basic).abs() / exp_error.abs() < tol);
+///     assert!(abs_actual_error < error);
+///     assert!(error < tol);
+/// }
 ///```
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Adaptive<'a, I> {
@@ -217,15 +177,19 @@ where
     /// the [`IntegralEstimate`] obtained before an error was encountered. The integration routine
     /// has several ways of failing:
     /// - The user supplied [`Tolerance`] could not be satisfied within the maximum number of
-    /// iterations (kind = [`IntegrationErrorKind::MaximumIterationsReached`]).
+    /// iterations, see [`IntegrationErrorKind::MaximumIterationsReached`].
+    ///
     /// - A roundoff error was detected. Can occur when the calculated numerical error from an
     /// internal integration is smaller than the estimated roundoff, but larger than the tolerance
     /// requested by the user, or when too many successive iterations do not reasonably improve the
-    /// integral value and error estimate (kind = [`IntegrationErrorKind::RoundoffErrorDetected`]).
+    /// integral value and error estimate, see [`IntegrationErrorKind::RoundoffErrorDetected`].
+    ///
     /// - Bisection of the highest error region into two subregions results in subregions with
-    /// integraion limits that are too small (kind = [`IntegrationErrorKind::BadIntegrandBehaviour`]).
+    /// integraion limits that are too small, see [`IntegrationErrorKind::BadIntegrandBehaviour`].
+    ///
     /// - An error is encountered when initialising the integration workspace. This is an internal
-    /// error, which should not occur downstream (kind = [`IntegrationErrorKind::UninitialisedWorkspace`]).
+    /// error, which should not occur in user code, see
+    /// [`IntegrationErrorKind::UninitialisedWorkspace`].
     pub fn integrate(&self) -> Result<IntegralEstimate<I::Scalar>, IntegrationError<I::Scalar>> {
         let initial = Integrator::new(self.function, self.rule, self.limits).integrate();
 
@@ -236,7 +200,8 @@ where
         let mut workspace = self.initialise_workspace(initial);
 
         while workspace.iteration < self.max_iterations {
-            // XXX Increases iterations, should this be taken out into own function for clarity?
+            // XXX Increases workspace.iteration,
+            // should this be taken out into own function for clarity?
             let previous = workspace.retrieve_largest_error()?;
 
             let [lower, upper] = previous.bisect(self.function, self.rule);

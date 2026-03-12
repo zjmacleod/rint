@@ -47,46 +47,39 @@ use crate::Limits;
 ///
 /// # Example
 ///
+/// Here we present a calculation of the golden ratio $\varphi$ ([`std::f64::consts::GOLDEN_RATIO`])
+/// using the integral representation,
+/// $$
+/// \ln \varphi = \int_{0}^{1/2} \frac{dx}{\sqrt{1 + x^{2}}}
+/// $$
 ///```rust
-/// use rint::{Limits, Integrand};
-/// use rint::quadrature::Basic;
-/// use rint::quadrature::Rule;
+/// use rint::{Integrand, Limits};
+/// use rint::quadrature::{Basic, Rule};
 ///
-/// /* f1(x) = x^alpha * log(1/x) */
-/// /* integ(f1,x,0,1) = 1/(alpha + 1)^2 */
-/// struct Function1 {
-///     alpha: f64,
-/// }
+/// const PHI: f64 = std::f64::consts::GOLDEN_RATIO;
 ///
-/// impl Integrand for Function1 {
+/// struct GoldenRatio;
+///
+/// impl Integrand for GoldenRatio {
 ///     type Scalar = f64;
+///
 ///     fn evaluate(&self, x: f64) -> Self::Scalar {
-///         let alpha = self.alpha;
-///         x.powf(alpha) * (1.0 / x).ln()
+///         1.0 / (1.0 + x.powi(2)).sqrt()
 ///     }
 /// }
 ///
-/// let exp_result: f64 = 7.716049357767090777E-02;
-/// let exp_abserr: f64 = 2.990224871000550874E-06;
-///
-/// let rel_tolerance = 1.0e-15;
-/// let alpha = 2.6;
-///
-/// let limits = Limits::new(0.0, 1.0);
-///
-/// let function = Function1 { alpha };
+/// let golden_ratio = GoldenRatio;
+/// let limits = Limits::new(0.0,0.5);
 /// let rule = Rule::gk15();
-/// let integral = Basic::new(&function, &rule, limits);
+/// let integral = Basic::new(&golden_ratio, &rule, limits)
+///     .integrate();
 ///
-/// let integral_result = integral.integrate();
-/// let result = integral_result.result();
-/// let abserr = integral_result.error();
-///
-/// println!("{}",(exp_result - result).abs() / exp_result.abs());
-/// println!("{}",(exp_abserr - abserr).abs() / exp_abserr.abs());
-///
-/// assert!((exp_result - result).abs() / exp_result.abs() < rel_tolerance);
-/// assert!((exp_abserr - abserr).abs() / exp_abserr.abs() < rel_tolerance);
+/// let result = integral.result();
+/// let error = integral.error();
+/// let abs_actual_error = (PHI.ln() - result).abs();
+/// let iters = integral.iterations();
+/// assert_eq!(iters, 1);
+/// assert!(abs_actual_error < error);
 ///```
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Basic<'a, I> {
