@@ -5,42 +5,11 @@ use crate::Limits;
 
 /// A non-adaptive Gauss-Kronrod integrator.
 ///
-/// The [`Basic`] integrator is a non-adaptive integrator designed for approximating
-/// one-dimensional integrals of the form,
-/// $$
-/// I = \int_{b}^{a} f(x) dx
-/// $$
-/// using Gauss-Kronrod integration rules. The function $f(x)$ is encoded in [`Basic`] as something
-/// implementing the [`Integrand`] trait. A Gaussian numerical integration rule approximates an
-/// integral of a function by performing a weighted sum of the function evaluated at defined
-/// points/abscissae. The order of an integration rule, $n$, denotes the number of abscissae,
-/// $x_{i}$, at which the function is evaluated and the number of weights $w_{i}$ for the weighted
-/// sum, such that the approximation is,
-/// $$
-/// I \approx \sum_{i = 1}^{n} W_{i} f(X_{i}) = I_{n}
-/// $$
-/// where the $X_{i}$ and $W_{i}$ are the rescaled abscissae and weights,
-/// $$
-/// X_{i} = \frac{b + a + (a - b) x_{i}}{2} ~~~~~~~~ W_{i} = \frac{(a - b) w_{i}}{2}
-/// $$
-/// where the `limits` $a$ and $b$ are encoded in [`Basic`] via [`Limits`] passed to the
-/// constructor. A Gauss-Kronrod integration rule combines two rules of different order for
-/// efficient estimation of the numerical error. The rules for an $n$-point Gauss-Kronrod rule
-/// contain $m = (n - 1) / 2$ abscissae _shared_ by the Gaussian and Kronrod rules and an extended
-/// set of $n - m$ Kronrod abscissae. The weighted sum of the full set of $n$ Kronrod function
-/// evaluations are used to approximate the result of the integration, while the weighted sum of
-/// the lower order set of $m$ Gaussian points are used to calculate the numerical error in the
-/// routine,
-/// $$
-/// E = |I_{n} - I_{m}|
-/// $$
-/// This approach is efficient, as only $n$ total function evaluations are required to obtain the
-/// result approximation and error estimate. See [`Rule`] for the available Gauss-Kronrod rules.
-///
-/// This routine is *not* adaptive, and runs exactly once on the input function. Thus, it is only
-/// suitable for the integration of smooth functions with no problematic regions in the integration
-/// region. If higher accuracy is required then the [`Adaptive`] or [`AdaptiveSingularity`]
-/// integrators should be used instead.
+/// The [`Basic`] integrator applies a Gauss-Kronrod integration [`Rule`] to approximate the
+/// integral of a one-dimensional function. It is non-adaptive: it runs exactly once on the input
+/// function. Thus, it is only suitable for the integration of smooth functions with no problematic
+/// regions in the integration region. If higher accuracy is required then the [`Adaptive`] or
+/// [`AdaptiveSingularity`] integrators should be used instead.
 ///
 /// [`Adaptive`]: crate::quadrature::Adaptive
 /// [`AdaptiveSingularity`]: crate::quadrature::AdaptiveSingularity
@@ -68,6 +37,8 @@ use crate::Limits;
 ///     }
 /// }
 ///
+/// # use std::error::Error;
+/// # fn main() -> Result<(), Box<dyn Error>> {
 /// let golden_ratio = GoldenRatio;
 /// let limits = Limits::new(0.0,0.5);
 /// let rule = Rule::gk15();
@@ -80,6 +51,8 @@ use crate::Limits;
 /// let iters = integral.iterations();
 /// assert_eq!(iters, 1);
 /// assert!(abs_actual_error < error);
+/// # Ok(())
+/// # }
 ///```
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Basic<'a, I> {
@@ -94,7 +67,7 @@ where
 {
     /// Create a new [`Basic`] integrator.
     ///
-    /// The user first defines a `function` which is a `struct` implementing the [`Integrand`]
+    /// The user first defines a `function` which is something implementing the [`Integrand`]
     /// trait and selects a Gauss-Kronrod quadrature [`Rule`], `rule`, to integrate the function
     /// with between the integration [`Limits`], `limits`.
     pub const fn new(function: &'a I, rule: &'a Rule, limits: Limits) -> Self {

@@ -10,44 +10,13 @@ use crate::{
 
 /// An adaptive Gauss-Kronrod integrator.
 ///
-/// The [`Adaptive`] integrator is an adaptive integrator designed for approximating one-dimensional
-/// integrals of the form,
-/// $$
-/// I = \int_{b}^{a} f(x) dx
-/// $$
-/// using Gauss-Kronrod integration rules. The function $f(x)$ is encoded in [`Adaptive`] as something
-/// implementing the [`Integrand`] trait. A Gaussian numerical integration rule approximates an
-/// integral of a function by performing a weighted sum of the function evaluated at defined
-/// points/abscissae. The order of an integration rule, $n$, denotes the number of abscissae,
-/// $x_{i}$, at which the function is evaluated and the number of weights $w_{i}$ for the weighted
-/// sum, such that the approximation is,
-/// $$
-/// I \approx \sum_{i = 1}^{n} W_{i} f(X_{i}) = I_{n}
-/// $$
-/// where the $X_{i}$ and $W_{i}$ are the rescaled abscissae and weights,
-/// $$
-/// X_{i} = \frac{b + a + (a - b) x_{i}}{2} ~~~~~~~~ W_{i} = \frac{(a - b) w_{i}}{2}
-/// $$
-/// where the `limits` $a$ and $b$ are encoded in [`Adaptive`] via [`Limits`] passed to the
-/// constructor. A Gauss-Kronrod integration rule combines two rules of different order for
-/// efficient estimation of the numerical error. The rules for an $n$-point Gauss-Kronrod rule
-/// contain $m = (n - 1) / 2$ abscissae _shared_ by the Gaussian and Kronrod rules and an extended
-/// set of $n - m$ Kronrod abscissae. The weighted sum of the full set of $n$ Kronrod function
-/// evaluations are used to approximate the result of the integration, while the weighted sum of
-/// the lower order set of $m$ Gaussian points are used to calculate the numerical error in the
-/// routine,
-/// $$
-/// E = |I_{n} - I_{m}|
-/// $$
-/// This approach is efficient, as only $n$ total function evaluations are required to obtain the
-/// result approximation and error estimate. See [`Rule`] for the available Gauss-Kronrod rules.
-///
-/// Unlike the [`Basic`] routine, the routine implemented by [`Adaptive`] is adaptive. After the
-/// initial integration, each iteration of the routine picks the previous integration area which
-/// has the largest error estimate and bisects this region, updating the estimate to the integal
-/// and the total approximated error. The adaptive routine will return the first approximation,
-/// `result`, to the integral which has an absolute `error` smaller than the tolerance `tol` encoded
-/// through the [`Tolerance`] enum, where
+/// The [`Adaptive`] integrator applies a Gauss-Kronrod integration [`Rule`] to approximate the
+/// integral of a one-dimensional function. Unlike the [`Basic`] routine, the routine implemented
+/// by [`Adaptive`] is adaptive. After the initial integration, each iteration of the routine picks
+/// the previous integration area which has the largest error estimate and bisects this region,
+/// updating the estimate to the integal and the total approximated error. The adaptive routine
+/// will return the first approximation, `result`, to the integral which has an absolute `error`
+/// smaller than the tolerance `tol` encoded through the [`Tolerance`] enum, where
 ///
 /// * [`Tolerance::Absolute`] specifies absolute tolerance and returns final estimate when
 /// `error <= tol`,
@@ -98,6 +67,8 @@ use crate::{
 ///     }
 /// }
 ///
+/// # use std::error::Error;
+/// # fn main() -> Result<(), Box<dyn Error>> {
 /// const TOL: f64 = 1.0e-12;
 ///
 /// let tolerance = Tolerance::Relative(TOL);
@@ -110,10 +81,8 @@ use crate::{
 /// for alpha in alpha_values {
 ///     let function = Function1 { alpha };
 ///
-///     let integral = Adaptive::new(&function, &rule, limits, tolerance, max_iterations)
-///                     .unwrap()
-///                     .integrate()
-///                     .unwrap();
+///     let integral = Adaptive::new(&function, &rule, limits, tolerance, max_iterations)?
+///                     .integrate()?;
 ///
 ///     let target = 1.0 / (1.0 + alpha).powi(2);
 ///     let result = integral.result();
@@ -124,6 +93,8 @@ use crate::{
 ///     assert!(abs_actual_error < error);
 ///     assert!(error < tol);
 /// }
+/// # Ok(())
+/// # }
 ///```
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Adaptive<'a, I> {
@@ -221,7 +192,6 @@ where
             workspace.push(upper);
 
             if error <= iteration_tolerance {
-                // TODO add individual checks on re and im error
                 break;
             }
 

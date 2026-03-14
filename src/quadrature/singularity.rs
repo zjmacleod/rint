@@ -10,51 +10,23 @@ use crate::{
 ///
 /// # Overview
 ///
-/// The [`AdaptiveSingularity`] integrator is an adaptive integrator designed for approximating
-/// one-dimensional integrals of the form,
-/// $$
-/// I = \int_{b}^{a} f(x) dx
-/// $$
-/// using Gauss-Kronrod integration rules. The function $f(x)$ is encoded in
-/// [`AdaptiveSingularity`] as something implementing the [`Integrand`] trait. A Gaussian numerical
-/// integration rule approximates an integral of a function by performing a weighted sum of the
-/// function evaluated at defined points/abscissae. The order of an integration rule, $n$, denotes
-/// the number of abscissae, $x_{i}$, at which the function is evaluated and the number of weights
-/// $w_{i}$ for the weighted sum, such that the approximation
-/// is,
-/// $$
-/// I \approx \sum_{i = 1}^{n} W_{i} f(X_{i}) = I_{n}
-/// $$
-/// where the $X_{i}$ and $W_{i}$ are the rescaled abscissae and weights,
-/// $$
-/// X_{i} = \frac{b + a + (a - b) x_{i}}{2} ~~~~~~~~ W_{i} = \frac{(a - b) w_{i}}{2}
-/// $$
-/// where the `limits` $a$ and $b$ are encoded in [`AdaptiveSingularity`] via [`Limits`] passed to
-/// the constructor. A Gauss-Kronrod integration rule combines two rules of different order for
-/// efficient estimation of the numerical error. The rules for an $n$-point Gauss-Kronrod rule
-/// contain $m = (n - 1) / 2$ abscissae _shared_ by the Gaussian and Kronrod rules and an extended
-/// set of $n - m$ Kronrod abscissae. The weighted sum of the full set of $n$ Kronrod function
-/// evaluations are used to approximate the result of the integration, while the weighted sum of
-/// the lower order set of $m$ Gaussian points are used to calculate the numerical error in the
-/// routine,
-/// $$
-/// E = |I_{n} - I_{m}|
-/// $$
-/// This approach is efficient, as only $n$ total function evaluations are required to obtain the
-/// result approximation and error estimate. Unlike the [`Adaptive`] integrator, a choice of
-/// Gauss-Kronrod integration rule is not required for the [`AdaptiveSingularity`] integrator.
-/// Instead, for general functions on finite intervals the 21-point rule [`Rule::gk21()`] is used,
-/// while for (semi-)infinite intervals (see below) the lower 15-point rule [`Rule::gk15()`]
-/// is used.
-///
-/// Unlike the [`Basic`] routine, the routine implemented by [`AdaptiveSingularity`] is adaptive.
-/// After the initial integration, each iteration of the routine picks the previous integration
-/// area which has the largest error estimate and bisects this region, updating the estimate to the
-/// integal and the total approximated error. Adaptive routines concentrate new subintervals around
-/// the region of highest error. If this region contains an integrable singularity, then the
-/// adaptive routine of [`Adaptive`] may fail to obtain a suitable estimate. To overcome this,
-/// [`AdaptiveSingularity`] uses an additional Wynn epsilon-algorithm extrapolation proceedure to
-/// manage these integrable singularities and provide a suitable estimate.
+/// The [`AdaptiveSingularity`] integrator applies a Gauss-Kronrod integration [`Rule`] to
+/// approximate the integral of a one-dimensional function. Unlike the [`Basic`] routine, the
+/// routine implemented by [`AdaptiveSingularity`] is adaptive. After the initial integration, each
+/// iteration of the routine picks the previous integration area which has the largest error
+/// estimate and bisects this region, updating the estimate to the integal and the total
+/// approximated error. Adaptive routines concentrate new subintervals around the region of highest
+/// error. If this region contains an integrable singularity, then the adaptive routine of
+/// [`Adaptive`] may fail to obtain a suitable estimate. To overcome this, [`AdaptiveSingularity`]
+/// uses an additional Wynn epsilon-algorithm extrapolation proceedure to manage these integrable
+/// singularities and provide a suitable estimate. The combination of adaptive iteration and
+/// extrapolation makes this routine suitable as a general purpose integrator, and will often
+/// out-perform the [`Adaptive`] routine (though this should be benchmarked on a case-by-case
+/// basis). It is valid for integrals defined on both finite _and_ (semi-)infinite integration
+/// intervals. A choice of Gauss-Kronrod integration rule is not required for the
+/// [`AdaptiveSingularity`] integrator. Instead, for general functions on finite intervals the
+/// 21-point rule [`Rule::gk21()`] is used, while for (semi-)infinite intervals (see below) the
+/// lower 15-point rule [`Rule::gk15()`] is used.
 ///
 /// The adaptive routine will return the first approximation, `result`, to the integral which has
 /// an absolute `error` smaller than the tolerance `tol` encoded through the [`Tolerance`] enum,
@@ -70,13 +42,13 @@ use crate::{
 /// The routine will end when _either_ one of the tolerance conditions have been satisfied _or_ an
 /// error has occurred, see [`Error`] for more details.
 ///
-/// # Infinite and semi-infinite integration regions
+/// # Finite, infinite and semi-infinite integration regions
 ///
 /// As well as being able to calculate integrals over integrable singularities within finite
 /// integration limits , [`AdaptiveSingularity`] can also be used for integrations over infinite
 /// and semi-infinite integration limits. Each of these has a dedicated constructor:
 /// - [`AdaptiveSingularity::finite`]: finite interval $x \in (b,a)$
-/// - [`AdaptiveSingularity::infinite`]: infinite interval $x \in (-\infty,+\infty)
+/// - [`AdaptiveSingularity::infinite`]: infinite interval $x \in (-\infty,+\infty)$
 /// - [`AdaptiveSingularity::semi_infinite_lower`]: infinite lower limit $x \in (-\infty,a)$
 /// - [`AdaptiveSingularity::semi_infinite_upper`]: infinite upper limit, $x \in (b,+\infty)$
 ///
@@ -110,13 +82,13 @@ use crate::{
 ///     }
 /// }
 ///
+/// # use std::error::Error;
+/// # fn main() -> Result<(), Box<dyn Error>> {
 /// let catalan = Catalan;
 /// let limits = Limits::new(0.0,1.0);
 /// let tolerance = Tolerance::Relative(TOL);
-/// let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
-///     .unwrap()
-///     .integrate()
-///     .unwrap();
+/// let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)?
+///     .integrate()?;  
 ///
 /// let result = integral.result();
 /// let error = integral.error();
@@ -126,6 +98,8 @@ use crate::{
 /// assert_eq!(iters, 10);
 /// assert!(abs_actual_error < error);
 /// assert!(error < tol);
+/// # Ok(())
+/// # }
 ///```
 ///
 ///
@@ -156,12 +130,12 @@ use crate::{
 ///     }
 /// }
 ///
+/// # use std::error::Error;
+/// # fn main() -> Result<(), Box<dyn Error>> {
 /// let gamma = Gamma;
 /// let tolerance = Tolerance::Relative(TOL);
-/// let integral = AdaptiveSingularity::infinite(gamma, tolerance, 1000)
-///     .unwrap()
-///     .integrate()
-///     .unwrap();
+/// let integral = AdaptiveSingularity::infinite(gamma, tolerance, 1000)?
+///     .integrate()?;
 ///
 /// let result = integral.result();
 /// let error = integral.error();
@@ -171,6 +145,8 @@ use crate::{
 /// assert_eq!(iters, 11);
 /// assert!(abs_actual_error < error);
 /// assert!(error < tol);
+/// # Ok(())
+/// # }
 ///```
 ///
 ///
@@ -204,13 +180,13 @@ use crate::{
 ///     }
 /// }
 ///
+/// # use std::error::Error;
+/// # fn main() -> Result<(), Box<dyn Error>> {
 /// let catalan = Catalan;
 /// let lower = 1.0;
 /// let tolerance = Tolerance::Relative(TOL);
-/// let integral = AdaptiveSingularity::semi_infinite_upper(catalan, lower, tolerance, 1000)
-///     .unwrap()
-///     .integrate()
-///     .unwrap();
+/// let integral = AdaptiveSingularity::semi_infinite_upper(catalan, lower, tolerance, 1000)?
+///     .integrate()?;
 ///
 /// let result = integral.result();
 /// let error = integral.error();
@@ -220,6 +196,8 @@ use crate::{
 /// assert_eq!(iters, 32);
 /// assert!(abs_actual_error < error);
 /// assert!(error < tol);
+/// # Ok(())
+/// # }
 ///```
 ///
 /// [Catalan's constant]: <https://en.wikipedia.org/wiki/Catalan%27s_constant>
@@ -295,13 +273,13 @@ where
     ///     }
     /// }
     ///
+    /// # use std::error::Error;
+    /// # fn main() -> Result<(), Box<dyn Error>> {
     /// let catalan = Catalan;
     /// let limits = Limits::new(0.0,1.0);
     /// let tolerance = Tolerance::Relative(TOL);
-    /// let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)
-    ///     .unwrap()
-    ///     .integrate()
-    ///     .unwrap();
+    /// let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)?
+    ///     .integrate()?;
     ///
     /// let result = integral.result();
     /// let error = integral.error();
@@ -311,6 +289,8 @@ where
     /// assert_eq!(iters, 10);
     /// assert!(abs_actual_error < error);
     /// assert!(error < tol);
+    /// # Ok(())
+    /// # }
     ///```
     ///
     pub fn finite(
@@ -674,12 +654,12 @@ where
     ///     }
     /// }
     ///
+    /// # use std::error::Error;
+    /// # fn main() -> Result<(), Box<dyn Error>> {
     /// let gamma = Gamma;
     /// let tolerance = Tolerance::Relative(TOL);
-    /// let integral = AdaptiveSingularity::infinite(gamma, tolerance, 1000)
-    ///     .unwrap()
-    ///     .integrate()
-    ///     .unwrap();
+    /// let integral = AdaptiveSingularity::infinite(gamma, tolerance, 1000)?
+    ///     .integrate()?;
     ///
     /// let result = integral.result();
     /// let error = integral.error();
@@ -689,6 +669,8 @@ where
     /// assert_eq!(iters, 11);
     /// assert!(abs_actual_error < error);
     /// assert!(error < tol);
+    /// # Ok(())
+    /// # }
     ///```
     ///
     pub fn infinite(
@@ -803,13 +785,13 @@ where
     ///     }
     /// }
     ///
+    /// # use std::error::Error;
+    /// # fn main() -> Result<(), Box<dyn Error>> {
     /// let catalan = Catalan;
     /// let lower = 1.0;
     /// let tolerance = Tolerance::Relative(TOL);
-    /// let integral = AdaptiveSingularity::semi_infinite_upper(catalan, lower, tolerance, 1000)
-    ///     .unwrap()
-    ///     .integrate()
-    ///     .unwrap();
+    /// let integral = AdaptiveSingularity::semi_infinite_upper(catalan, lower, tolerance, 1000)?
+    ///     .integrate()?;
     ///
     /// let result = integral.result();
     /// let error = integral.error();
@@ -819,6 +801,8 @@ where
     /// assert_eq!(iters, 32);
     /// assert!(abs_actual_error < error);
     /// assert!(error < tol);
+    /// # Ok(())
+    /// # }
     ///```
     pub fn semi_infinite_upper(
         function: I,
@@ -907,7 +891,7 @@ where
     ///
     /// Here we present a calculation of [Catalan's constant] $G$ using the integral representation:
     /// $$
-    /// G = \frac{\pi}{2} \int_{1}^{+\infty} \frac{(x^{4} - 6 x^{2} + 1) \ln \ln x}{(1+x^{2})^{3}} d x
+    /// G = \frac{\pi}{2} \int^{-1}_{-\infty} \frac{(x^{4} - 6 x^{2} + 1) \ln \ln (-x)}{(1+x^{2})^{3}} d x
     /// $$
     /// which has a semi-infinite integration region $x \in (1,+\infty)$. We use
     /// [`AdaptiveSingularity::semi_infinite_upper`] to approximate $G$.
@@ -927,19 +911,18 @@ where
     ///         let FRAC_PI_2 = std::f64::consts::FRAC_PI_2;
     ///         let polynomial = x.powi(4) - 6.0 * x.powi(2) + 1.0;
     ///         let denominator = (1.0 + x.powi(2)).powi(3);
-    ///         let lnlnx = x.ln().ln();
+    ///         let lnlnx = (-x).ln().ln();
     ///         
     ///         FRAC_PI_2 * polynomial * lnlnx / denominator
     ///     }
     /// }
-    ///
+    /// # use std::error::Error;
+    /// # fn main() -> Result<(), Box<dyn Error>> {
     /// let catalan = Catalan;
-    /// let lower = 1.0;
+    /// let upper = -1.0;
     /// let tolerance = Tolerance::Relative(TOL);
-    /// let integral = AdaptiveSingularity::semi_infinite_upper(catalan, lower, tolerance, 1000)
-    ///     .unwrap()
-    ///     .integrate()
-    ///     .unwrap();
+    /// let integral = AdaptiveSingularity::semi_infinite_lower(catalan, upper, tolerance, 1000)?
+    ///     .integrate()?;
     ///
     /// let result = integral.result();
     /// let error = integral.error();
@@ -949,6 +932,8 @@ where
     /// assert_eq!(iters, 32);
     /// assert!(abs_actual_error < error);
     /// assert!(error < tol);
+    /// # Ok(())
+    /// # }
     ///```
     pub fn semi_infinite_lower(
         function: I,

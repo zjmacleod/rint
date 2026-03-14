@@ -5,9 +5,9 @@
 //! # Overview
 //!
 //! This library contains numerical integration routines for both functions of one dimension (see
-//! [`quadrature`]) and functions with multiple dimensions up to $N = 15$ (see [`multi`]).
-//! The basic principle of the library is to expose all of the routines through the trait system.
-//! Each of the one- and multi-dimensional integrators take as a parameter a type implementing the
+//! [`quadrature`]) and functions with multiple dimensions up to $N = 15$ (see [`multi`]). The
+//! basic principle of the library is to expose all of the routines through the trait system. Each
+//! of the one- and multi-dimensional integrators take as a parameter a type implementing the
 //! corresponding trait, respectively [`Integrand`] and [`MultiDimensionalIntegrand`].
 //!
 //! The integration routines attempt to make approximations to integrals such as the
@@ -20,11 +20,10 @@
 //! I = \int_{\Sigma_{N}} f(\mathbf{x}) d\mathbf{x}
 //! $$
 //! where $\mathbf{x} = (x_{1}, x_{2}, \dots, x_{N})$ and $\Sigma_{N}$ is an $N$-dimensional
-//! hypercube.
-//! A Gaussian numerical integration rule approximates an integral of a function by performing a
-//! weighted sum of the function evaluated at defined points/abscissae. The order of an integration
-//! rule, $n$, denotes the number of abscissae, $x_{i}$, at which the function is evaluated and the
-//! number of weights $w_{i}$ for the weighted sum, such that the approximation is,
+//! hypercube. The functions $f(x)$ and $f(\mathbf{x})$ can be real valued, with return type
+//! [`f64`] _or_ complex valued with return type [`Complex<f64>`]. The numerical integration
+//! routines approximate the integral of a function by performing a weighted sum of the function
+//! evaluated at defined points/abscissae. For example, in the one-dimensional case,
 //! $$
 //! I = \int_{b}^{a} f(x) dx \approx \sum_{i = 1}^{n} W_{i} f(X_{i}) = I_{n}
 //! $$
@@ -32,21 +31,14 @@
 //! $$
 //! X_{i} = \frac{b + a + (a - b) x_{i}}{2} ~~~~~~~~ W_{i} = \frac{(a - b) w_{i}}{2}
 //! $$
+//! Integration rules have a polynomial order. Rules of higher polynomial order use more
+//! points/abscissae and weights for evaluating the sum.
 //!
-//! The user supplies a [`Tolerance`] which can be an absolute bound, `abs`, a relative bound, `rel`, or both.
-//! The integration routine calculates an approximation to the given integral, `result`, and an
-//! estimate of the numerical error, `error`.
-//! The numerical integration is considered successful when the numerical error satisfies
-//! appropriate constraint for the tolerance type:
-//!
-//! - [`Tolerance::Relative`]: `error < rel * result`
-//! - [`Tolerance::Absolute`]: `error < abs`
-//! - [`Tolerance::Either`]: `error < max(abs, rel * result)`
-//!
-//! On success, the output of the numerical integration is an [`IntegralEstimate`] which provides
-//! both the `result` and `error` fields, as well as counts of the number of `iterations` of the
-//! numerical integration and the number of function `evaluations`.
-//!
+//! The library contains both non-adaptive and adaptive integration routines. In the case of an
+//! adaptive routine, the user supplies an error [`Tolerance`] which acts as a goal for the
+//! numerical error estimate. The numerical integration is considered successful when the numerical
+//! error is less than the user supplied tolerance. On success, the output of the numerical
+//! integration is an [`IntegralEstimate`].
 //!
 //!
 //! # Traits
@@ -60,22 +52,17 @@
 //! $N$-dimensional hypercube.
 //!
 //! Each trait requires an implementation of an `evaluate` method, which defines the value of the
-//! integrand for a given one- or $N$-dimensional point.
-//! The return type of the `evaluate` function is the associated type `Scalar`, which defines
-//! whether the function is real-valued (`Scalar = `[`std::f64`]), or complex-valued (`Scalar =
-//! `[`Complex<f64>`]).
-//! These traits simply tell the integrators how to evaluate the function at a point and can be
-//! implemented on either an empty `struct` or a `struct` containing constant parameters required to
-//! perform the integral.
-//! For example, consider probability density function of a normal distribution,
+//! integrand for a given one- or $N$-dimensional point. The return type of the `evaluate` function
+//! is the associated type `Scalar`, which defines whether the function is real-valued
+//! (`Scalar=`[`std::f64`]), or complex-valued (`Scalar=`[`Complex<f64>`]). These traits tell the
+//! integrators how to evaluate the function at a point, allowing the integration to be done.
 //!
+//! As an example, consider probability density function of a normal distribution,
 //! $$
 //! f(x) = \frac{1}{\sqrt{2 \pi \sigma^{2}}} e^{- \frac{(x - \mu)^{2}}{2 \sigma^{2}}}
 //! $$
-//!
 //! which has mean $\mu$ and standard deviation $\sigma$. To integrate this function, one first
 //! implements the [`Integrand`] trait,
-//!
 //!```rust
 //! use rint::Integrand;
 //!
@@ -97,7 +84,6 @@
 //!     }
 //! }
 //!```
-//!
 //! The type `NormalDist` can then be passed as a parameter to a one-dimensional integration
 //! routine in the module [`quadrature`] and integrated over a given (possibly infinite) region.
 //! Since [`Integrand::evaluate`] and [`MultiDimensionalIntegrand::evaluate`] do not return a
@@ -105,89 +91,46 @@
 //! correct.
 //!
 //!
-//!
 //! # Modules
-//!
 //!
 //! ## [`quadrature`]
 //!
 //! The [`quadrature`] module provides a number of numerical quadrature integration routines of a
-//! function in one dimension. The main routines are based primarily on the algorithms presented in
-//! the Fortran library QUADPACK (Piessens, de Doncker-Kapenga, Ueberhuber and Kahaner) \[1\] and
-//! reimplemented in the GNU scientific library (GSL) (Gough, Alken, Gonnet, Holoborodko,
-//! Griessinger) \[2\]. The routines implement Gauss-Kronrod integration rules for efficient
-//! determination of the integral approximation and the error. A Gauss-Kronrod integration rule
-//! combines two rules of different order for efficient estimation of the numerical error. The
-//! rules for an $n$-point Gauss-Kronrod rule contain $m = (n - 1) / 2$ abscissae _shared_ by the
-//! Gaussian and Kronrod rules and an extended set of $n - m$ Kronrod abscissae. The weighted sum
-//! of the full set of $n$ Kronrod function evaluations are used to approximate the result of the
-//! integration, while the weighted sum of the lower order set of $m$ Gaussian points are used to
-//! calculate the numerical error in the routine,
-//! $$
-//! E = |I_{n} - I_{m}|
-//! $$
-//! This approach is efficient, as only $n$ total function evaluations are required to obtain the
-//! result approximation and error estimate.
+//! function in one dimension. The routines are based primarily on the algorithms presented in the
+//! Fortran library [QUADPACK] (Piessens, de Doncker-Kapenga, Ueberhuber and Kahaner) and
+//! reimplemented in the [GNU scientific library] (GSL) (Gough, Alken, Gonnet, Holoborodko,
+//! Griessinger). The integrators use Gauss-Kronrod integration rules, combining two rules of
+//! different order for efficient estimation of the numerical error. The rules for an $n$-point
+//! Gauss-Kronrod rule contain $m = (n - 1) / 2$ abscissae _shared_ by the Gaussian and Kronrod
+//! rules and an extended set of $n - m$ Kronrod abscissae. Thus, only $n$ total function
+//! evaluations are required for both the integral and error estimates.
 //!
-//! The `rint` library departs from the naming conventions of the QUADPACK and GSL, but provides a
-//! selection of comparable implementations:
-//!
-//! - [`quadrature::Adaptive`]: A one-dimensional adaptive routine based on the `qag.f` QUADPACK
-//! and `qag.c` GSL implementations.
-//! The integration is region is bisected into subregions and an initial estimate is performed.
-//! Upon each further iteration of the routine the subregion with the highest numerical error
-//! estimate is bisected again and new estimates are calculated for these newly bisected regions.
-//! This concentrates the integration refinement to the regions with highest error, rapidly
-//! reducing the numerical error of the routine. Gauss-Kronrod integration [`quadrature::Rule`]s
-//! are provided of various order to use with the adaptive algorithm and are generated by the
-//! constructors:
-//!
-//!     - [`quadrature::Rule::gk15`]: Generate a 15-point Gauss-Kronrod integration rule
-//!     - [`quadrature::Rule::gk21`]: Generate a 21-point Gauss-Kronrod integration rule
-//!     - [`quadrature::Rule::gk31`]: Generate a 31-point Gauss-Kronrod integration rule
-//!     - [`quadrature::Rule::gk41`]: Generate a 41-point Gauss-Kronrod integration rule
-//!     - [`quadrature::Rule::gk51`]: Generate a 51-point Gauss-Kronrod integration rule
-//!     - [`quadrature::Rule::gk61`]: Generate a 61-point Gauss-Kronrod integration rule
-//!
-//! - [`quadrature::AdaptiveSingularity`]: A one-dimensional adaptive routine based on the `qags.f`
-//! QUADPACK and `qags.c` GSL implementations.
-//! Adaptive routines concentrate new subintervals around the region of highest error.
-//! If this region contains an integrable singularity, then the adaptive routine of
-//! [`quadrature::Adaptive`] may fail to obtain a suitable estimate. However, this can be combined
-//! with an extrapolation proceedure such as the Wynn epsilon-algorithm to extrapolate the value at
-//! these integrable singularities and provide a suitable estimate.
-//! As well as handling integrable singularities, [`quadrature::AdaptiveSingularity`] can be used
-//! to calculate integrals with infinite or semi-infinite bounds by using the appropriate
-//! constructors:
-//!
-//!     - [`quadrature::AdaptiveSingularity::infinite`]: integrates functions $f(x)$ over the
-//!     infinite interval $(-\infty,+\infty)$, i.e.
-//!     $$
-//!     \int_{-\infty}^{+\infty} f(x) dx.
-//!     $$
-//!     Based on the
-//!     `qagi.f` QUADPACK and `qagi.c` GSL routines.
-//!
-//!     - [`quadrature::AdaptiveSingularity::semi_infinite_lower`]: integrates functions $f(x)$ over
-//!     the semi-infinite interval $(-\infty,a)$, i.e.
-//!     $$
-//!     \int_{-\infty}^{a} f(x) dx.
-//!     $$
-//!     Based on the `qagil.f` QUADPACK and `qagil.c` GSL routines.
-//!
-//!     - [`quadrature::AdaptiveSingularity::semi_infinite_upper`]: integrates functions $f(x)$ over
-//!     the semi-infinite interval $(b,+\infty)$, i.e.
-//!     $$
-//!     \int_{b}^{+\infty} f(x) dx.
-//!     $$
-//!     Based on the `qagiu.f` QUADPACK and `qagiu.c` GSL routines.
+//! The `rint` library departs from the naming conventions of the [QUADPACK] and [GSL], but
+//! provides a selection of comparable implementations:
 //!
 //! - [`quadrature::Basic`]: A non-adaptive routine which applies a provided Gauss-Kronrod
 //! integration [`quadrature::Rule`] to a function exactly once.
 //!
-//! \[1\] <https://www.netlib.org/quadpack/>
+//! - [`quadrature::Adaptive`]: A one-dimensional adaptive routine based on the `qag.f` [QUADPACK]
+//! and `qag.c` [GSL] implementations. The integration is region is bisected into subregions and an
+//! initial estimate is performed. Upon each further iteration of the routine the subregion with
+//! the highest numerical error estimate is bisected again and new estimates are calculated for
+//! these newly bisected regions. This concentrates the integration refinement to the regions with
+//! highest error, rapidly reducing the numerical error of the routine. Gauss-Kronrod integration
+//! [`quadrature::Rule`]s are provided of various order to use with the adaptive algorithm.
 //!
-//! \[2\] <https://www.gnu.org/software/gsl/doc/html/integration.html>
+//! - [`quadrature::AdaptiveSingularity`]: A one-dimensional adaptive routine based on the `qags.f`
+//! [QUADPACK] and `qags.c` [GSL] implementations. Adaptive routines concentrate new subintervals
+//! around the region of highest error. If this region contains an integrable singularity, then the
+//! adaptive routine of [`quadrature::Adaptive`] may fail to obtain a suitable estimate. However,
+//! this can be combined with an extrapolation proceedure such as the Wynn epsilon-algorithm to
+//! extrapolate the value at these integrable singularities and provide a suitable estimate. As
+//! well as handling integrable singularities, [`quadrature::AdaptiveSingularity`] can be used to
+//! calculate integrals with infinite or semi-infinite bounds by using the appropriate constructors.
+//!
+//! [QUADPACK]: <https://www.netlib.org/quadpack/>
+//! [GNU Scientific Library]: <https://www.gnu.org/software/gsl/doc/html/integration.html>
+//! [GSL]: <https://www.gnu.org/software/gsl/doc/html/integration.html>
 //!
 //! [`quadrature::Rule`]: crate::quadrature::Rule
 //!
@@ -196,44 +139,25 @@
 //! The [`multi`] module provides numerical integration routines for integrating functions with
 //! dimensionality between $2 \le N \le 15$. The functions can be either real-valued or complex,
 //! and are integrated over an $N$-dimensional hypercube. The routines are based primarily on the
-//! DCUHRE FORTRAN library (Bernsten, Espelid, Genz) \[1\], however unlike the original algorithm
-//! the routines presented in [`multi`] currently only operate on a single function _not_ a vector
-//! of functions. The module provides two classes of routine:
+//! [DCUHRE] FORTRAN library (Bernsten, Espelid, Genz), which use sets of fully-symmetric
+//! integration rules to obtain integral and error estimates. Unlike the original algorithm the
+//! routines presented in [`multi`] currently only operate on a single function _not_ a vector of
+//! functions. The module provides two classes of routine:
 //!
-//! - [`multi::Adaptive`]: A $2 \le N \le 15$ dimensional adaptive routine with a similar approach to
-//! the one-dimensional adaptive routines found in [`quadrature`]. On each iteration of the
+//! - [`multi::Basic`]: A non-adaptive routine which applies a fully-symmetric integration rule
+//! [`multi::Rule`] to a multi-dimensional function exactly once.
+//!
+//! - [`multi::Adaptive`]: A $2 \le N \le 15$ dimensional adaptive routine with a similar approach
+//! to the one-dimensional adaptive routines found in [`quadrature`]. On each iteration of the
 //! algorithm the axis along which the largest contribution to the error estimate was obtained is
 //! used as the bisection axis to bisect the integration region and then calculate new estimates
 //! for these newly bisected volumes. This concentrates the integration refinement to the regions
 //! with highest error, rapidly reducing the numerical error of the routine. The algorithm uses
 //! fully-symmetric integration rules, [`crate::multi::Rule`], of varying order and generality.
-//! These are generated through the `Rule*::generate` constructors of specific type alias' for each
-//! rule:
-//!
-//!     - [`multi::Rule13`]: A 13-point fully symmetric integration rule for functions of $N=2$
-//!     dimension.
-//!     - [`multi::Rule13`]: An 11-point fully symmetric integration rule for functions of $N=3$
-//!     dimension.
-//!     - [`multi::Rule09N2`]: A 9-point fully symmetric integration rule for functions of $N=2$
-//!     dimension.
-//!     - [`multi::Rule09`]: A 9-point fully symmetric integration rule for functions of
-//!     $3 \le N \le 15$ dimension.
-//!     - [`multi::Rule07`]: A 7-point fully symmetric integration rule for functions of
-//!     $2 \le N \le 15$ dimension.
-//!
-//! - [`multi::Basic`]: A non-adaptive routine which applies a provided Gauss-Kronrod
-//! integration [`multi::Rule`] to a function exactly once.
-//!
-//! \[1\] Jarle Berntsen, Terje O. Espelid, and Alan Genz. 1991. Algorithm 698: DCUHRE: an adaptive
-//! multidemensional integration routine for a vector of integrals. ACM Trans. Math. Softw. 17, 4
-//! (Dec. 1991), 452–456. <https://doi.org/10.1145/210232.210234>
+//! These are generated through the `Rule*::generate` constructors.
 //!
 //! [`multi::Rule`]: crate::multi::Rule
-//! [`multi::Rule07`]: crate::multi::Rule07
-//! [`multi::Rule09`]: crate::multi::Rule09
-//! [`multi::Rule09N2`]: crate::multi::Rule09N2
-//! [`multi::Rule11`]: crate::multi::Rule11
-//! [`multi::Rule13`]: crate::multi::Rule13
+//! [DCUHRE]: <https://doi.org/10.1145/210232.210234>
 //!
 //!
 //! # One-dimensional example
@@ -244,10 +168,10 @@
 //! $$
 //! over the
 //! semi-infinite interval $0 < x < \infty$ using an adaptive integration routine with singularity
-//! detection (see [`AdapttiveSingularity`]).
-//! Adapted from the QUADPACK & GSL numerical integration test suites.
+//! detection (see [`quadrature::AdaptiveSingularity`]). Adapted from the [QUADPACK] & [GSL] numerical
+//! integration test suites.
 //!
-//! [`AdapttiveSingularity`]: crate::quadrature::AdaptiveSingularity
+//! [`quadrature::AdaptiveSingularity`]: crate::quadrature::AdaptiveSingularity
 //!
 //!```rust
 //! use rint::{Limits, Integrand, Tolerance};
@@ -262,67 +186,26 @@
 //!     }
 //! }
 //!
+//! # use std::error::Error;
+//! # fn main() -> Result<(), Box<dyn Error>> {
 //! let function = F;
 //! let lower = 0.0;
 //! let tolerance = Tolerance::Relative(1.0e-3);
 //!
-//! let integrator = AdaptiveSingularity::semi_infinite_upper(
-//!     &function,
-//!     lower,
-//!     tolerance,
-//!     1000,
-//! ).unwrap();
+//! let integrator = AdaptiveSingularity::semi_infinite_upper(&function, lower, tolerance, 1000)?;
 //!
 //! let exp_result = -3.616_892_186_127_022_568E-01;
 //! let exp_error = 3.016_716_913_328_831_851E-06;
 //!
-//! let integral = integrator.integrate().unwrap();
+//! let integral = integrator.integrate()?;
 //! let result = integral.result();
 //! let error = integral.error();
 //!
 //! let tol = 1.0e-9;
 //! assert!((exp_result - result).abs() / exp_result.abs() < tol);
 //! assert!((exp_error - error).abs() / exp_error.abs() < tol);
-//!```
-//! In this example we explicitly constructed the integrator [`AdaptiveSingularity`] and then
-//! integrated it with the `.integrate()` method to generate an [`IntegralEstimate`]. However it is
-//! possible to instead construct an [`IntegralEstimate`] directly using one of the constructor
-//! methods provided which implicitly perform the integration. With this approach, the previous
-//! example becomes,
-//!
-//! [`AdaptiveSingularity`]: crate::quadrature::AdaptiveSingularity
-//!```rust
-//! use rint::{Limits, Integrand, Tolerance, IntegralEstimate};
-//!
-//! struct F;
-//!
-//! impl Integrand for F {
-//!     type Scalar = f64;
-//!     fn evaluate(&self, x: f64) -> Self::Scalar {
-//!         x.ln() / (1.0 + 100.0 * x.powi(2))
-//!     }
-//! }
-//!
-//! let function = F;
-//! let lower = 0.0;
-//! let tolerance = Tolerance::Relative(1.0e-3);
-//!
-//! let integral = IntegralEstimate::<f64>::adaptive_singularity_semi_infinite_upper(
-//!     &function,
-//!     lower,
-//!     tolerance,
-//!     1000,
-//! ).unwrap();
-//!
-//! let exp_result = -3.616_892_186_127_022_568E-01;
-//! let exp_error = 3.016_716_913_328_831_851E-06;
-//!
-//! let result = integral.result();
-//! let error = integral.error();
-//!
-//! let tol = 1.0e-9;
-//! assert!((exp_result - result).abs() / exp_result.abs() < tol);
-//! assert!((exp_error - error).abs() / exp_error.abs() < tol);
+//! # Ok(())
+//! # }
 //!```
 //!
 //! # Multi-dimensional example
@@ -342,21 +225,7 @@
 //!
 //! const N: usize = 4;
 //!
-//! struct F {
-//!     limits: [Limits; N],
-//! }
-//!
-//! impl F {
-//!     fn new() -> Self {
-//!         let limits = [
-//!             Limits::new(0.0, 1.0),
-//!             Limits::new(0.0, 1.0),
-//!             Limits::new(0.0, 1.0),
-//!             Limits::new(0.0, 2.0)
-//!         ];
-//!         Self { limits }
-//!     }
-//! }
+//! struct F;
 //!
 //! impl MultiDimensionalIntegrand<N> for F {
 //!     type Scalar = f64;
@@ -366,30 +235,34 @@
 //!     }
 //! }
 //!
+//! # use std::error::Error;
+//! # fn main() -> Result<(), Box<dyn Error>> {
 //! const TARGET: f64 = 5.753_641_449_035_616e-1;
 //! const TOL: f64 = 1e-2;
 //!
-//! let function = F::new();
-//! let limits = function.limits;
-//! let rule = Rule07::<N>::generate().unwrap();
+//! let function = F;
+//! let limits = [
+//!     Limits::new(0.0, 1.0),
+//!     Limits::new(0.0, 1.0),
+//!     Limits::new(0.0, 1.0),
+//!     Limits::new(0.0, 2.0)
+//! ];
+//! let rule = Rule07::<N>::generate()?;
 //! let tolerance = Tolerance::Relative(TOL);
 //!
-//! let integrator = Adaptive::new(
-//!     &function,
-//!     &rule,
-//!     limits,
-//!     tolerance,
-//!     10000
-//! ).unwrap();
+//! let integrator = Adaptive::new(&function, &rule, limits, tolerance, 10000)?;
 //!
-//! let integral = integrator.integrate().unwrap();
+//! let integral = integrator.integrate()?;
 //! let result = integral.result();
 //! let error = integral.error();
 //!
 //! let actual_error = (result - TARGET).abs();
 //! let requested_error = TOL * result.abs();
 //!
-//! assert!(actual_error < requested_error);
+//! assert!(actual_error < error);
+//! assert!(error < requested_error);
+//! # Ok(())
+//! # }
 //!```
 #![deny(clippy::pedantic)]
 #![allow(
