@@ -1,9 +1,21 @@
 [package]
 name = "rint"
+description = "A pure Rust library for the numerical integration of real or complex valued functions of real variables in multiple dimensions."
+authors = ["Zander Macleod <zmacleod@pm.me>"]
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.86"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+readme = "README.md"
+license = "GPLv3"
+license-file = "LICENSE"
+
+repository = "https://github.com/zjmacleod/rint"
+keywords = ["integration", "numerical", "adaptive", "math", "quadrature"]
+categories = ["mathematics", "science", "algorithms"]
+
+include = ["/src", "/tests", "katex-header.html"]
+exclude = [".*"]
 
 [dependencies]
 num-complex = "0.4.6"
