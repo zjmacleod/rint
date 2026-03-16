@@ -1,3 +1,9 @@
+/// A generator of evaluation points for a fully-symmetric integration rule.
+///
+/// A fully-symmetric integration rule is one in which all points which can be created from a base
+/// point by negation and permutation are used to evaluate the function with the same weight. The
+/// [`Generator`] can be used to generate these evaluation points through the
+/// [`Generator::permutations`] and [`Generator::point_permutations`] methods.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub(crate) struct Generator<const N: usize>([f64; N]);
 
@@ -36,6 +42,7 @@ impl<const N: usize> Generator<N> {
     }
 }
 
+/// An iterator over the evaluation points produced from a base [`Generator`]
 pub(crate) struct Permutations<const N: usize> {
     initial: bool,
     current: [f64; N],

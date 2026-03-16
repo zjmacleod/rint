@@ -9,6 +9,93 @@ use crate::multi::two_pow_n_f64;
 use crate::InitialisationError;
 use crate::ScalarF64;
 
+/// A multi-dimensional fully-symmetric integration rule.
+///
+/// # Overview
+///
+/// This provides fully-symmetric numerical integration rules for approximating $N$-dimensional
+/// integrals of the form
+/// $$
+/// I = \int_{\Sigma_{N}} f(\mathbf{x}) d\mathbf{x}
+/// $$
+/// where $\mathbf{x} = (x_{1},\dots,x_{N})$ is an $N$-dimensional coordinate and $\Sigma_{N}$ is
+/// an $N$-dimensional hypercube. A [`Rule`] of a given order $n$ denotes a set of five
+/// fully-symmetric rules. The rule with polynomial order $n = 2m + 1$ is used to approximate the
+/// integral $I$ using a weighted sum,
+/// $$
+/// I = \int_{\Sigma_{N}} f(\mathbf{x}) d\mathbf{x}
+/// \approx R\[f\] = \sum_{i = 1}^{L} w_{i} f(\mathbf{x}\_{i})
+/// $$
+/// where $L$ is the total number of evaluation points $\mathbf{x}\_{i} = (x_{1},\dots,x_{N})$ and
+/// $w_{i}$ are the rule weights. The remaining four rules are _null rules_ of order $2m-1$,
+/// $2m-1$, $2m-3$, and $2m-5$, used to calculate,
+/// $$
+/// N_{j}\[f\] = \sum_{i = 1}^{L} w_{i}^{j} f(\mathbf{x}\_{i}) ~~~~~~ (j = 1,2,3,4).
+/// $$
+/// The null-rules are evaluated with the same set of points $\mathbf{x}\_{i}$, however the weights
+/// $w_{i}^{j}$ are such that a null rule of degree $d$ will _integrate to zero_ all monomials of
+/// degree $\le d$. These are used in the estimation of the error.
+///
+/// Each rule is defined by a set of _generators_ and weights. The generators are used to generate
+/// all of the evaluation points $\mathbf{x}\_{i}$ from a set of base generator _types_. A rule for
+/// the $N$-dimensional hypercube $x_{i} \in [-1,+1]^{N}$ is _fully-symmetric_ if it contains all
+/// points that can be generated from the base generator type by permutations and/or sign-changes
+/// of the coordinates with the same associated weight. The base generator types are:
+///
+/// <center>
+///
+/// | Types | Generators | Number of points |
+/// | -------- | -------- | -------- |
+/// | $(0,0,0,0,\dots,0)$                               | $(0,0,0,0,\dots,0)$ $i = K_{0}$                                                   | $1$ |
+/// | $(\alpha,0,0,0,\dots,0)$                          | $(\alpha_{i},0,0,0,\dots,0)$ $i = K_{1}$                                          | $2N$ |
+/// | $(\beta,\beta,0,0,\dots,0)$                       | $(\beta_{i},\beta_{i},0,0,\dots,0)$ $i = K_{2}$                                   | $2N(N-1)$ |
+/// | $(\gamma,\delta,0,0,\dots,0)$                     | $(\gamma_{i},\delta_{i},0,0,\dots,0)$ $i = K_{3}$                                 | $4N(N-1)$ |
+/// | $(\epsilon,\epsilon,\epsilon,0,\dots,0)$          | $(\epsilon_{i},\epsilon_{i},\epsilon_{i},0,\dots,0)$ $i = K_{4}$                  | $4N(N-1)(N-2)/3$ |
+/// | $(\zeta,\zeta,\eta,0,\dots,0)$                    | $(\zeta_{i},\zeta_{i},\eta_{i},0,\dots,0)$ $i = K_{5}$                            | $4N(N-1)(N-2)$ |
+/// | $(\lambda,\lambda,\lambda,\lambda,\dots,\lambda)$ | $(\lambda_{i},\lambda_{i},\lambda_{i},\lambda_{i},\dots,\lambda_{i})$ $i = K_{6}$ | $2^{N}$ |
+///
+/// </center>
+///
+/// The number of unique generators of a particular type is given by the structure parameter
+/// $K_{j}$ (note that $K_{0}$ can only take the values $0$ or $1$). As an example, consider an
+/// $N=2$ dimensional integral, which contains the generator of type $\mathbf{x}=(\alpha, 0)$ which
+/// is associated with a weight $w$. The fully-symmetric rule will evaluate the function
+/// $f(\mathbf{x})$ at each of the points $\mathbf{x}\_{1}=(\alpha,0)$,
+/// $\mathbf{x}\_{2}=(-\alpha,0)$, $\mathbf{x}\_{3}=(0,\alpha)$, $\mathbf{x}\_{4}=(0,-\alpha)$,
+/// weighting each function value with the same $w$. The null rules use the same sets of generators
+/// but different weights so error estimation is very inexpensive. For more details on the error
+/// estimation algorithm see:
+/// - Bernsten, Espelid, & Genz. 1991. An adaptive algorithm for the approximate calculation of
+/// multiple integrals. ACM Trans. Math. Softw. 17, 4 (Dec. 1991), 437–451.
+/// <https://doi.org/10.1145/210232.210233>
+///
+///
+/// # Available fully-symmetric integration rules
+///
+/// A number of fully-symmetric integration rules of different order $n$ are provided. The
+/// underlying [`Rule`] type should _not_ be required to call directly. Instead, type alias' are
+/// provided of the form `RuleX`, with generators `RuleX::generate` to construct them for use with
+/// the integrators. There are three rules provided which are only valid for a specific
+/// dimensionality $N$. These are,
+/// - [`multi::Rule13`]: A 13-point fully symmetric integration rule for functions of $N=2$
+/// dimension.
+/// - [`multi::Rule11`]: An 11-point fully symmetric integration rule for functions of $N=3$
+/// dimension.
+/// - [`multi::Rule09N2`]: A 9-point fully symmetric integration rule for functions of $N=2$
+/// dimension.
+///
+/// A further two rules are provided which are more general, with each being suitable for
+/// integration in up to $N=15$ dimensions,
+/// - [`multi::Rule09`]: A 9-point fully symmetric integration rule for functions of
+/// $3 \le N \le 15$ dimension.
+/// - [`multi::Rule07`]: A 7-point fully symmetric integration rule for functions of
+/// $2 \le N \le 15$ dimension.
+///
+/// [`multi::Rule07`]: crate::multi::Rule07
+/// [`multi::Rule09`]: crate::multi::Rule09
+/// [`multi::Rule09N2`]: crate::multi::Rule09N2
+/// [`multi::Rule11`]: crate::multi::Rule11
+/// [`multi::Rule13`]: crate::multi::Rule13
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Rule<const N: usize, const FINAL: usize, const TOTAL: usize> {
     initial_data: [Data<N>; 3],
@@ -50,69 +137,152 @@ impl<const N: usize, const FINAL: usize, const TOTAL: usize> Rule<N, FINAL, TOTA
     }
 }
 
-/// A 7-point fully-symmetric integration rule valid for `2 <= N <= 15`.
+/// A 7-point fully-symmetric integration rule valid for $2 \le N \le 15$.
 ///
+/// This is a general integration [`Rule`] valid for functions with dimensionality $2 \le N \le
+/// 15$. The structure parameters $K_{i}$ for the rule generators are,
+///
+/// <center>
+///
+/// | $K_{0}$ | $K_{1}$ | $K_{2}$ | $K_{3}$ | $K_{4}$ | $K_{5}$ | $K_{6}$ |
+/// | :-----: | :-----: | :-----: | :-----: | :-----: | :-----: | :-----: |
+/// |   $1$   |   $3$   |   $1$   |   $0$   |   $0$   |   $0$   |   $1$   |
+///
+/// </center>
+///
+/// While the total number of evaluation points $L$ depends on the dimensionality $N$ via,
+/// $$
+/// L = 1 + 6N + 2N(N-1) + 2^{N}
+/// $$
 /// This is the recommended rule to use when a significant amount of adaptivity is required.
+///
+/// - Genz & Malik, _An imbedded family of fully symmetric numerical integration rules_, SIAM J.
+/// Numer. Anal., 20 (1983)
 pub type Rule07<const N: usize> = Rule<N, 3, 6>;
 
 impl<const N: usize> Rule07<N> {
-    /// Generate a fully-symmetric 7-point integration rule.
+    /// Generate a fully-symmetric 7-point integration rule for $2 \le N \le 15$ dimensional integration.
     ///
     /// # Errors
-    /// Will fail if `N < 2` or `N > 15`.
+    /// Will fail if $N < 2$ or $N > 15$.
     pub const fn generate() -> Result<Self, InitialisationError> {
         fully_symmetric_07::generate_rule::<N>()
     }
 }
 
-/// A 9-point fully-symmetric integration rule valid for `3 <= N <= 15`.
+/// A 9-point fully-symmetric integration rule valid for $3 \le N \le 15$.
+///
+/// This is a general integration [`Rule`] valid for functions with dimensionality $3 \le N \le
+/// 15$. The structure parameters $K_{i}$ for the rule generators are,
+///
+/// <center>
+///
+/// | $K_{0}$ | $K_{1}$ | $K_{2}$ | $K_{3}$ | $K_{4}$ | $K_{5}$ | $K_{6}$ |
+/// | :-----: | :-----: | :-----: | :-----: | :-----: | :-----: | :-----: |
+/// |   $1$   |   $4$   |   $2$   |   $1$   |   $0$   |   $0$   |   $0$   |
+///
+/// </center>
+///
+/// While the total number of evaluation points $L$ depends on the dimensionality $N$ via,
+/// $$
+/// L = 1 + 8N + 6N(N-1) + 4N(N-1)(N-2)/3 + 2^{N}
+/// $$
+///
+/// - Genz & Malik, _An imbedded family of fully symmetric numerical integration rules_, SIAM J.
+/// Numer. Anal., 20 (1983)
 pub type Rule09<const N: usize> = Rule<N, 6, 9>;
 
 impl<const N: usize> Rule09<N> {
-    /// Generate a fully-symmetric 9-point integration rule for N > 3 dimensional integration.
+    /// Generate a fully-symmetric 9-point integration rule for $3 \le N \le 15$ dimensional integration.
     ///
     /// # Errors
-    /// Will fail if `N < 3` or `N > 15`.
+    /// Will fail if $N < 3$ or $N > 15$.
     pub const fn generate() -> Result<Self, InitialisationError> {
         fully_symmetric_09::generate_rule::<N>()
     }
 }
 
-/// A 9-point fully-symmetric integration rule valid for `N == 2`.
+/// A 9-point fully-symmetric integration rule valid for $N = 2$.
+///
+/// This [`Rule`] is only valid for functions with $N=2$ dimensions. The structure parameters
+/// $K_{i}$ and total number of evaluation points $L$ for the rule generators are,
+///
+/// <center>
+///
+/// | $K_{0}$ | $K_{1}$ | $K_{2}$ | $K_{3}$ | $K_{4}$ | $K_{5}$ | $K_{6}$ | $L$ |
+/// | :-----: | :-----: | :-----: | :-----: | :-----: | :-----: | :-----: | :-: |
+/// |   $1$   |   $4$   |   $2$   |   $1$   |   $0$   |   $0$   |   $0$   | $33$ |
+///
+/// </center>
+///
+/// - Genz & Malik, _An imbedded family of fully symmetric numerical integration rules_, SIAM J.
+/// Numer. Anal., 20 (1983)
 pub type Rule09N2 = Rule<2, 5, 8>;
 
 impl Rule09N2 {
-    /// Generate a fully-symmetric 9-point integration rule for N == 3 dimensional integration.
+    /// Generate a fully-symmetric 9-point integration rule for $N = 2$ dimensional integration.
     #[must_use]
     pub const fn generate() -> Self {
         fully_symmetric_09_2d::generate_rule()
     }
 }
 
-/// A 11-point fully-symmetric integration rule valid for `N == 3`.
+/// A 11-point fully-symmetric integration rule valid for $N = 3$.
+///
+/// This [`Rule`] is only valid for functions with $N=3$ dimensions. The structure parameters
+/// $K_{i}$ and total number of evaluation points $L$ for the rule generators are,
+///
+/// <center>
+///
+/// | $K_{0}$ | $K_{1}$ | $K_{2}$ | $K_{3}$ | $K_{4}$ | $K_{5}$ | $K_{6}$ | $L$ |
+/// | :-----: | :-----: | :-----: | :-----: | :-----: | :-----: | :-----: | :-: |
+/// |   $1$   |   $5$   |   $2$   |   $0$   |   $3$   |   $2$   |   $0$   | $127$ |
+///
+/// </center>
+///
+/// - Bernsten & Espelid, _On the construction of higher degree three dimensional embedded
+/// integration rules_, Reports in Informatics 16, Dept. of Informatics. Univ. of Bergen, 1985.
+/// - Bernsten & Espelid, _On the construction of higher degree three-dimensional embedded
+/// integration rules_, SIAM J. Numer. Anal. 25, 1 (1988)
 pub type Rule11 = Rule<3, 10, 13>;
 
 impl Rule11 {
-    /// Generate a fully-symmetric 11-point integration rule for `N = 3` dimensional integration.
+    /// Generate a fully-symmetric 11-point integration rule for $N = 3$ dimensional integration.
     #[must_use]
     pub const fn generate() -> Self {
         fully_symmetric_11_3d::generate_rule()
     }
 }
 
-/// A 13-point fully-symmetric integration rule valid for `N == 2`.
+/// A 13-point fully-symmetric integration rule valid for $N = 2$.
+///
+/// This is the highest polynomial order [`Rule`] available for multi-dimensional integration, and
+/// is only valid for functions with $N=2$ dimensions. The structure parameters $K_{i}$ and total
+/// number of evaluation points $L$ for the rule generators are,
+///
+/// <center>
+///
+/// | $K_{0}$ | $K_{1}$ | $K_{2}$ | $K_{3}$ | $K_{4}$ | $K_{5}$ | $K_{6}$ |   $L$   |
+/// | :-----: | :-----: | :-----: | :-----: | :-----: | :-----: | :-----: | :-----: |
+/// |   $1$   |   $5$   |   $5$   |   $3$   |   $0$   |   $0$   |   $0$   |   $65$  |
+///
+/// </center>
+///
+/// - Eriksen, _On the development of embedded fully symetric quadrature rules fpr the square_,
+/// Thesis for the degree Cand. Scient., Dept. of Informatics, Univ. of Bergen, 1986.
 pub type Rule13 = Rule<2, 11, 14>;
 
 impl Rule13 {
-    /// Generate a fully-symmetric 13-point integration rule for `N = 2` dimensional integration.
+    /// Generate a fully-symmetric 13-point integration rule for $N = 2$ dimensional integration.
     #[must_use]
     pub const fn generate() -> Self {
         fully_symmetric_13_2d::generate_rule()
     }
 }
 
-const ADAPTIVE_ERROR_COEFF: AdaptiveErrorCoeff = AdaptiveErrorCoeff::new(0.5, 0.25);
-
+/// A generator and its associated weights
+///
+/// Data structure containing a generator and the five weights associated with it.
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub(crate) struct Data<const N: usize> {
     generator: Generator<N>,
@@ -124,6 +294,7 @@ pub(crate) struct Data<const N: usize> {
 }
 
 impl<const N: usize> Data<N> {
+    /// Create a new instance of [`Data`]
     pub(crate) const fn new(generator: Generator<N>, weights: [f64; 5]) -> Self {
         let [weight, null1, null2, null3, null4] = weights;
         Self {
@@ -297,6 +468,8 @@ impl AdaptiveErrorCoeff {
         self.c6
     }
 }
+
+const ADAPTIVE_ERROR_COEFF: AdaptiveErrorCoeff = AdaptiveErrorCoeff::new(0.5, 0.25);
 
 #[cfg(test)]
 mod util {

@@ -6,6 +6,22 @@ use crate::Limits;
 use crate::MultiDimensionalIntegrand;
 use crate::ScalarF64;
 
+/// The estimated integral value of a calculated region.
+///
+/// This is the output of the core [`Integrator`], used internally by the different numerical
+/// integration routines in [`multi`]. It contains an estimate of the numerical integration
+/// `result`, the estimated `error`, and then further information about the integration which is
+/// used in the [`Adaptive`] routines for error estimation and analysis. A key feature of the
+/// adaptive routines is the use of a [`BinaryHeap`] for storing the various [`Region`]s which have
+/// been integrated. As such, the [`Region`] type implements the [`Ord`] and [`PartialOrd`] traits
+/// and order against the `error` (primary) and `limits` (secondary) fields. Thus, when pushed on
+/// to the [`BinaryHeap`], the [`Region`] with the largest `error` estimate _or_ if all have equal
+/// `error` the region with the smallest [`Limits::length`] will be obtained first upon using
+/// [`BinaryHeap::pop`]. This offloads the ordering of the [`Region`]s to the standard libary
+/// implementation of the [`BinaryHeap`].
+///
+/// [`Integrator`]: crate::quadrature::Integrator
+/// [`Adaptive`]: crate::quadrature::Adaptive
 #[derive(Debug, Clone)]
 pub(crate) struct Region<T: ScalarF64, const N: usize> {
     pub(crate) error: f64,
@@ -99,10 +115,20 @@ impl<T: ScalarF64, const N: usize> Region<T, N> {
         self.bisection_axis
     }
 
+    /// Primary comparison function for the [`Region`].
+    ///
+    /// Uses [`f64::total_cmp`] to determine the ordering of two [`Region`]s based on the `error`
+    /// estimates.
     pub(crate) fn total_cmp_error(&self, other: &Self) -> Ordering {
         self.error.total_cmp(&other.error)
     }
 
+    /// Secondary comparison function for the [`Region`].
+    ///
+    /// In the event that two regions have the same `error` estimate we use the _inverse_ length of
+    /// the integration region to determine the ordering. The rational here is that if the `error`
+    /// due to each region is the same then the smaller region is likely to be more problematic and
+    /// should be tackled first.
     pub(crate) fn total_cmp_interval_length(&self, other: &Self) -> Ordering {
         let width = self.limits[self.bisection_axis].width().abs();
         let other_width = other.limits[other.bisection_axis].width().abs();

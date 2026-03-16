@@ -9,6 +9,15 @@ use crate::Limits;
 use crate::MultiDimensionalIntegrand;
 use crate::ScalarF64;
 
+/// The core integrator for the multi-dimensional routines.
+///
+/// This is the core integrator which takes an $N$-dimensional `function` implementing the
+/// [`MultiDimensionalIntegrator`] trait, a fully-symmetric integration [`Rule`], and an
+/// integration region defined by the passed [`Limits`]. The [`Basic`] integration routine simply
+/// applies this integrator once to the function over the given integration region, while the
+/// [`Adaptive`] routine uses an iterative bisection method to concentrate more integration points
+/// in regions of higher numerical error, applying the [`Integrator`] to each subsequent bisected
+/// region.
 pub(crate) struct Integrator<'a, I, const N: usize, const FINAL: usize, const TOTAL: usize>
 where
     I: MultiDimensionalIntegrand<N>,

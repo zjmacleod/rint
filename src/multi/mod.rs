@@ -1,41 +1,109 @@
 //! Numerical integration routines for multi-dimensional functions.
 //!
-//! This module provides numerical integration routines for integrating functions with
-//! dimensionality between $2 \le N \le 15$. The functions can be either real-valued or complex,
-//! and are integrated over an $N$-dimensional hypercube. The routines are based primarily on the
-//! DCUHRE FORTRAN library (Bernsten, Espelid, Genz) \[1\], however unlike the original algorithm
-//! the routines presented in currently only operate on a single function _not_ a vector of
-//! functions. The module provides two classes of routine:
 //!
-//! - [`Adaptive`]: A $2 \le N \le 15$ dimensional adaptive routine with a similar approach to
-//! the one-dimensional adaptive routines found in [`crate::quadrature`]. On each iteration of the
+//! # Overview
+//!
+//! This module provides numerical integration routines for approximating the $N$-dimensional
+//! integrals of the form,
+//! $$
+//! I = \int_{\Sigma_{N}} f(\mathbf{x}) d\mathbf{x}
+//! $$
+//! where $\mathbf{x} = (x_{1}, x_{2}, \dots, x_{N})$ and $\Sigma_{N}$ is an $N$-dimensional
+//! hypercube. The dimensionality is limited to $2 \le N \le 15$. The functions $f(x)$ can be
+//! either real- or complex-valued and implement the [`MultiDimensionalIntegrand`] trait. The
+//! routines are based primarily on the [DCUHRE] FORTRAN library (Bernsten, Espelid, Genz), however
+//! unlike the original algorithm the routines presented in currently only operate on a single
+//! function _not_ a vector of functions. The routines use fully symmetric integration [`Rule`]s,
+//! with each rule of a particular order $n$ there is a set of five fully symmetric rules used,
+//! where one rule of degree $n=2m+1$ is used to obtain an estimate of the integral, $R\[f\]$,
+//! $$
+//! I = \int_{\Sigma_{N}} f(\mathbf{x}) d\mathbf{x}
+//! \approx R\[f\] = \sum_{i = 1}^{L} w_{i} f(\mathbf{x}\_{i})
+//! $$
+//! where $L$ is the total number of evaluation points $\mathbf{x}\_{i} = (x_{1},\dots,x_{N})$ and
+//! $w_{i}$ are the rule weights. In adition there are four _null rules_ of order $2m-1$, $2m-1$,
+//! $2m-3$, and $2m-5$, used to calculate,
+//! $$
+//! N_{j}\[f\] = \sum_{i = 1}^{L} w_{i}^{j} f(\mathbf{x}\_{i}) ~~~~~~ (j = 1,2,3,4)
+//! $$
+//! evaluated with the same set of points $\mathbf{x}\_{i}$, however the weights $w_{i}^{j}$ are
+//! such that a null rule of degree $d$ will integrate to zero all monomials of degree $\le d$.
+//! These are used in the estimation of the error.
+//!
+//! The algorithm and integration rules are outlined in,
+//! - Bernsten, Espelid, & Genz. 1991. Algorithm 698: DCUHRE: an adaptive multidemensional
+//! integration routine for a vector of integrals. ACM Trans. Math. Softw. 17, 4 (Dec. 1991),
+//! 452–456. <https://doi.org/10.1145/210232.210234>
+//! - Bernsten, Espelid, & Genz. 1991. An adaptive algorithm for the approximate calculation of
+//! multiple integrals. ACM Trans. Math. Softw. 17, 4 (Dec. 1991), 437–451.
+//! <https://doi.org/10.1145/210232.210233>
+//!
+//! [`MultiDimensionalIntegrand`]: crate::MultiDimensionalIntegrand
+//!
+//! # Available integrator routines
+//!
+//! The module provides two classes of routine:
+//!
+//! - [`Basic`]: A non-adaptive routine which applies a fully-symmetric integration [`Rule`] to a
+//! function exactly once. Rules of different order are available, and are generated through the
+//! `Rule*::generate` constructors of specific type alias' for each rule.
+//!
+//! - [`Adaptive`]: A $2 \le N \le 15$ dimensional adaptive routine. On each iteration of the
 //! algorithm the axis along which the largest contribution to the error estimate was obtained is
 //! used as the bisection axis to bisect the integration region and then calculate new estimates
 //! for these newly bisected volumes. This concentrates the integration refinement to the regions
 //! with highest error, rapidly reducing the numerical error of the routine. The algorithm uses
 //! fully-symmetric integration rules, [`Rule`], of varying order and generality.
-//! These are generated through the `Rule*::generate` constructors of specific type alias' for each
-//! rule:
 //!
-//!     - [`Rule13`]: A 13-point fully symmetric integration rule for functions of $N=2$
-//!     dimension.
-//!     - [`Rule13`]: An 11-point fully symmetric integration rule for functions of $N=3$
-//!     dimension.
-//!     - [`Rule09N2`]: A 9-point fully symmetric integration rule for functions of $N=2$
-//!     dimension.
-//!     - [`Rule09`]: A 9-point fully symmetric integration rule for functions of
-//!     $3 \le N \le 15$ dimension.
-//!     - [`Rule07`]: A 7-point fully symmetric integration rule for functions of
-//!     $2 \le N \le 15$ dimension.
+//! [DCUHRE]: <https://doi.org/10.1145/210232.210234>
 //!
-//! - [`Basic`]: A non-adaptive routine which applies a provided Gauss-Kronrod
-//! integration [`Rule`] to a function exactly once.
+//! # Examples
 //!
-//! \[1\] Jarle Berntsen, Terje O. Espelid, and Alan Genz. 1991. Algorithm 698: DCUHRE: an adaptive
-//! multidemensional integration routine for a vector of integrals. ACM Trans. Math. Softw. 17, 4
-//! (Dec. 1991), 452–456. <https://doi.org/10.1145/210232.210234>
+//! ## [`Basic`] integrator example
 //!
-//! # Example
+//! Here we present a calculation of [Catalan's constant] $G$ using the integral representation:
+//! $$
+//! G = \int_{0}^{1} \int_{0}^{1} \frac{dxdy}{1 + x^{2} y^{2}},
+//! $$
+//! which is a smooth integral over the integration region and can be easily integrated with the
+//! [`Basic`] routine.
+//!
+//!```rust
+//! use rint::{Limits, MultiDimensionalIntegrand, Tolerance};
+//! use rint::multi::{Basic, Rule13};
+//!
+//! const N: usize = 2;
+//! const G: f64 = 0.915_965_594_177_219_015_054_603_514_932_384_110_774;
+//!
+//! struct Catalan;
+//!
+//! impl MultiDimensionalIntegrand<N> for Catalan {
+//!     type Scalar = f64;
+//!     fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
+//!         let [x, y] = coordinates;
+//!         1.0 / (1.0 + x.powi(2) * y.powi(2))
+//!     }
+//! }
+//!
+//! # use std::error::Error;
+//! # fn main() -> Result<(), Box<dyn Error>> {
+//! let catalan = Catalan;
+//! let limits = [Limits::new(0.0,1.0);N];
+//! let rule = Rule13::generate();
+//! let integral = Basic::new(&catalan, &rule, limits)?.integrate();
+//!
+//! let result = integral.result();
+//! let error = integral.error();
+//! let abs_actual_error = (G - result).abs();
+//! let iters = integral.iterations();
+//! assert_eq!(iters, 1);
+//! assert!(abs_actual_error < error);
+//! # Ok(())
+//! # }
+//!```
+//!
+//!
+//! ## [`Adaptive`] integrator example
 //!
 //! The following example integtates a 4-dimensional function $f(\mathbf{x})$,
 //! $$
@@ -46,27 +114,14 @@
 //! Adapted from P. van Dooren & L. de Ridder, "An adaptive algorithm for numerical integration over
 //! an n-dimensional cube", J. Comp. App. Math., Vol. 2, (1976) 207-217
 //!
+//!
 //!```rust
 //! use rint::{Limits, MultiDimensionalIntegrand, Tolerance};
 //! use rint::multi::{Adaptive, Rule07};
 //!
 //! const N: usize = 4;
 //!
-//! struct F {
-//!     limits: [Limits; N],
-//! }
-//!
-//! impl F {
-//!     fn new() -> Self {
-//!         let limits = [
-//!             Limits::new(0.0, 1.0),
-//!             Limits::new(0.0, 1.0),
-//!             Limits::new(0.0, 1.0),
-//!             Limits::new(0.0, 2.0)
-//!         ];
-//!         Self { limits }
-//!     }
-//! }
+//! struct F;
 //!
 //! impl MultiDimensionalIntegrand<N> for F {
 //!     type Scalar = f64;
@@ -76,30 +131,32 @@
 //!     }
 //! }
 //!
+//! # use std::error::Error;
+//! # fn main() -> Result<(), Box<dyn Error>> {
 //! const TARGET: f64 = 5.753_641_449_035_616e-1;
 //! const TOL: f64 = 1e-2;
 //!
-//! let function = F::new();
-//! let limits = function.limits;
-//! let rule = Rule07::<N>::generate().unwrap();
+//! let function = F;
+//! let limits = [
+//!     Limits::new(0.0, 1.0),
+//!     Limits::new(0.0, 1.0),
+//!     Limits::new(0.0, 1.0),
+//!     Limits::new(0.0, 2.0)
+//! ];
+//! let rule = Rule07::<N>::generate()?;
 //! let tolerance = Tolerance::Relative(TOL);
 //!
-//! let integrator = Adaptive::new(
-//!     &function,
-//!     &rule,
-//!     limits,
-//!     tolerance,
-//!     10000
-//! ).unwrap();
+//! let integral = Adaptive::new(&function, &rule, limits, tolerance, 10000)?.integrate()?;
 //!
-//! let integral = integrator.integrate().unwrap();
 //! let result = integral.result();
 //! let error = integral.error();
-//!
 //! let actual_error = (result - TARGET).abs();
 //! let requested_error = TOL * result.abs();
 //!
-//! assert!(actual_error < requested_error);
+//! assert!(actual_error < error);
+//! assert!(error < requested_error);
+//! # Ok(())
+//! # }
 //!```
 mod adaptive;
 mod basic;

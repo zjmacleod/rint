@@ -10,6 +10,89 @@ use crate::{InitialisationError, InitialisationErrorKind};
 use crate::{IntegrationError, IntegrationErrorKind};
 use crate::{Limits, Tolerance};
 
+/// An adaptive multi-dimensional integrator.
+///
+/// The [`Adaptive`] integrator applies a fully-symmetric integration [`Rule`] to approximate the
+/// integral of an $N$-dimensional function for $2 \le N \le 15$. Unlike the [`Basic`] routine, the
+/// routine implemented by [`Adaptive`] is adaptive. After the initial integration, on each
+/// iteration of the algorithm the axis along which the largest contribution to the error estimate
+/// was obtained is used as the bisection axis to bisect the integration region and then calculate
+/// new estimates for these newly bisected volumes. This concentrates the integration refinement to
+/// the regions with highest error, rapidly reducing the numerical error of the routine. The
+/// adaptive routine will return the first approximation, `result`, to the integral which has an
+/// absolute `error` smaller than the tolerance `tol` encoded through the [`Tolerance`] enum, where
+///
+/// * [`Tolerance::Absolute`] specifies absolute tolerance and returns final estimate when
+/// `error <= tol`,
+/// * [`Tolerance::Relative`] specifies a relative error and returns final estimate when
+/// `error <= tol * abs(result)`,  
+/// * [`Tolerance::Either`] to return a result as soon as _either_ the relative or
+/// absolute error bound has been satisfied.
+///
+/// The routine will end when _either_ one of the tolerance conditions have been satisfied _or_ an
+/// error has occurred, see [`Error`] for more details.
+///
+/// [`Basic`]: crate::quadrature::Basic
+/// [`AdaptiveSingularity`]: crate::quadrature::AdaptiveSingularity
+/// [`Error`]: crate::Error
+/// [`Tolerance`]: crate::Tolerance
+///
+/// # Example
+///
+/// The following example integtates a 4-dimensional function $f(\mathbf{x})$,
+/// $$
+/// f(\mathbf{x}) = \frac{x_{3}^{2} x_{4} e^{x_{3} x_{4}}}{(1 + x_{1} + x_{2})^{2}}
+/// $$
+/// where $\mathbf{x} = (x_{1}, x_{2}, x_{3}, x_{4})$ over an $N=4$ dimensional hypercube
+/// $((0,1),(0,1),(0,2),(0,1))$ using a fully-symmetric 7-point adaptive algorithm.
+/// Adapted from P. van Dooren & L. de Ridder, "An adaptive algorithm for numerical integration over
+/// an n-dimensional cube", J. Comp. App. Math., Vol. 2, (1976) 207-217
+///
+///```rust
+/// use rint::{Limits, MultiDimensionalIntegrand, Tolerance};
+/// use rint::multi::{Adaptive, Rule07};
+///
+/// const N: usize = 4;
+///
+/// struct F;
+///
+/// impl MultiDimensionalIntegrand<N> for F {
+///     type Scalar = f64;
+///     fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
+///         let [x1, x2, x3, x4] = coordinates;
+///         x3.powi(2) * x4 * (x3 * x4).exp() / (x1 + x2 + 1.0).powi(2)
+///     }
+/// }
+///
+/// # use std::error::Error;
+/// # fn main() -> Result<(), Box<dyn Error>> {
+/// const TARGET: f64 = 5.753_641_449_035_616e-1;
+/// const TOL: f64 = 1e-2;
+///
+/// let function = F;
+/// let limits = [
+///     Limits::new(0.0, 1.0),
+///     Limits::new(0.0, 1.0),
+///     Limits::new(0.0, 1.0),
+///     Limits::new(0.0, 2.0)
+/// ];
+/// let rule = Rule07::<N>::generate()?;
+/// let tolerance = Tolerance::Relative(TOL);
+///
+/// let integrator = Adaptive::new(&function, &rule, limits, tolerance, 10000)?;
+///
+/// let integral = integrator.integrate()?;
+/// let result = integral.result();
+/// let error = integral.error();
+///
+/// let actual_error = (result - TARGET).abs();
+/// let requested_error = TOL * result.abs();
+///
+/// assert!(actual_error < error);
+/// assert!(error < requested_error);
+/// # Ok(())
+/// # }
+///```
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Adaptive<'a, I, R, const N: usize> {
     function: &'a I,
@@ -24,19 +107,25 @@ impl<'a, I, const N: usize, const FINAL: usize, const TOTAL: usize>
 where
     I: MultiDimensionalIntegrand<N>,
 {
-    /// Generate a new adaptive multi-dimensional integrator.
+    /// Generate a new [`Adaptive`] integrator.
+    ///
+    /// Initialise an adaptive multi-dimensional integrator integrator. Arguments:
+    /// - `function`: A user supplied function to be integrated which is something implementing the
+    /// [`MultiDimensionalIntegrand`] trait.
+    /// - `rule`: A fully-symmetric integration [`Rule`]
+    /// - `limits`: An $N$-dimensional array of the [`Limits`] over which the `function` should be
+    /// integrated.
+    /// - `tolerance`: The tolerance requested by the user. Can be either an absolute tolerance
+    /// or relative tolerance. Determines the exit condition of the integration routine, see
+    /// [`Tolerance`].
+    /// - `max_iterations`: The maximum number of iterations that the adaptive routine should use
+    /// to try to satisfy the requested tolerance.
     ///
     /// # Errors
-    ///
-    /// Returns an [`InitialisationError`] if:
-    /// - The requested dimensionality `N` is invalid. `N` must match the dimensionality of
-    /// the selected fully-symmetric multi-dimensional integration [`Rule`] and (in general)
-    /// satisfy `2 <= N <= 15`.
-    /// - The requested [`Tolerance`] is invalid. The tolerance muse satisfy the following
-    /// constraints:
-    ///     - `Tolerance::Absolute(v)` where `v > 0.0`
-    ///     - `Tolerance::Relative(v)` where `v > 50.0 * f64::EPSILON`
-    ///     - `Tolerance::Either { absolute, relative }` where `absolute > 0.0 and relative > 50.0 * f64::EPSILON`
+    /// Function can return an error if it receives bad user input. This is primarily related to
+    /// using invalid values for the `tolerance` or choosing an invalid dimensionality ($N$ must
+    /// satisfy $2 \le N \le 15$ in general). The returned error is an [`InitialisationError`]. See
+    /// [`Tolerance`] and [`InitialisationError`] for more details.
     pub fn new(
         function: &'a I,
         rule: &'a Rule<N, FINAL, TOTAL>,
@@ -61,12 +150,30 @@ where
         })
     }
 
-    /// Integrate the function using the adaptive routine and return a [`IntegralEstimate`].
+    /// Integrate the function and return a [`IntegralEstimate`] integration result.
+    ///
+    /// Adaptively applies the fully-symmetric integration [`Rule`] to the user supplied function
+    /// implementing the [`MultiDimensionalIntegrand`] trait to generate an [`IntegralEstimate`]
+    /// upon successful completion.
     ///
     /// # Errors
+    /// The error type [`IntegrationError`] will return both the error [`IntegrationErrorKind`] and
+    /// the [`IntegralEstimate`] obtained before an error was encountered. The integration routine
+    /// has several ways of failing:
+    /// - The user supplied [`Tolerance`] could not be satisfied within the maximum number of
+    /// iterations, see [`IntegrationErrorKind::MaximumIterationsReached`].
     ///
-    /// Returns an [`IntegrationError`] if:
-    /// - TODO
+    //    /// - A roundoff error was detected. Can occur when the calculated numerical error from an
+    //    /// internal integration is smaller than the estimated roundoff, but larger than the tolerance
+    //    /// requested by the user, or when too many successive iterations do not reasonably improve the
+    //    /// integral value and error estimate, see [`IntegrationErrorKind::RoundoffErrorDetected`].
+    //    ///
+    /// - Bisection of the highest error region into two subregions results in subregions with
+    /// integraion limits that are too small, see [`IntegrationErrorKind::BadIntegrandBehaviour`].
+    ///
+    /// - An error is encountered when initialising the integration workspace. This is an internal
+    /// error, which should not occur in user code, see
+    /// [`IntegrationErrorKind::UninitialisedWorkspace`].
     pub fn integrate(&self) -> Result<IntegralEstimate<I::Scalar>, IntegrationError<I::Scalar>> {
         let initial = Integrator::new(&self.function, self.rule, self.limits).integrate();
 
@@ -91,10 +198,10 @@ where
             workspace.push(upper);
 
             if error <= iteration_tolerance {
-                // TODO add individual checks on re and im error
                 break;
             }
 
+            //TODO add roundoff check, see quadrature::Adaptive
             //workspace.check_roundoff()?;
             workspace.check_singularity()?;
         }
@@ -133,6 +240,16 @@ where
     }
 }
 
+/// The integration workspace.
+///
+/// We use a workspace for maintaining the state of the adaptive integration routines. The `heap`
+/// is a [`BinaryHeap`] storing [`Region`]s which have been integrated, and upon using
+/// [`Workspace::pop`] returns the region with the highest `error` approximation which is the next
+/// region to be bisected and re-integrated. Also tracked are the current estimates of `result` and
+/// `error` across the entire integration region, the number of `iteration`s.
+// /// , and counts of times
+// /// that roundoff errors may have occurred, used as a diagnostic for terminating the integration
+// /// early if problematic roundoff behaviour is observed.
 struct Workspace<T: ScalarF64, const N: usize> {
     heap: BinaryHeap<Region<T, N>>,
     iteration: usize,
@@ -144,6 +261,7 @@ struct Workspace<T: ScalarF64, const N: usize> {
 }
 
 impl<T: ScalarF64, const N: usize> Workspace<T, N> {
+    /// Get the next [`Region`] in the [`BinaryHeap`] queue with the largest `error` estimate.
     fn retrieve_largest_error(&mut self) -> Result<Region<T, N>, IntegrationError<T>> {
         self.iteration += 1;
         if let Some(previous) = self.pop() {

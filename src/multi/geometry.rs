@@ -1,5 +1,9 @@
 use crate::Limits;
 
+/// The geometry of a multi-dimensional integral
+///
+/// Contains an array of the centre points and half_widths in each integration axis for a given
+/// region, alongside the volume and the longest axis.
 pub(crate) struct Geometry<const N: usize> {
     pub(crate) centre: [f64; N],
     pub(crate) half_widths: [f64; N],
