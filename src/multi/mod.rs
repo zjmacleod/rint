@@ -55,7 +55,7 @@
 //! with highest error, rapidly reducing the numerical error of the routine. The algorithm uses
 //! fully-symmetric integration rules, [`Rule`], of varying order and generality.
 //!
-//! [DCUHRE]: <https://doi.org/10.1145/210232.210234>
+//! [DCUHRE]: <https://dl.acm.org/doi/10.1145/210232.210234>
 //!
 //! # Examples
 //!
