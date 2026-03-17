@@ -6,19 +6,19 @@ Numerical integration routines written in Rust.
 
 This library contains numerical integration routines for both functions of one dimension (see [`quadrature`]) and functions with multiple dimensions up to $N = 15$ (see [`multi`]). The basic principle of the library is to expose all of the routines through the trait system. Each of the one- and multi-dimensional integrators take as a parameter a type implementing the corresponding trait, respectively [`Integrand`] and [`MultiDimensionalIntegrand`].
 
-The integration routines attempt to make approximations to integrals such as the one-dimensional integral,\
+The integration routines attempt to make approximations to integrals such as the one-dimensional integral,
 ```math
 I = \int_{b}^{a} f(x) dx
 ```
-or the $N$-dimensional\
+or the $N$-dimensional
 ```math
 I = \int_{\Sigma_{N}} f(\mathbf{x}) d\mathbf{x}
 ```
-where $\mathbf{x} = (x_{1}, x_{2}, \dots, x_{N})$ and $\Sigma_{N}$ is an $N$-dimensional hypercube. The functions $f(x)$ and $f(\mathbf{x})$ can be real valued, with return type [`f64`] _or_ complex valued with return type [`Complex<f64>`]. The numerical integration routines approximate the integral of a function by performing a weighted sum of the function evaluated at defined points/abscissae. For example, in the one-dimensional case,\
+where $\mathbf{x} = (x_{1}, x_{2}, \dots, x_{N})$ and $\Sigma_{N}$ is an $N$-dimensional hypercube. The functions $f(x)$ and $f(\mathbf{x})$ can be real valued, with return type [`f64`] _or_ complex valued with return type [`Complex<f64>`]. The numerical integration routines approximate the integral of a function by performing a weighted sum of the function evaluated at defined points/abscissae. For example, in the one-dimensional case,
 ```math
 I = \int_{b}^{a} f(x) dx \approx \sum_{i = 1}^{n} W_{i} f(X_{i}) = I_{n}
 ```
-where the $X_{i}$ and $W_{i}$ are the rescaled abscissae and weights,\
+where the $X_{i}$ and $W_{i}$ are the rescaled abscissae and weights,
 ```math
 X_{i} = \frac{b + a + (a - b) x_{i}}{2} ~~~~~~~~ W_{i} = \frac{(a - b) w_{i}}{2}
 ```
@@ -37,7 +37,7 @@ The primary entry points for the library are the one- and multi-dimenensional in
 
 Each trait requires an implementation of an `evaluate` method, which defines the value of the integrand for a given one- or $N$-dimensional point. The return type of the `evaluate` function is the associated type `Scalar`, which defines whether the function is real-valued (`Scalar=`[`f64`]), or complex-valued (`Scalar=`[`Complex<f64>`]). These traits tell the integrators how to evaluate the function at a point, allowing the integration to be done.
 
-As an example, consider probability density function of a normal distribution,\
+As an example, consider probability density function of a normal distribution,
 ```math
 f(x) = \frac{1}{\sqrt{2 \pi \sigma^{2}}} e^{- \frac{(x - \mu)^{2}}{2 \sigma^{2}}}
 ```
@@ -91,7 +91,7 @@ The [`multi`] module provides numerical integration routines for integrating fun
 
 # One-dimensional example
 
-The following example integrates the function\
+The following example integrates the function
 ```math
 f(x) = \frac{\log(x)}{(1 + 100 x^{2})}
 ```
@@ -135,7 +135,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 # Multi-dimensional example
 
-The following example integtates a 4-dimensional function $f(\mathbf{x})$,\
+The following example integtates a 4-dimensional function $f(\mathbf{x})$,
 ```math
 f(\mathbf{x}) = \frac{x_{3}^{2} x_{4} e^{x_{3} x_{4}}}{(1 + x_{1} + x_{2})^{2}}
 ```
