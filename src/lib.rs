@@ -157,7 +157,7 @@
 //! These are generated through the `Rule*::generate` constructors.
 //!
 //! [`multi::Rule`]: crate::multi::Rule
-//! [DCUHRE]: <https://doi.org/10.1145/210232.210234>
+//! [DCUHRE]: <https://dl.acm.org/doi/10.1145/210232.210234>
 //!
 //!
 //! # One-dimensional example

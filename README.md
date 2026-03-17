@@ -190,7 +190,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 [GNU Scientific Library]: <https://www.gnu.org/software/gsl/doc/html/integration.html>
 [GSL]: <https://www.gnu.org/software/gsl/doc/html/integration.html>
 [QUADPACK]: <https://www.netlib.org/quadpack/>
-[DCUHRE]: <https://doi.org/10.1145/210232.210234>
+[DCUHRE]: <https://dl.acm.org/doi/10.1145/210232.210234>
 [`Integrand`]: <https://docs.rs/rint/latest/rint/trait.Integrand.html>
 [`MultiDimensionalIntegrand`]: <https://docs.rs/rint/latest/rint/trait.MultiDimensionalIntegrand.html>
 [`Limits`]: <https://docs.rs/rint/latest/rint/struct.Limits.html>
