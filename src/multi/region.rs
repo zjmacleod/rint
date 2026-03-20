@@ -2,8 +2,8 @@ use std::cmp::Ordering;
 
 use crate::multi::Integrator;
 use crate::multi::Rule;
+use crate::Integrand;
 use crate::Limits;
-use crate::MultiDimensionalIntegrand;
 use crate::ScalarF64;
 
 /// The estimated integral value of a calculated region.
@@ -145,7 +145,7 @@ impl<T: ScalarF64, const N: usize> Region<T, N> {
 
     #[allow(clippy::needless_borrow)]
     pub(crate) fn bisect<
-        I: MultiDimensionalIntegrand<N, Scalar = T>,
+        I: Integrand<Point = [f64; N], Scalar = T>,
         const J: usize,
         const K: usize,
     >(

@@ -4,7 +4,7 @@ use crate::multi::Integrator;
 use crate::multi::Region;
 use crate::multi::Rule;
 use crate::IntegralEstimate;
-use crate::MultiDimensionalIntegrand;
+use crate::Integrand;
 use crate::ScalarF64;
 use crate::{InitialisationError, InitialisationErrorKind};
 use crate::{IntegrationError, IntegrationErrorKind};
@@ -105,7 +105,7 @@ pub struct Adaptive<'a, I, R, const N: usize> {
 impl<'a, I, const N: usize, const FINAL: usize, const TOTAL: usize>
     Adaptive<'a, I, Rule<N, FINAL, TOTAL>, N>
 where
-    I: MultiDimensionalIntegrand<N>,
+    I: Integrand<Point = [f64; N]>,
 {
     /// Generate a new [`Adaptive`] integrator.
     ///

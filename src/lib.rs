@@ -222,14 +222,15 @@
 //! an n-dimensional cube", J. Comp. App. Math., Vol. 2, (1976) 207-217
 //!
 //!```rust
-//! use rint::{Limits, MultiDimensionalIntegrand, Tolerance};
+//! use rint::{Limits, Integrand, Tolerance};
 //! use rint::multi::{Adaptive, Rule07};
 //!
 //! const N: usize = 4;
 //!
 //! struct F;
 //!
-//! impl MultiDimensionalIntegrand<N> for F {
+//! impl Integrand for F {
+//!     type Point = [f64; N];
 //!     type Scalar = f64;
 //!     fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
 //!         let [x1, x2, x3, x4] = coordinates;
@@ -355,64 +356,65 @@ impl<I: Integrand> Integrand for &I {
     }
 }
 
-/// A real or complex-valued function to be integrated over an $N$-dimensional hypercube.
-///
-/// The [`Integrand`] trait tells the integrators how to evaluate a one-dimensional function at a
-/// the _real_ point `x`. Can be implemented on e.g. an empty `struct` or a `struct` containing
-/// constant parameters required to perform the integral. The trait requires an implementation of
-/// the [`Integrand::evaluate`] method, which defines the value of the integrand at a point. The
-/// return type of the `evaluate` function is the associated type `Scalar`, which defines whether
-/// the function is real- (`Scalar=`[`std::f64`]) or complex-valued (`Scalar=`[`Complex<f64>`]).
-/// For example, consider a nonlinear 4-dimensional function $f(\mathbf{x})$,
-/// $$
-/// f(\mathbf{x}) = a \frac{x_{3}^{2} x_{4} e^{x_{3} x_{4}}}{(1 + x_{1} + x_{2})^{2}}
-/// $$
-/// where $\mathbf{x} = (x_{1}, x_{2}, x_{3}, x_{4})$, which has some amplitude $a$. To integrate
-/// this function, one first implements the [`MultiDimensionalIntegrand`] trait,
-///```rust
-/// use rint::MultiDimensionalIntegrand;
-///
-/// const N: usize = 4;
-///
-/// struct F {
-///     amplitude: f64,
-/// }
-///
-/// impl MultiDimensionalIntegrand<N> for F {
-///     type Scalar = f64;
-///     fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
-///         let [x1, x2, x3, x4] = coordinates;
-///         let a = self.amplitude;
-///         a * x3.powi(2) * x4 * (x3 * x4).exp() / (x1 + x2 + 1.0).powi(2)
-///     }
-/// }
-///```
-/// The type `F` can then be used as the `function` parameter in one of the numerical integration
-/// routines provided by the [`multi`] module.
-pub trait MultiDimensionalIntegrand<const N: usize> {
-    /// The type that the function evaluates to.
-    ///
-    /// The integrand can be either real-valued or complex-valued, evaluating to [`f64`] or
-    /// [`Complex<f64>`], respectively.
-    type Scalar: ScalarF64;
-
-    /// Evaluate the function at the real-valued $N$-dimensional point $[x_{1},x_{2},\dots,x_{N}]$.
-    ///
-    /// The user provided implementation of [`MultiDimensionalIntegrand::evaluate`] defines how the
-    /// function is evaluated at a given _real_ `coordinate`, which is an $N$-dimensional array
-    /// `[f64; N]`. Since the method is implemented on a user defined type, such as a `struct`, it
-    /// can have access to any constant parameters required for the evaluation of the function
-    /// through, for example, fields on the implementing `struct`.
-    fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar;
-}
-
-impl<I: MultiDimensionalIntegrand<N>, const N: usize> MultiDimensionalIntegrand<N> for &I {
-    type Scalar = I::Scalar;
-
-    fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
-        I::evaluate(self, coordinates)
-    }
-}
+// /// A real or complex-valued function to be integrated over an $N$-dimensional hypercube.
+// ///
+// /// The [`Integrand`] trait tells the integrators how to evaluate a one-dimensional function at a
+// /// the _real_ point `x`. Can be implemented on e.g. an empty `struct` or a `struct` containing
+// /// constant parameters required to perform the integral. The trait requires an implementation of
+// /// the [`Integrand::evaluate`] method, which defines the value of the integrand at a point. The
+// /// return type of the `evaluate` function is the associated type `Scalar`, which defines whether
+// /// the function is real- (`Scalar=`[`std::f64`]) or complex-valued (`Scalar=`[`Complex<f64>`]).
+// /// For example, consider a nonlinear 4-dimensional function $f(\mathbf{x})$,
+// /// $$
+// /// f(\mathbf{x}) = a \frac{x_{3}^{2} x_{4} e^{x_{3} x_{4}}}{(1 + x_{1} + x_{2})^{2}}
+// /// $$
+// /// where $\mathbf{x} = (x_{1}, x_{2}, x_{3}, x_{4})$, which has some amplitude $a$. To integrate
+// /// this function, one first implements the [`MultiDimensionalIntegrand`] trait,
+// ///```rust
+// /// use rint::MultiDimensionalIntegrand;
+// ///
+// /// const N: usize = 4;
+// ///
+// /// struct F {
+// ///     amplitude: f64,
+// /// }
+// ///
+// /// impl Integrand for F {
+// ///     type Point = [f64; N];
+// ///     type Scalar = f64;
+// ///     fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
+// ///         let [x1, x2, x3, x4] = coordinates;
+// ///         let a = self.amplitude;
+// ///         a * x3.powi(2) * x4 * (x3 * x4).exp() / (x1 + x2 + 1.0).powi(2)
+// ///     }
+// /// }
+// ///```
+// /// The type `F` can then be used as the `function` parameter in one of the numerical integration
+// /// routines provided by the [`multi`] module.
+// pub trait MultiDimensionalIntegrand<const N: usize> {
+//     /// The type that the function evaluates to.
+//     ///
+//     /// The integrand can be either real-valued or complex-valued, evaluating to [`f64`] or
+//     /// [`Complex<f64>`], respectively.
+//     type Scalar: ScalarF64;
+//
+//     /// Evaluate the function at the real-valued $N$-dimensional point $[x_{1},x_{2},\dots,x_{N}]$.
+//     ///
+//     /// The user provided implementation of [`MultiDimensionalIntegrand::evaluate`] defines how the
+//     /// function is evaluated at a given _real_ `coordinate`, which is an $N$-dimensional array
+//     /// `[f64; N]`. Since the method is implemented on a user defined type, such as a `struct`, it
+//     /// can have access to any constant parameters required for the evaluation of the function
+//     /// through, for example, fields on the implementing `struct`.
+//     fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar;
+// }
+//
+// impl<I: MultiDimensionalIntegrand<N>, const N: usize> MultiDimensionalIntegrand<N> for &I {
+//     type Scalar = I::Scalar;
+//
+//     fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
+//         I::evaluate(self, coordinates)
+//     }
+// }
 
 /// A numerical scalar.
 ///

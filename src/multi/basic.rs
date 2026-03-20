@@ -1,7 +1,7 @@
 use crate::multi::{Integrator, Rule};
 use crate::IntegralEstimate;
+use crate::Integrand;
 use crate::Limits;
-use crate::MultiDimensionalIntegrand;
 use crate::{InitialisationError, InitialisationErrorKind};
 
 /// A non-adaptive multi-dimensional integrator.
@@ -67,7 +67,7 @@ pub struct Basic<'a, I, R, const N: usize> {
 impl<'a, I, const N: usize, const FINAL: usize, const TOTAL: usize>
     Basic<'a, I, Rule<N, FINAL, TOTAL>, N>
 where
-    I: MultiDimensionalIntegrand<N>,
+    I: Integrand<Point = [f64; N]>,
 {
     /// Create a new [`Basic`] multi-dimensional integrator.
     ///
