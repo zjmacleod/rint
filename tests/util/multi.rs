@@ -3,8 +3,8 @@
 // n-dimensional cube", J. Comp. App. Math., Vol. 2, (1976) 207-217
 
 use num_complex::Complex;
+use rint::Integrand;
 use rint::Limits;
-use rint::MultiDimensionalIntegrand;
 
 // F1
 
@@ -28,7 +28,8 @@ impl F1 {
     }
 }
 
-impl MultiDimensionalIntegrand<DIMF1> for F1 {
+impl Integrand for F1 {
+    type Point = [f64; DIMF1];
     type Scalar = f64;
 
     fn evaluate(&self, coordinates: &[f64; DIMF1]) -> Self::Scalar {
@@ -58,7 +59,8 @@ impl F2 {
     }
 }
 
-impl MultiDimensionalIntegrand<DIMF2> for F2 {
+impl Integrand for F2 {
+    type Point = [f64; DIMF2];
     type Scalar = f64;
 
     fn evaluate(&self, coordinates: &[f64; DIMF2]) -> Self::Scalar {
@@ -87,7 +89,8 @@ impl F3 {
     }
 }
 
-impl MultiDimensionalIntegrand<DIMF3> for F3 {
+impl Integrand for F3 {
+    type Point = [f64; DIMF3];
     type Scalar = f64;
 
     fn evaluate(&self, coordinates: &[f64; DIMF3]) -> Self::Scalar {
@@ -118,7 +121,8 @@ impl F4 {
     }
 }
 
-impl MultiDimensionalIntegrand<DIMF4> for F4 {
+impl Integrand for F4 {
+    type Point = [f64; DIMF4];
     type Scalar = f64;
 
     fn evaluate(&self, coordinates: &[f64; DIMF4]) -> Self::Scalar {
@@ -148,7 +152,8 @@ impl F5 {
     }
 }
 
-impl MultiDimensionalIntegrand<DIMF5> for F5 {
+impl Integrand for F5 {
+    type Point = [f64; DIMF5];
     type Scalar = f64;
 
     fn evaluate(&self, coordinates: &[f64; DIMF5]) -> Self::Scalar {
@@ -176,7 +181,8 @@ impl F6 {
     }
 }
 
-impl MultiDimensionalIntegrand<DIMF6> for F6 {
+impl Integrand for F6 {
+    type Point = [f64; DIMF6];
     type Scalar = f64;
 
     fn evaluate(&self, coordinates: &[f64; DIMF6]) -> Self::Scalar {
@@ -205,7 +211,8 @@ impl F7 {
     }
 }
 
-impl MultiDimensionalIntegrand<DIMF7> for F7 {
+impl Integrand for F7 {
+    type Point = [f64; DIMF7];
     type Scalar = f64;
 
     fn evaluate(&self, coordinates: &[f64; DIMF7]) -> Self::Scalar {
@@ -233,7 +240,8 @@ impl F8 {
     }
 }
 
-impl MultiDimensionalIntegrand<DIMF8> for F8 {
+impl Integrand for F8 {
+    type Point = [f64; DIMF8];
     type Scalar = f64;
 
     fn evaluate(&self, coordinates: &[f64; DIMF8]) -> Self::Scalar {
@@ -265,7 +273,8 @@ impl F9 {
     }
 }
 
-impl MultiDimensionalIntegrand<DIMF9> for F9 {
+impl Integrand for F9 {
+    type Point = [f64; DIMF9];
     type Scalar = f64;
 
     fn evaluate(&self, coordinates: &[f64; DIMF9]) -> Self::Scalar {
@@ -293,7 +302,8 @@ impl F10 {
     }
 }
 
-impl MultiDimensionalIntegrand<DIMF10> for F10 {
+impl Integrand for F10 {
+    type Point = [f64; DIMF10];
     type Scalar = f64;
 
     fn evaluate(&self, coordinates: &[f64; DIMF10]) -> Self::Scalar {
@@ -326,7 +336,8 @@ impl C11 {
     }
 }
 
-impl MultiDimensionalIntegrand<DIMC11> for C11 {
+impl Integrand for C11 {
+    type Point = [f64; DIMC11];
     type Scalar = Complex<f64>;
 
     fn evaluate(&self, coordinates: &[f64; DIMC11]) -> Self::Scalar {
@@ -359,7 +370,8 @@ impl C37 {
     }
 }
 
-impl MultiDimensionalIntegrand<DIMC37> for C37 {
+impl Integrand for C37 {
+    type Point = [f64; DIMC37];
     type Scalar = Complex<f64>;
 
     fn evaluate(&self, coordinates: &[f64; DIMC37]) -> Self::Scalar {

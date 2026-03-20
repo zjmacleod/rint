@@ -8,7 +8,7 @@
 //! [`quadrature`]) and functions with multiple dimensions up to $N = 15$ (see [`multi`]). The
 //! basic principle of the library is to expose all of the routines through the trait system. Each
 //! of the one- and multi-dimensional integrators take as a parameter a type implementing the
-//! corresponding trait, respectively [`Integrand`] and [`MultiDimensionalIntegrand`].
+//! trait [`Integrand`].
 //!
 //! The integration routines attempt to make approximations to integrals such as the
 //! one-dimensional integral,
@@ -43,19 +43,26 @@
 //!
 //! # Traits
 //!
-//! The primary entry points for the library are the one- and multi-dimenensional integrand traits:
+//! The primary entry point for the library is the [`Integrand`] trait. A type implementing the
+//! [`Integrand`] trait represents a real or complex valued function which is to be integrated. The
+//! trait requires the definition of two associated types, [`Integrand::Point`] and
+//! [`Integrand::Scalar`], and an implementation of the method [`Integrand::evaluate`].
 //!
-//! - [`Integrand`]: A real or complex-valued function to be integrated over the real line in one
-//! dimension.
+//! - [`Integrand::Point`]: This associated type defines the point at which the function is to be
+//! evaluated, and determines the types of numerical integrators which are available to the user to
+//! integrate the function. Integrators are provided for univariate functions $f(x)$ through the
+//! associated type `Point=f64`, while integrators for multivariate functions $f(\mathbf{x})$ are
+//! provided through the associated type `Point=[f64;N]` where $N$ is the dimensionality of the
+//! point $\mathbf{x}=(x_{1},\dots,x_{N})$ which is limited to $2 \le N \le 15$.
 //!
-//! - [`MultiDimensionalIntegrand`]: A real or complex-valued function to be integrated over an
-//! $N$-dimensional hypercube.
+//! - [`Integrand::Scalar`]: This is the output type of the function to be integrated. A _real_
+//! valued function should have the output type `Scalar=`[`f64`], while a _complex_ valued function
+//! should have output type `Scalar=`[`Complex<f64>`].
 //!
-//! Each trait requires an implementation of an `evaluate` method, which defines the value of the
-//! integrand for a given one- or $N$-dimensional point. The return type of the `evaluate` function
-//! is the associated type `Scalar`, which defines whether the function is real-valued
-//! (`Scalar=`[`std::f64`]), or complex-valued (`Scalar=`[`Complex<f64>`]). These traits tell the
-//! integrators how to evaluate the function at a point, allowing the integration to be done.
+//! - [`Integrand::evaluate`]: The trait requires an implementation of an `evaluate` method, which
+//! defines how the function takes the input [`Integrand::Point`] and turns this into the output
+//! type [`Integrand::Scalar`]. In other words, this method tells the integrators how to evaluate
+//! the function at a point, allowing the integration to be done.
 //!
 //! As an example, consider probability density function of a normal distribution,
 //! $$
@@ -87,9 +94,8 @@
 //!```
 //! The type `NormalDist` can then be passed as a parameter to a one-dimensional integration
 //! routine in the module [`quadrature`] and integrated over a given (possibly infinite) region.
-//! Since [`Integrand::evaluate`] and [`MultiDimensionalIntegrand::evaluate`] do not return a
-//! [`Result`] it is the users responsibility to ensure that the evaluation implementation is
-//! correct.
+//! Since [`Integrand::evaluate`] does not return a [`Result`] it is the users responsibility to
+//! ensure that the evaluation implementation is correct.
 //!
 //!
 //! # Modules
@@ -287,14 +293,33 @@ pub mod quadrature;
 pub use estimate::IntegralEstimate;
 pub use limits::Limits;
 
-/// A real or complex-valued function to be integrated over the real line in one dimension.
+/// A real or complex-valued function to be integrated.
 ///
-/// The [`Integrand`] trait tells the integrators how to evaluate a one-dimensional function at a
-/// the _real_ point `x`. Can be implemented on e.g. an empty `struct` or a `struct` containing
-/// constant parameters required to perform the integral. The trait requires an implementation of
-/// the [`Integrand::evaluate`] method, which defines the value of the integrand at a point. The
-/// return type of the `evaluate` function is the associated type `Scalar`, which defines whether
-/// the function is real- (`Scalar=`[`std::f64`]) or complex-valued (`Scalar=`[`Complex<f64>`]).
+/// The primary entry point for the library is the [`Integrand`] trait. A type implementing the
+/// [`Integrand`] trait represents a real or complex valued function which is to be integrated. The
+/// trait requires the definition of two associated types, [`Integrand::Point`] and
+/// [`Integrand::Scalar`], and an implementation of the method [`Integrand::evaluate`].
+///
+/// - [`Integrand::Point`]: This associated type defines the point at which the function is to be
+/// evaluated, and determines the types of numerical integrators which are available to the user to
+/// integrate the function. Integrators are provided for univariate functions $f(x)$ through the
+/// associated type `Point=f64`, while integrators for multivariate functions $f(\mathbf{x})$ are
+/// provided through the associated type `Point=[f64;N]` where $N$ is the dimensionality of the
+/// point $\mathbf{x}=(x_{1},\dots,x_{N})$ which is limited to $2 \le N \le 15$.
+///
+/// - [`Integrand::Scalar`]: This is the output type of the function to be integrated. A _real_
+/// valued function should have the output type `Scalar=`[`f64`], while a _complex_ valued function
+/// should have output type `Scalar=`[`Complex<f64>`].
+///
+/// - [`Integrand::evaluate`]: The trait requires an implementation of an `evaluate` method, which
+/// defines how the function takes the input [`Integrand::Point`] and turns this into the output
+/// type [`Integrand::Scalar`]. In other words, this method tells the integrators how to evaluate
+/// the function at a point, allowing the integration to be done.
+///
+/// # Examples
+///
+/// ## One-dimensional example
+///
 /// For example, consider probability density function of a normal distribution,
 /// $$
 /// f(x) = \frac{1}{\sqrt{2 \pi \sigma^{2}}} e^{- \frac{(x - \mu)^{2}}{2 \sigma^{2}}}
@@ -325,25 +350,60 @@ pub use limits::Limits;
 ///```
 /// The type `NormalDist` can then be used as the `function` parameter in one of the numerical
 /// integration routines provided by the [`quadrature`] module.
+///
+/// ## Multi-dimensional example
+///
+/// For example, consider a nonlinear 4-dimensional function $f(\mathbf{x})$,
+/// $$
+/// f(\mathbf{x}) = a \frac{x_{3}^{2} x_{4} e^{x_{3} x_{4}}}{(1 + x_{1} + x_{2})^{2}}
+/// $$
+/// where $\mathbf{x} = (x_{1}, x_{2}, x_{3}, x_{4})$, which has some amplitude $a$. To integrate
+/// this function, one first implements the [`Integrand`] trait,
+///```rust
+/// use rint::Integrand;
+///
+/// const N: usize = 4;
+///
+/// struct F {
+///     amplitude: f64,
+/// }
+///
+/// impl Integrand for F {
+///     type Point = [f64; N];
+///     type Scalar = f64;
+///     fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
+///         let [x1, x2, x3, x4] = coordinates;
+///         let a = self.amplitude;
+///         a * x3.powi(2) * x4 * (x3 * x4).exp() / (x1 + x2 + 1.0).powi(2)
+///     }
+/// }
+///```
+/// The type `F` can then be used as the `function` parameter in one of the numerical integration
+/// routines provided by the [`multi`] module.
 pub trait Integrand {
-    /// The type that the function evaluates to.
+    /// The input point at which the function is evaluated.
     ///
-    /// The integrand can be either real-valued or complex-valued, evaluating to [`f64`] or
-    /// [`Complex<f64>`], respectively.
+    /// This associated type defines the point at which the function is to be evaluated, and
+    /// determines the types of numerical integrators which are available to the user to integrate
+    /// the function. Integrators are provided for univariate functions $f(x)$ through the
+    /// associated type `Point=f64`, while integrators for multivariate functions $f(\mathbf{x})$
+    /// are provided through the associated type `Point=[f64;N]` where $N$ is the dimensionality of
+    /// the point $\mathbf{x}=(x_{1},\dots,x_{N})$ which is limited to $2 \le N \le 15$.
     type Point;
 
     /// The type that the function evaluates to.
     ///
-    /// The integrand can be either real-valued or complex-valued, evaluating to [`f64`] or
-    /// [`Complex<f64>`], respectively.
+    /// This is the output type of the function to be integrated. A _real_ valued function should
+    /// have the output type `Scalar=`[`f64`], while a _complex_ valued function should have output
+    /// type `Scalar=`[`Complex<f64>`].
     type Scalar: ScalarF64;
 
     /// Evaluate the function at the real point `x`
     ///
-    /// The user provided implementation of [`Integrand::evaluate`] defines how the function is
-    /// evaluated at a given _real_ point `x`. Since the method is implemented on a user defined
-    /// type, such as a `struct`, it can have access to any constant parameters required for the
-    /// evaluation of the function through, for example, fields on the implementing `struct`.
+    /// The trait requires an implementation of an `evaluate` method, which defines how the
+    /// function takes the input [`Integrand::Point`] and turns this into the output type
+    /// [`Integrand::Scalar`]. In other words, this method tells the integrators how to evaluate
+    /// the function at a point, allowing the integration to be done.
     fn evaluate(&self, x: &Self::Point) -> Self::Scalar;
 }
 
@@ -356,71 +416,10 @@ impl<I: Integrand> Integrand for &I {
     }
 }
 
-// /// A real or complex-valued function to be integrated over an $N$-dimensional hypercube.
-// ///
-// /// The [`Integrand`] trait tells the integrators how to evaluate a one-dimensional function at a
-// /// the _real_ point `x`. Can be implemented on e.g. an empty `struct` or a `struct` containing
-// /// constant parameters required to perform the integral. The trait requires an implementation of
-// /// the [`Integrand::evaluate`] method, which defines the value of the integrand at a point. The
-// /// return type of the `evaluate` function is the associated type `Scalar`, which defines whether
-// /// the function is real- (`Scalar=`[`std::f64`]) or complex-valued (`Scalar=`[`Complex<f64>`]).
-// /// For example, consider a nonlinear 4-dimensional function $f(\mathbf{x})$,
-// /// $$
-// /// f(\mathbf{x}) = a \frac{x_{3}^{2} x_{4} e^{x_{3} x_{4}}}{(1 + x_{1} + x_{2})^{2}}
-// /// $$
-// /// where $\mathbf{x} = (x_{1}, x_{2}, x_{3}, x_{4})$, which has some amplitude $a$. To integrate
-// /// this function, one first implements the [`MultiDimensionalIntegrand`] trait,
-// ///```rust
-// /// use rint::MultiDimensionalIntegrand;
-// ///
-// /// const N: usize = 4;
-// ///
-// /// struct F {
-// ///     amplitude: f64,
-// /// }
-// ///
-// /// impl Integrand for F {
-// ///     type Point = [f64; N];
-// ///     type Scalar = f64;
-// ///     fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
-// ///         let [x1, x2, x3, x4] = coordinates;
-// ///         let a = self.amplitude;
-// ///         a * x3.powi(2) * x4 * (x3 * x4).exp() / (x1 + x2 + 1.0).powi(2)
-// ///     }
-// /// }
-// ///```
-// /// The type `F` can then be used as the `function` parameter in one of the numerical integration
-// /// routines provided by the [`multi`] module.
-// pub trait MultiDimensionalIntegrand<const N: usize> {
-//     /// The type that the function evaluates to.
-//     ///
-//     /// The integrand can be either real-valued or complex-valued, evaluating to [`f64`] or
-//     /// [`Complex<f64>`], respectively.
-//     type Scalar: ScalarF64;
-//
-//     /// Evaluate the function at the real-valued $N$-dimensional point $[x_{1},x_{2},\dots,x_{N}]$.
-//     ///
-//     /// The user provided implementation of [`MultiDimensionalIntegrand::evaluate`] defines how the
-//     /// function is evaluated at a given _real_ `coordinate`, which is an $N$-dimensional array
-//     /// `[f64; N]`. Since the method is implemented on a user defined type, such as a `struct`, it
-//     /// can have access to any constant parameters required for the evaluation of the function
-//     /// through, for example, fields on the implementing `struct`.
-//     fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar;
-// }
-//
-// impl<I: MultiDimensionalIntegrand<N>, const N: usize> MultiDimensionalIntegrand<N> for &I {
-//     type Scalar = I::Scalar;
-//
-//     fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
-//         I::evaluate(self, coordinates)
-//     }
-// }
-
 /// A numerical scalar.
 ///
-/// The [`Integrand`] and [`MultiDimensionalIntegrand`] traits are implemented for both real- and
-/// complex-valued functions of a _real_ variable. The *sealed* trait [`ScalarF64`] is implemented
-/// for both [`f64`] and [`Complex<f64>`].
+/// The [`Integrand`] trait is implemented for both real- and complex-valued functions of a _real_
+/// variable. The *sealed* trait [`ScalarF64`] is implemented for both [`f64`] and [`Complex<f64>`].
 pub trait ScalarF64:
     PartialEq
     + ComplexFloat<Real = f64>

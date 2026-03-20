@@ -22,7 +22,7 @@ use crate::{InitialisationError, InitialisationErrorKind};
 ///
 /// [Catalan's constant]: <https://en.wikipedia.org/wiki/Catalan%27s_constant>
 ///```rust
-/// use rint::{MultiDimensionalIntegrand, Limits};
+/// use rint::{Integrand, Limits};
 /// use rint::multi::{Basic, Rule13};
 ///
 /// const G: f64 = 0.915_965_594_177_219_015_054_603_514_932_384_110_774;
@@ -30,7 +30,8 @@ use crate::{InitialisationError, InitialisationErrorKind};
 ///
 /// struct Catalan;
 ///
-/// impl MultiDimensionalIntegrand<2> for Catalan {
+/// impl Integrand for Catalan {
+///     type Point = [f64; N];
 ///     type Scalar = f64;
 ///
 ///     fn evaluate(&self, coordinate: &[f64; N]) -> Self::Scalar {
@@ -71,10 +72,10 @@ where
 {
     /// Create a new [`Basic`] multi-dimensional integrator.
     ///
-    /// The user first defines a `function` which is something implementing the
-    /// [`MultiDimensionalIntegrand`] trait and selects a fully-symmetric multi-dimensional
-    /// integration [`Rule`], `rule`, to integrate the function in the hypercube formed by the
-    /// [`Limits`], `limits` in each of the $N$ integration directions.
+    /// The user first defines a `function` which is something implementing the [`Integrand`] trait
+    /// and selects a fully-symmetric multi-dimensional integration [`Rule`], `rule`, to integrate
+    /// the function in the hypercube formed by the [`Limits`], `limits` in each of the $N$
+    /// integration directions.
     ///
     /// # Errors
     ///

@@ -10,12 +10,13 @@
 //! $$
 //! where $\mathbf{x} = (x_{1}, x_{2}, \dots, x_{N})$ and $\Sigma_{N}$ is an $N$-dimensional
 //! hypercube. The dimensionality is limited to $2 \le N \le 15$. The functions $f(x)$ can be
-//! either real- or complex-valued and implement the [`MultiDimensionalIntegrand`] trait. The
-//! routines are based primarily on the [DCUHRE] FORTRAN library (Bernsten, Espelid, Genz), however
-//! unlike the original algorithm the routines presented in currently only operate on a single
-//! function _not_ a vector of functions. The routines use fully symmetric integration [`Rule`]s,
-//! with each rule of a particular order $n$ there is a set of five fully symmetric rules used,
-//! where one rule of degree $n=2m+1$ is used to obtain an estimate of the integral, $R\[f\]$,
+//! either real- or complex-valued and implement the [`Integrand`] trait with associated type
+//! [`Integrand::Point`]`=`[`[f64;N]`]. The routines are based primarily on the [DCUHRE] FORTRAN
+//! library (Bernsten, Espelid, Genz), however unlike the original algorithm the routines presented
+//! in currently only operate on a single function _not_ a vector of functions. The routines use
+//! fully symmetric integration [`Rule`]s, with each rule of a particular order $n$ there is a set
+//! of five fully symmetric rules used, where one rule of degree $n=2m+1$ is used to obtain an
+//! estimate of the integral, $R\[f\]$,
 //! $$
 //! I = \int_{\Sigma_{N}} f(\mathbf{x}) d\mathbf{x}
 //! \approx R\[f\] = \sum_{i = 1}^{L} w_{i} f(\mathbf{x}\_{i})
@@ -38,7 +39,8 @@
 //! multiple integrals. ACM Trans. Math. Softw. 17, 4 (Dec. 1991), 437–451.
 //! <https://doi.org/10.1145/210232.210233>
 //!
-//! [`MultiDimensionalIntegrand`]: crate::MultiDimensionalIntegrand
+//! [`Integrand`]: crate::Integrand
+//! [`Integrand::Point`]: crate::Integrand::Point
 //!
 //! # Available integrator routines
 //!
@@ -69,7 +71,7 @@
 //! [`Basic`] routine.
 //!
 //!```rust
-//! use rint::{Limits, MultiDimensionalIntegrand, Tolerance};
+//! use rint::{Limits, Integrand, Tolerance};
 //! use rint::multi::{Basic, Rule13};
 //!
 //! const N: usize = 2;
@@ -77,7 +79,8 @@
 //!
 //! struct Catalan;
 //!
-//! impl MultiDimensionalIntegrand<N> for Catalan {
+//! impl Integrand for Catalan {
+//!     type Point = [f64; N];
 //!     type Scalar = f64;
 //!     fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
 //!         let [x, y] = coordinates;
@@ -116,14 +119,15 @@
 //!
 //!
 //!```rust
-//! use rint::{Limits, MultiDimensionalIntegrand, Tolerance};
+//! use rint::{Limits, Integrand, Tolerance};
 //! use rint::multi::{Adaptive, Rule07};
 //!
 //! const N: usize = 4;
 //!
 //! struct F;
 //!
-//! impl MultiDimensionalIntegrand<N> for F {
+//! impl Integrand for F {
+//!     type Point = [f64; N];
 //!     type Scalar = f64;
 //!     fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
 //!         let [x1, x2, x3, x4] = coordinates;
