@@ -4,7 +4,7 @@ Numerical integration routines written in Rust.
 
 # Overview
 
-This library contains numerical integration routines for both functions of one dimension (see [`quadrature`]) and functions with multiple dimensions up to $N = 15$ (see [`multi`]). The basic principle of the library is to expose all of the routines through the trait system. Each of the one- and multi-dimensional integrators take as a parameter a type implementing the corresponding trait, respectively [`Integrand`] and [`MultiDimensionalIntegrand`].
+This library contains numerical integration routines for both functions of one dimension (see [`quadrature`]) and functions with multiple dimensions up to $N = 15$ (see [`multi`]). The basic principle of the library is to expose all of the routines through the trait system. Each of the one- and multi-dimensional integrators take as a parameter a type implementing the trait [`Integrand`].
 
 The integration routines attempt to make approximations to integrals such as the one-dimensional integral,
 ```math
@@ -29,13 +29,14 @@ The library contains both non-adaptive and adaptive integration routines. In the
 
 # Traits
 
-The primary entry points for the library are the one- and multi-dimenensional integrand traits:
+The primary entry point for the library is the [`Integrand`] trait. A type implementing the [`Integrand`] trait represents a real or complex valued function which is to be integrated. The trait requires the definition of two associated types, [`Integrand::Point`] and [`Integrand::Scalar`], and an implementation of the method [`Integrand::evaluate`].
 
-- [`Integrand`]: A real or complex-valued function to be integrated over the real line in one dimension.
+- [`Integrand::Point`]: This associated type defines the point at which the function is to be evaluated, and determines the types of numerical integrators which are available to the user to integrate the function. Integrators are provided for univariate functions $f(x)$ through the associated type `Point=f64`, while integrators for multivariate functions $f(\mathbf{x})$ are provided through the associated type `Point=[f64;N]` where $N$ is the dimensionality of the point $\mathbf{x}=(x_{1},\dots,x_{N})$ which is limited to $2 \le N \le 15$.
 
-- [`MultiDimensionalIntegrand`]: A real or complex-valued function to be integrated over an $N$-dimensional hypercube.
+- [`Integrand::Scalar`]: This is the output type of the function to be integrated. A _real_ valued function should have the output type `Scalar=`[`f64`], while a _complex_ valued function should have output type `Scalar=`[`Complex<f64>`].
 
-Each trait requires an implementation of an `evaluate` method, which defines the value of the integrand for a given one- or $N$-dimensional point. The return type of the `evaluate` function is the associated type `Scalar`, which defines whether the function is real-valued (`Scalar=`[`f64`]), or complex-valued (`Scalar=`[`Complex<f64>`]). These traits tell the integrators how to evaluate the function at a point, allowing the integration to be done.
+- [`Integrand::evaluate`]: The trait requires an implementation of an `evaluate` method, which defines how the function takes the input [`Integrand::Point`] and turns this into the output type [`Integrand::Scalar`]. In other words, this method tells the integrators how to evaluate the function at a point, allowing the integration to be done.
+
 
 As an example, consider probability density function of a normal distribution,
 ```math
@@ -142,7 +143,7 @@ f(\mathbf{x}) = \frac{x_{3}^{2} x_{4} e^{x_{3} x_{4}}}{(1 + x_{1} + x_{2})^{2}}
 where $\mathbf{x} = (x_{1}, x_{2}, x_{3}, x_{4})$ over an $N=4$ dimensional hypercube $((0,1),(0,1),(0,2),(0,1))$ using a fully-symmetric 7-point adaptive algorithm. Adapted from P. van Dooren & L. de Ridder, "An adaptive algorithm for numerical integration over an n-dimensional cube", J. Comp. App. Math., Vol. 2, (1976) 207-217
 
 ```rust
-use rint::{Limits, MultiDimensionalIntegrand, Tolerance};
+use rint::{Limits, Integrand, Tolerance};
 use rint::multi::{Adaptive, Rule07};
 use std::error::Error;
 
@@ -150,7 +151,8 @@ const N: usize = 4;
 
 struct F;
 
-impl MultiDimensionalIntegrand<N> for F {
+impl Integrand for F {
+    type Point = [f64; N]; 
     type Scalar = f64;
     fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
         let [x1, x2, x3, x4] = coordinates;
@@ -192,7 +194,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 [QUADPACK]: <https://www.netlib.org/quadpack/>
 [DCUHRE]: <https://dl.acm.org/doi/10.1145/210232.210234>
 [`Integrand`]: <https://docs.rs/rint/latest/rint/trait.Integrand.html>
-[`MultiDimensionalIntegrand`]: <https://docs.rs/rint/latest/rint/trait.MultiDimensionalIntegrand.html>
 [`Limits`]: <https://docs.rs/rint/latest/rint/struct.Limits.html>
 [`Tolerance`]: <https://docs.rs/rint/latest/rint/enum.Tolerance.html>
 [`IntegralEstimate`]: <https://docs.rs/rint/latest/rint/struct.IntegralEstimate.html>

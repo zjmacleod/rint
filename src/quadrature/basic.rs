@@ -30,9 +30,10 @@ use crate::Limits;
 /// struct GoldenRatio;
 ///
 /// impl Integrand for GoldenRatio {
+///     type Point = f64;
 ///     type Scalar = f64;
 ///
-///     fn evaluate(&self, x: f64) -> Self::Scalar {
+///     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
 ///         1.0 / (1.0 + x.powi(2)).sqrt()
 ///     }
 /// }
@@ -63,7 +64,7 @@ pub struct Basic<'a, I> {
 
 impl<'a, I> Basic<'a, I>
 where
-    I: Integrand,
+    I: Integrand<Point = f64>,
 {
     /// Create a new [`Basic`] integrator.
     ///

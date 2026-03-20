@@ -78,7 +78,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     ///
     /// Note: for the [`Basic`] integrator the number of iterations is `1`, and the number of
     /// function evaluations for an `n`-point integration rule is `n`.
-    pub fn basic<I: Integrand>(
+    pub fn basic<I: Integrand<Point = f64>>(
         function: &I,
         rule: &Rule,
         limits: Limits,
@@ -95,7 +95,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     ///
     /// [`InitialisationError`]: crate::InitialisationError
     /// [`IntegrationError`]: crate::IntegrationError
-    pub fn adaptive<'a, I: Integrand>(
+    pub fn adaptive<'a, I: Integrand<Point = f64>>(
         function: &'a I,
         rule: &'a Rule,
         limits: Limits,
@@ -115,7 +115,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     ///
     /// [`InitialisationError`]: crate::InitialisationError
     /// [`IntegrationError`]: crate::IntegrationError
-    pub fn adaptive_singularity_finite<I: Integrand>(
+    pub fn adaptive_singularity_finite<I: Integrand<Point = f64>>(
         function: I,
         limits: Limits,
         tolerance: Tolerance,
@@ -135,7 +135,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     ///
     /// [`InitialisationError`]: crate::InitialisationError
     /// [`IntegrationError`]: crate::IntegrationError
-    pub fn adaptive_singularity_infinite<I: Integrand>(
+    pub fn adaptive_singularity_infinite<I: Integrand<Point = f64>>(
         function: I,
         tolerance: Tolerance,
         max_iterations: usize,
@@ -154,7 +154,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     ///
     /// [`InitialisationError`]: crate::InitialisationError
     /// [`IntegrationError`]: crate::IntegrationError
-    pub fn adaptive_singularity_semi_infinite_upper<I: Integrand>(
+    pub fn adaptive_singularity_semi_infinite_upper<I: Integrand<Point = f64>>(
         function: I,
         lower: f64,
         tolerance: Tolerance,
@@ -175,7 +175,7 @@ impl<T: ScalarF64> IntegralEstimate<T> {
     ///
     /// [`InitialisationError`]: crate::InitialisationError
     /// [`IntegrationError`]: crate::IntegrationError
-    pub fn adaptive_singularity_semi_infinite_lower<I: Integrand>(
+    pub fn adaptive_singularity_semi_infinite_lower<I: Integrand<Point = f64>>(
         function: I,
         upper: f64,
         tolerance: Tolerance,

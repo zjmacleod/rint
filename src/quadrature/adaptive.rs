@@ -3,9 +3,10 @@ use std::collections::binary_heap::BinaryHeap;
 
 use crate::ScalarF64;
 
-use crate::quadrature::{IntegralEstimate, Integrator, Region, Rule};
+use crate::quadrature::{Integrator, Region, Rule};
 use crate::{
-    InitialisationError, Integrand, IntegrationError, IntegrationErrorKind, Limits, Tolerance,
+    InitialisationError, IntegralEstimate, Integrand, IntegrationError, IntegrationErrorKind,
+    Limits, Tolerance,
 };
 
 /// An adaptive Gauss-Kronrod integrator.
@@ -60,8 +61,10 @@ use crate::{
 /// }
 ///
 /// impl Integrand for Function1 {
+///     type Point = f64;
 ///     type Scalar = f64;
-///     fn evaluate(&self, x: f64) -> Self::Scalar {
+///
+///     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
 ///         let alpha = self.alpha;
 ///         x.powf(alpha) * (1.0 / x).ln()
 ///     }
@@ -107,7 +110,7 @@ pub struct Adaptive<'a, I> {
 
 impl<'a, I> Adaptive<'a, I>
 where
-    I: Integrand,
+    I: Integrand<Point = f64>,
 {
     /// Generate a new [`Adaptive`] integrator.
     ///

@@ -5,8 +5,8 @@ use crate::multi::geometry::Geometry;
 use crate::multi::region::Region;
 use crate::multi::rule::Data;
 use crate::multi::rule::Rule;
+use crate::Integrand;
 use crate::Limits;
-use crate::MultiDimensionalIntegrand;
 use crate::ScalarF64;
 
 /// The core integrator for the multi-dimensional routines.
@@ -20,7 +20,7 @@ use crate::ScalarF64;
 /// region.
 pub(crate) struct Integrator<'a, I, const N: usize, const FINAL: usize, const TOTAL: usize>
 where
-    I: MultiDimensionalIntegrand<N>,
+    I: Integrand<Point = [f64; N]>,
 {
     function: &'a I,
     rule: &'a Rule<N, FINAL, TOTAL>,
@@ -30,7 +30,7 @@ where
 impl<'a, I, const N: usize, const FINAL: usize, const TOTAL: usize>
     Integrator<'a, I, N, FINAL, TOTAL>
 where
-    I: MultiDimensionalIntegrand<N>,
+    I: Integrand<Point = [f64; N]>,
 {
     pub(crate) const fn new(
         function: &'a I,
@@ -252,7 +252,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -286,7 +287,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -320,7 +322,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -354,7 +357,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -387,7 +391,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -424,7 +429,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -459,7 +465,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -495,7 +502,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -529,7 +537,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -573,7 +582,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -607,7 +617,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -641,7 +652,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -675,7 +687,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -708,7 +721,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -745,7 +759,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -780,7 +795,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -815,7 +831,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -851,7 +868,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -885,7 +903,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -929,7 +948,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -964,7 +984,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -999,7 +1020,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -1035,7 +1057,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -1069,7 +1092,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -1113,7 +1137,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -1147,7 +1172,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -1181,7 +1207,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -1215,7 +1242,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
@@ -1248,7 +1276,8 @@ mod tests {
         {
             struct Function;
 
-            impl MultiDimensionalIntegrand<N> for Function {
+            impl Integrand for Function {
+                type Point = [f64; N];
                 type Scalar = f64;
                 fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
                     let x = coordinates[0];
