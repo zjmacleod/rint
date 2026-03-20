@@ -78,7 +78,7 @@ use crate::{
 ///     type Point = f64;
 ///     type Scalar = f64;
 ///
-///     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+///     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
 ///         x.asinh() / (1.0 - x.powi(2)).sqrt()
 ///     }
 /// }
@@ -126,7 +126,7 @@ use crate::{
 ///     type Point = f64;
 ///     type Scalar = f64;
 ///
-///     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+///     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
 ///         let exponent = x - x.exp();
 ///         -x * exponent.exp()
 ///     }
@@ -173,7 +173,7 @@ use crate::{
 ///     type Point = f64;
 ///     type Scalar = f64;
 ///
-///     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+///     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
 ///         let FRAC_PI_2 = std::f64::consts::FRAC_PI_2;
 ///         let polynomial = x.powi(4) - 6.0 * x.powi(2) + 1.0;
 ///         let denominator = (1.0 + x.powi(2)).powi(3);
@@ -272,7 +272,7 @@ where
     ///     type Point = f64;
     ///     type Scalar = f64;
     ///
-    ///     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    ///     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
     ///         x.asinh() / (1.0 - x.powi(2)).sqrt()
     ///     }
     /// }
@@ -587,9 +587,9 @@ impl<I: Integrand<Point = f64>> InfiniteInterval<I> {
         Self { function }
     }
 
-    fn transform_evaluate(&self, t: f64) -> I::Scalar {
+    fn transform_evaluate(&self, t: &f64) -> I::Scalar {
         let x = (1.0 - t) / t;
-        let y = self.function.evaluate(x) + self.function.evaluate(-x);
+        let y = self.function.evaluate(&x) + self.function.evaluate(&(-x));
         (y / t) / t
     }
 }
@@ -597,8 +597,8 @@ impl<I: Integrand<Point = f64>> InfiniteInterval<I> {
 impl<I: Integrand<Point = f64>> Integrand for InfiniteInterval<I> {
     type Point = I::Point;
     type Scalar = I::Scalar;
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
-        self.transform_evaluate(x)
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
+        self.transform_evaluate(&x)
     }
 }
 
@@ -654,7 +654,7 @@ where
     ///     type Point = f64;
     ///     type Scalar = f64;
     ///
-    ///     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    ///     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
     ///         let exponent = x - x.exp();
     ///         -x * exponent.exp()
     ///     }
@@ -717,9 +717,9 @@ impl<I: Integrand<Point = f64>> SemiInfiniteIntervalPositive<I> {
         Self { function, lower }
     }
 
-    fn transform_evaluate(&self, t: f64) -> I::Scalar {
+    fn transform_evaluate(&self, t: &f64) -> I::Scalar {
         let x = self.lower + (1.0 - t) / t;
-        let y = self.function.evaluate(x);
+        let y = self.function.evaluate(&x);
         y / (t.powi(2))
     }
 }
@@ -727,7 +727,7 @@ impl<I: Integrand<Point = f64>> SemiInfiniteIntervalPositive<I> {
 impl<I: Integrand<Point = f64>> Integrand for SemiInfiniteIntervalPositive<I> {
     type Point = I::Point;
     type Scalar = I::Scalar;
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         self.transform_evaluate(x)
     }
 }
@@ -783,7 +783,7 @@ where
     ///     type Point = f64;
     ///     type Scalar = f64;
     ///
-    ///     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    ///     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
     ///         let FRAC_PI_2 = std::f64::consts::FRAC_PI_2;
     ///         let polynomial = x.powi(4) - 6.0 * x.powi(2) + 1.0;
     ///         let denominator = (1.0 + x.powi(2)).powi(3);
@@ -851,9 +851,9 @@ impl<I: Integrand<Point = f64>> SemiInfiniteIntervalNegative<I> {
         Self { function, upper }
     }
 
-    fn transform_evaluate(&self, t: f64) -> I::Scalar {
+    fn transform_evaluate(&self, t: &f64) -> I::Scalar {
         let x = self.upper - (1.0 - t) / t;
-        let y = self.function.evaluate(x);
+        let y = self.function.evaluate(&x);
         y / (t.powi(2))
     }
 }
@@ -861,7 +861,7 @@ impl<I: Integrand<Point = f64>> SemiInfiniteIntervalNegative<I> {
 impl<I: Integrand<Point = f64>> Integrand for SemiInfiniteIntervalNegative<I> {
     type Point = I::Point;
     type Scalar = I::Scalar;
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         self.transform_evaluate(x)
     }
 }
@@ -917,7 +917,7 @@ where
     ///     type Point = f64;
     ///     type Scalar = f64;
     ///
-    ///     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    ///     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
     ///         let FRAC_PI_2 = std::f64::consts::FRAC_PI_2;
     ///         let polynomial = x.powi(4) - 6.0 * x.powi(2) + 1.0;
     ///         let denominator = (1.0 + x.powi(2)).powi(3);

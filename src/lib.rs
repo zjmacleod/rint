@@ -74,7 +74,7 @@
 //! impl Integrand for NormalDist {
 //!     type Point = f64;
 //!     type Scalar = f64;
-//!     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+//!     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
 //!         let mu = self.mean;
 //!         let sigma = self.standard_dev;
 //!
@@ -183,7 +183,7 @@
 //! impl Integrand for F {
 //!     type Point = f64;
 //!     type Scalar = f64;
-//!     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+//!     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
 //!         x.ln() / (1.0 + 100.0 * x.powi(2))
 //!     }
 //! }
@@ -311,7 +311,7 @@ pub use limits::Limits;
 /// impl Integrand for NormalDist {
 ///     type Point = f64;
 ///     type Scalar = f64;
-///     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+///     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
 ///         let mu = self.mean;
 ///         let sigma = self.standard_dev;
 ///
@@ -343,14 +343,14 @@ pub trait Integrand {
     /// evaluated at a given _real_ point `x`. Since the method is implemented on a user defined
     /// type, such as a `struct`, it can have access to any constant parameters required for the
     /// evaluation of the function through, for example, fields on the implementing `struct`.
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar;
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar;
 }
 
 impl<I: Integrand> Integrand for &I {
     type Point = I::Point;
     type Scalar = I::Scalar;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         I::evaluate(self, x)
     }
 }

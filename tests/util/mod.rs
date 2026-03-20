@@ -27,7 +27,7 @@ impl Function1 {
 impl Integrand for Function1 {
     type Point = f64;
     type Scalar = f64;
-    fn evaluate(&self, x: Self::Point) -> f64 {
+    fn evaluate(&self, x: &Self::Point) -> f64 {
         let alpha = self.alpha;
         x.powf(alpha) * (1.0 / x).ln()
     }
@@ -48,7 +48,7 @@ impl Function2 {
 impl Integrand for Function2 {
     type Point = f64;
     type Scalar = f64;
-    fn evaluate(&self, x: Self::Point) -> f64 {
+    fn evaluate(&self, x: &Self::Point) -> f64 {
         let alpha = self.alpha;
         4.0_f64.powf(-alpha) / ((x - PI / 4.0).powi(2) + 16.0_f64.powf(-alpha))
     }
@@ -69,7 +69,7 @@ impl Function3 {
 impl Integrand for Function3 {
     type Point = f64;
     type Scalar = f64;
-    fn evaluate(&self, x: Self::Point) -> f64 {
+    fn evaluate(&self, x: &Self::Point) -> f64 {
         let alpha = self.alpha;
         (2.0_f64.powf(alpha) * x.sin()).cos()
     }
@@ -90,7 +90,7 @@ impl Function11 {
 impl Integrand for Function11 {
     type Point = f64;
     type Scalar = f64;
-    fn evaluate(&self, x: Self::Point) -> f64 {
+    fn evaluate(&self, x: &Self::Point) -> f64 {
         let alpha = self.alpha;
         f64::ln(1.0 / x).powf(alpha - 1.0)
     }
@@ -109,7 +109,7 @@ impl Function15 {
 impl Integrand for Function15 {
     type Point = f64;
     type Scalar = f64;
-    fn evaluate(&self, x: Self::Point) -> f64 {
+    fn evaluate(&self, x: &Self::Point) -> f64 {
         let alpha = self.alpha;
         x.powi(2) * f64::exp(-2.0f64.powi(-alpha) * x)
     }
@@ -129,7 +129,7 @@ impl Function16 {
 impl Integrand for Function16 {
     type Point = f64;
     type Scalar = f64;
-    fn evaluate(&self, x: Self::Point) -> f64 {
+    fn evaluate(&self, x: &Self::Point) -> f64 {
         let alpha = self.alpha;
         if x.to_bits() == 0f64.to_bits() && alpha == 1 {
             1.0
@@ -155,7 +155,7 @@ impl MyFunciton1 {
 impl Integrand for MyFunciton1 {
     type Point = f64;
     type Scalar = f64;
-    fn evaluate(&self, x: Self::Point) -> f64 {
+    fn evaluate(&self, x: &Self::Point) -> f64 {
         f64::exp(-x - x.powi(2))
     }
 }
@@ -173,7 +173,7 @@ impl MyFunciton2 {
 impl Integrand for MyFunciton2 {
     type Point = f64;
     type Scalar = f64;
-    fn evaluate(&self, x: Self::Point) -> f64 {
+    fn evaluate(&self, x: &Self::Point) -> f64 {
         let alpha = self.alpha;
         f64::exp(alpha * x)
     }
@@ -186,7 +186,7 @@ pub(crate) struct Function455;
 impl Integrand for Function455 {
     type Point = f64;
     type Scalar = f64;
-    fn evaluate(&self, x: Self::Point) -> f64 {
+    fn evaluate(&self, x: &Self::Point) -> f64 {
         x.ln() / (1.0 + 100.0 * x.powi(2))
     }
 }
@@ -199,7 +199,7 @@ impl Function455 {
 
 pub(crate) const CATALAN: f64 = 0.915_965_594_177_219_015_054_603_514_932_384_110_774;
 
-fn catalan1(x: f64) -> f64 {
+fn catalan1(x: &f64) -> f64 {
     -x.ln() / (1.0 + x.powi(2))
 }
 
@@ -225,12 +225,12 @@ impl Integrand for Catalan1 {
     type Point = f64;
     type Scalar = f64;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         catalan1(x)
     }
 }
 
-fn catalan2(x: f64) -> f64 {
+fn catalan2(x: &f64) -> f64 {
     let x = x * std::f64::consts::FRAC_PI_2;
     (0.5 * x / x.sin()) * std::f64::consts::FRAC_PI_2
 }
@@ -257,12 +257,12 @@ impl Integrand for Catalan2 {
     type Point = f64;
     type Scalar = f64;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         catalan2(x)
     }
 }
 
-fn catalan3(x: f64) -> f64 {
+fn catalan3(x: &f64) -> f64 {
     let x = x * std::f64::consts::FRAC_PI_4;
     (x.cos() / x.sin()).ln() * std::f64::consts::FRAC_PI_4
 }
@@ -289,12 +289,12 @@ impl Integrand for Catalan3 {
     type Point = f64;
     type Scalar = f64;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         catalan3(x)
     }
 }
 
-fn catalan4(x: f64) -> f64 {
+fn catalan4(x: &f64) -> f64 {
     x.acos() / (1.0 + x.powi(2)).sqrt()
 }
 
@@ -320,12 +320,12 @@ impl Integrand for Catalan4 {
     type Point = f64;
     type Scalar = f64;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         catalan4(x)
     }
 }
 
-fn catalan5(x: f64) -> f64 {
+fn catalan5(x: &f64) -> f64 {
     x.asinh() / (1.0 - x.powi(2)).sqrt()
 }
 
@@ -351,12 +351,12 @@ impl Integrand for Catalan5 {
     type Point = f64;
     type Scalar = f64;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         catalan5(x)
     }
 }
 
-fn catalan6(x: f64) -> f64 {
+fn catalan6(x: &f64) -> f64 {
     (x.atanh() / (1.0 - x.powf(2.0)).sqrt()) * 0.5
 }
 
@@ -382,12 +382,12 @@ impl Integrand for Catalan6 {
     type Point = f64;
     type Scalar = f64;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         catalan6(x)
     }
 }
 
-fn catalan7(x: f64) -> f64 {
+fn catalan7(x: &f64) -> f64 {
     x.ln() / (1.0 + x.powi(2))
 }
 
@@ -405,12 +405,12 @@ impl Integrand for Catalan7 {
     type Point = f64;
     type Scalar = f64;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         catalan7(x)
     }
 }
 
-fn catalan8(x: f64) -> f64 {
+fn catalan8(x: &f64) -> f64 {
     0.5 * x.atan() / x / (1.0 + x.powi(2)).sqrt()
 }
 
@@ -428,12 +428,12 @@ impl Integrand for Catalan8 {
     type Point = f64;
     type Scalar = f64;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         catalan8(x)
     }
 }
 
-fn catalan9(x: f64) -> f64 {
+fn catalan9(x: &f64) -> f64 {
     ((-x).exp()).atan()
 }
 
@@ -451,12 +451,12 @@ impl Integrand for Catalan9 {
     type Point = f64;
     type Scalar = f64;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         catalan9(x)
     }
 }
 
-fn catalan10(x: f64) -> f64 {
+fn catalan10(x: &f64) -> f64 {
     std::f64::consts::FRAC_PI_2 * (x.powi(4) - 6.0 * x.powi(2) + 1.0) * x.ln().ln()
         / (1.0 + x.powi(2)).powi(3)
 }
@@ -475,12 +475,12 @@ impl Integrand for Catalan10 {
     type Point = f64;
     type Scalar = f64;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         catalan10(x)
     }
 }
 
-fn catalan11(x: f64) -> f64 {
+fn catalan11(x: &f64) -> f64 {
     0.5 * x / x.cosh()
 }
 
@@ -498,7 +498,7 @@ impl Integrand for Catalan11 {
     type Point = f64;
     type Scalar = f64;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         catalan11(x)
     }
 }
@@ -525,7 +525,7 @@ impl Integrand for ComplexCatalan12 {
     type Point = f64;
     type Scalar = Complex<f64>;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         let re = catalan1(x);
         let im = catalan2(x);
         Complex::new(re, im)
@@ -554,7 +554,7 @@ impl Integrand for ComplexCatalan13 {
     type Point = f64;
     type Scalar = Complex<f64>;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         let re = catalan1(x);
         let im = catalan3(x);
         Complex::new(re, im)
@@ -583,7 +583,7 @@ impl Integrand for ComplexCatalan14 {
     type Point = f64;
     type Scalar = Complex<f64>;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         let re = catalan1(x);
         let im = catalan4(x);
         Complex::new(re, im)
@@ -612,7 +612,7 @@ impl Integrand for ComplexCatalan23 {
     type Point = f64;
     type Scalar = Complex<f64>;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         let re = catalan2(x);
         let im = catalan3(x);
         Complex::new(re, im)
@@ -641,7 +641,7 @@ impl Integrand for ComplexCatalan24 {
     type Point = f64;
     type Scalar = Complex<f64>;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         let re = catalan2(x);
         let im = catalan4(x);
         Complex::new(re, im)
@@ -670,7 +670,7 @@ impl Integrand for ComplexCatalan34 {
     type Point = f64;
     type Scalar = Complex<f64>;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         let re = catalan3(x);
         let im = catalan4(x);
         Complex::new(re, im)
@@ -699,7 +699,7 @@ impl Integrand for ComplexCatalan15 {
     type Point = f64;
     type Scalar = Complex<f64>;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         let re = catalan1(x);
         let im = catalan5(x);
         Complex::new(re, im)
@@ -728,7 +728,7 @@ impl Integrand for ComplexCatalan16 {
     type Point = f64;
     type Scalar = Complex<f64>;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         let re = catalan1(x);
         let im = catalan6(x);
         Complex::new(re, im)
@@ -757,7 +757,7 @@ impl Integrand for ComplexCatalan45 {
     type Point = f64;
     type Scalar = Complex<f64>;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         let re = catalan4(x);
         let im = catalan5(x);
         Complex::new(re, im)
@@ -786,7 +786,7 @@ impl Integrand for ComplexCatalan46 {
     type Point = f64;
     type Scalar = Complex<f64>;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         let re = catalan4(x);
         let im = catalan6(x);
         Complex::new(re, im)
@@ -815,7 +815,7 @@ impl Integrand for ComplexCatalan56 {
     type Point = f64;
     type Scalar = Complex<f64>;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         let re = catalan5(x);
         let im = catalan6(x);
         Complex::new(re, im)
@@ -837,7 +837,7 @@ impl Integrand for ComplexF1F1 {
     type Point = f64;
     type Scalar = Complex<f64>;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         let re = x.powf(self.alpha1) * (1.0 / x).ln();
         let im = x.powf(self.alpha2) * (1.0 / x).ln();
         Complex::new(re, im)
@@ -859,7 +859,8 @@ impl Integrand for ComplexF1F3 {
     type Point = f64;
     type Scalar = Complex<f64>;
 
-    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
+        let x = *x;
         let re = if (x > 0.0) && (x < 1.0) {
             x.powf(self.alpha1) * (1.0 / x).ln()
         } else {

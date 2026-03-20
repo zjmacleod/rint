@@ -64,7 +64,7 @@ use crate::{
 ///     type Point = f64;
 ///     type Scalar = f64;
 ///
-///     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+///     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
 ///         let alpha = self.alpha;
 ///         x.powf(alpha) * (1.0 / x).ln()
 ///     }

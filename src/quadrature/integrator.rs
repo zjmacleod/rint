@@ -54,7 +54,7 @@ where
         let centre = self.limits.centre();
         let half_length = self.limits.half_width();
         let abs_half_length = half_length.abs();
-        let f_centre = self.function.evaluate(centre);
+        let f_centre = self.function.evaluate(&centre);
 
         let initial_kronrod = f_centre * self.rule.kronrod_centre();
         let initial_gauss = if let Some(v) = self.rule.gauss_centre() {
@@ -79,8 +79,8 @@ where
                 let kronrod = data.kronrod();
                 let x_plus = point.mul_add(half_length, centre);
                 let x_minus = point.mul_add(-half_length, centre);
-                let rate_plus = self.function.evaluate(x_plus);
-                let rate_minus = self.function.evaluate(x_minus);
+                let rate_plus = self.function.evaluate(&x_plus);
+                let rate_minus = self.function.evaluate(&x_minus);
                 let rate = rate_plus + rate_minus;
                 let rate_abs = rate_plus.abs() + rate_minus.abs();
                 function_values.push((kronrod, (rate_plus, rate_minus)));
@@ -100,8 +100,8 @@ where
                 let kronrod = data.kronrod();
                 let x_plus = point.mul_add(half_length, centre);
                 let x_minus = point.mul_add(-half_length, centre);
-                let rate_plus = self.function.evaluate(x_plus);
-                let rate_minus = self.function.evaluate(x_minus);
+                let rate_plus = self.function.evaluate(&x_plus);
+                let rate_minus = self.function.evaluate(&x_minus);
                 let rate = rate_plus + rate_minus;
                 let rate_abs = rate_plus.abs() + rate_minus.abs();
                 function_values.push((kronrod, (rate_plus, rate_minus)));

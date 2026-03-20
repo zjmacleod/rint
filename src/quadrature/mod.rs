@@ -88,7 +88,7 @@
 //!     type Point = f64;
 //!     type Scalar = f64;
 //!
-//!     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+//!     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
 //!         1.0 / (1.0 + x.powi(2)).sqrt()
 //!     }
 //! }
@@ -128,7 +128,7 @@
 //! impl Integrand for Function1 {
 //!     type Point = f64;
 //!     type Scalar = f64;
-//!     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+//!     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
 //!         let alpha = self.alpha;
 //!         x.powf(alpha) * (1.0 / x).ln()
 //!     }
@@ -184,7 +184,7 @@
 //!     type Point = f64;
 //!     type Scalar = f64;
 //!
-//!     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+//!     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
 //!         let FRAC_PI_2 = std::f64::consts::FRAC_PI_2;
 //!         let polynomial = x.powi(4) - 6.0 * x.powi(2) + 1.0;
 //!         let denominator = (1.0 + x.powi(2)).powi(3);
@@ -258,7 +258,7 @@
 //!     type Point = f64;
 //!     type Scalar = Complex<f64>;
 //!
-//!     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
+//!     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
 //!         if x.abs() >= 1.0 {
 //!             Complex::ZERO
 //!         } else {
