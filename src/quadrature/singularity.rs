@@ -587,7 +587,7 @@ impl<I: Integrand<Point = f64>> InfiniteInterval<I> {
         Self { function }
     }
 
-    fn transform_evaluate(&self, t: &f64) -> I::Scalar {
+    fn transform_evaluate(&self, t: f64) -> I::Scalar {
         let x = (1.0 - t) / t;
         let y = self.function.evaluate(&x) + self.function.evaluate(&(-x));
         (y / t) / t
@@ -598,7 +598,7 @@ impl<I: Integrand<Point = f64>> Integrand for InfiniteInterval<I> {
     type Point = I::Point;
     type Scalar = I::Scalar;
     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
-        self.transform_evaluate(&x)
+        self.transform_evaluate(*x)
     }
 }
 
@@ -717,7 +717,7 @@ impl<I: Integrand<Point = f64>> SemiInfiniteIntervalPositive<I> {
         Self { function, lower }
     }
 
-    fn transform_evaluate(&self, t: &f64) -> I::Scalar {
+    fn transform_evaluate(&self, t: f64) -> I::Scalar {
         let x = self.lower + (1.0 - t) / t;
         let y = self.function.evaluate(&x);
         y / (t.powi(2))
@@ -728,7 +728,7 @@ impl<I: Integrand<Point = f64>> Integrand for SemiInfiniteIntervalPositive<I> {
     type Point = I::Point;
     type Scalar = I::Scalar;
     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
-        self.transform_evaluate(x)
+        self.transform_evaluate(*x)
     }
 }
 
@@ -851,7 +851,7 @@ impl<I: Integrand<Point = f64>> SemiInfiniteIntervalNegative<I> {
         Self { function, upper }
     }
 
-    fn transform_evaluate(&self, t: &f64) -> I::Scalar {
+    fn transform_evaluate(&self, t: f64) -> I::Scalar {
         let x = self.upper - (1.0 - t) / t;
         let y = self.function.evaluate(&x);
         y / (t.powi(2))
@@ -862,7 +862,7 @@ impl<I: Integrand<Point = f64>> Integrand for SemiInfiniteIntervalNegative<I> {
     type Point = I::Point;
     type Scalar = I::Scalar;
     fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
-        self.transform_evaluate(x)
+        self.transform_evaluate(*x)
     }
 }
 
