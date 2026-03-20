@@ -1,8 +1,7 @@
 use crate::quadrature::rule::Rule;
-use crate::quadrature::Basic;
+use crate::quadrature::{Adaptive, Basic};
 //use crate::quadrature::{Adaptive, AdaptiveSingularity, Basic};
-//use crate::{Error, Integrand, Limits, ScalarF64, Tolerance};
-use crate::{Integrand, Limits, ScalarF64};
+use crate::{Error, Integrand, Limits, ScalarF64, Tolerance};
 
 /// The value of a function evaluated with Gauss-Kronrod integration and associated error
 /// estimation.
@@ -88,26 +87,26 @@ impl<T: ScalarF64> IntegralEstimate<T> {
         Basic::new(function, rule, limits).integrate()
     }
 
-    //    /// Integrate a function using an adaptive Gauss-Kronrod integration routine, see [`Adaptive`]
-    //    /// for details.
-    //    ///
-    //    /// # Errors
-    //    /// The error enum [`Error`] will return the error variant, which either corresponds to an
-    //    /// [`InitialisationError`] or an [`IntegrationError`].
-    //    ///
-    //    /// [`InitialisationError`]: crate::InitialisationError
-    //    /// [`IntegrationError`]: crate::IntegrationError
-    //    pub fn adaptive<'a, I: Integrand>(
-    //        function: &'a I,
-    //        rule: &'a Rule,
-    //        limits: Limits,
-    //        tolerance: Tolerance,
-    //        max_iterations: usize,
-    //    ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
-    //        let res = Adaptive::new(function, rule, limits, tolerance, max_iterations)?.integrate()?;
-    //        Ok(res)
-    //    }
-    //
+    /// Integrate a function using an adaptive Gauss-Kronrod integration routine, see [`Adaptive`]
+    /// for details.
+    ///
+    /// # Errors
+    /// The error enum [`Error`] will return the error variant, which either corresponds to an
+    /// [`InitialisationError`] or an [`IntegrationError`].
+    ///
+    /// [`InitialisationError`]: crate::InitialisationError
+    /// [`IntegrationError`]: crate::IntegrationError
+    pub fn adaptive<'a, I: Integrand<Point = f64>>(
+        function: &'a I,
+        rule: &'a Rule,
+        limits: Limits,
+        tolerance: Tolerance,
+        max_iterations: usize,
+    ) -> Result<IntegralEstimate<I::Scalar>, Error<I::Scalar>> {
+        let res = Adaptive::new(function, rule, limits, tolerance, max_iterations)?.integrate()?;
+        Ok(res)
+    }
+
     //    /// Integrate the function with possible integrable singularities and a finite integration
     //    /// interval, see [`AdaptiveSingularity`] for details.
     //    ///

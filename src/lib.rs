@@ -72,8 +72,9 @@
 //! }
 //!
 //! impl Integrand for NormalDist {
+//!     type Point = f64;
 //!     type Scalar = f64;
-//!     fn evaluate(&self, x: f64) -> Self::Scalar {
+//!     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
 //!         let mu = self.mean;
 //!         let sigma = self.standard_dev;
 //!
@@ -180,8 +181,9 @@
 //! struct F;
 //!
 //! impl Integrand for F {
+//!     type Point = f64;
 //!     type Scalar = f64;
-//!     fn evaluate(&self, x: f64) -> Self::Scalar {
+//!     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
 //!         x.ln() / (1.0 + 100.0 * x.powi(2))
 //!     }
 //! }
@@ -307,8 +309,9 @@ pub use limits::Limits;
 /// }
 ///
 /// impl Integrand for NormalDist {
+///     type Point = f64;
 ///     type Scalar = f64;
-///     fn evaluate(&self, x: f64) -> Self::Scalar {
+///     fn evaluate(&self, x: Self::Point) -> Self::Scalar {
 ///         let mu = self.mean;
 ///         let sigma = self.standard_dev;
 ///
