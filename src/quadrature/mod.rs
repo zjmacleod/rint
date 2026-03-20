@@ -309,26 +309,26 @@
 //! [`Tolerance`]: crate::Tolerance
 //! [`Error`]: crate::Error
 //!
-mod adaptive;
+//mod adaptive;
 mod basic;
 mod integrator;
 mod region;
 pub(crate) mod rule;
-mod singularity;
+//mod singularity;
 
 #[cfg(test)]
 mod tests;
 
 pub(crate) use integrator::Integrator;
-pub(crate) use region::Region;
+//pub(crate) use region::Region;
 
-pub use adaptive::Adaptive;
+//pub use adaptive::Adaptive;
 pub use basic::Basic;
-pub use singularity::AdaptiveSingularity;
+//pub use singularity::AdaptiveSingularity;
 
 pub use rule::Rule;
 
-use crate::IntegralEstimate;
+//use crate::IntegralEstimate;
 
 pub(crate) fn rescale_error(error: f64, result_abs: f64, result_asc: f64) -> f64 {
     let mut error = error;

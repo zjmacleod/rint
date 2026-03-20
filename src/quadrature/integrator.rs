@@ -25,7 +25,7 @@ pub(crate) struct Integrator<'a, I> {
 
 impl<'a, I> Integrator<'a, I>
 where
-    I: Integrand,
+    I: Integrand<Point = f64>,
 {
     pub(crate) const fn new(function: &'a I, rule: &'a Rule, limits: Limits) -> Self {
         Self {

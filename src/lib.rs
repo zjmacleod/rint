@@ -326,6 +326,12 @@ pub trait Integrand {
     ///
     /// The integrand can be either real-valued or complex-valued, evaluating to [`f64`] or
     /// [`Complex<f64>`], respectively.
+    type Point;
+
+    /// The type that the function evaluates to.
+    ///
+    /// The integrand can be either real-valued or complex-valued, evaluating to [`f64`] or
+    /// [`Complex<f64>`], respectively.
     type Scalar: ScalarF64;
 
     /// Evaluate the function at the real point `x`
@@ -334,13 +340,14 @@ pub trait Integrand {
     /// evaluated at a given _real_ point `x`. Since the method is implemented on a user defined
     /// type, such as a `struct`, it can have access to any constant parameters required for the
     /// evaluation of the function through, for example, fields on the implementing `struct`.
-    fn evaluate(&self, x: f64) -> Self::Scalar;
+    fn evaluate(&self, x: Self::Point) -> Self::Scalar;
 }
 
 impl<I: Integrand> Integrand for &I {
+    type Point = I::Point;
     type Scalar = I::Scalar;
 
-    fn evaluate(&self, x: f64) -> Self::Scalar {
+    fn evaluate(&self, x: Self::Point) -> Self::Scalar {
         I::evaluate(self, x)
     }
 }

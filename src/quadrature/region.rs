@@ -155,7 +155,11 @@ impl<T: ScalarF64> Region<T> {
     }
 
     /// Bisect a region into two parts and integrate each new part to produce two new [`Region`]s.
-    pub(crate) fn bisect<I: Integrand>(&self, function: &I, rule: &Rule) -> [Region<I::Scalar>; 2] {
+    pub(crate) fn bisect<I: Integrand<Point = f64>>(
+        &self,
+        function: &I,
+        rule: &Rule,
+    ) -> [Region<I::Scalar>; 2] {
         let [lower, upper] = self.limits.bisect();
         let lower_integral = Integrator::new(&function, rule, lower).integrate();
 

@@ -63,7 +63,7 @@ pub struct Basic<'a, I> {
 
 impl<'a, I> Basic<'a, I>
 where
-    I: Integrand,
+    I: Integrand<Point = f64>,
 {
     /// Create a new [`Basic`] integrator.
     ///
