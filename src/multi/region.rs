@@ -68,7 +68,7 @@ impl<T: ScalarF64, const N: usize> Region<T, N> {
         Self {
             error: 0.0,
             result: zero,
-            limits: [Limits::new(0.0, 0.0); N],
+            limits: [Limits::new_unchecked(0.0, 0.0); N],
             bisection_axis: 0,
             volume: 0.0,
         }

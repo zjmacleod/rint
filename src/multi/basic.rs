@@ -45,7 +45,7 @@ use crate::{InitialisationError, InitialisationErrorKind};
 /// # use std::error::Error;
 /// # fn main() -> Result<(), Box<dyn Error>> {
 /// let catalan = Catalan;
-/// let limits = [Limits::new(0.0,1.0),Limits::new(0.0,1.0)];
+/// let limits = [Limits::new(0.0,1.0)?,Limits::new(0.0,1.0)?];
 /// let rule = Rule13::generate();
 /// let integral = Basic::new(&catalan, &rule, limits)?.integrate();
 ///

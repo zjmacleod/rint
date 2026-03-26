@@ -75,7 +75,7 @@ use crate::{
 /// const TOL: f64 = 1.0e-12;
 ///
 /// let tolerance = Tolerance::Relative(TOL);
-/// let limits = Limits::new(0.0, 1.0);
+/// let limits = Limits::new(0.0, 1.0)?;
 /// let rule = Rule::gk31();
 /// let max_iterations = 1000;
 ///

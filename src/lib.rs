@@ -41,7 +41,7 @@
 //! integration is an [`IntegralEstimate`].
 //!
 //!
-//! # Traits
+//! # [`Integrand`] trait
 //!
 //! The primary entry point for the library is the [`Integrand`] trait. A type implementing the
 //! [`Integrand`] trait represents a real or complex valued function which is to be integrated. The
@@ -166,7 +166,6 @@
 //! [`multi::Rule`]: crate::multi::Rule
 //! [DCUHRE]: <https://dl.acm.org/doi/10.1145/210232.210234>
 //!
-//!
 //! # One-dimensional example
 //!
 //! The following example integrates the function
@@ -251,10 +250,10 @@
 //!
 //! let function = F;
 //! let limits = [
-//!     Limits::new(0.0, 1.0),
-//!     Limits::new(0.0, 1.0),
-//!     Limits::new(0.0, 1.0),
-//!     Limits::new(0.0, 2.0)
+//!     Limits::new(0.0, 1.0)?,
+//!     Limits::new(0.0, 1.0)?,
+//!     Limits::new(0.0, 1.0)?,
+//!     Limits::new(0.0, 2.0)?
 //! ];
 //! let rule = Rule07::<N>::generate()?;
 //! let tolerance = Tolerance::Relative(TOL);
@@ -620,6 +619,11 @@ pub enum InitialisationErrorKind {
     /// satisfy `tol > 50.0 * f64::EPSILON`.
     RelativeBoundTooSmall(f64),
 
+    /// The user provided values for `upper` and `lower` when generating a set of [`Limits`] using
+    /// [`Limits::new`] did not satisfy `(upper - lower).abs() < f64::MAX` and `(upper + lower).abs()
+    /// < f64::MAX` . The integration range should be rescaled to satisfy this constraint.
+    IntegrationRangeTooLarge { lower: f64, upper: f64 },
+
     /// An invalid tolerance was requested for the adaptive integration routine.
     /// The absolute tolerance bound `abs_tol` must satisfy `abs_tol > 0.0`.
     /// The relative tolerance bound `rel_tol` must satisfy satisfy `rel_tol > 50.0 * f64::EPSILON`.
@@ -658,6 +662,10 @@ impl fmt::Display for InitialisationError {
 
             InitialisationErrorKind::InvalidTolerance { absolute, relative } => {
                 write!(f, "Invalid tolerance requested:\n`Either '{{' abs_tol: {absolute}, rel_tol: {relative} '}}'`\nThe absolute tolerance bound `abs_tol` requested for the adaptive integration routines must satisfy `abs_tol > 0.0`. The relative tolerance bound `rel_tol` requested for the adaptive integration routines must satisfy `rel_tol > 50.0 * f64::EPSILON`.")
+            }
+
+            InitialisationErrorKind::IntegrationRangeTooLarge { lower, upper } => {
+                write!(f, "Invalid integration limits requested:\nWhen generating a new set of integration `Limits` using `Limits::new(lower, upper)?` the bounds must satisfy `(upper - lower).abs() < f64::MAX` and  `(upper + lower).abs() < f64::MAX`. Please rescale the integration bounds accordingly. Provided bounds were: `lower = {lower}` and `upper = {upper}`.")
             }
 
             InitialisationErrorKind::InvalidDimension(ndim) => {

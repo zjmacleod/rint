@@ -91,7 +91,7 @@
 //! # use std::error::Error;
 //! # fn main() -> Result<(), Box<dyn Error>> {
 //! let catalan = Catalan;
-//! let limits = [Limits::new(0.0,1.0);N];
+//! let limits = [Limits::new(0.0,1.0)?;N];
 //! let rule = Rule13::generate();
 //! let integral = Basic::new(&catalan, &rule, limits)?.integrate();
 //!
@@ -142,10 +142,10 @@
 //!
 //! let function = F;
 //! let limits = [
-//!     Limits::new(0.0, 1.0),
-//!     Limits::new(0.0, 1.0),
-//!     Limits::new(0.0, 1.0),
-//!     Limits::new(0.0, 2.0)
+//!     Limits::new(0.0, 1.0)?,
+//!     Limits::new(0.0, 1.0)?,
+//!     Limits::new(0.0, 1.0)?,
+//!     Limits::new(0.0, 2.0)?
 //! ];
 //! let rule = Rule07::<N>::generate()?;
 //! let tolerance = Tolerance::Relative(TOL);

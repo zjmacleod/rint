@@ -27,7 +27,7 @@ macro_rules! basic_test {
 
             let function = <$type>::new(alpha);
             let rule = Rule::$rule();
-            let integral = Basic::new(&function, &rule, Limits::new(lower, upper));
+            let integral = Basic::new(&function, &rule, Limits::new(lower, upper).unwrap());
 
             let integral_result = integral.integrate();
             let result = integral_result.result();
@@ -50,7 +50,7 @@ macro_rules! basic_test {
             let upper = $lower;
 
             let rule = Rule::$rule();
-            let integral = Basic::new(&function, &rule, Limits::new(lower, upper));
+            let integral = Basic::new(&function, &rule, Limits::new(lower, upper).unwrap());
 
             let integral_result = integral.integrate();
             let result = integral_result.result();
@@ -96,7 +96,7 @@ macro_rules! basic_test {
 
             let function = <$type>::new();
             let rule = Rule::$rule();
-            let integral = Basic::new(&function, &rule, Limits::new(lower, upper));
+            let integral = Basic::new(&function, &rule, Limits::new(lower, upper).unwrap());
 
             let integral_result = integral.integrate();
             let result = integral_result.result();
@@ -119,7 +119,7 @@ macro_rules! basic_test {
             let upper = $lower;
 
             let rule = Rule::$rule();
-            let integral = Basic::new(&function, &rule, Limits::new(lower, upper));
+            let integral = Basic::new(&function, &rule, Limits::new(lower, upper).unwrap());
 
             let integral_result = integral.integrate();
             let result = integral_result.result();
@@ -179,9 +179,14 @@ macro_rules! adaptive_test_passing {
 
             let function = <$type>::new(alpha);
 
-            let integral =
-                Adaptive::new(&function, &rule, Limits::new(lower, upper), tolerance, 1000)
-                    .unwrap();
+            let integral = Adaptive::new(
+                &function,
+                &rule,
+                Limits::new(lower, upper).unwrap(),
+                tolerance,
+                1000,
+            )
+            .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -217,9 +222,14 @@ macro_rules! adaptive_test_passing {
             let lower = $upper;
             let upper = $lower;
 
-            let integral =
-                Adaptive::new(&function, &rule, Limits::new(lower, upper), tolerance, 1000)
-                    .unwrap();
+            let integral = Adaptive::new(
+                &function,
+                &rule,
+                Limits::new(lower, upper).unwrap(),
+                tolerance,
+                1000,
+            )
+            .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -287,9 +297,14 @@ macro_rules! adaptive_test_passing {
 
             let function = <$type>::new(alpha);
 
-            let integral =
-                Adaptive::new(&function, &rule, Limits::new(lower, upper), tolerance, 1000)
-                    .unwrap();
+            let integral = Adaptive::new(
+                &function,
+                &rule,
+                Limits::new(lower, upper).unwrap(),
+                tolerance,
+                1000,
+            )
+            .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -325,9 +340,14 @@ macro_rules! adaptive_test_passing {
             let lower = $upper;
             let upper = $lower;
 
-            let integral =
-                Adaptive::new(&function, &rule, Limits::new(lower, upper), tolerance, 1000)
-                    .unwrap();
+            let integral = Adaptive::new(
+                &function,
+                &rule,
+                Limits::new(lower, upper).unwrap(),
+                tolerance,
+                1000,
+            )
+            .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -397,9 +417,13 @@ macro_rules! singularity_test {
 
             let function = <$type>::new(alpha);
 
-            let integral =
-                AdaptiveSingularity::finite(&function, Limits::new(lower, upper), tolerance, 1000)
-                    .unwrap();
+            let integral = AdaptiveSingularity::finite(
+                &function,
+                Limits::new(lower, upper).unwrap(),
+                tolerance,
+                1000,
+            )
+            .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -434,9 +458,13 @@ macro_rules! singularity_test {
             let upper = $lower;
             let tolerance = Tolerance::Relative($tolerance);
 
-            let integral =
-                AdaptiveSingularity::finite(&function, Limits::new(lower, upper), tolerance, 1000)
-                    .unwrap();
+            let integral = AdaptiveSingularity::finite(
+                &function,
+                Limits::new(lower, upper).unwrap(),
+                tolerance,
+                1000,
+            )
+            .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -502,9 +530,13 @@ macro_rules! singularity_test {
 
             let function = <$type>::new(alpha);
 
-            let integral =
-                AdaptiveSingularity::finite(&function, Limits::new(lower, upper), tolerance, 1000)
-                    .unwrap();
+            let integral = AdaptiveSingularity::finite(
+                &function,
+                Limits::new(lower, upper).unwrap(),
+                tolerance,
+                1000,
+            )
+            .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -539,9 +571,13 @@ macro_rules! singularity_test {
             let upper = $lower;
             let tolerance = Tolerance::Absolute($tolerance);
 
-            let integral =
-                AdaptiveSingularity::finite(&function, Limits::new(lower, upper), tolerance, 1000)
-                    .unwrap();
+            let integral = AdaptiveSingularity::finite(
+                &function,
+                Limits::new(lower, upper).unwrap(),
+                tolerance,
+                1000,
+            )
+            .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -991,9 +1027,13 @@ macro_rules! singularity_test {
 
             let function = <$type>::new();
 
-            let integral =
-                AdaptiveSingularity::finite(&function, Limits::new(lower, upper), tolerance, 1000)
-                    .unwrap();
+            let integral = AdaptiveSingularity::finite(
+                &function,
+                Limits::new(lower, upper).unwrap(),
+                tolerance,
+                1000,
+            )
+            .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -1028,9 +1068,13 @@ macro_rules! singularity_test {
             let upper = $lower;
             let tolerance = Tolerance::Relative(1e-10);
 
-            let integral =
-                AdaptiveSingularity::finite(&function, Limits::new(lower, upper), tolerance, 1000)
-                    .unwrap();
+            let integral = AdaptiveSingularity::finite(
+                &function,
+                Limits::new(lower, upper).unwrap(),
+                tolerance,
+                1000,
+            )
+            .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -1094,9 +1138,13 @@ macro_rules! singularity_test {
 
             let function = <$type>::new();
 
-            let integral =
-                AdaptiveSingularity::finite(&function, Limits::new(lower, upper), tolerance, 1000)
-                    .unwrap();
+            let integral = AdaptiveSingularity::finite(
+                &function,
+                Limits::new(lower, upper).unwrap(),
+                tolerance,
+                1000,
+            )
+            .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -1131,9 +1179,13 @@ macro_rules! singularity_test {
             let upper = $lower;
             let tolerance = Tolerance::Absolute(1e-10);
 
-            let integral =
-                AdaptiveSingularity::finite(&function, Limits::new(lower, upper), tolerance, 1000)
-                    .unwrap();
+            let integral = AdaptiveSingularity::finite(
+                &function,
+                Limits::new(lower, upper).unwrap(),
+                tolerance,
+                1000,
+            )
+            .unwrap();
 
             let integral_result = integral.integrate().unwrap();
             let result = integral_result.result();
@@ -1578,7 +1630,7 @@ macro_rules! basic_test_complex_equal {
 
             let function = <$type>::new(alpha1, alpha2);
             let rule = Rule::$rule();
-            let integral = Basic::new(&function, &rule, Limits::new(lower, upper));
+            let integral = Basic::new(&function, &rule, Limits::new(lower, upper).unwrap());
 
             let integral_result = integral.integrate();
             let result = integral_result.result();
@@ -1609,7 +1661,7 @@ macro_rules! basic_test_complex_equal {
             let upper = $lower;
 
             let rule = Rule::$rule();
-            let integral = Basic::new(&function, &rule, Limits::new(lower, upper));
+            let integral = Basic::new(&function, &rule, Limits::new(lower, upper).unwrap());
 
             let integral_result = integral.integrate();
             let result = integral_result.result();

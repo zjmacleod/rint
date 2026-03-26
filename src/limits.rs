@@ -1,3 +1,5 @@
+use crate::{InitialisationError, InitialisationErrorKind};
+
 /// Integration limits for an integration axis.
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Limits {
@@ -7,8 +9,23 @@ pub struct Limits {
 
 impl Limits {
     /// Generate a new set of integration [`Limits`].
-    #[must_use]
-    pub const fn new(lower: f64, upper: f64) -> Self {
+    ///
+    /// # Errors
+    ///
+    /// Returns an [`InitialisationError`] if `(upper-lower).abs()<f64::MAX` or
+    /// `(upper+lower).abs()<f64::MAX` is _not_ satisfied.
+    pub const fn new(lower: f64, upper: f64) -> Result<Self, InitialisationError> {
+        if (upper - lower).abs() > f64::MAX || (upper + lower).abs() > f64::MAX {
+            let kind = InitialisationErrorKind::IntegrationRangeTooLarge { lower, upper };
+            let err = InitialisationError::new(kind);
+            Err(err)
+        } else {
+            let out = Self { lower, upper };
+            Ok(out)
+        }
+    }
+
+    pub(crate) const fn new_unchecked(lower: f64, upper: f64) -> Self {
         Self { lower, upper }
     }
 
@@ -32,12 +49,12 @@ impl Limits {
 
     /// Return the width of the integration region.
     pub(crate) const fn width(&self) -> f64 {
-        self.upper - self.lower
+        2.0 * self.half_width()
     }
 
     /// Return the half width of the integration region.
     pub(crate) const fn half_width(&self) -> f64 {
-        self.width() * 0.5
+        (self.upper).midpoint(-self.lower)
     }
 
     /// Bisect the integration region into two new regions.
@@ -45,9 +62,12 @@ impl Limits {
     pub const fn bisect(&self) -> [Self; 2] {
         let upper = self.upper();
         let lower = self.lower();
-        let midpoint = (upper + lower) * 0.5;
+        let midpoint = self.centre();
 
-        [Self::new(lower, midpoint), Self::new(midpoint, upper)]
+        [
+            Self::new_unchecked(lower, midpoint),
+            Self::new_unchecked(midpoint, upper),
+        ]
     }
 
     /// Determine if a subinterval is too small.
@@ -70,8 +90,11 @@ impl Limits {
     }
 
     /// Scale the limits by a constant factor.
-    #[must_use]
-    pub fn scale(self, scale: f64) -> Self {
+    ///
+    /// # Errors
+    /// Returns an [`InitialisationError`] if upon rescalling the new bounds `lower` and `upper` do
+    /// not satisfy `(upper-lower).abs()<f64::MAX` or `(upper+lower).abs()<f64::MAX` .
+    pub fn scale(self, scale: f64) -> Result<Self, InitialisationError> {
         let lower = self.lower() * scale;
         let upper = self.upper() * scale;
 
@@ -85,10 +108,10 @@ mod tests {
 
     #[test]
     fn test_bisection() {
-        let limit = Limits::new(0.0, 1.0);
+        let limit = Limits::new(0.0, 1.0).unwrap();
         let [lower, upper] = limit.bisect();
 
-        assert_eq!(lower, Limits::new(0.0, 0.5));
-        assert_eq!(upper, Limits::new(0.5, 1.0));
+        assert_eq!(lower, Limits::new(0.0, 0.5).unwrap());
+        assert_eq!(upper, Limits::new(0.5, 1.0).unwrap());
     }
 }

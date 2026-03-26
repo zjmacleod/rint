@@ -72,10 +72,10 @@ use crate::{Limits, Tolerance};
 ///
 /// let function = F;
 /// let limits = [
-///     Limits::new(0.0, 1.0),
-///     Limits::new(0.0, 1.0),
-///     Limits::new(0.0, 1.0),
-///     Limits::new(0.0, 2.0)
+///     Limits::new(0.0, 1.0)?,
+///     Limits::new(0.0, 1.0)?,
+///     Limits::new(0.0, 1.0)?,
+///     Limits::new(0.0, 2.0)?
 /// ];
 /// let rule = Rule07::<N>::generate()?;
 /// let tolerance = Tolerance::Relative(TOL);
@@ -371,7 +371,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -409,7 +409,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -447,7 +447,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -484,7 +484,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -521,7 +521,10 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limits = [Limits::new(-2.0, 3.0), Limits::new(1.0, 10.0)];
+            let limits = [
+                Limits::new(-2.0, 3.0).unwrap(),
+                Limits::new(1.0, 10.0).unwrap(),
+            ];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 
@@ -565,7 +568,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -604,7 +607,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -644,7 +647,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -682,7 +685,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -723,9 +726,9 @@ mod tests_relative {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limits = [
-                Limits::new(-2.0, 3.0),
-                Limits::new(1.0, 10.0),
-                Limits::new(0.0, -1.0),
+                Limits::new(-2.0, 3.0).unwrap(),
+                Limits::new(1.0, 10.0).unwrap(),
+                Limits::new(0.0, -1.0).unwrap(),
             ];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -770,7 +773,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule09::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -809,7 +812,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule09::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(1e-7);
             let max_iterations = 1000;
@@ -849,7 +852,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule09::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -887,7 +890,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule09::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -928,9 +931,9 @@ mod tests_relative {
             let function = Function;
             let rule = Rule09::generate().unwrap();
             let limits = [
-                Limits::new(-2.0, 3.0),
-                Limits::new(1.0, 10.0),
-                Limits::new(0.0, -1.0),
+                Limits::new(-2.0, 3.0).unwrap(),
+                Limits::new(1.0, 10.0).unwrap(),
+                Limits::new(0.0, -1.0).unwrap(),
             ];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -975,7 +978,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule11::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -1014,7 +1017,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule11::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -1054,7 +1057,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule11::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -1092,7 +1095,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule11::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -1133,9 +1136,9 @@ mod tests_relative {
             let function = Function;
             let rule = Rule11::generate();
             let limits = [
-                Limits::new(-2.0, 3.0),
-                Limits::new(1.0, 10.0),
-                Limits::new(0.0, -1.0),
+                Limits::new(-2.0, 3.0).unwrap(),
+                Limits::new(1.0, 10.0).unwrap(),
+                Limits::new(0.0, -1.0).unwrap(),
             ];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -1179,7 +1182,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule13::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -1217,7 +1220,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule13::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -1255,7 +1258,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule13::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -1292,7 +1295,7 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule13::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
@@ -1329,7 +1332,10 @@ mod tests_relative {
 
             let function = Function;
             let rule = Rule13::generate();
-            let limits = [Limits::new(-2.0, 3.0), Limits::new(1.0, 10.0)];
+            let limits = [
+                Limits::new(-2.0, 3.0).unwrap(),
+                Limits::new(1.0, 10.0).unwrap(),
+            ];
             let tol = Tolerance::Relative(TOL);
             let max_iterations = 1000;
 

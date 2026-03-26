@@ -265,7 +265,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -300,7 +300,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -335,7 +335,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -369,7 +369,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -403,7 +403,10 @@ mod tests {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limits = [Limits::new(-2.0, 3.0), Limits::new(1.0, 10.0)];
+            let limits = [
+                Limits::new(-2.0, 3.0).unwrap(),
+                Limits::new(1.0, 10.0).unwrap(),
+            ];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -443,7 +446,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -480,7 +483,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -515,7 +518,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule07::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -553,9 +556,9 @@ mod tests {
             let function = Function;
             let rule = Rule07::generate().unwrap();
             let limits = [
-                Limits::new(-2.0, 3.0),
-                Limits::new(1.0, 10.0),
-                Limits::new(0.0, -1.0),
+                Limits::new(-2.0, 3.0).unwrap(),
+                Limits::new(1.0, 10.0).unwrap(),
+                Limits::new(0.0, -1.0).unwrap(),
             ];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -595,7 +598,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule09N2::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -630,7 +633,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule09N2::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -665,7 +668,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule09N2::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -699,7 +702,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule09N2::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -733,7 +736,10 @@ mod tests {
 
             let function = Function;
             let rule = Rule09N2::generate();
-            let limits = [Limits::new(-2.0, 3.0), Limits::new(1.0, 10.0)];
+            let limits = [
+                Limits::new(-2.0, 3.0).unwrap(),
+                Limits::new(1.0, 10.0).unwrap(),
+            ];
 
             let integral = Integrator::new(&function, &rule, limits);
 
@@ -773,7 +779,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule09::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -809,7 +815,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule09::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -846,7 +852,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule09::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -881,7 +887,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule09::generate().unwrap();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -919,9 +925,9 @@ mod tests {
             let function = Function;
             let rule = Rule09::generate().unwrap();
             let limits = [
-                Limits::new(-2.0, 3.0),
-                Limits::new(1.0, 10.0),
-                Limits::new(0.0, -1.0),
+                Limits::new(-2.0, 3.0).unwrap(),
+                Limits::new(1.0, 10.0).unwrap(),
+                Limits::new(0.0, -1.0).unwrap(),
             ];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -962,7 +968,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule11::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -998,7 +1004,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule11::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -1035,7 +1041,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule11::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -1070,7 +1076,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule11::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -1108,9 +1114,9 @@ mod tests {
             let function = Function;
             let rule = Rule11::generate();
             let limits = [
-                Limits::new(-2.0, 3.0),
-                Limits::new(1.0, 10.0),
-                Limits::new(0.0, -1.0),
+                Limits::new(-2.0, 3.0).unwrap(),
+                Limits::new(1.0, 10.0).unwrap(),
+                Limits::new(0.0, -1.0).unwrap(),
             ];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -1150,7 +1156,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule13::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -1185,7 +1191,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule13::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -1220,7 +1226,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule13::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -1254,7 +1260,7 @@ mod tests {
 
             let function = Function;
             let rule = Rule13::generate();
-            let limit = Limits::new(0.0, 1.0);
+            let limit = Limits::new(0.0, 1.0).unwrap();
             let limits = [limit; N];
 
             let integral = Integrator::new(&function, &rule, limits);
@@ -1288,7 +1294,10 @@ mod tests {
 
             let function = Function;
             let rule = Rule13::generate();
-            let limits = [Limits::new(-2.0, 3.0), Limits::new(1.0, 10.0)];
+            let limits = [
+                Limits::new(-2.0, 3.0).unwrap(),
+                Limits::new(1.0, 10.0).unwrap(),
+            ];
 
             let integral = Integrator::new(&function, &rule, limits);
 
