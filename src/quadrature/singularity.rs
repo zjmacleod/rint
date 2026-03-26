@@ -513,7 +513,7 @@ where
 
             Err(IntegrationError::new(output, kind))
         } else if (initial.error() <= tolerance
-            && initial.error().to_bits() != initial.result_asc().to_bits())
+            && ((initial.error() - initial.result_asc()).abs() > f64::EPSILON))
             || initial.error() == 0.0
         {
             let output = initial.estimate(1, self.rule.evaluations());
@@ -1043,8 +1043,8 @@ impl<T: ScalarF64> Workspace<T> {
         let new_result = lower.result() + upper.result();
         let new_error = lower.error() + upper.error();
 
-        if lower.result_asc().to_bits() != lower.error().to_bits()
-            && upper.result_asc().to_bits() != upper.error().to_bits()
+        if ((lower.error() - lower.result_asc()).abs() > f64::EPSILON)
+            && ((upper.error() - upper.result_asc()).abs() > f64::EPSILON)
         {
             let delta = (prev_result - new_result).abs();
 

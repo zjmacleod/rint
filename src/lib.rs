@@ -493,7 +493,6 @@ pub enum Tolerance {
 }
 
 impl Tolerance {
-    // TODO make const when abs() is const 1.85
     #[must_use]
     pub(crate) fn tolerance<T: ScalarF64>(&self, integral_value: &T) -> f64 {
         match *self {

@@ -91,7 +91,8 @@ where
             let fourth_diff = fval_0 * 2.0 * (1.0 - ratio) - fval_2 + fval_1 * ratio;
             let fourth_diff_abs = fourth_diff.abs();
 
-            let difsum = if (fval_0 + fourth_diff / 4.0).abs().to_bits() != fval_0.abs().to_bits() {
+            let difsum = if ((fval_0 + fourth_diff / 4.0).abs() - fval_0.abs()).abs() > f64::EPSILON
+            {
                 fourth_diff_abs
             } else {
                 0.0
