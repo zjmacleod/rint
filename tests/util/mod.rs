@@ -217,7 +217,7 @@ impl Catalan1 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 
@@ -249,7 +249,7 @@ impl Catalan2 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 
@@ -281,7 +281,7 @@ impl Catalan3 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 
@@ -312,7 +312,7 @@ impl Catalan4 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 
@@ -343,7 +343,7 @@ impl Catalan5 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 
@@ -374,7 +374,7 @@ impl Catalan6 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 
@@ -517,7 +517,7 @@ impl ComplexCatalan12 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 
@@ -546,7 +546,7 @@ impl ComplexCatalan13 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 
@@ -575,7 +575,7 @@ impl ComplexCatalan14 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 
@@ -604,7 +604,7 @@ impl ComplexCatalan23 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 
@@ -633,7 +633,7 @@ impl ComplexCatalan24 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 
@@ -662,7 +662,7 @@ impl ComplexCatalan34 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 
@@ -691,7 +691,7 @@ impl ComplexCatalan15 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 
@@ -720,7 +720,7 @@ impl ComplexCatalan16 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 
@@ -749,7 +749,7 @@ impl ComplexCatalan45 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 
@@ -778,7 +778,7 @@ impl ComplexCatalan46 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 
@@ -807,7 +807,7 @@ impl ComplexCatalan56 {
     }
 
     pub(crate) fn limits(&self) -> Limits {
-        Limits::new(self.lower, self.upper)
+        Limits::new(self.lower, self.upper).unwrap()
     }
 }
 

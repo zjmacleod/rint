@@ -41,7 +41,7 @@ use crate::Limits;
 /// # use std::error::Error;
 /// # fn main() -> Result<(), Box<dyn Error>> {
 /// let golden_ratio = GoldenRatio;
-/// let limits = Limits::new(0.0,0.5);
+/// let limits = Limits::new(0.0,0.5)?;
 /// let rule = Rule::gk15();
 /// let integral = Basic::new(&golden_ratio, &rule, limits)
 ///     .integrate();

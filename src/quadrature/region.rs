@@ -26,8 +26,8 @@ use crate::ScalarF64;
 /// [`AdaptiveSingularity`]: crate::quadrature::AdaptiveSingularity
 #[derive(Debug, Clone)]
 pub(crate) struct Region<T> {
-    pub(crate) result: T,
     pub(crate) error: f64,
+    pub(crate) result: T,
     pub(crate) result_abs: f64,
     pub(crate) result_asc: f64,
     pub(crate) limits: Limits,
@@ -35,8 +35,8 @@ pub(crate) struct Region<T> {
 
 impl<T: ScalarF64> PartialEq for Region<T> {
     fn eq(&self, other: &Self) -> bool {
-        (self.result == other.result)
-            && (self.error == other.error)
+        (self.error == other.error)
+            && (self.result == other.result)
             && (self.result_abs == other.result_abs)
             && (self.result_asc == other.result_asc)
             && (self.limits == other.limits)
@@ -71,7 +71,7 @@ impl<T: ScalarF64> Region<T> {
             result,
             result_abs: 0.0,
             result_asc: 0.0,
-            limits: Limits::new(0.0, 0.0),
+            limits: Limits::new_unchecked(0.0, 0.0),
         }
     }
 
@@ -202,28 +202,28 @@ mod tests {
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
-            limits: Limits::new(0.0, 1.0),
+            limits: Limits::new(0.0, 1.0).unwrap(),
         };
         let b: Region<f64> = Region {
             error: 1.533,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
-            limits: Limits::new(0.0, 1.0),
+            limits: Limits::new(0.0, 1.0).unwrap(),
         };
         let c: Region<f64> = Region {
             error: 1.533,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
-            limits: Limits::new(0.5, 1.0),
+            limits: Limits::new(0.5, 1.0).unwrap(),
         };
         let d: Region<f64> = Region {
             error: 1.60,
             result: 1.0,
             result_abs: 1.0,
             result_asc: 1.0,
-            limits: Limits::new(0.0, 1.0),
+            limits: Limits::new(0.0, 1.0).unwrap(),
         };
 
         let mut bh = BinaryHeap::new();
@@ -238,28 +238,28 @@ mod tests {
                 result: 1.0,
                 result_abs: 1.0,
                 result_asc: 1.0,
-                limits: Limits::new(0.0, 1.0),
+                limits: Limits::new(0.0, 1.0).unwrap(),
             },
             Region {
                 error: 1.533,
                 result: 1.0,
                 result_abs: 1.0,
                 result_asc: 1.0,
-                limits: Limits::new(0.5, 1.0),
+                limits: Limits::new(0.5, 1.0).unwrap(),
             },
             Region {
                 error: 1.60,
                 result: 1.0,
                 result_abs: 1.0,
                 result_asc: 1.0,
-                limits: Limits::new(0.0, 1.0),
+                limits: Limits::new(0.0, 1.0).unwrap(),
             },
             Region {
                 error: 2.0,
                 result: 1.0,
                 result_abs: 1.0,
                 result_asc: 1.0,
-                limits: Limits::new(0.0, 1.0),
+                limits: Limits::new(0.0, 1.0).unwrap(),
             },
         ];
 

@@ -38,7 +38,8 @@ mod macros {
                 let function = <$type>::new(alpha);
                 let rule = Rule::$rule();
 
-                let integral = Integrator::new(&function, &rule, Limits::new(lower, upper));
+                let integral =
+                    Integrator::new(&function, &rule, Limits::new(lower, upper).unwrap());
 
                 let integral_result = integral.integrate();
                 let result = integral_result.result();
@@ -74,7 +75,8 @@ mod macros {
                 let lower = $upper;
                 let upper = $lower;
 
-                let integral = Integrator::new(&function, &rule, Limits::new(lower, upper));
+                let integral =
+                    Integrator::new(&function, &rule, Limits::new(lower, upper).unwrap());
 
                 let integral_result = integral.integrate();
                 let result = integral_result.result();
@@ -142,7 +144,8 @@ mod macros {
                 let function = <$type>::new();
                 let rule = Rule::$rule();
 
-                let integral = Integrator::new(Limits::new(lower, upper), &rule, &function);
+                let integral =
+                    Integrator::new(Limits::new(lower, upper).unwrap(), &rule, &function);
 
                 let integral_result = integral.integrate_internal();
                 let result = integral_result.result();
@@ -178,7 +181,8 @@ mod macros {
                 let lower = $upper;
                 let upper = $lower;
 
-                let integral = Integrator::new(Limits::new(lower, upper), &rule, &function);
+                let integral =
+                    Integrator::new(Limits::new(lower, upper).unwrap(), &rule, &function);
 
                 let integral_result = integral.integrate_internal();
                 let result = integral_result.result();

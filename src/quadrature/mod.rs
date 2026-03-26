@@ -92,9 +92,10 @@
 //!         1.0 / (1.0 + x.powi(2)).sqrt()
 //!     }
 //! }
-//!
+//! # use std::error::Error;
+//! # fn main() -> Result<(), Box<dyn Error>> {
 //! let golden_ratio = GoldenRatio;
-//! let limits = Limits::new(0.0,0.5);
+//! let limits = Limits::new(0.0,0.5)?;
 //! let rule = Rule::gk15();
 //! let integral = Basic::new(&golden_ratio, &rule, limits)
 //!     .integrate();
@@ -105,6 +106,8 @@
 //! let iters = integral.iterations();
 //! assert_eq!(iters, 1);
 //! assert!(abs_actual_error < error);
+//! # Ok(())
+//! # }
 //!```
 //!
 //! ## [`Adaptive`] integrator example
@@ -134,10 +137,12 @@
 //!     }
 //! }
 //!
+//! # use std::error::Error;
+//! # fn main() -> Result<(), Box<dyn Error>> {
 //! const TOL: f64 = 1.0e-12;
 //!
 //! let tolerance = Tolerance::Relative(TOL);
-//! let limits = Limits::new(0.0, 1.0);
+//! let limits = Limits::new(0.0, 1.0)?;
 //! let rule = Rule::gk31();
 //! let max_iterations = 1000;
 //!
@@ -160,6 +165,8 @@
 //!     assert!(abs_actual_error < error);
 //!     assert!(error < tol);
 //! }
+//! # Ok(())
+//! # }
 //!```
 //!
 //!

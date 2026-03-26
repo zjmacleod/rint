@@ -46,9 +46,9 @@ mod tests {
     #[test]
     fn geometry_tests() {
         let limits = [
-            Limits::new(0.0, 10.0),
-            Limits::new(-1.0, 2.0),
-            Limits::new(-100.0, 0.0),
+            Limits::new(0.0, 10.0).unwrap(),
+            Limits::new(-1.0, 2.0).unwrap(),
+            Limits::new(-100.0, 0.0).unwrap(),
         ];
 
         let centre_should_be = [5.0, 0.5, -50.0];

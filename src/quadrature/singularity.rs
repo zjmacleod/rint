@@ -86,7 +86,7 @@ use crate::{
 /// # use std::error::Error;
 /// # fn main() -> Result<(), Box<dyn Error>> {
 /// let catalan = Catalan;
-/// let limits = Limits::new(0.0,1.0);
+/// let limits = Limits::new(0.0,1.0)?;
 /// let tolerance = Tolerance::Relative(TOL);
 /// let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)?
 ///     .integrate()?;  
@@ -280,7 +280,7 @@ where
     /// # use std::error::Error;
     /// # fn main() -> Result<(), Box<dyn Error>> {
     /// let catalan = Catalan;
-    /// let limits = Limits::new(0.0,1.0);
+    /// let limits = Limits::new(0.0,1.0)?;
     /// let tolerance = Tolerance::Relative(TOL);
     /// let integral = AdaptiveSingularity::finite(catalan, limits, tolerance, 1000)?
     ///     .integrate()?;
@@ -690,7 +690,7 @@ where
         Self::new_with_evaluations_multiplier(
             transformed,
             rule,
-            Limits::new(0.0, 1.0),
+            Limits::new_unchecked(0.0, 1.0),
             tolerance,
             max_iterations,
             evaluations_multiplier,
@@ -824,7 +824,7 @@ where
         Self::new_with_evaluations_multiplier(
             transformed,
             rule,
-            Limits::new(0.0, 1.0),
+            Limits::new_unchecked(0.0, 1.0),
             tolerance,
             max_iterations,
             evaluations_multiplier,
@@ -957,7 +957,7 @@ where
         Self::new_with_evaluations_multiplier(
             transformed,
             rule,
-            Limits::new(0.0, 1.0),
+            Limits::new_unchecked(0.0, 1.0),
             tolerance,
             max_iterations,
             evaluations_multiplier,
@@ -1188,7 +1188,7 @@ impl<T: ScalarF64> Workspace<T> {
     fn update(&mut self, lower: Region<T>, upper: Region<T>) {
         let lower_limit = lower.limits().lower();
         let upper_limit = upper.limits().upper();
-        let limits = Limits::new(lower_limit, upper_limit);
+        let limits = Limits::new_unchecked(lower_limit, upper_limit);
 
         self.check_roundoff();
 
@@ -1489,7 +1489,7 @@ mod tests {
         let result = 0.0;
         let result_abs = 0.0;
         let result_asc = 0.0;
-        let limits = Limits::new(0.0, 0.0);
+        let limits = Limits::new(0.0, 0.0).unwrap();
         let value = Region {
             result,
             error,

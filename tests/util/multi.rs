@@ -17,12 +17,12 @@ pub struct F1 {
 
 impl F1 {
     pub fn new() -> Self {
-        let x1 = Limits::new(0.0, 2.0);
-        let x2 = Limits::new(0.0, 1.0);
-        let x3 = Limits::new(0.0, std::f64::consts::PI / 2.0);
-        let x4 = Limits::new(-1.0, 1.0);
-        let x5 = Limits::new(-1.0, 1.0);
-        let x6 = Limits::new(-1.0, 1.0);
+        let x1 = Limits::new(0.0, 2.0).unwrap();
+        let x2 = Limits::new(0.0, 1.0).unwrap();
+        let x3 = Limits::new(0.0, std::f64::consts::PI / 2.0).unwrap();
+        let x4 = Limits::new(-1.0, 1.0).unwrap();
+        let x5 = Limits::new(-1.0, 1.0).unwrap();
+        let x6 = Limits::new(-1.0, 1.0).unwrap();
         let limits = [x1, x2, x3, x4, x5, x6];
         Self { limits }
     }
@@ -50,10 +50,10 @@ pub struct F2 {
 
 impl F2 {
     pub fn new() -> Self {
-        let x1 = Limits::new(0.0, 1.0);
-        let x2 = Limits::new(0.0, 1.0);
-        let x3 = Limits::new(0.0, 1.0);
-        let x4 = Limits::new(0.0, 2.0);
+        let x1 = Limits::new(0.0, 1.0).unwrap();
+        let x2 = Limits::new(0.0, 1.0).unwrap();
+        let x3 = Limits::new(0.0, 1.0).unwrap();
+        let x4 = Limits::new(0.0, 2.0).unwrap();
         let limits = [x1, x2, x3, x4];
         Self { limits }
     }
@@ -81,9 +81,9 @@ pub struct F3 {
 
 impl F3 {
     pub fn new() -> Self {
-        let x1 = Limits::new(0.0, 1.0);
-        let x2 = Limits::new(0.0, 1.0);
-        let x3 = Limits::new(0.0, 1.0);
+        let x1 = Limits::new(0.0, 1.0).unwrap();
+        let x2 = Limits::new(0.0, 1.0).unwrap();
+        let x3 = Limits::new(0.0, 1.0).unwrap();
         let limits = [x1, x2, x3];
         Self { limits }
     }
@@ -111,11 +111,11 @@ pub struct F4 {
 
 impl F4 {
     pub fn new() -> Self {
-        let x1 = Limits::new(0.0, std::f64::consts::PI);
-        let x2 = Limits::new(0.0, std::f64::consts::PI);
-        let x3 = Limits::new(0.0, std::f64::consts::PI);
-        let x4 = Limits::new(0.0, std::f64::consts::PI);
-        let x5 = Limits::new(0.0, std::f64::consts::FRAC_PI_2);
+        let x1 = Limits::new(0.0, std::f64::consts::PI).unwrap();
+        let x2 = Limits::new(0.0, std::f64::consts::PI).unwrap();
+        let x3 = Limits::new(0.0, std::f64::consts::PI).unwrap();
+        let x4 = Limits::new(0.0, std::f64::consts::PI).unwrap();
+        let x5 = Limits::new(0.0, std::f64::consts::FRAC_PI_2).unwrap();
         let limits = [x1, x2, x3, x4, x5];
         Self { limits }
     }
@@ -143,10 +143,10 @@ pub struct F5 {
 
 impl F5 {
     pub fn new() -> Self {
-        let x1 = Limits::new(0.0, 1.0);
-        let x2 = Limits::new(0.0, 1.0);
-        let x3 = Limits::new(0.0, 1.0);
-        let x4 = Limits::new(0.0, 1.0);
+        let x1 = Limits::new(0.0, 1.0).unwrap();
+        let x2 = Limits::new(0.0, 1.0).unwrap();
+        let x3 = Limits::new(0.0, 1.0).unwrap();
+        let x4 = Limits::new(0.0, 1.0).unwrap();
         let limits = [x1, x2, x3, x4];
         Self { limits }
     }
@@ -174,8 +174,8 @@ pub struct F6 {
 
 impl F6 {
     pub fn new() -> Self {
-        let x1 = Limits::new(0.0, 3.0 * std::f64::consts::PI);
-        let x2 = Limits::new(0.0, 3.0 * std::f64::consts::PI);
+        let x1 = Limits::new(0.0, 3.0 * std::f64::consts::PI).unwrap();
+        let x2 = Limits::new(0.0, 3.0 * std::f64::consts::PI).unwrap();
         let limits = [x1, x2];
         Self { limits }
     }
@@ -203,9 +203,9 @@ pub struct F7 {
 
 impl F7 {
     pub fn new() -> Self {
-        let x1 = Limits::new(0.0, 1.0);
-        let x2 = Limits::new(0.0, 1.0);
-        let x3 = Limits::new(0.0, 1.0);
+        let x1 = Limits::new(0.0, 1.0).unwrap();
+        let x2 = Limits::new(0.0, 1.0).unwrap();
+        let x3 = Limits::new(0.0, 1.0).unwrap();
         let limits = [x1, x2, x3];
         Self { limits }
     }
@@ -233,8 +233,8 @@ pub struct F8 {
 
 impl F8 {
     pub fn new() -> Self {
-        let x1 = Limits::new(0.0, 1.0);
-        let x2 = Limits::new(0.0, 1.0);
+        let x1 = Limits::new(0.0, 1.0).unwrap();
+        let x2 = Limits::new(0.0, 1.0).unwrap();
         let limits = [x1, x2];
         Self { limits }
     }
@@ -266,8 +266,8 @@ pub struct F9 {
 
 impl F9 {
     pub fn new() -> Self {
-        let x1 = Limits::new(0.0, 1.0);
-        let x2 = Limits::new(0.0, 1.0);
+        let x1 = Limits::new(0.0, 1.0).unwrap();
+        let x2 = Limits::new(0.0, 1.0).unwrap();
         let limits = [x1, x2];
         Self { limits }
     }
@@ -295,8 +295,8 @@ pub struct F10 {
 
 impl F10 {
     pub fn new() -> Self {
-        let x1 = Limits::new(0.0, 1.0);
-        let x2 = Limits::new(0.0, 1.0);
+        let x1 = Limits::new(0.0, 1.0).unwrap();
+        let x2 = Limits::new(0.0, 1.0).unwrap();
         let limits = [x1, x2];
         Self { limits }
     }
@@ -325,12 +325,12 @@ pub struct C11 {
 
 impl C11 {
     pub fn new() -> Self {
-        let x1 = Limits::new(0.0, 2.0);
-        let x2 = Limits::new(0.0, 1.0);
-        let x3 = Limits::new(0.0, std::f64::consts::PI / 2.0);
-        let x4 = Limits::new(-1.0, 1.0);
-        let x5 = Limits::new(-1.0, 1.0);
-        let x6 = Limits::new(-1.0, 1.0);
+        let x1 = Limits::new(0.0, 2.0).unwrap();
+        let x2 = Limits::new(0.0, 1.0).unwrap();
+        let x3 = Limits::new(0.0, std::f64::consts::PI / 2.0).unwrap();
+        let x4 = Limits::new(-1.0, 1.0).unwrap();
+        let x5 = Limits::new(-1.0, 1.0).unwrap();
+        let x6 = Limits::new(-1.0, 1.0).unwrap();
         let limits = [x1, x2, x3, x4, x5, x6];
         Self { limits }
     }
@@ -362,9 +362,9 @@ pub struct C37 {
 
 impl C37 {
     pub fn new() -> Self {
-        let x1 = Limits::new(0.0, 1.0);
-        let x2 = Limits::new(0.0, 1.0);
-        let x3 = Limits::new(0.0, 1.0);
+        let x1 = Limits::new(0.0, 1.0).unwrap();
+        let x2 = Limits::new(0.0, 1.0).unwrap();
+        let x3 = Limits::new(0.0, 1.0).unwrap();
         let limits = [x1, x2, x3];
         Self { limits }
     }
