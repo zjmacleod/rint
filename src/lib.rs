@@ -493,7 +493,6 @@ pub enum Tolerance {
 }
 
 impl Tolerance {
-    // TODO make const when abs() is const 1.85
     #[must_use]
     pub(crate) fn tolerance<T: ScalarF64>(&self, integral_value: &T) -> f64 {
         match *self {
@@ -791,3 +790,28 @@ impl<T: ScalarF64> fmt::Display for IntegrationError<T> {
 }
 
 impl<T: ScalarF64> error::Error for IntegrationError<T> {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_error_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<Error<f64>>();
+        assert_send::<Error<Complex<f64>>>();
+        assert_send::<IntegrationError<f64>>();
+        assert_send::<IntegrationError<Complex<f64>>>();
+        assert_send::<InitialisationError>();
+    }
+
+    #[test]
+    fn test_error_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<Error<f64>>();
+        assert_sync::<Error<Complex<f64>>>();
+        assert_sync::<IntegrationError<f64>>();
+        assert_sync::<IntegrationError<Complex<f64>>>();
+        assert_sync::<InitialisationError>();
+    }
+}

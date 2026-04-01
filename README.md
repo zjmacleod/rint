@@ -29,13 +29,13 @@ The library contains both non-adaptive and adaptive integration routines. In the
 
 # Traits
 
-The primary entry point for the library is the [`Integrand`] trait. A type implementing the [`Integrand`] trait represents a real or complex valued function which is to be integrated. The trait requires the definition of two associated types, [`Integrand::Point`] and [`Integrand::Scalar`], and an implementation of the method [`Integrand::evaluate`].
+The primary entry point for the library is the [`Integrand`] trait. A type implementing the [`Integrand`] trait represents a real or complex valued function which is to be integrated. The trait requires the definition of two associated types, `Integrand::Point` and `Integrand::Scalar`, and an implementation of the method `Integrand::evaluate`.
 
-- [`Integrand::Point`]: This associated type defines the point at which the function is to be evaluated, and determines the types of numerical integrators which are available to the user to integrate the function. Integrators are provided for univariate functions $f(x)$ through the associated type `Point=f64`, while integrators for multivariate functions $f(\mathbf{x})$ are provided through the associated type `Point=[f64;N]` where $N$ is the dimensionality of the point $\mathbf{x}=(x_{1},\dots,x_{N})$ which is limited to $2 \le N \le 15$.
+- `Integrand::Point`: This associated type defines the point at which the function is to be evaluated, and determines the types of numerical integrators which are available to the user to integrate the function. Integrators are provided for univariate functions $f(x)$ through the associated type `Point=f64`, while integrators for multivariate functions $f(\mathbf{x})$ are provided through the associated type `Point=[f64;N]` where $N$ is the dimensionality of the point $\mathbf{x}=(x_{1},\dots,x_{N})$ which is limited to $2 \le N \le 15$.
 
-- [`Integrand::Scalar`]: This is the output type of the function to be integrated. A _real_ valued function should have the output type `Scalar=`[`f64`], while a _complex_ valued function should have output type `Scalar=`[`Complex<f64>`].
+- `Integrand::Scalar`: This is the output type of the function to be integrated. A _real_ valued function should have the output type `Scalar=`[`f64`], while a _complex_ valued function should have output type `Scalar=`[`Complex<f64>`].
 
-- [`Integrand::evaluate`]: The trait requires an implementation of an `evaluate` method, which defines how the function takes the input [`Integrand::Point`] and turns this into the output type [`Integrand::Scalar`]. In other words, this method tells the integrators how to evaluate the function at a point, allowing the integration to be done.
+- `Integrand::evaluate`: The trait requires an implementation of an `evaluate` method, which defines how the function takes the input `Integrand::Point` and turns this into the output type `Integrand::Scalar`. In other words, this method tells the integrators how to evaluate the function at a point, allowing the integration to be done.
 
 
 As an example, consider probability density function of a normal distribution,
