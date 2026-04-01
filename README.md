@@ -197,12 +197,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 [`Limits`]: <https://docs.rs/rint/latest/rint/struct.Limits.html>
 [`Tolerance`]: <https://docs.rs/rint/latest/rint/enum.Tolerance.html>
 [`IntegralEstimate`]: <https://docs.rs/rint/latest/rint/struct.IntegralEstimate.html>
-[`quadrature`]: <https://docs.rs/rand/latest/rand/quadrature/>
+[`quadrature`]: <https://docs.rs/rint/latest/rint/quadrature/>
 [`quadrature::Rule`]:  <https://docs.rs/rint/latest/rint/quadrature/struct.Rule.html>
 [`quadrature::Basic`]:  <https://docs.rs/rint/latest/rint/quadrature/struct.Basic.html>
 [`quadrature::Adaptive`]:  <https://docs.rs/rint/latest/rint/quadrature/struct.Adaptive.html>
 [`quadrature::AdaptiveSingularity`]:  <https://docs.rs/rint/latest/rint/quadrature/struct.AdaptiveSingularity.html>
-[`multi`]: <https://docs.rs/rand/latest/rand/multi/>
+[`multi`]: <https://docs.rs/rint/latest/rint/multi/>
 [`multi::Rule`]:  <https://docs.rs/rint/latest/rint/multi/struct.Rule.html>
 [`multi::Basic`]:  <https://docs.rs/rint/latest/rint/multi/struct.Basic.html>
 [`multi::Adaptive`]:  <https://docs.rs/rint/latest/rint/multi/struct.Adaptive.html>
