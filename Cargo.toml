@@ -14,7 +14,6 @@ keywords = ["integration", "numerical", "adaptive", "math", "quadrature"]
 categories = ["mathematics", "science", "algorithms"]
 
 include = ["/src", "/tests", "katex-header.html"]
-exclude = [".*"]
 
 [dependencies]
 num-complex = "0.4.6"
