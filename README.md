@@ -43,6 +43,7 @@ As an example, consider probability density function of a normal distribution,
 f(x) = \frac{1}{\sqrt{2 \pi \sigma^{2}}} e^{- \frac{(x - \mu)^{2}}{2 \sigma^{2}}}
 ```
 which has mean $\mu$ and standard deviation $\sigma$. To integrate this function, one first implements the [`Integrand`] trait,
+
 ```rust
 use rint::Integrand;
 
@@ -52,8 +53,9 @@ struct NormalDist {
 }
 
 impl Integrand for NormalDist {
+    type Point = f64;
     type Scalar = f64;
-    fn evaluate(&self, x: f64) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         let mu = self.mean;
         let sigma = self.standard_dev;
 
@@ -64,6 +66,7 @@ impl Integrand for NormalDist {
     }
 }
 ```
+
 The type `NormalDist` can then be passed as a parameter to a one-dimensional integration routine in the module [`quadrature`] and integrated over a given (possibly infinite) region.
 
 
@@ -98,7 +101,6 @@ f(x) = \frac{\log(x)}{(1 + 100 x^{2})}
 ```
 over the semi-infinite interval $0 < x < \infty$ using an adaptive integration routine with singularity detection (see [`quadrature::AdaptiveSingularity`]). Adapted from the [QUADPACK] & [GSL] numerical integration test suites.
 
-
 ```rust
 use rint::{Limits, Integrand, Tolerance};
 use rint::quadrature::AdaptiveSingularity;
@@ -107,8 +109,9 @@ use std::error::Error;
 struct F;
 
 impl Integrand for F {
+    type Point = f64;
     type Scalar = f64;
-    fn evaluate(&self, x: f64) -> Self::Scalar {
+    fn evaluate(&self, x: &Self::Point) -> Self::Scalar {
         x.ln() / (1.0 + 100.0 * x.powi(2))
     }
 }
@@ -117,16 +120,16 @@ fn main() -> Result<(), Box<dyn Error>> {
     let function = F;
     let lower = 0.0;
     let tolerance = Tolerance::Relative(1.0e-3);
-    
+
     let integrator = AdaptiveSingularity::semi_infinite_upper(&function, lower, tolerance, 1000)?;
-    
+
     let exp_result = -3.616_892_186_127_022_568E-01;
     let exp_error = 3.016_716_913_328_831_851E-06;
-    
+
     let integral = integrator.integrate()?;
     let result = integral.result();
     let error = integral.error();
-    
+
     let tol = 1.0e-9;
     assert!((exp_result - result).abs() / exp_result.abs() < tol);
     assert!((exp_error - error).abs() / exp_error.abs() < tol);
@@ -152,7 +155,7 @@ const N: usize = 4;
 struct F;
 
 impl Integrand for F {
-    type Point = [f64; N]; 
+    type Point = [f64; N];
     type Scalar = f64;
     fn evaluate(&self, coordinates: &[f64; N]) -> Self::Scalar {
         let [x1, x2, x3, x4] = coordinates;
@@ -163,26 +166,26 @@ impl Integrand for F {
 fn main() -> Result<(), Box<dyn Error>> {
     const TARGET: f64 = 5.753_641_449_035_616e-1;
     const TOL: f64 = 1e-2;
-    
+
     let function = F;
     let limits = [
-        Limits::new(0.0, 1.0),
-        Limits::new(0.0, 1.0),
-        Limits::new(0.0, 1.0),
-        Limits::new(0.0, 2.0)
+        Limits::new(0.0, 1.0)?,
+        Limits::new(0.0, 1.0)?,
+        Limits::new(0.0, 1.0)?,
+        Limits::new(0.0, 2.0)?
     ];
     let rule = Rule07::<N>::generate()?;
     let tolerance = Tolerance::Relative(TOL);
-    
+
     let integrator = Adaptive::new(&function, &rule, limits, tolerance, 10000)?;
-    
+
     let integral = integrator.integrate()?;
     let result = integral.result();
     let error = integral.error();
-    
+
     let actual_error = (result - TARGET).abs();
     let requested_error = TOL * result.abs();
-    
+
     assert!(actual_error < error);
     assert!(error < requested_error);
     Ok(())
