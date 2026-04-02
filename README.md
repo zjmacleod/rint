@@ -1,5 +1,8 @@
 # rint
 
+[![Crate](https://img.shields.io/crates/v/rint.svg)](https://crates.io/crates/rint)
+[![API](https://docs.rs/rint/badge.svg)](https://docs.rs/rint)
+
 Numerical integration routines written in Rust. 
 
 # Overview
