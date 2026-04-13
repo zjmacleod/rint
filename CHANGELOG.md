@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-04-13
+
 ### Fixed
 
 - Typos in examples in README.md. 
@@ -28,5 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial release published on crates.io.
 
 [Unreleased]: https://github.com/zjmacleod/rint
+[0.1.2]: https://crates.io/crates/rint/0.1.2
 [0.1.1]: https://crates.io/crates/rint/0.1.1
 [0.1.0]: https://crates.io/crates/rint/0.1.0

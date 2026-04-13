@@ -23,7 +23,7 @@ I = \int_{b}^{a} f(x) dx \approx \sum_{i = 1}^{n} W_{i} f(X_{i}) = I_{n}
 ```
 where the $X_{i}$ and $W_{i}$ are the rescaled abscissae and weights,
 ```math
-X_{i} = \frac{b + a + (a - b) x_{i}}{2} ~~~~~~~~ W_{i} = \frac{(a - b) w_{i}}{2}
+X_{i} = \frac{b + a + (a - b) x_{i}}{2} \\ W_{i} = \frac{(a - b) w_{i}}{2}
 ```
 Integration rules have a polynomial order. Rules of higher polynomial order use more points/abscissae and weights for evaluating the sum.
 

@@ -11,7 +11,7 @@
 //! where $\mathbf{x} = (x_{1}, x_{2}, \dots, x_{N})$ and $\Sigma_{N}$ is an $N$-dimensional
 //! hypercube. The dimensionality is limited to $2 \le N \le 15$. The functions $f(x)$ can be
 //! either real- or complex-valued and implement the [`Integrand`] trait with associated type
-//! [`Integrand::Point`]`=`[`[f64;N]`]. The routines are based primarily on the [DCUHRE] FORTRAN
+//! [`Integrand::Point`]`=[f64;N]`. The routines are based primarily on the [DCUHRE] FORTRAN
 //! library (Bernsten, Espelid, Genz), however unlike the original algorithm the routines presented
 //! in currently only operate on a single function _not_ a vector of functions. The routines use
 //! fully symmetric integration [`Rule`]s, with each rule of a particular order $n$ there is a set
